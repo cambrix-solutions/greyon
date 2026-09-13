@@ -12,7 +12,11 @@ import {
   DEFAULT_ACTIVE_PACKAGE_ID,
   seedPackages
 } from "@/data/seed-packages";
-import { seedUsers, USERS_SEED_REV } from "@/data/seed-users";
+import {
+  seedUserPackages,
+  seedUsers,
+  USERS_SEED_REV
+} from "@/data/seed-users";
 import type {
   AdminRole,
   AdminUser,
@@ -31,10 +35,11 @@ import type {
   ProductPackage,
   RateCalendar,
   RatePlan,
-  RoomType
+  RoomType,
+  UserPackage
 } from "@/types/greyon";
 
-const STORAGE_KEY = "greyon_cms_v3";
+const STORAGE_KEY = "greyon_cms_v4";
 
 export interface MediaItem {
   id: string;
@@ -79,21 +84,37 @@ function mergeFeatures(stored?: ProductFeature[]): ProductFeature[] {
     return {
       ...seed,
       enabled: prev.enabled,
-      paidAddOn: prev.paidAddOn ?? seed.paidAddOn
+      paidAddOn: prev.paidAddOn ?? seed.paidAddOn,
+      parentKey: seed.parentKey ?? prev.parentKey ?? null
     };
   });
+}
+
+function normalizeRole(role: AdminRole): AdminRole {
+  if (role === "org_admin" || role === "super_admin" || role === "content_admin")
+    return "admin";
+  if (role === "location_admin") return "manager";
+  if (role === "booking_admin") return "hotel_admin";
+  return role;
 }
 
 function mergePackages(stored?: ProductPackage[]): ProductPackage[] {
   const merged = seedPackages.map(seed => {
     const prev = (stored ?? []).find(p => p.id === seed.id);
     if (!prev) return clone(seed);
+    const legacyRole = (prev as ProductPackage & { role?: AdminRole }).role;
+    const roles = (prev.roles?.length
+      ? prev.roles
+      : legacyRole
+        ? [legacyRole]
+        : seed.roles
+    ).map(normalizeRole);
     return {
       ...seed,
       name: prev.name || seed.name,
       description: prev.description || seed.description,
       priceNote: prev.priceNote ?? seed.priceNote,
-      role: prev.role || seed.role,
+      roles: Array.from(new Set(roles)),
       featureKeys: prev.featureKeys?.length
         ? [...prev.featureKeys]
         : [...seed.featureKeys],
@@ -102,13 +123,19 @@ function mergePackages(stored?: ProductPackage[]): ProductPackage[] {
   });
   for (const p of stored ?? []) {
     if (seedPackages.some(s => s.id === p.id)) continue;
-    const legacyRoles = (p as ProductPackage & { roles?: AdminRole[] }).roles;
+    const legacyRole = (p as ProductPackage & { role?: AdminRole }).role;
+    const roles = (p.roles?.length
+      ? p.roles
+      : legacyRole
+        ? [legacyRole]
+        : (["admin"] as AdminRole[])
+    ).map(normalizeRole);
     merged.push({
       id: p.id,
       name: p.name,
       description: p.description ?? "",
       priceNote: p.priceNote ?? "",
-      role: p.role || legacyRoles?.[0] || "org_admin",
+      roles: Array.from(new Set(roles)),
       featureKeys: [...(p.featureKeys ?? [])],
       isSystem: false
     });
@@ -123,8 +150,6 @@ function applyPackageKeys(
   const set = new Set(featureKeys);
   return catalog.map(f => ({
     ...f,
-    // Developer control panel always stays in catalog as enabled=true for gating edge cases;
-    // auth still restricts "features" to developer role.
     enabled: f.key === "features" ? true : set.has(f.key)
   }));
 }
@@ -134,7 +159,6 @@ function normalizeUser(u: AdminUser): AdminUser {
     id: u.id,
     name: u.name,
     email: u.email,
-    packageId: u.packageId || DEFAULT_ACTIVE_PACKAGE_ID,
     locationIds: u.locationIds ?? [],
     hotelIds: u.hotelIds ?? []
   };
@@ -211,6 +235,7 @@ export const useCmsStore = defineStore("cms", () => {
   const bookings = ref<Booking[]>([]);
   const enquiries = ref<Enquiry[]>([]);
   const users = ref<AdminUser[]>(clone(seedUsers).map(normalizeUser));
+  const userPackages = ref<UserPackage[]>(clone(seedUserPackages));
   const media = ref<MediaItem[]>([]);
   const settings = ref<SiteSettings>({ ...defaultSettings });
   const availability = ref<Availability[]>([]);
@@ -260,6 +285,7 @@ export const useCmsStore = defineStore("cms", () => {
         bookings: bookings.value,
         enquiries: enquiries.value,
         users: users.value,
+        userPackages: userPackages.value,
         media: media.value,
         settings: settings.value,
         availability: availability.value,
@@ -273,10 +299,10 @@ export const useCmsStore = defineStore("cms", () => {
   }
 
   function reseedUsersAndPackages() {
-    // Reset system package matrix from seed (drop stale customizations on system ids)
     const custom = packages.value.filter(p => !p.isSystem);
     packages.value = [...clone(seedPackages), ...custom];
     users.value = clone(seedUsers).map(normalizeUser);
+    userPackages.value = clone(seedUserPackages);
     activePackageId.value = DEFAULT_ACTIVE_PACKAGE_ID;
     applyActivePackage();
   }
@@ -299,6 +325,7 @@ export const useCmsStore = defineStore("cms", () => {
         bookings: Booking[];
         enquiries: Enquiry[];
         users: AdminUser[];
+        userPackages: UserPackage[];
         media: MediaItem[];
         settings: SiteSettings;
         availability: Availability[];
@@ -324,20 +351,23 @@ export const useCmsStore = defineStore("cms", () => {
 
       const needsUserReseed = data.usersSeedRev !== USERS_SEED_REV;
       if (needsUserReseed) {
-        // Fresh package + user matrix after seed redesign
         reseedUsersAndPackages();
       } else {
         packages.value = mergePackages(data.packages);
-        if (data.users?.length) {
-          users.value = data.users.map(normalizeUser);
-          const hasDev = users.value.some(
-            u => getPackageById(u.packageId)?.role === "developer"
-          );
-          if (!hasDev) {
-            users.value.unshift(normalizeUser(clone(seedUsers[0]!)));
+        users.value = (data.users?.length ? data.users : seedUsers).map(
+          normalizeUser
+        );
+        userPackages.value = data.userPackages?.length
+          ? data.userPackages
+          : clone(seedUserPackages);
+        const hasDev = users.value.some(u =>
+          getUserRoles(u).includes("developer")
+        );
+        if (!hasDev) {
+          users.value.unshift(normalizeUser(clone(seedUsers[0]!)));
+          if (!userPackages.value.some(up => up.userId === "usr-dev")) {
+            userPackages.value.push(clone(seedUserPackages[0]!));
           }
-        } else {
-          users.value = clone(seedUsers).map(normalizeUser);
         }
         activePackageId.value =
           data.activePackageId &&
@@ -1012,49 +1042,128 @@ export const useCmsStore = defineStore("cms", () => {
     persist();
   }
 
-  // —— Users ——
+  // —— Users + user_package (M2M) ——
+  function getPackageById(id: string) {
+    return packages.value.find(p => p.id === id) ?? null;
+  }
+
+  function getPackagesForUser(userId: string) {
+    return userPackages.value
+      .filter(up => up.userId === userId)
+      .map(up => getPackageById(up.packageId))
+      .filter((p): p is ProductPackage => Boolean(p));
+  }
+
+  function getUserRoles(user: AdminUser | null | undefined): AdminRole[] {
+    if (!user) return [];
+    const roles = getPackagesForUser(user.id).flatMap(p =>
+      p.roles.map(normalizeRole)
+    );
+    return Array.from(new Set(roles));
+  }
+
+  /** Primary role for display (highest privilege) */
+  function getUserRole(user: AdminUser | null | undefined): AdminRole | null {
+    const roles = getUserRoles(user);
+    if (!roles.length) return null;
+    const order: AdminRole[] = [
+      "developer",
+      "admin",
+      "manager",
+      "hotel_admin",
+      "customer"
+    ];
+    return order.find(r => roles.includes(r)) ?? roles[0]!;
+  }
+
+  function getUserFeatureKeys(user: AdminUser | null | undefined): string[] {
+    if (!user) return [];
+    const keys = getPackagesForUser(user.id).flatMap(p => p.featureKeys);
+    return Array.from(new Set(keys));
+  }
+
+  function usersOnPackage(packageId: string) {
+    const ids = new Set(
+      userPackages.value.filter(up => up.packageId === packageId).map(up => up.userId)
+    );
+    return users.value.filter(u => ids.has(u.id));
+  }
+
+  function setUserPackages(userId: string, packageIds: string[]) {
+    const unique = Array.from(new Set(packageIds)).filter(id =>
+      packages.value.some(p => p.id === id)
+    );
+    userPackages.value = [
+      ...userPackages.value.filter(up => up.userId !== userId),
+      ...unique.map(packageId => ({
+        id: uid("up"),
+        userId,
+        packageId
+      }))
+    ];
+    // Scope only if manager / hotel_admin among roles
+    const roles = unique.flatMap(
+      id => getPackageById(id)?.roles.map(normalizeRole) ?? []
+    );
+    const idx = users.value.findIndex(u => u.id === userId);
+    if (idx >= 0) {
+      const u = users.value[idx]!;
+      users.value[idx] = normalizeUser({
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        locationIds: roles.includes("manager") ? (u.locationIds ?? []) : [],
+        hotelIds: roles.includes("hotel_admin") ? (u.hotelIds ?? []) : []
+      });
+    }
+    persist();
+  }
+
   function upsertUser(input: {
     id?: string;
     name: string;
     email: string;
-    packageId?: string;
+    packageIds?: string[];
     locationIds?: string[];
     hotelIds?: string[];
   }) {
-    const packageId =
-      input.packageId && packages.value.some(p => p.id === input.packageId)
-        ? input.packageId
-        : activePackageId.value || DEFAULT_ACTIVE_PACKAGE_ID;
-    const pkgRole = packages.value.find(p => p.id === packageId)?.role;
+    const packageIds =
+      input.packageIds?.filter(id => packages.value.some(p => p.id === id)) ??
+      [];
+    const roles = packageIds.flatMap(
+      id => getPackageById(id)?.roles.map(normalizeRole) ?? []
+    );
     const patch = normalizeUser({
       id: input.id ?? "",
       name: input.name,
       email: input.email,
-      packageId,
-      locationIds:
-        pkgRole === "location_admin" ? (input.locationIds ?? []) : [],
-      hotelIds: pkgRole === "hotel_admin" ? (input.hotelIds ?? []) : []
+      locationIds: roles.includes("manager") ? (input.locationIds ?? []) : [],
+      hotelIds: roles.includes("hotel_admin") ? (input.hotelIds ?? []) : []
     });
+    let userId = input.id;
     if (input.id) {
       const idx = users.value.findIndex(u => u.id === input.id);
       if (idx >= 0) {
         const current = users.value[idx]!;
         users.value[idx] = { ...current, ...patch, id: current.id };
-        persist();
-        return users.value[idx];
+        userId = current.id;
       }
     }
-    const user: AdminUser = {
-      ...patch,
-      id: uid("usr")
-    };
-    users.value.unshift(user);
-    persist();
-    return user;
+    if (!userId || !users.value.some(u => u.id === userId)) {
+      userId = uid("usr");
+      users.value.unshift({ ...patch, id: userId });
+    }
+    if (input.packageIds) {
+      setUserPackages(userId, packageIds);
+    } else {
+      persist();
+    }
+    return users.value.find(u => u.id === userId)!;
   }
 
   function deleteUser(id: string) {
     users.value = users.value.filter(u => u.id !== id);
+    userPackages.value = userPackages.value.filter(up => up.userId !== id);
     persist();
   }
 
@@ -1080,17 +1189,19 @@ export const useCmsStore = defineStore("cms", () => {
     description?: string;
     priceNote?: string;
     featureKeys: string[];
-    role: AdminRole;
+    roles: AdminRole[];
   }) {
+    const roles = Array.from(
+      new Set(input.roles.map(normalizeRole).filter(Boolean))
+    ) as AdminRole[];
+    if (!roles.length) roles.push("admin");
     const keys = Array.from(
       new Set(
-        input.role === "customer"
+        roles.includes("customer") && roles.length === 1
           ? input.featureKeys
           : ["features", "dashboard", ...input.featureKeys]
       )
     );
-    const role: AdminRole =
-      input.role === "super_admin" ? "org_admin" : input.role;
     if (input.id) {
       const idx = packages.value.findIndex(p => p.id === input.id);
       if (idx >= 0) {
@@ -1100,19 +1211,10 @@ export const useCmsStore = defineStore("cms", () => {
           name: input.name,
           description: input.description ?? current.description,
           priceNote: input.priceNote ?? current.priceNote,
-          role,
+          roles,
           featureKeys: keys
         };
         if (activePackageId.value === input.id) applyActivePackage();
-        // Clear scope fields that no longer apply when package role changes
-        users.value = users.value.map(u => {
-          if (u.packageId !== input.id) return u;
-          return normalizeUser({
-            ...u,
-            locationIds: role === "location_admin" ? u.locationIds : [],
-            hotelIds: role === "hotel_admin" ? u.hotelIds : []
-          });
-        });
         persist();
         return packages.value[idx];
       }
@@ -1122,7 +1224,7 @@ export const useCmsStore = defineStore("cms", () => {
       name: input.name,
       description: input.description ?? "",
       priceNote: input.priceNote ?? "Custom",
-      role,
+      roles,
       featureKeys: keys,
       isSystem: false
     };
@@ -1135,30 +1237,13 @@ export const useCmsStore = defineStore("cms", () => {
     const pkg = packages.value.find(p => p.id === id);
     if (!pkg || pkg.isSystem) return false;
     packages.value = packages.value.filter(p => p.id !== id);
+    userPackages.value = userPackages.value.filter(up => up.packageId !== id);
     if (activePackageId.value === id) {
       activePackageId.value = DEFAULT_ACTIVE_PACKAGE_ID;
       applyActivePackage();
     }
-    // Reassign users that were on the deleted package
-    users.value = users.value.map(u =>
-      u.packageId === id ? { ...u, packageId: activePackageId.value } : u
-    );
     persist();
     return true;
-  }
-
-  function getPackageById(id: string) {
-    return packages.value.find(p => p.id === id) ?? null;
-  }
-
-  /** Role is owned by the package — never stored on the user */
-  function getUserRole(user: AdminUser | null | undefined): AdminRole | null {
-    if (!user?.packageId) return null;
-    return getPackageById(user.packageId)?.role ?? null;
-  }
-
-  function usersOnPackage(packageId: string) {
-    return users.value.filter(u => u.packageId === packageId);
   }
 
   function duplicatePackage(id: string) {
@@ -1169,7 +1254,7 @@ export const useCmsStore = defineStore("cms", () => {
       description: src.description,
       priceNote: src.priceNote,
       featureKeys: [...src.featureKeys],
-      role: src.role
+      roles: [...src.roles]
     });
   }
 
@@ -1207,6 +1292,7 @@ export const useCmsStore = defineStore("cms", () => {
     bookings.value = [];
     enquiries.value = [];
     users.value = clone(seedUsers).map(normalizeUser);
+    userPackages.value = clone(seedUserPackages);
     settings.value = { ...defaultSettings };
     availability.value = [];
     rateCalendar.value = [];
@@ -1232,12 +1318,10 @@ export const useCmsStore = defineStore("cms", () => {
   ];
   const roleOptions: AdminRole[] = [
     "developer",
-    "org_admin",
-    "location_admin",
+    "admin",
+    "manager",
     "hotel_admin",
-    "customer",
-    "content_admin",
-    "booking_admin"
+    "customer"
   ];
 
   return {
@@ -1249,6 +1333,7 @@ export const useCmsStore = defineStore("cms", () => {
     bookings,
     enquiries,
     users,
+    userPackages,
     media,
     settings,
     availability,
@@ -1305,6 +1390,10 @@ export const useCmsStore = defineStore("cms", () => {
     saveSettings,
     upsertUser,
     deleteUser,
+    setUserPackages,
+    getPackagesForUser,
+    getUserRoles,
+    getUserFeatureKeys,
     getPackageById,
     getUserRole,
     usersOnPackage,

@@ -214,8 +214,16 @@ const routes: RouteRecordRaw[] = [
     ]
   },
   {
+    path: "/404",
+    name: "access-denied",
+    component: () => import("@/pages/ErrorAccessDenied.vue"),
+    meta: { title: "404 | Greyon", publicAdmin: true }
+  },
+  {
     path: "/:catchAll(.*)*",
-    component: () => import("@/pages/ErrorNotFound.vue")
+    name: "not-found",
+    component: () => import("@/pages/ErrorAccessDenied.vue"),
+    meta: { title: "404 | Greyon" }
   }
 ];
 
@@ -227,32 +235,44 @@ export function setupRouterGuards(
       document.title = String(to.meta.title);
     }
 
-    // Public admin login — never block
-    if (to.name === "admin-login" || to.meta.publicAdmin) {
+    // Public admin login / access denied — never block
+    if (to.name === "admin-login" || to.name === "access-denied" || to.meta.publicAdmin) {
       return true;
     }
 
     const auth = useAuthStore();
 
-    // Public product gates
+    // Public product gates → 404-style denied
     if (to.name === "booking" && !auth.featureEnabled("booking_public")) {
-      return { name: "home" };
+      return {
+        name: "access-denied",
+        query: { message: "Booking is not enabled on this site." }
+      };
     }
     if (
       (to.name === "news" || to.name === "news-detail") &&
       !auth.featureEnabled("news_public")
     ) {
-      return { name: "home" };
+      return {
+        name: "access-denied",
+        query: { message: "News is not enabled on this site." }
+      };
     }
     if (to.name === "contact" && !auth.featureEnabled("contact_public")) {
-      return { name: "home" };
+      return {
+        name: "access-denied",
+        query: { message: "Contact is not enabled on this site." }
+      };
     }
     if (
       typeof to.name === "string" &&
       to.name.startsWith("portfolio-") &&
       !auth.featureEnabled("portfolios")
     ) {
-      return { name: "home" };
+      return {
+        name: "access-denied",
+        query: { message: "This portfolio page is not enabled." }
+      };
     }
 
     if (to.meta.requiresAuth || to.path.startsWith("/admin")) {
@@ -260,9 +280,15 @@ export function setupRouterGuards(
       if (!auth.isAuthenticated) {
         return { name: "admin-login", query: { redirect: to.fullPath } };
       }
+      // Every admin page: user_package features + roles first
       const perm = to.meta.perm as string | undefined;
       if (perm && !auth.can(perm)) {
-        return { name: "admin-dashboard" };
+        return {
+          name: "access-denied",
+          query: {
+            message: `Your user package does not include “${perm}”.`
+          }
+        };
       }
     }
     return true;

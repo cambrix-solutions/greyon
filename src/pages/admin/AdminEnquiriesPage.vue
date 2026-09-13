@@ -113,11 +113,13 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 import AdminPageHeader from "@/components/admin/AdminPageHeader.vue";
+import { useAuthStore } from "@/stores/auth-store";
 import { useCmsStore } from "@/stores/cms-store";
 import type { EnquiryStatus } from "@/types/greyon";
 import { formatDateTime } from "@/utils/datetime";
 
 const cms = useCmsStore();
+const auth = useAuthStore();
 const $q = useQuasar();
 const route = useRoute();
 const router = useRouter();
@@ -152,7 +154,7 @@ watch(statusFilter, value => {
 
 const filtered = computed(() => {
   const q = query.value.trim().toLowerCase();
-  return cms.enquiries.filter(item => {
+  return auth.scopedEnquiries.filter(item => {
     if (statusFilter.value !== "all" && item.status !== statusFilter.value) {
       return false;
     }

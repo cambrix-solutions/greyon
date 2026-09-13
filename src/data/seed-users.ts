@@ -1,68 +1,60 @@
-import type { AdminUser } from "@/types/greyon";
+import type { AdminUser, UserPackage } from "@/types/greyon";
 
 /**
- * Demo users — only packageId (+ scope). Role comes from the package.
+ * Users hold no role/package columns — only scope.
+ * Packages are linked via userPackages (many-to-many).
  */
 export const seedUsers: AdminUser[] = [
   {
     id: "usr-dev",
     name: "Greyon Developer",
-    email: "dev@greyon.com.kh",
-    packageId: "pkg-developer"
+    email: "dev@greyon.com.kh"
   },
   {
-    id: "usr-org-full",
+    id: "usr-admin",
     name: "Sovann Meas",
-    email: "admin@greyon.com.kh",
-    packageId: "pkg-org-full"
+    email: "admin@greyon.com.kh"
   },
   {
-    id: "usr-loc-pp",
+    id: "usr-mgr-pp",
     name: "Phnom Penh Manager",
     email: "pp@greyon.com.kh",
-    packageId: "pkg-loc-booking",
     locationIds: ["loc-pp"]
   },
   {
-    id: "usr-loc-sr",
+    id: "usr-mgr-sr",
     name: "Siem Reap Manager",
     email: "sr@greyon.com.kh",
-    packageId: "pkg-loc-content",
     locationIds: ["loc-sr"]
   },
   {
     id: "usr-hotel-angkor",
     name: "Angkor Front Desk",
     email: "angkor@greyon.com.kh",
-    packageId: "pkg-hotel-booking",
     hotelIds: ["htl-angkor"]
   },
   {
     id: "usr-hotel-riverside",
     name: "Riverside Front Desk",
     email: "hotel@greyon.com.kh",
-    packageId: "pkg-hotel-core",
     hotelIds: ["htl-riverside"]
-  },
-  {
-    id: "usr-content",
-    name: "Dara Chhim",
-    email: "content@greyon.com.kh",
-    packageId: "pkg-content-admin"
-  },
-  {
-    id: "usr-booking",
-    name: "Kanha Sok",
-    email: "bookings@greyon.com.kh",
-    packageId: "pkg-booking-admin"
   },
   {
     id: "usr-guest",
     name: "Guest Customer",
-    email: "guest@example.com",
-    packageId: "pkg-customer"
+    email: "guest@example.com"
   }
 ];
 
-/** Bump when package/user matrix redesigns — forces re-seed */
-export const USERS_SEED_REV = 5;
+/** M2M: user ↔ package (developer assigns; users cannot) */
+export const seedUserPackages: UserPackage[] = [
+  { id: "up-dev", userId: "usr-dev", packageId: "pkg-developer" },
+  { id: "up-admin", userId: "usr-admin", packageId: "pkg-admin-full" },
+  { id: "up-pp", userId: "usr-mgr-pp", packageId: "pkg-manager-booking" },
+  { id: "up-sr", userId: "usr-mgr-sr", packageId: "pkg-manager-content" },
+  { id: "up-angkor", userId: "usr-hotel-angkor", packageId: "pkg-hotel-booking" },
+  { id: "up-riverside", userId: "usr-hotel-riverside", packageId: "pkg-hotel-core" },
+  { id: "up-guest", userId: "usr-guest", packageId: "pkg-customer" }
+];
+
+export const USERS_SEED_REV = 6;

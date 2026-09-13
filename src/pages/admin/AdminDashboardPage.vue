@@ -315,32 +315,38 @@ const greeting = computed(() => {
   return "Good evening";
 });
 
+const myHotels = computed(() => auth.scopedHotels);
+const myBookings = computed(() => auth.scopedBookings);
+const myEnquiries = computed(() => auth.scopedEnquiries);
+
 const pendingCount = computed(
-  () => cms.bookings.filter(b => b.status === "pending").length
+  () => myBookings.value.filter(b => b.status === "pending").length
 );
 const newEnquiryCount = computed(
-  () => cms.enquiries.filter(e => e.status === "new").length
+  () => myEnquiries.value.filter(e => e.status === "new").length
 );
 const arrivalsToday = computed(() =>
-  cms.bookings.filter(
+  myBookings.value.filter(
     b => b.checkIn === today && (b.status === "pending" || b.status === "confirmed")
   )
 );
 const departuresToday = computed(() =>
-  cms.bookings.filter(
+  myBookings.value.filter(
     b => b.checkOut === today && (b.status === "confirmed" || b.status === "completed")
   )
 );
 const todayCount = computed(
   () => arrivalsToday.value.length + departuresToday.value.length
 );
-const publishedHotels = computed(() => cms.publishedHotels.length);
+const publishedHotels = computed(
+  () => myHotels.value.filter(h => h.status === "published").length
+);
 const draftHotels = computed(
-  () => cms.hotels.filter(h => h.status === "draft").length
+  () => myHotels.value.filter(h => h.status === "draft").length
 );
 const monthRevenue = computed(() => {
   const prefix = today.slice(0, 7);
-  return cms.bookings
+  return myBookings.value
     .filter(
       b =>
         b.createdAt.startsWith(prefix) &&
@@ -374,7 +380,7 @@ const attentionCopy = computed(() => {
 const cards = computed(() => [
   {
     label: "Hotels",
-    value: cms.hotels.length,
+    value: myHotels.value.length,
     hint: draftHotels.value
       ? `${publishedHotels.value} live · ${draftHotels.value} draft`
       : `${publishedHotels.value} published`,
@@ -383,7 +389,7 @@ const cards = computed(() => [
   },
   {
     label: "Bookings",
-    value: cms.bookings.length,
+    value: myBookings.value.length,
     hint: pendingCount.value
       ? `${pendingCount.value} pending`
       : "All clear",
@@ -394,7 +400,7 @@ const cards = computed(() => [
   },
   {
     label: "Enquiries",
-    value: cms.enquiries.length,
+    value: myEnquiries.value.length,
     hint: newEnquiryCount.value
       ? `${newEnquiryCount.value} new`
       : "Inbox clear",
@@ -467,7 +473,9 @@ function matchesEnquiry(e: { name: string; subject: string; email: string; messa
 }
 
 const visibleBookings = computed(() => {
-  let list = [...cms.bookings].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  let list = [...myBookings.value].sort((a, b) =>
+    b.createdAt.localeCompare(a.createdAt)
+  );
   if (focus.value === "pending") {
     list = list.filter(b => b.status === "pending");
   } else if (focus.value === "today") {
@@ -483,7 +491,9 @@ const visibleBookings = computed(() => {
 });
 
 const visibleEnquiries = computed(() => {
-  let list = [...cms.enquiries].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  let list = [...myEnquiries.value].sort((a, b) =>
+    b.createdAt.localeCompare(a.createdAt)
+  );
   if (focus.value === "inbox" || focus.value === "all") {
     if (focus.value === "inbox") list = list.filter(e => e.status === "new");
   } else if (focus.value === "pending" || focus.value === "today") {
@@ -534,7 +544,7 @@ function setBookingStatus(reference: string, status: BookingStatus) {
 }
 
 function confirmAllPending() {
-  const pending = cms.bookings.filter(b => b.status === "pending");
+  const pending = myBookings.value.filter(b => b.status === "pending");
   if (!pending.length) return;
   $q.dialog({
     title: "Confirm all pending bookings?",

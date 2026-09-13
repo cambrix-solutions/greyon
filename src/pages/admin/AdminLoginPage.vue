@@ -62,13 +62,11 @@ const error = ref("");
 
 const demoAccounts = [
   { email: "dev@greyon.com.kh", role: "Developer", package: "Platform Developer" },
-  { email: "admin@greyon.com.kh", role: "Org admin", package: "Org Admin · Full" },
-  { email: "pp@greyon.com.kh", role: "Location · PP", package: "Location · Booking Pro" },
-  { email: "sr@greyon.com.kh", role: "Location · SR", package: "Location · Content+" },
-  { email: "angkor@greyon.com.kh", role: "Hotel · Angkor", package: "Hotel · Booking Pro" },
-  { email: "hotel@greyon.com.kh", role: "Hotel · Riverside", package: "Hotel · Core" },
-  { email: "content@greyon.com.kh", role: "Content admin", package: "Content Admin" },
-  { email: "bookings@greyon.com.kh", role: "Booking admin", package: "Booking Admin" }
+  { email: "admin@greyon.com.kh", role: "Admin", package: "Admin · Full suite" },
+  { email: "pp@greyon.com.kh", role: "Manager · PP", package: "Manager · Booking Pro" },
+  { email: "sr@greyon.com.kh", role: "Manager · SR", package: "Manager · Content+" },
+  { email: "angkor@greyon.com.kh", role: "Hotel admin", package: "Hotel Admin · Booking Pro" },
+  { email: "hotel@greyon.com.kh", role: "Hotel admin", package: "Hotel Admin · Core" }
 ];
 
 function onSubmit() {

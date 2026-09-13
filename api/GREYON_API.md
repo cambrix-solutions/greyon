@@ -1,5 +1,9 @@
 # Greyon API (NestJS + PostgreSQL)
 
+> **Foundation access model (users · packages · roles · features · scope)**  
+> See **[FOUNDATION_API_SPEC.md](./FOUNDATION_API_SPEC.md)** — implement that before expanding admin CRUD.  
+> Current stub below is outdated (`User.role` / singular `package_id`).
+
 ## Setup
 
 1. Copy `.env.example` to `.env`
@@ -15,7 +19,7 @@ npm run start:dev
 
 API base: `http://localhost:3000/api`
 
-## Endpoints
+## Endpoints (stub — incomplete)
 
 ### Public
 - `GET /api/hotels`
@@ -30,15 +34,17 @@ API base: `http://localhost:3000/api`
 - `GET /api/bookings/:reference`
 
 ### Auth
-- `POST /api/auth/login` → `{ accessToken, user }`
+- `POST /api/auth/login` → `{ accessToken, user }` (user payload must match foundation spec)
 
-### Admin (JWT + role)
-- `GET /api/admin/bookings` — super_admin, booking_admin
-- `PATCH /api/admin/bookings/:reference/status` — body `{ "status": "confirmed" }`
+### Admin (JWT)
+- Bookings list/status exist partially — **must filter by hotel scope**
+- Full admin surface: see FOUNDATION_API_SPEC.md §7–8
 
 ## Schema entities
 
-Location, Hotel, RoomType, RatePlan, Availability, RateCalendar, Booking, News, Enquiry, User
+**Foundation (required):** Feature, Package, UserPackage, User (no role column; `location_ids` / `hotel_ids`), Settings.active_package_id  
+
+**Content:** Location, Hotel, RoomType, RatePlan, Availability, RateCalendar, Booking, News, Enquiry  
 
 Availability + RateCalendar drive per-night inventory and prices (fallback: room `baseInventory` / plan `basePrice`).
 

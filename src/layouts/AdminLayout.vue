@@ -52,8 +52,8 @@
               <span class="admin-account__name">{{ displayName }}</span>
               <span class="admin-account__role">
                 {{ roleLabel
-                }}<template v-if="auth.userPackage"
-                  > · {{ auth.userPackage.name }}</template
+                }}<template v-if="packageSummary"
+                  > · {{ packageSummary }}</template
                 >
               </span>
             </span>
@@ -71,8 +71,8 @@
                   <p class="admin-account-menu__name">{{ displayName }}</p>
                   <p class="admin-account-menu__email">{{ auth.user?.email }}</p>
                   <p class="admin-account-menu__badge">{{ roleLabel }}</p>
-                  <p v-if="auth.userPackage" class="admin-account-menu__pkg">
-                    {{ auth.userPackage.name }}
+                  <p v-if="packageSummary" class="admin-account-menu__pkg">
+                    {{ packageSummary }}
                   </p>
                 </div>
               </div>
@@ -245,10 +245,10 @@ const router = useRouter();
 const leftOpen = ref(true);
 
 const pendingBookings = computed(
-  () => cms.bookings.filter(b => b.status === "pending").length
+  () => auth.scopedBookings.filter(b => b.status === "pending").length
 );
 const newEnquiries = computed(
-  () => cms.enquiries.filter(e => e.status === "new").length
+  () => auth.scopedEnquiries.filter(e => e.status === "new").length
 );
 
 const displayName = computed(() => auth.user?.name ?? "Admin");
@@ -264,9 +264,16 @@ const initials = computed(() =>
 );
 
 const roleLabel = computed(() => {
-  const role = auth.role;
-  if (!role) return "Admin";
-  return roleLabels[role] ?? role.replaceAll("_", " ");
+  const list = auth.roles;
+  if (!list.length) return "Admin";
+  return list.map(r => roleLabels[r] ?? r.replaceAll("_", " ")).join(" · ");
+});
+
+const packageSummary = computed(() => {
+  const pkgs = auth.userPackages;
+  if (!pkgs.length) return "";
+  if (pkgs.length === 1) return pkgs[0]!.name;
+  return `${pkgs[0]!.name} +${pkgs.length - 1}`;
 });
 
 const headerAlerts = computed(() => {
@@ -362,7 +369,7 @@ const nav = computed<NavItem[]>(() => [
     group: "system"
   },
   {
-    label: "User packages",
+    label: "Packages",
     to: "/admin/features",
     icon: "inventory_2",
     perm: "features",

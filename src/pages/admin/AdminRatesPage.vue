@@ -442,6 +442,7 @@ import { useQuasar } from "quasar";
 import AdminDialog from "@/components/admin/AdminDialog.vue";
 import AdminFormSection from "@/components/admin/AdminFormSection.vue";
 import AdminPageHeader from "@/components/admin/AdminPageHeader.vue";
+import { useAuthStore } from "@/stores/auth-store";
 import { useCmsStore } from "@/stores/cms-store";
 import type { ContentStatus, RatePlan } from "@/types/greyon";
 import {
@@ -453,13 +454,14 @@ import {
 type InventoryView = "list" | "calendar";
 
 const cms = useCmsStore();
+const auth = useAuthStore();
 const $q = useQuasar();
 const route = useRoute();
 const dialog = ref(false);
 const editing = ref<string | null>(null);
 const inventoryView = ref<InventoryView>("list");
 
-const selectedRoomId = ref(cms.roomTypes[0]?.id ?? "");
+const selectedRoomId = ref(auth.scopedRoomTypes[0]?.id ?? "");
 const selectedPlanId = ref("");
 const calendarStart = ref(new Date().toISOString().slice(0, 10));
 const monthCursor = ref(monthStart(new Date()));
@@ -470,9 +472,16 @@ const planStatusOptions = ["all", ...cms.statusOptions];
 
 onMounted(() => {
   const roomId = String(route.query.roomId || "");
-  if (cms.roomTypes.some(r => r.id === roomId)) {
+  if (auth.scopedRoomTypes.some(r => r.id === roomId)) {
     selectedRoomId.value = roomId;
     planRoomFilter.value = roomId;
+  } else if (
+    selectedRoomId.value &&
+    !auth.canAccessHotel(
+      cms.getRoomTypeById(selectedRoomId.value)?.hotelId ?? ""
+    )
+  ) {
+    selectedRoomId.value = auth.scopedRoomTypes[0]?.id ?? "";
   }
   if (route.query.view === "calendar") {
     inventoryView.value = "calendar";
@@ -514,7 +523,7 @@ const form = reactive({
 });
 
 const roomOptions = computed(() =>
-  cms.roomTypes.map(r => ({
+  auth.scopedRoomTypes.map(r => ({
     label: `${r.name} (${cms.getHotelById(r.hotelId)?.name ?? ""})`,
     value: r.id
   }))
@@ -524,7 +533,9 @@ const planRoomFilterOptions = computed(() => roomOptions.value);
 
 const filteredPlans = computed(() => {
   const q = planQuery.value.trim().toLowerCase();
+  const allowed = new Set(auth.scopedRatePlans.map(p => p.id));
   return cms.ratePlans.filter(plan => {
+    if (!allowed.has(plan.id)) return false;
     if (planStatusFilter.value !== "all" && plan.status !== planStatusFilter.value) {
       return false;
     }

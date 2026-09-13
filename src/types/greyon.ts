@@ -7,55 +7,84 @@ export type BookingStatus =
 export type EnquiryStatus = "new" | "in_progress" | "closed";
 
 /**
- * Access roles:
- * - developer: platform owner — feature packages + everything
- * - org_admin: client full admin (all paid features)
- * - location_admin: scoped to assigned locationIds
- * - hotel_admin: scoped to assigned hotelIds
- * - customer: guest account (no admin modules)
- * Legacy presets: super_admin, content_admin, booking_admin
+ * Foundation roles:
+ * - developer: platform owner (packages, all features)
+ * - admin: client org admin (all hotels/locations in scope of package features)
+ * - manager: location manager — assigned locationIds
+ * - hotel_admin: property front desk — assigned hotelIds
+ * - customer: guest (no admin)
+ *
+ * Legacy aliases normalize in the store.
  */
 export type AdminRole =
   | "developer"
-  | "org_admin"
-  | "location_admin"
+  | "admin"
+  | "manager"
   | "hotel_admin"
   | "customer"
+  // legacy → mapped on normalize
+  | "org_admin"
+  | "location_admin"
   | "super_admin"
   | "content_admin"
   | "booking_admin";
 
 export type FeatureCategory = "admin" | "public";
 
-/** Paid / enabled product capability — catalog row (public site uses active/default package) */
+/**
+ * Product feature catalog.
+ * Parent features unlock modules; sub-features (parentKey set) are finer capabilities
+ * e.g. locations → locations_managers, locations_hotels.
+ */
 export interface ProductFeature {
   id: string;
   key: string;
   label: string;
   description: string;
   category: FeatureCategory;
-  /** Derived from site default package (activePackageId) for public gating */
+  /** Parent feature key — null/undefined = top-level module */
+  parentKey?: string | null;
+  /** Derived from site default package for public gating */
   enabled: boolean;
-  /** Billing hint in catalog */
   paidAddOn: boolean;
 }
 
-/** Customizable user package (user_package) — owns role + features */
+/**
+ * Sellable package: many roles + many features.
+ * Only a developer assigns packages to users (user_package M2M).
+ */
 export interface ProductPackage {
   id: string;
   name: string;
   description: string;
-  /** Optional price / plan note shown in admin */
   priceNote: string;
-  /**
-   * The single role this package grants.
-   * Users do not store role — they inherit it from their package.
-   */
-  role: AdminRole;
-  /** Modules unlocked by this package */
+  /** Roles this package grants (user may hold several via multiple packages) */
+  roles: AdminRole[];
+  /** Feature keys (parents and/or sub-features) unlocked */
   featureKeys: string[];
-  /** Seed presets cannot be deleted */
   isSystem?: boolean;
+}
+
+/** Join: users ↔ packages (many-to-many) */
+export interface UserPackage {
+  id: string;
+  userId: string;
+  packageId: string;
+}
+
+/**
+ * User account — no role/package fields on the row.
+ * Role + features come from user_package → package.
+ * Scope (locationIds / hotelIds) is assigned by developer for manager / hotel_admin.
+ */
+export interface AdminUser {
+  id: string;
+  name: string;
+  email: string;
+  /** manager: destinations they manage */
+  locationIds?: string[];
+  /** hotel_admin: properties they manage */
+  hotelIds?: string[];
 }
 
 export interface Location {
@@ -219,17 +248,3 @@ export interface BookingSearchParams {
   children: number;
 }
 
-export interface AdminUser {
-  id: string;
-  name: string;
-  email: string;
-  /**
-   * FK to user_package — role + features come from this package only.
-   * Do not store role on the user.
-   */
-  packageId: string;
-  /** When package.role is location_admin: assigned destinations */
-  locationIds?: string[];
-  /** When package.role is hotel_admin: assigned properties */
-  hotelIds?: string[];
-}

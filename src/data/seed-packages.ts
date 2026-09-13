@@ -2,11 +2,20 @@ import type { AdminRole, ProductPackage } from "@/types/greyon";
 
 const ALWAYS = ["features", "dashboard"] as const;
 
+const LOCATION_SUB = [
+  "locations",
+  "locations_list",
+  "locations_managers",
+  "locations_hotels",
+  "locations_publish",
+  "locations_seo"
+] as const;
+
 const CORE_KEYS = [
   ...ALWAYS,
+  ...LOCATION_SUB,
   "hotels",
   "rooms",
-  "locations",
   "bookings",
   "enquiries",
   "settings",
@@ -21,103 +30,91 @@ const BOOKING_KEYS = [...CONTENT_KEYS, "rates"];
 
 const FULL_KEYS = [...BOOKING_KEYS, "media", "portfolios"];
 
-/** Roles that can be set on a sellable package (developer is platform seat) */
-export const PACKAGE_CLIENT_ROLES: AdminRole[] = [
-  "org_admin",
-  "location_admin",
+export const FOUNDATION_ROLES: AdminRole[] = [
+  "admin",
+  "manager",
   "hotel_admin",
-  "content_admin",
-  "booking_admin",
   "customer"
 ];
 
 /**
- * Each package is a seat: one role + feature set.
- * Users only store packageId — role is never on the user.
+ * Packages grant many roles + many features.
+ * Developer assigns packages to users via user_package (M2M).
  */
 export const seedPackages: ProductPackage[] = [
   {
     id: "pkg-developer",
     name: "Platform Developer",
-    description: "Greyon platform seat — full access including User packages.",
+    description: "Internal seat — all features and package builder.",
     priceNote: "Internal",
-    role: "developer",
+    roles: ["developer"],
     featureKeys: [...FULL_KEYS],
     isSystem: true
   },
   {
-    id: "pkg-org-full",
-    name: "Org Admin · Full suite",
-    description: "Enterprise org owner — all modules except package builder.",
+    id: "pkg-admin-full",
+    name: "Admin · Full suite",
+    description: "Org admin with full modules including location managers & hotels.",
     priceNote: "Enterprise",
-    role: "org_admin",
+    roles: ["admin"],
     featureKeys: [...FULL_KEYS],
     isSystem: true
   },
   {
-    id: "pkg-loc-booking",
-    name: "Location Admin · Booking Pro",
-    description: "Destination manager with rates & bookings.",
+    id: "pkg-manager-booking",
+    name: "Manager · Booking Pro",
+    description: "Location manager with rates — scoped to assigned destinations.",
     priceNote: "Pro",
-    role: "location_admin",
+    roles: ["manager"],
     featureKeys: [...BOOKING_KEYS],
     isSystem: true
   },
   {
-    id: "pkg-loc-content",
-    name: "Location Admin · Content+",
-    description: "Destination manager with news CMS (no rates).",
+    id: "pkg-manager-content",
+    name: "Manager · Content+",
+    description: "Location manager with news — no rates calendar.",
     priceNote: "Mid",
-    role: "location_admin",
+    roles: ["manager"],
     featureKeys: [...CONTENT_KEYS],
     isSystem: true
   },
   {
     id: "pkg-hotel-booking",
     name: "Hotel Admin · Booking Pro",
-    description: "Property front desk with rates calendar.",
+    description: "Property seat with rates — scoped to assigned hotels.",
     priceNote: "Pro",
-    role: "hotel_admin",
+    roles: ["hotel_admin"],
     featureKeys: [...BOOKING_KEYS],
     isSystem: true
   },
   {
     id: "pkg-hotel-core",
     name: "Hotel Admin · Core",
-    description: "Property front desk on the starter feature set.",
+    description: "Property starter seat.",
     priceNote: "Starter",
-    role: "hotel_admin",
+    roles: ["hotel_admin"],
     featureKeys: [...CORE_KEYS],
     isSystem: true
   },
   {
-    id: "pkg-content-admin",
-    name: "Content Admin · Content+",
-    description: "Editorial seat for hotels, locations, and news.",
-    priceNote: "Mid",
-    role: "content_admin",
-    featureKeys: [...CONTENT_KEYS],
-    isSystem: true
-  },
-  {
-    id: "pkg-booking-admin",
-    name: "Booking Admin · Booking Pro",
-    description: "Reservations & rates operations seat.",
+    id: "pkg-ops-booking",
+    name: "Ops · Booking + Admin",
+    description: "Combo seat: admin + manager roles for multi-site ops.",
     priceNote: "Pro",
-    role: "booking_admin",
+    roles: ["admin", "manager"],
     featureKeys: [...BOOKING_KEYS],
     isSystem: true
   },
   {
     id: "pkg-customer",
-    name: "Customer · Core",
-    description: "Guest account — public site only, no admin.",
+    name: "Customer",
+    description: "Guest account — public site only.",
     priceNote: "Free",
-    role: "customer",
+    roles: ["customer"],
     featureKeys: ["booking_public", "contact_public", "news_public"],
     isSystem: true
   }
 ];
 
-/** Site default package for public feature catalog */
-export const DEFAULT_ACTIVE_PACKAGE_ID = "pkg-org-full";
+export const DEFAULT_ACTIVE_PACKAGE_ID = "pkg-admin-full";
+export const PACKAGE_CLIENT_ROLES = FOUNDATION_ROLES;

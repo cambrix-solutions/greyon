@@ -1,6 +1,9 @@
 import type { ProductFeature } from "@/types/greyon";
 
-/** Default product catalog — developer toggles `enabled` per client package */
+/**
+ * Feature catalog with parent / sub-feature hierarchy.
+ * Example: Locations unlocks the module; sub-features control managers, hotels, etc.
+ */
 export const seedFeatures: ProductFeature[] = [
   {
     id: "feat-dashboard",
@@ -8,6 +11,65 @@ export const seedFeatures: ProductFeature[] = [
     label: "Dashboard",
     description: "Admin home / ops overview",
     category: "admin",
+    enabled: true,
+    paidAddOn: false
+  },
+  {
+    id: "feat-locations",
+    key: "locations",
+    label: "Locations",
+    description: "Destination CMS — parent module for location sub-features",
+    category: "admin",
+    enabled: true,
+    paidAddOn: false
+  },
+  {
+    id: "feat-locations-list",
+    key: "locations_list",
+    label: "Location list & pages",
+    description: "View and edit destination content",
+    category: "admin",
+    parentKey: "locations",
+    enabled: true,
+    paidAddOn: false
+  },
+  {
+    id: "feat-locations-managers",
+    key: "locations_managers",
+    label: "Location managers",
+    description: "Assign a manager per destination (scoped locationIds)",
+    category: "admin",
+    parentKey: "locations",
+    enabled: true,
+    paidAddOn: false
+  },
+  {
+    id: "feat-locations-hotels",
+    key: "locations_hotels",
+    label: "Hotels under locations",
+    description: "Link hotels to destinations; hotel admins sit under a location",
+    category: "admin",
+    parentKey: "locations",
+    enabled: true,
+    paidAddOn: false
+  },
+  {
+    id: "feat-locations-publish",
+    key: "locations_publish",
+    label: "Publish destinations",
+    description: "Publish / archive location pages",
+    category: "admin",
+    parentKey: "locations",
+    enabled: true,
+    paidAddOn: false
+  },
+  {
+    id: "feat-locations-seo",
+    key: "locations_seo",
+    label: "Location SEO",
+    description: "Per-destination SEO fields",
+    category: "admin",
+    parentKey: "locations",
     enabled: true,
     paidAddOn: false
   },
@@ -30,15 +92,6 @@ export const seedFeatures: ProductFeature[] = [
     paidAddOn: false
   },
   {
-    id: "feat-locations",
-    key: "locations",
-    label: "Locations",
-    description: "Destination pages; hotels belong to a location",
-    category: "admin",
-    enabled: true,
-    paidAddOn: false
-  },
-  {
     id: "feat-news",
     key: "news",
     label: "News",
@@ -51,8 +104,7 @@ export const seedFeatures: ProductFeature[] = [
     id: "feat-media",
     key: "media",
     label: "Media library",
-    description:
-      "Optional asset dump. Hotels/rooms already store their own images — turn off if they did not pay for a library.",
+    description: "Optional asset library add-on",
     category: "admin",
     enabled: false,
     paidAddOn: true
@@ -96,8 +148,8 @@ export const seedFeatures: ProductFeature[] = [
   {
     id: "feat-users",
     key: "users",
-    label: "Users & roles",
-    description: "Org user management (not developer Features)",
+    label: "Users",
+    description: "View access / developer manages accounts",
     category: "admin",
     enabled: true,
     paidAddOn: false
@@ -105,8 +157,8 @@ export const seedFeatures: ProductFeature[] = [
   {
     id: "feat-features",
     key: "features",
-    label: "Feature packages",
-    description: "Developer-only: build and activate user packages",
+    label: "User packages",
+    description: "Developer-only: build packages and assign to users",
     category: "admin",
     enabled: true,
     paidAddOn: false
@@ -115,7 +167,7 @@ export const seedFeatures: ProductFeature[] = [
     id: "feat-booking-public",
     key: "booking_public",
     label: "Public booking engine",
-    description: "Guest-facing /booking flow and Book CTAs",
+    description: "Guest-facing /booking flow",
     category: "public",
     enabled: true,
     paidAddOn: false
@@ -142,7 +194,7 @@ export const seedFeatures: ProductFeature[] = [
     id: "feat-portfolios",
     key: "portfolios",
     label: "Portfolio stubs",
-    description: "Service apartment / boutique / resort coming-soon pages",
+    description: "Coming-soon portfolio pages",
     category: "public",
     enabled: true,
     paidAddOn: true
