@@ -6,7 +6,7 @@ import {
   createWebHistory
 } from "vue-router";
 
-import routes from "./routes";
+import routes, { setupRouterGuards } from "./routes";
 
 /*
  * If not building with SSR mode, you can
@@ -25,7 +25,11 @@ export default defineRouter((/* { store, ssrContext } */) => {
       : createWebHashHistory;
 
   const Router = createRouter({
-    scrollBehavior: () => ({ left: 0, top: 0 }),
+    scrollBehavior: (to, _from, saved) => {
+      if (saved) return saved;
+      if (to.hash) return { el: to.hash, behavior: "smooth" };
+      return { left: 0, top: 0 };
+    },
     routes,
 
     // Leave this as is and make changes in quasar.conf.js instead!
@@ -33,6 +37,8 @@ export default defineRouter((/* { store, ssrContext } */) => {
     // quasar.conf.js -> build -> publicPath
     history: createHistory(import.meta.env.QUASAR_VUE_ROUTER_BASE)
   });
+
+  setupRouterGuards(Router);
 
   return Router;
 });

@@ -1,38 +1,57 @@
-# Quasar App (quasar-project)
+# Greyon
 
-## Install the dependencies
+Hotel portfolio and booking website for [www.greyon.com.kh](https://www.greyon.com.kh).
 
-```bash
-pnpm install
-# or: yarn/npm/bun install
-```
+**Frontend:** Quasar Vue 3 SPA (Pinia CMS + mock by default)  
+**Backend:** NestJS + PostgreSQL in `api/` (optional; wire with `VITE_USE_API=true`)
 
-### Start the app in development mode (HMR, error reporting, etc.)
+## Quick start (frontend)
 
 ```bash
-quasar dev
+npm install
+npm run dev
 ```
 
-### Format & Lint the files
+App: http://localhost:9000
+
+## Optional Nest API
 
 ```bash
-pnpm run lint
-# or: yarn/npm/bun run lint
+cd api
+cp .env.example .env
+# Create Postgres DB greyon, then:
+npm install
+# SEED_ON_BOOT=true in .env for demo data
+npm run start:dev
 ```
 
-...or just check formatting & linting:
+API: http://localhost:3000/api
 
-```bash
-pnpm run lint:check
-# or: yarn/npm/bun run lint:check
+Frontend `.env`:
+
+```
+VITE_USE_API=true
+VITE_API_BASE_URL=http://localhost:3000/api
 ```
 
-### Build the app for production
+## MVP features
 
-```bash
-quasar build
-```
+- Public: Home, Hotels, Locations (6), News, Booking flow, Contact
+- Admin CMS at `/admin` with role-based demo auth (Pinia)
+- Nest: public reads, availability, bookings, JWT login, admin booking status
+- SEO helpers, robots.txt, sitemap.xml, cookie notice, analytics placeholder
 
-### Customize the configuration
+## Docs
 
-See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-vite/quasar-config-file).
+- [docs/LAUNCH_CHECKLIST.md](docs/LAUNCH_CHECKLIST.md)
+- [api/GREYON_API.md](api/GREYON_API.md)
+
+## Admin demo users (SPA)
+
+| Email | Role |
+|-------|------|
+| admin@greyon.com.kh | Super Admin |
+| content@greyon.com.kh | Content Admin |
+| bookings@greyon.com.kh | Booking Admin |
+
+SPA demo: any password. Nest seed users: password `password`.

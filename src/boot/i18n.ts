@@ -22,8 +22,16 @@ declare module "vue-i18n" {
 /* eslint-enable @typescript-eslint/no-empty-object-type */
 
 export default defineBoot(({ app }) => {
+  const saved =
+    typeof localStorage !== "undefined"
+      ? localStorage.getItem("greyon_locale")
+      : null;
+  const locale =
+    saved === "km-KH" || saved === "en-US" ? saved : "en-US";
+
   const i18n = createI18n<{ message: MessageSchema }, MessageLanguages>({
-    locale: "en-US",
+    locale,
+    fallbackLocale: "en-US",
     legacy: false,
     messages
   });

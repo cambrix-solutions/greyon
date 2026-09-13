@@ -1,0 +1,10 @@
+export { Location } from './location.entity';
+export { Hotel } from './hotel.entity';
+export { RoomType } from './room-type.entity';
+export { RatePlan } from './rate-plan.entity';
+export { Availability } from './availability.entity';
+export { RateCalendar } from './rate-calendar.entity';
+export { Booking } from './booking.entity';
+export { News } from './news.entity';
+export { Enquiry } from './enquiry.entity';
+export { User } from './user.entity';
