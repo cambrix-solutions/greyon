@@ -56,12 +56,11 @@ import { useAuthStore } from "@/stores/auth-store";
 const auth = useAuthStore();
 const router = useRouter();
 const route = useRoute();
-const email = ref("dev@greyon.com.kh");
+const email = ref("admin@greyon.com.kh");
 const password = ref("demo");
 const error = ref("");
 
 const demoAccounts = [
-  { email: "dev@greyon.com.kh", role: "Developer", package: "Platform Developer" },
   { email: "admin@greyon.com.kh", role: "Admin", package: "Admin · Full suite" },
   { email: "pp@greyon.com.kh", role: "Manager · PP", package: "Manager · Booking Pro" },
   { email: "sr@greyon.com.kh", role: "Manager · SR", package: "Manager · Content+" },
