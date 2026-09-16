@@ -1,6 +1,5 @@
 import type { RouteRecordRaw } from "vue-router";
 import { useAuthStore } from "@/stores/auth-store";
-import { useMaintenanceStore } from "@/stores/maintenance-store";
 
 const routes: RouteRecordRaw[] = [
   {
@@ -215,16 +214,10 @@ const routes: RouteRecordRaw[] = [
     ]
   },
   {
-    path: "/maintenance",
-    name: "maintenance",
-    component: () => import("@/pages/MaintenancePage.vue"),
-    meta: { title: "Maintenance | Greyon", allowDuringMaintenance: true }
-  },
-  {
     path: "/404",
     name: "access-denied",
     component: () => import("@/pages/ErrorAccessDenied.vue"),
-    meta: { title: "404 | Greyon", publicAdmin: true, allowDuringMaintenance: true }
+    meta: { title: "404 | Greyon", publicAdmin: true }
   },
   {
     path: "/:catchAll(.*)*",
@@ -237,26 +230,9 @@ const routes: RouteRecordRaw[] = [
 export function setupRouterGuards(
   router: ReturnType<typeof import("vue-router").createRouter>
 ) {
-  router.beforeEach(async to => {
+  router.beforeEach(to => {
     if (to.meta.title) {
       document.title = String(to.meta.title);
-    }
-
-    const maintenance = useMaintenanceStore();
-    if (!maintenance.loaded) {
-      await maintenance.hydrate();
-    }
-
-    // Public site locked; admin + maintenance page stay open
-    if (maintenance.isEnabled) {
-      const allowed =
-        to.meta.allowDuringMaintenance ||
-        to.path.startsWith("/admin") ||
-        to.name === "admin-login" ||
-        to.name === "maintenance";
-      if (!allowed) {
-        return { name: "maintenance" };
-      }
     }
 
     // Public admin login / access denied — never block
