@@ -99,7 +99,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useQuasar } from "quasar";
 import AdminDialog from "@/components/admin/AdminDialog.vue";
 import AdminFormSection from "@/components/admin/AdminFormSection.vue";
@@ -109,6 +109,11 @@ import { useCmsStore } from "@/stores/cms-store";
 
 const cms = useCmsStore();
 const $q = useQuasar();
+
+onMounted(() => {
+  void cms.ensureMedia();
+});
+
 const dialog = ref(false);
 const src = ref("");
 const alt = ref("");
@@ -126,16 +131,23 @@ function openAdd() {
   dialog.value = true;
 }
 
-function add() {
+async function add() {
   if (!src.value) {
     $q.notify({ type: "negative", message: "Image is required." });
     return;
   }
-  cms.addMedia(src.value, alt.value || "Greyon media");
-  src.value = "";
-  alt.value = "";
-  dialog.value = false;
-  $q.notify({ type: "positive", message: "Media added." });
+  try {
+    await cms.addMedia(src.value, alt.value || "Greyon media");
+    src.value = "";
+    alt.value = "";
+    dialog.value = false;
+    $q.notify({ type: "positive", message: "Media added." });
+  } catch (e) {
+    $q.notify({
+      type: "negative",
+      message: e instanceof Error ? e.message : "Add failed."
+    });
+  }
 }
 
 function copy(value: string) {
@@ -144,8 +156,15 @@ function copy(value: string) {
 }
 
 function remove(id: string) {
-  $q.dialog({ title: "Delete media?", cancel: true, persistent: true }).onOk(() => {
-    cms.deleteMedia(id);
+  $q.dialog({ title: "Delete media?", cancel: true, persistent: true }).onOk(async () => {
+    try {
+      await cms.deleteMedia(id);
+    } catch (e) {
+      $q.notify({
+        type: "negative",
+        message: e instanceof Error ? e.message : "Delete failed."
+      });
+    }
   });
 }
 </script>

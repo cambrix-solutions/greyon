@@ -30,7 +30,7 @@ export default {
     featured: "Featured hotels",
     stayWith: "Stay with Greyon",
     exploreBy: "Explore by location",
-    sixDestinations: "Six destinations",
+    destinationsCount: "0 destinations | 1 destination | {n} destinations",
     storyEyebrow: "The Greyon story",
     storyTitle: "Premium hospitality, locally rooted",
     storyBody:

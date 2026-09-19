@@ -1,17 +1,18 @@
 <template>
   <q-page padding>
-    <template v-if="auth.isDeveloper">
+    <template v-if="canManagePeople">
       <AdminPageHeader
-        eyebrow="Foundation"
-        title="Users"
-        :subtitle="`${filtered.length} users · packages linked via user_package (M2M)`"
+        eyebrow="Access"
+        title="People"
+        :subtitle="`${filtered.length} people · Admin assigns Manager (locations) or Hotel desk (hotels)`"
       >
         <template #actions>
           <q-btn
+            v-if="auth.isDeveloper"
             outline
             no-caps
             color="primary"
-            label="User packages"
+            label="Seat types"
             to="/admin/features"
           />
           <q-btn
@@ -19,7 +20,7 @@
             no-caps
             color="primary"
             icon="add"
-            label="Add user"
+            label="Add person"
             @click="openCreate"
           />
         </template>
@@ -29,7 +30,7 @@
             dense
             outlined
             clearable
-            placeholder="Search users…"
+            placeholder="Search people…"
             style="min-width: min(100%, 220px); background: #fff"
           >
             <template #prepend><q-icon name="search" /></template>
@@ -37,13 +38,7 @@
         </template>
       </AdminPageHeader>
 
-      <q-banner class="bg-white q-mb-md" rounded>
-        Foundation:
-        <strong>users</strong> ↔
-        <strong>user_package</strong> ↔
-        <strong>packages</strong> (roles + features).
-        Only developers assign packages. Managers get location scope; hotel admins get hotel scope.
-      </q-banner>
+      <AccessHubBanner focus="people" />
 
       <div class="admin-scroll">
         <q-markup-table flat bordered class="bg-white">
@@ -51,8 +46,7 @@
             <tr>
               <th class="text-left">Name</th>
               <th class="text-left">Email</th>
-              <th class="text-left">Packages</th>
-              <th class="text-left">Roles</th>
+              <th class="text-left">Seat (role)</th>
               <th class="text-left">Scope</th>
               <th class="text-left">Actions</th>
             </tr>
@@ -64,34 +58,32 @@
               <td>
                 <div class="pkg-chips">
                   <span
-                    v-for="pkg in cms.getPackagesForUser(user.id)"
-                    :key="pkg.id"
+                    v-for="seat in seatsFor(user)"
+                    :key="seat.id"
                     class="pkg-chip"
-                  >{{ pkg.name }}</span>
-                  <span v-if="!cms.getPackagesForUser(user.id).length" class="text-grey-6"
+                    >{{ seat.label }}</span
+                  >
+                  <span v-if="!seatsFor(user).length" class="text-grey-6"
                     >None</span
                   >
                 </div>
               </td>
-              <td>
-                <span
-                  v-for="r in cms.getUserRoles(user)"
-                  :key="r"
-                  class="role-pill"
-                  >{{ roleLabels[r] }}</span
-                >
-              </td>
               <td class="text-caption">{{ scopeLabel(user) }}</td>
               <td>
-                <q-btn flat dense color="primary" label="Edit" @click="openEdit(user)" />
+                <q-btn
+                  flat
+                  dense
+                  color="primary"
+                  label="Edit"
+                  :disable="!canEditRow(user)"
+                  @click="openEdit(user)"
+                />
                 <q-btn
                   flat
                   dense
                   color="negative"
                   label="Delete"
-                  :disable="
-                    cms.getUserRoles(user).includes('developer') && developerCount <= 1
-                  "
+                  :disable="!canDeleteRow(user)"
                   @click="remove(user.id)"
                 />
               </td>
@@ -103,10 +95,11 @@
 
     <template v-else>
       <AdminPageHeader
-        eyebrow="Account"
-        title="My access"
-        subtitle="Role and scope from your user packages — view only."
+        eyebrow="Access"
+        title="My seat"
+        subtitle="Your role, seat type, and property scope."
       />
+      <AccessHubBanner focus="people" />
       <article v-if="me" class="my-access">
         <header class="my-access__head">
           <h2>{{ me.name }}</h2>
@@ -114,7 +107,7 @@
         </header>
         <div class="my-access__grid">
           <section>
-            <p class="label">Roles</p>
+            <p class="label">Role</p>
             <p>
               <span
                 v-for="r in cms.getUserRoles(me)"
@@ -127,16 +120,18 @@
           <section>
             <p class="label">Scope</p>
             <p>{{ scopeLabel(me) }}</p>
-            <p class="hint">Only a developer can change your locations or hotels.</p>
+            <p class="hint">
+              Managers can hold many locations. Hotel desks hold hotels.
+            </p>
           </section>
           <section class="span-2">
-            <p class="label">Packages</p>
+            <p class="label">Seat type</p>
             <p>
               <span
-                v-for="pkg in cms.getPackagesForUser(me.id)"
-                :key="pkg.id"
+                v-for="seat in seatsFor(me)"
+                :key="seat.id"
                 class="pkg-chip"
-                >{{ pkg.name }}</span
+                >{{ seat.label }}</span
               >
             </p>
           </section>
@@ -148,26 +143,26 @@
       v-model="dialog"
       size="xl"
       icon="person"
-      eyebrow="Foundation"
-      :title="editing ? 'Edit user' : 'Add user'"
-      subtitle="Assign one or more packages. Roles and features come from those packages."
+      eyebrow="Access"
+      :title="editing ? 'Edit person' : 'Add person'"
+      subtitle="Pick a seat by role. Managers can get many locations; hotel desks get hotels."
     >
       <AdminFormSection title="Profile" :columns="2">
         <q-input v-model="form.name" label="Full name" outlined dense />
         <q-input v-model="form.email" type="email" label="Email" outlined dense />
       </AdminFormSection>
       <AdminFormSection
-        title="Packages (user_package)"
-        hint="Many-to-many — only developers can assign. Users cannot add packages."
+        title="Seat (role)"
+        hint="Shown as roles — each seat unlocks features + CRUD permissions."
       >
         <q-select
           v-model="form.packageIds"
-          :options="packageOptions"
+          :options="seatOptions"
           emit-value
           map-options
           multiple
           use-chips
-          label="Packages"
+          label="Seat type"
           outlined
           dense
           @update:model-value="onPackagesChange"
@@ -189,7 +184,7 @@
           label="Managed locations"
           outlined
           dense
-          hint="Each location can have a manager"
+          hint="Assign many locations to one manager (Phnom Penh, Sihanoukville, Kampot)."
         />
         <q-select
           v-if="needsHotelScope"
@@ -202,7 +197,7 @@
           label="Managed hotels"
           outlined
           dense
-          hint="Hotel admins sit under a location’s hotels"
+          hint="Package limits: up to 3 hotels per location."
         />
       </AdminFormSection>
       <template #actions>
@@ -214,8 +209,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref } from "vue";
 import { useQuasar } from "quasar";
+import AccessHubBanner from "@/components/admin/AccessHubBanner.vue";
 import AdminDialog from "@/components/admin/AdminDialog.vue";
 import AdminFormSection from "@/components/admin/AdminFormSection.vue";
 import AdminPageHeader from "@/components/admin/AdminPageHeader.vue";
@@ -226,21 +222,61 @@ import type { AdminUser } from "@/types/greyon";
 const cms = useCmsStore();
 const auth = useAuthStore();
 const $q = useQuasar();
+
+const canManagePeople = computed(
+  () => auth.isDeveloper || auth.can("users")
+);
+
+onMounted(() => {
+  void cms.ensureTeamBundle();
+  void cms.ensureLocations();
+  void cms.ensureHotels();
+});
+
 const dialog = ref(false);
 const editing = ref<string | null>(null);
 const query = ref("");
 
-const packageOptions = computed(() =>
-  cms.packages.map(p => ({
-    label: `${p.name} · ${p.roles.map(r => roleLabels[r]).join(", ")}`,
+function seatLabel(pkg: { name: string; roles: string[]; priceNote?: string }) {
+  const roles = pkg.roles
+    .map(r => roleLabels[r as keyof typeof roleLabels] ?? r)
+    .join(" + ");
+  const note = pkg.priceNote ? ` · ${pkg.priceNote}` : "";
+  return `${roles}${note}`;
+}
+
+const assignablePackages = computed(() => {
+  if (auth.isDeveloper) return cms.packages;
+  return cms.packages.filter(
+    p =>
+      p.roles.some(r => r === "manager" || r === "hotel_admin") &&
+      !p.roles.includes("admin")
+  );
+});
+
+const seatOptions = computed(() =>
+  assignablePackages.value.map(p => ({
+    label: seatLabel(p),
     value: p.id
   }))
 );
+
+function seatsFor(user: AdminUser | null | undefined) {
+  if (!user?.id) return [] as Array<{ id: string; label: string }>;
+  return cms.getPackagesForUser(user.id).map(p => ({
+    id: p.id,
+    label: seatLabel(p)
+  }));
+}
+
 const locationOptions = computed(() =>
   cms.locations.map(l => ({ label: l.name, value: l.id }))
 );
 const hotelOptions = computed(() =>
-  cms.hotels.map(h => ({ label: h.name, value: h.id }))
+  cms.hotels.map(h => ({
+    label: `${h.name} (${cms.getLocationById(h.locationId)?.name ?? "—"})`,
+    value: h.id
+  }))
 );
 
 const developerCount = computed(
@@ -272,19 +308,38 @@ const formRoles = computed(() => {
 const needsManagerScope = computed(() => formRoles.value.includes("manager"));
 const needsHotelScope = computed(() => formRoles.value.includes("hotel_admin"));
 const formRolesHint = computed(() => {
-  if (!formRoles.value.length) return "Pick at least one package.";
-  return `Effective roles: ${formRoles.value.map(r => roleLabels[r]).join(", ")}`;
+  if (!formRoles.value.length) return "Pick at least one seat.";
+  return `Role: ${formRoles.value.map(r => roleLabels[r]).join(", ")}`;
 });
 
 const filtered = computed(() => {
   const q = query.value.trim().toLowerCase();
   return cms.users.filter(u => {
     if (!q) return true;
-    const pkgs = cms.getPackagesForUser(u.id).map(p => p.name).join(" ");
+    const seats = seatsFor(u)
+      .map(s => s.label)
+      .join(" ");
     const roles = cms.getUserRoles(u).join(" ");
-    return `${u.name} ${u.email} ${pkgs} ${roles}`.toLowerCase().includes(q);
+    return `${u.name} ${u.email} ${seats} ${roles}`.toLowerCase().includes(q);
   });
 });
+
+function canEditRow(user: AdminUser) {
+  if (auth.isDeveloper) return true;
+  const roles = cms.getUserRoles(user);
+  if (roles.includes("admin") && user.id !== auth.user?.id) return false;
+  return true;
+}
+
+function canDeleteRow(user: AdminUser) {
+  if (auth.isDeveloper) {
+    return !(
+      cms.getUserRoles(user).includes("developer") && developerCount.value <= 1
+    );
+  }
+  if (user.id === auth.user?.id) return false;
+  return canEditRow(user);
+}
 
 function scopeLabel(user: AdminUser) {
   const roles = cms.getUserRoles(user);
@@ -303,8 +358,10 @@ function scopeLabel(user: AdminUser) {
         : "Hotels: none"
     );
   }
-  if (!parts.length) return "All (admin / developer)";
-  return parts.join(" · ");
+  if (roles.includes("admin") || roles.includes("developer")) {
+    parts.push("Org-wide");
+  }
+  return parts.join(" · ") || "—";
 }
 
 function onPackagesChange() {
@@ -313,18 +370,20 @@ function onPackagesChange() {
 }
 
 function openCreate() {
-  if (!auth.isDeveloper) return;
   editing.value = null;
   form.name = "";
   form.email = "";
-  form.packageIds = ["pkg-hotel-core"];
+  const hotelPkg =
+    assignablePackages.value.find(
+      p => p.roles.includes("hotel_admin") && !p.roles.includes("admin")
+    ) ?? assignablePackages.value[0];
+  form.packageIds = hotelPkg ? [hotelPkg.id] : [];
   form.locationIds = [];
   form.hotelIds = [];
   dialog.value = true;
 }
 
 function openEdit(user: AdminUser) {
-  if (!auth.isDeveloper) return;
   editing.value = user.id;
   form.name = user.name;
   form.email = user.email;
@@ -334,42 +393,59 @@ function openEdit(user: AdminUser) {
   dialog.value = true;
 }
 
-function save() {
-  if (!auth.isDeveloper) return;
-  if (!form.name || !form.email) {
-    $q.notify({ type: "negative", message: "Name and email are required." });
-    return;
-  }
+async function save() {
   if (!form.packageIds.length) {
-    $q.notify({ type: "negative", message: "Assign at least one package." });
+    $q.notify({ type: "negative", message: "Assign at least one seat." });
     return;
   }
   if (needsManagerScope.value && !form.locationIds.length) {
-    $q.notify({ type: "negative", message: "Assign at least one location for managers." });
+    $q.notify({
+      type: "negative",
+      message: "Pick at least one location for a manager."
+    });
     return;
   }
   if (needsHotelScope.value && !form.hotelIds.length) {
-    $q.notify({ type: "negative", message: "Assign at least one hotel for hotel admins." });
+    $q.notify({
+      type: "negative",
+      message: "Pick at least one hotel for a hotel desk."
+    });
     return;
   }
-  cms.upsertUser({
-    ...(editing.value ? { id: editing.value } : {}),
-    name: form.name,
-    email: form.email,
-    packageIds: form.packageIds,
-    locationIds: form.locationIds,
-    hotelIds: form.hotelIds
-  });
-  dialog.value = false;
-  auth.hydrate();
-  $q.notify({ type: "positive", message: "User saved." });
+  try {
+    await cms.upsertUser({
+      id: editing.value ?? undefined,
+      name: form.name,
+      email: form.email,
+      packageIds: form.packageIds,
+      locationIds: form.locationIds,
+      hotelIds: form.hotelIds
+    });
+    dialog.value = false;
+    $q.notify({ type: "positive", message: "Person saved." });
+  } catch (e) {
+    $q.notify({
+      type: "negative",
+      message: e instanceof Error ? e.message : "Save failed."
+    });
+  }
 }
 
 function remove(id: string) {
-  if (!auth.isDeveloper) return;
-  $q.dialog({ title: "Delete user?", cancel: true, persistent: true }).onOk(() => {
-    cms.deleteUser(id);
-    $q.notify({ type: "positive", message: "User deleted." });
+  $q.dialog({
+    title: "Remove this person?",
+    cancel: true,
+    persistent: true
+  }).onOk(async () => {
+    try {
+      await cms.deleteUser(id);
+      $q.notify({ type: "positive", message: "Removed." });
+    } catch (e) {
+      $q.notify({
+        type: "negative",
+        message: e instanceof Error ? e.message : "Delete failed."
+      });
+    }
   });
 }
 </script>

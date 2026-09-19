@@ -5,11 +5,19 @@
  * for the /quasar.config file itself.
  *
  * https://quasar.dev/quasar-cli-vite/handling-import-meta-env#type-inference
- *
- * @example
- * interface ImportMetaEnv {
- *   readonly MY_VAR: string;
- *   readonly MY_OTHER_VAR: string;
- * }
  */
-interface ImportMetaEnv {}
+interface ImportMetaEnv {
+  readonly VITE_USE_API?: string;
+  readonly VITE_APP_MODE?: string;
+  readonly VITE_ENGINE_URL?: string;
+  readonly VITE_API_BASE_URL?: string;
+  readonly VITE_GTM_ID?: string;
+}
+
+declare module "vue" {
+  interface ComponentCustomProperties {
+    $engineAPI: import("./src/helpers/api/createApiClient").ApiClient;
+    $apiMode: import("./src/helpers/api/apiConfig").ApiMode;
+    $apiEndpoints: import("./src/helpers/api/apiConfig").ApiEndpoints;
+  }
+}

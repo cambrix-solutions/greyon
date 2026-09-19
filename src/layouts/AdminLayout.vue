@@ -220,6 +220,25 @@
             </q-item>
           </q-list>
         </template>
+
+        <template v-if="accessNav.length">
+          <p class="admin-drawer__label">Access</p>
+          <q-list padding class="admin-nav">
+            <q-item
+              v-for="item in accessNav"
+              :key="item.to"
+              clickable
+              v-ripple
+              :to="item.to"
+              active-class="admin-nav__active"
+            >
+              <q-item-section avatar>
+                <q-icon :name="item.icon" />
+              </q-item-section>
+              <q-item-section>{{ item.label }}</q-item-section>
+            </q-item>
+          </q-list>
+        </template>
       </div>
     </q-drawer>
 
@@ -300,10 +319,11 @@ type NavItem = {
   to: string;
   icon: string;
   perm: string;
-  group: "primary" | "properties" | "publishing" | "ops" | "system";
+  group: "primary" | "properties" | "publishing" | "ops" | "system" | "access";
   badge?: number;
   depth?: number;
   caption?: string;
+  developerOnly?: boolean;
 };
 
 const nav = computed<NavItem[]>(() => [
@@ -338,6 +358,13 @@ const nav = computed<NavItem[]>(() => [
   { label: "News", to: "/admin/news", icon: "newspaper", perm: "news", group: "publishing" },
   { label: "Media", to: "/admin/media", icon: "photo_library", perm: "media", group: "publishing" },
   {
+    label: "Hero slides",
+    to: "/admin/hero-slides",
+    icon: "view_carousel",
+    perm: "settings",
+    group: "publishing"
+  },
+  {
     label: "Rates & Availability",
     to: "/admin/rates",
     icon: "event_available",
@@ -362,30 +389,46 @@ const nav = computed<NavItem[]>(() => [
   },
   { label: "SEO / Settings", to: "/admin/settings", icon: "settings", perm: "settings", group: "system" },
   {
-    label: auth.isDeveloper ? "Users" : "My access",
+    label: "People",
     to: "/admin/users",
     icon: auth.isDeveloper ? "group" : "badge",
     perm: "users",
-    group: "system"
+    group: "access"
   },
   {
-    label: "Packages",
+    label: "Seat types",
     to: "/admin/features",
     icon: "inventory_2",
     perm: "features",
-    group: "system"
+    group: "access",
+    developerOnly: true
+  },
+  {
+    label: "Access catalog",
+    to: "/admin/access-catalog",
+    icon: "admin_panel_settings",
+    perm: "features",
+    group: "access",
+    developerOnly: true
   }
 ]);
 
-const visibleNav = computed(() => nav.value.filter(item => auth.can(item.perm)));
+const visibleNav = computed(() =>
+  nav.value.filter(item => {
+    if (!auth.can(item.perm)) return false;
+    if (item.developerOnly && !auth.isDeveloper) return false;
+    return true;
+  })
+);
 const primaryNav = computed(() => visibleNav.value.filter(i => i.group === "primary"));
 const propertyNav = computed(() => visibleNav.value.filter(i => i.group === "properties"));
 const publishingNav = computed(() => visibleNav.value.filter(i => i.group === "publishing"));
 const opsNav = computed(() => visibleNav.value.filter(i => i.group === "ops"));
 const systemNav = computed(() => visibleNav.value.filter(i => i.group === "system"));
+const accessNav = computed(() => visibleNav.value.filter(i => i.group === "access"));
 
-function onLogout() {
-  auth.logout();
+async function onLogout() {
+  await auth.logout();
   void router.push("/admin/login");
 }
 </script>

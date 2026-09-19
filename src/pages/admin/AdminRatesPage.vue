@@ -43,17 +43,29 @@
           label="Room type"
           style="min-width: 200px; background: #fff"
         />
+        <q-select
+          v-model="planPageSize"
+          :options="planPageSizeOptions"
+          dense
+          outlined
+          emit-value
+          map-options
+          label="Per page"
+          style="min-width: 110px; background: #fff"
+        />
       </template>
     </AdminPageHeader>
 
     <q-banner v-reveal="{ delay: '100ms' }" class="bg-grey-2 q-mb-md" rounded>
-      Base rate plans below. Inventory is per night (date). Hotel check-in / check-out
-      <strong>times</strong> come from each hotel (edit under Hotels). Use List or Calendar
-      to set units, stop-sell, and prices.
+      Base rate plans below. Hotel check-in / check-out
+      <strong>times</strong> come from each hotel (edit under Hotels).
+      <template v-if="auth.isDeveloper">
+        Inventory is per night — use List or Calendar below to set units, stop-sell, and prices.
+      </template>
     </q-banner>
 
     <div v-reveal="{ delay: '140ms' }" class="admin-scroll">
-      <q-markup-table flat bordered class="q-mb-xl bg-white">
+      <q-markup-table flat bordered class="bg-white">
         <thead>
           <tr>
             <th class="text-left">Rate plan</th>
@@ -65,7 +77,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="plan in filteredPlans" :key="plan.id">
+          <tr v-for="plan in pagedPlans" :key="plan.id">
             <td>{{ plan.name }}</td>
             <td>{{ roomName(plan.roomTypeId) }}</td>
             <td class="text-right">${{ plan.basePrice }}</td>
@@ -74,6 +86,7 @@
             <td>
               <q-btn flat dense color="primary" label="Edit" @click="openEdit(plan)" />
               <q-btn
+                v-if="auth.isDeveloper"
                 flat
                 dense
                 color="primary"
@@ -91,202 +104,218 @@
           </tr>
         </tbody>
       </q-markup-table>
-    </div>
-
-    <div id="inventory-section" class="row items-center justify-between q-mb-md">
-      <h2 class="text-h6 q-ma-none">Inventory & rates</h2>
-      <q-btn-toggle
-        v-model="inventoryView"
-        toggle-color="primary"
-        unelevated
-        dense
-        :options="[
-          { label: 'List', value: 'list', icon: 'view_list' },
-          { label: 'Calendar', value: 'calendar', icon: 'calendar_month' }
-        ]"
-      />
-    </div>
-
-    <div class="row q-col-gutter-md q-mb-md">
-      <div class="col-12 col-md-4">
-        <q-select
-          v-model="selectedRoomId"
-          :options="roomOptions"
-          label="Room type"
-          outlined
-          dense
-          emit-value
-          map-options
-        />
-      </div>
-      <div class="col-12 col-md-3">
-        <q-select
-          v-model="selectedPlanId"
-          :options="planOptionsForRoom"
-          label="Rate plan (for prices)"
-          outlined
-          dense
-          emit-value
-          map-options
-          clearable
-        />
-      </div>
-      <div v-if="inventoryView === 'list'" class="col-12 col-md-3">
-        <q-input
-          v-model="calendarStart"
-          type="date"
-          label="Start date"
-          outlined
-          dense
+      <div v-if="filteredPlans.length" class="rates-pager">
+        <p class="rates-pager__meta">
+          Showing {{ planRangeStart }}–{{ planRangeEnd }} of
+          {{ filteredPlans.length }}
+        </p>
+        <q-pagination
+          v-model="planPage"
+          :max="planPageCount"
+          :max-pages="7"
+          direction-links
+          boundary-links
+          color="primary"
+          size="sm"
+          :disable="planPageCount <= 1"
         />
       </div>
     </div>
 
-    <q-banner v-if="roomHotelTimes" dense rounded class="bg-blue-1 q-mb-md">
-      Selected room hotel times: check-in
-      <strong>{{ roomHotelTimes.checkIn }}</strong>
-      · check-out
-      <strong>{{ roomHotelTimes.checkOut }}</strong>
-    </q-banner>
-
-    <!-- Default list view -->
-    <div
-      v-if="inventoryView === 'list'"
-      v-reveal="{ delay: '160ms' }"
-      class="admin-scroll"
-    >
-      <q-markup-table flat bordered>
-      <thead>
-        <tr>
-          <th class="text-left">Date</th>
-          <th class="text-left">Units</th>
-          <th class="text-left">Stop-sell</th>
-          <th class="text-left">Booked</th>
-          <th class="text-left">Free</th>
-          <th class="text-left">Night price</th>
-          <th class="text-left">Min / max stay</th>
-          <th class="text-left">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="day in listDays" :key="day">
-          <td>
-            <div>{{ formatDate(day) }}</div>
-            <div class="text-caption text-grey-7">{{ day }}</div>
-          </td>
-          <td>
-            <q-input
-              dense
-              outlined
-              type="number"
-              style="max-width: 90px"
-              :model-value="unitsValue(day)"
-              @update:model-value="(v) => setUnits(day, Number(v))"
-            />
-          </td>
-          <td>
-            <q-toggle
-              :model-value="stopSellValue(day)"
-              @update:model-value="(v: boolean) => setStopSell(day, v)"
-            />
-          </td>
-          <td>{{ cms.bookedOnNight(selectedRoomId, day) }}</td>
-          <td>{{ freeUnits(day) }}</td>
-          <td>
-            <q-input
-              dense
-              outlined
-              type="number"
-              style="max-width: 110px"
-              :disable="!selectedPlanId"
-              :model-value="priceValue(day)"
-              @update:model-value="(v) => setPrice(day, Number(v))"
-            />
-          </td>
-          <td>
-            <div class="row q-gutter-xs items-center">
-              <q-input
-                dense
-                outlined
-                type="number"
-                style="max-width: 70px"
-                :disable="!selectedPlanId"
-                :model-value="minStayValue(day)"
-                label="min"
-                @update:model-value="(v) => setMinStay(day, v)"
-              />
-              <q-input
-                dense
-                outlined
-                type="number"
-                style="max-width: 70px"
-                :disable="!selectedPlanId"
-                :model-value="maxStayValue(day)"
-                label="max"
-                @update:model-value="(v) => setMaxStay(day, v)"
-              />
-            </div>
-          </td>
-          <td>
-            <q-btn
-              flat
-              dense
-              color="grey-8"
-              label="Clear day"
-              @click="clearDay(day)"
-            />
-          </td>
-        </tr>
-      </tbody>
-    </q-markup-table>
-    </div>
-
-    <!-- Calendar month view -->
-    <div v-else v-reveal="{ delay: '160ms' }" class="cal">
-      <div class="cal__toolbar">
-        <q-btn flat dense round icon="chevron_left" @click="shiftMonth(-1)" />
-        <div class="cal__month">{{ monthLabel }}</div>
-        <q-btn flat dense round icon="chevron_right" @click="shiftMonth(1)" />
-        <q-space />
-        <q-btn flat dense label="Today" @click="goToday" />
+    <template v-if="auth.isDeveloper">
+      <div id="inventory-section" class="row items-center justify-between q-mb-md q-mt-lg">
+        <h2 class="text-h6 q-ma-none">Inventory & rates</h2>
+        <q-btn-toggle
+          v-model="inventoryView"
+          toggle-color="primary"
+          unelevated
+          dense
+          :options="[
+            { label: 'List', value: 'list', icon: 'view_list' },
+            { label: 'Calendar', value: 'calendar', icon: 'calendar_month' }
+          ]"
+        />
       </div>
 
-      <div class="cal__weekdays">
-        <span v-for="wd in weekdays" :key="wd">{{ wd }}</span>
+      <div class="row q-col-gutter-md q-mb-md">
+        <div class="col-12 col-md-4">
+          <q-select
+            v-model="selectedRoomId"
+            :options="roomOptions"
+            label="Room type"
+            outlined
+            dense
+            emit-value
+            map-options
+          />
+        </div>
+        <div class="col-12 col-md-3">
+          <q-select
+            v-model="selectedPlanId"
+            :options="planOptionsForRoom"
+            label="Rate plan (for prices)"
+            outlined
+            dense
+            emit-value
+            map-options
+            clearable
+          />
+        </div>
+        <div v-if="inventoryView === 'list'" class="col-12 col-md-3">
+          <q-input
+            v-model="calendarStart"
+            type="date"
+            label="Start date"
+            outlined
+            dense
+          />
+        </div>
       </div>
 
-      <div class="cal__grid">
-        <button
-          v-for="(cell, idx) in monthCells"
-          :key="`${cell.date}-${idx}`"
-          type="button"
-          class="cal__cell"
-          :class="{
-            'cal__cell--outside': !cell.inMonth,
-            'cal__cell--today': cell.date === today,
-            'cal__cell--stop': cell.inMonth && stopSellValue(cell.date),
-            'cal__cell--low':
-              cell.inMonth && !stopSellValue(cell.date) && freeUnits(cell.date) <= 1
-          }"
-          :disabled="!cell.inMonth || !selectedRoomId"
-          @click="openDayEditor(cell.date)"
-        >
-          <span class="cal__day">{{ cell.day }}</span>
-          <template v-if="cell.inMonth && selectedRoomId">
-            <span class="cal__meta">
-              {{ stopSellValue(cell.date) ? "Stop" : `${freeUnits(cell.date)} free` }}
-            </span>
-            <span v-if="selectedPlanId" class="cal__price">
-              ${{ priceValue(cell.date) }}
-            </span>
-          </template>
-        </button>
+      <q-banner v-if="roomHotelTimes" dense rounded class="bg-blue-1 q-mb-md">
+        Selected room hotel times: check-in
+        <strong>{{ roomHotelTimes.checkIn }}</strong>
+        · check-out
+        <strong>{{ roomHotelTimes.checkOut }}</strong>
+      </q-banner>
+
+      <div
+        v-if="inventoryView === 'list'"
+        v-reveal="{ delay: '160ms' }"
+        class="admin-scroll"
+      >
+        <q-markup-table flat bordered>
+          <thead>
+            <tr>
+              <th class="text-left">Date</th>
+              <th class="text-left">Units</th>
+              <th class="text-left">Stop-sell</th>
+              <th class="text-left">Booked</th>
+              <th class="text-left">Free</th>
+              <th class="text-left">Night price</th>
+              <th class="text-left">Min / max stay</th>
+              <th class="text-left">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="day in listDays" :key="day">
+              <td>
+                <div>{{ formatDate(day) }}</div>
+                <div class="text-caption text-grey-7">{{ day }}</div>
+              </td>
+              <td>
+                <q-input
+                  dense
+                  outlined
+                  type="number"
+                  style="max-width: 90px"
+                  :model-value="unitsValue(day)"
+                  @update:model-value="(v) => setUnits(day, Number(v))"
+                />
+              </td>
+              <td>
+                <q-toggle
+                  :model-value="stopSellValue(day)"
+                  @update:model-value="(v: boolean) => setStopSell(day, v)"
+                />
+              </td>
+              <td>{{ cms.bookedOnNight(selectedRoomId, day) }}</td>
+              <td>{{ freeUnits(day) }}</td>
+              <td>
+                <q-input
+                  dense
+                  outlined
+                  type="number"
+                  style="max-width: 110px"
+                  :disable="!selectedPlanId"
+                  :model-value="priceValue(day)"
+                  @update:model-value="(v) => setPrice(day, Number(v))"
+                />
+              </td>
+              <td>
+                <div class="row q-gutter-xs items-center">
+                  <q-input
+                    dense
+                    outlined
+                    type="number"
+                    style="max-width: 70px"
+                    :disable="!selectedPlanId"
+                    :model-value="minStayValue(day)"
+                    label="min"
+                    @update:model-value="(v) => setMinStay(day, v)"
+                  />
+                  <q-input
+                    dense
+                    outlined
+                    type="number"
+                    style="max-width: 70px"
+                    :disable="!selectedPlanId"
+                    :model-value="maxStayValue(day)"
+                    label="max"
+                    @update:model-value="(v) => setMaxStay(day, v)"
+                  />
+                </div>
+              </td>
+              <td>
+                <q-btn
+                  flat
+                  dense
+                  color="grey-8"
+                  label="Clear day"
+                  @click="clearDay(day)"
+                />
+              </td>
+            </tr>
+          </tbody>
+        </q-markup-table>
       </div>
 
-      <p class="text-caption text-grey-7 q-mt-sm">
-        Click a day to edit units, stop-sell, price, and stay rules.
-      </p>
-    </div>
+      <div v-else v-reveal="{ delay: '160ms' }" class="cal">
+        <div class="cal__toolbar">
+          <q-btn flat dense round icon="chevron_left" @click="shiftMonth(-1)" />
+          <div class="cal__month">{{ monthLabel }}</div>
+          <q-btn flat dense round icon="chevron_right" @click="shiftMonth(1)" />
+          <q-space />
+          <q-btn flat dense label="Today" @click="goToday" />
+        </div>
+
+        <div class="cal__weekdays">
+          <span v-for="wd in weekdays" :key="wd">{{ wd }}</span>
+        </div>
+
+        <div class="cal__grid">
+          <button
+            v-for="(cell, idx) in monthCells"
+            :key="`${cell.date}-${idx}`"
+            type="button"
+            class="cal__cell"
+            :class="{
+              'cal__cell--outside': !cell.inMonth,
+              'cal__cell--today': cell.date === today,
+              'cal__cell--stop': cell.inMonth && stopSellValue(cell.date),
+              'cal__cell--low':
+                cell.inMonth && !stopSellValue(cell.date) && freeUnits(cell.date) <= 1
+            }"
+            :disabled="!cell.inMonth || !selectedRoomId"
+            @click="openDayEditor(cell.date)"
+          >
+            <span class="cal__day">{{ cell.day }}</span>
+            <template v-if="cell.inMonth && selectedRoomId">
+              <span class="cal__meta">
+                {{ stopSellValue(cell.date) ? "Stop" : `${freeUnits(cell.date)} free` }}
+              </span>
+              <span v-if="selectedPlanId" class="cal__price">
+                ${{ priceValue(cell.date) }}
+              </span>
+            </template>
+          </button>
+        </div>
+
+        <p class="text-caption text-grey-7 q-mt-sm">
+          Click a day to edit units, stop-sell, price, and stay rules.
+        </p>
+      </div>
+    </template>
 
     <AdminDialog
       v-model="dialog"
@@ -357,15 +386,16 @@
       </template>
     </AdminDialog>
 
-    <AdminDialog
-      v-model="dayDialog"
-      size="md"
-      icon="event"
-      :persistent="false"
-      eyebrow="Inventory"
-      :title="editingDay ? `Edit ${formatDate(editingDay)}` : 'Edit day'"
-      :subtitle="dayDialogSubtitle"
-    >
+    <template v-if="auth.isDeveloper">
+      <AdminDialog
+        v-model="dayDialog"
+        size="md"
+        icon="event"
+        :persistent="false"
+        eyebrow="Inventory"
+        :title="editingDay ? `Edit ${formatDate(editingDay)}` : 'Edit day'"
+        :subtitle="dayDialogSubtitle"
+      >
       <template v-if="editingDay">
         <AdminFormSection
           title="Availability"
@@ -431,7 +461,8 @@
         <q-btn flat no-caps label="Cancel" v-close-popup />
         <q-btn color="primary" unelevated no-caps label="Save day" @click="saveDayEditor" />
       </template>
-    </AdminDialog>
+      </AdminDialog>
+    </template>
   </q-page>
 </template>
 
@@ -469,8 +500,22 @@ const planQuery = ref("");
 const planStatusFilter = ref("all");
 const planRoomFilter = ref<string | null>(null);
 const planStatusOptions = ["all", ...cms.statusOptions];
+const planPage = ref(1);
+const planPageSize = ref(10);
+const planPageSizeOptions = [
+  { label: "10", value: 10 },
+  { label: "25", value: 25 },
+  { label: "50", value: 50 }
+];
 
-onMounted(() => {
+onMounted(async () => {
+  await Promise.all([
+    cms.ensureHotels(),
+    cms.ensureRoomTypes(),
+    cms.ensureRatePlans(),
+    cms.ensureAvailability().catch(() => undefined),
+    cms.ensureRateCalendars().catch(() => undefined)
+  ]);
   const roomId = String(route.query.roomId || "");
   if (auth.scopedRoomTypes.some(r => r.id === roomId)) {
     selectedRoomId.value = roomId;
@@ -548,6 +593,33 @@ const filteredPlans = computed(() => {
       .toLowerCase()
       .includes(q);
   });
+});
+
+const planPageCount = computed(() =>
+  Math.max(1, Math.ceil(filteredPlans.value.length / planPageSize.value))
+);
+
+const pagedPlans = computed(() => {
+  const start = (planPage.value - 1) * planPageSize.value;
+  return filteredPlans.value.slice(start, start + planPageSize.value);
+});
+
+const planRangeStart = computed(() =>
+  filteredPlans.value.length
+    ? (planPage.value - 1) * planPageSize.value + 1
+    : 0
+);
+
+const planRangeEnd = computed(() =>
+  Math.min(planPage.value * planPageSize.value, filteredPlans.value.length)
+);
+
+watch([planQuery, planStatusFilter, planRoomFilter, planPageSize], () => {
+  planPage.value = 1;
+});
+
+watch(planPageCount, count => {
+  if (planPage.value > count) planPage.value = count;
 });
 
 const planOptionsForRoom = computed(() =>
@@ -835,18 +907,34 @@ function save() {
     $q.notify({ type: "negative", message: "Name and room type are required." });
     return;
   }
-  cms.upsertRate({
-    ...(editing.value ? { id: editing.value } : {}),
-    ...form
-  });
-  dialog.value = false;
-  $q.notify({ type: "positive", message: "Rate plan saved." });
+  void (async () => {
+    try {
+      await cms.upsertRate({
+        ...(editing.value ? { id: editing.value } : {}),
+        ...form
+      });
+      dialog.value = false;
+      $q.notify({ type: "positive", message: "Rate plan saved." });
+    } catch (e) {
+      $q.notify({
+        type: "negative",
+        message: e instanceof Error ? e.message : "Save failed."
+      });
+    }
+  })();
 }
 
 function remove(id: string) {
   $q.dialog({ title: "Delete rate plan?", cancel: true, persistent: true }).onOk(() => {
-    cms.deleteRate(id);
-    $q.notify({ type: "positive", message: "Rate deleted." });
+    void cms
+      .deleteRate(id)
+      .then(() => $q.notify({ type: "positive", message: "Rate deleted." }))
+      .catch(e =>
+        $q.notify({
+          type: "negative",
+          message: e instanceof Error ? e.message : "Delete failed."
+        })
+      );
   });
 }
 </script>
@@ -1010,5 +1098,24 @@ function remove(id: string) {
   font-size: 0.84rem;
   color: var(--gy-muted);
   line-height: 1.4;
+}
+
+.rates-pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  margin: 0.85rem 0 1.75rem;
+  padding: 0.65rem 0.85rem;
+  background: #fff;
+  border: 1px solid rgba(28, 36, 33, 0.08);
+  border-radius: 12px;
+}
+
+.rates-pager__meta {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--gy-muted);
 }
 </style>

@@ -33,8 +33,8 @@ export type FeatureCategory = "admin" | "public";
 
 /**
  * Product feature catalog.
- * Parent features unlock modules; sub-features (parentKey set) are finer capabilities
- * e.g. locations → locations_managers, locations_hotels.
+ * Parent features unlock modules; nested permissions (parentKey set) live under a feature
+ * e.g. locations → locations_list, locations_managers.
  */
 export interface ProductFeature {
   id: string;
@@ -42,7 +42,7 @@ export interface ProductFeature {
   label: string;
   description: string;
   category: FeatureCategory;
-  /** Parent feature key — null/undefined = top-level module */
+  /** Parent feature key — null/undefined = top-level feature/module */
   parentKey?: string | null;
   /** Derived from site default package for public gating */
   enabled: boolean;
@@ -50,8 +50,8 @@ export interface ProductFeature {
 }
 
 /**
- * Sellable package: many roles + many features.
- * Only a developer assigns packages to users (user_package M2M).
+ * Sellable package flow: roles (+ scope type) → features → permissions.
+ * Property scope lists are assigned on Users. Only a developer assigns packages.
  */
 export interface ProductPackage {
   id: string;
@@ -60,7 +60,7 @@ export interface ProductPackage {
   priceNote: string;
   /** Roles this package grants (user may hold several via multiple packages) */
   roles: AdminRole[];
-  /** Feature keys (parents and/or sub-features) unlocked */
+  /** Feature keys (modules) and permission keys (nested under features) */
   featureKeys: string[];
   isSystem?: boolean;
 }
@@ -225,6 +225,12 @@ export interface Booking {
   source: "website" | "admin";
   createdAt: string;
   notes?: string;
+  /** Present on my-bookings / detail payloads from engine */
+  hotelName?: string;
+  hotelSlug?: string;
+  hotelHeroImage?: string;
+  roomTypeName?: string;
+  ratePlanName?: string;
 }
 
 export interface AvailabilityResult {

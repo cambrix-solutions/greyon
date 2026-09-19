@@ -3,7 +3,7 @@
     <AdminPageHeader
       eyebrow="Properties"
       title="Room types"
-      :subtitle="`${filtered.length} rooms · each belongs to one hotel via hotelId`"
+      :subtitle="`${filtered.length} room types · nested under each hotel`"
     >
       <template #actions>
         <q-btn outline no-caps color="primary" label="Rates calendar" to="/admin/rates" />
@@ -62,14 +62,13 @@
       <section v-for="group in grouped" :key="group.hotelId" class="room-group">
         <header class="room-group__head">
           <div>
-            <p class="room-group__crumb">
-              {{ group.locationName }}
-              <span aria-hidden="true">/</span>
-              Hotel
-            </p>
+            <p class="room-group__level">Hotel</p>
             <h2 class="room-group__title">{{ group.hotelName }}</h2>
             <p class="room-group__meta">
-              {{ group.rooms.length }} room type{{ group.rooms.length === 1 ? "" : "s" }}
+              {{ group.locationName }}
+              · {{ group.rooms.length }} room type{{
+                group.rooms.length === 1 ? "" : "s"
+              }}
             </p>
           </div>
           <div class="room-group__links">
@@ -78,7 +77,7 @@
               dense
               no-caps
               color="primary"
-              label="Edit hotel"
+              label="Open hotel"
               :to="`/admin/hotels?locationId=${group.locationId}`"
             />
             <q-btn
@@ -93,47 +92,68 @@
           </div>
         </header>
 
-        <div class="room-rows">
-          <article v-for="room in group.rooms" :key="room.id" class="room-row">
-            <img
-              v-if="room.images?.[0]"
-              :src="room.images[0]"
-              alt=""
-              class="room-row__thumb"
-            />
-            <div class="room-row__main">
-              <p class="room-row__level">Room type</p>
-              <h3 class="room-row__name">{{ room.name }}</h3>
-              <p class="room-row__facts">
-                {{ room.bedType }} · {{ room.roomSize }} ·
-                {{ room.maxAdults }}A / {{ room.maxChildren }}C · max
-                {{ room.maxGuests }}
-              </p>
+        <div class="room-cards">
+          <article v-for="room in group.rooms" :key="room.id" class="room-card">
+            <div v-if="room.images?.[0]" class="room-card__media">
+              <img :src="room.images[0]" :alt="room.name" />
             </div>
-            <div class="room-row__inv">
+            <div v-else class="room-card__thumb" aria-hidden="true">
+              <q-icon name="bed" size="22px" />
+            </div>
+
+            <div class="room-card__body">
+              <div class="room-card__topline">
+                <p class="room-card__crumb">Room type</p>
+                <span class="room-card__status" :data-status="room.status">{{
+                  room.status
+                }}</span>
+              </div>
+              <h3 class="room-card__name">{{ room.name }}</h3>
+              <p v-if="room.description" class="room-card__desc">
+                {{ room.description }}
+              </p>
+              <ul class="room-card__chips">
+                <li v-if="room.bedType">{{ room.bedType }}</li>
+                <li v-if="room.roomSize">{{ room.roomSize }}</li>
+                <li>
+                  {{ room.maxAdults }}A / {{ room.maxChildren }}C · max
+                  {{ room.maxGuests }}
+                </li>
+              </ul>
+            </div>
+
+            <div class="room-card__inv">
               <label>Inventory</label>
               <q-input
                 dense
                 outlined
                 type="number"
-                style="max-width: 90px"
+                class="room-card__inv-input"
                 :model-value="room.baseInventory"
                 @update:model-value="(v) => setInventory(room.id, Number(v))"
               />
             </div>
-            <div class="room-row__side">
+
+            <div class="room-card__side">
               <q-select
                 dense
                 outlined
                 :model-value="room.status"
                 :options="cms.statusOptions"
-                style="min-width: 120px"
+                class="room-card__status-select"
                 @update:model-value="(v: string) => setStatus(room.id, v)"
               />
-              <div class="room-row__actions">
-                <q-btn flat dense no-caps color="primary" label="Edit" @click="openEdit(room)" />
+              <div class="room-card__actions">
                 <q-btn
                   flat
+                  dense
+                  no-caps
+                  color="primary"
+                  label="Edit"
+                  @click="openEdit(room)"
+                />
+                <q-btn
+                  outline
                   dense
                   no-caps
                   color="primary"
@@ -147,7 +167,9 @@
                   icon="delete"
                   color="negative"
                   @click="remove(room.id)"
-                />
+                >
+                  <q-tooltip>Delete</q-tooltip>
+                </q-btn>
               </div>
             </div>
           </article>
@@ -396,29 +418,52 @@ function save() {
     $q.notify({ type: "negative", message: "Name and hotel are required." });
     return;
   }
-  cms.upsertRoom({
-    ...(editing.value ? { id: editing.value } : {}),
-    ...form,
-    images: images.value.filter(Boolean),
-    amenities: amenitiesText.value
-      .split(",")
-      .map(s => s.trim())
-      .filter(Boolean)
-  });
-  dialog.value = false;
-  $q.notify({ type: "positive", message: "Room saved." });
+  void (async () => {
+    try {
+      await cms.upsertRoom({
+        ...(editing.value ? { id: editing.value } : {}),
+        ...form,
+        images: images.value.filter(Boolean),
+        amenities: amenitiesText.value
+          .split(",")
+          .map(s => s.trim())
+          .filter(Boolean)
+      });
+      dialog.value = false;
+      $q.notify({ type: "positive", message: "Room saved." });
+    } catch (e) {
+      $q.notify({
+        type: "negative",
+        message: e instanceof Error ? e.message : "Save failed."
+      });
+    }
+  })();
 }
 
 function setInventory(id: string, baseInventory: number) {
   const room = cms.getRoomTypeById(id);
   if (!room || Number.isNaN(baseInventory)) return;
-  cms.upsertRoom({ ...room, baseInventory });
+  void cms
+    .upsertRoom({ ...room, baseInventory })
+    .catch(e =>
+      $q.notify({
+        type: "negative",
+        message: e instanceof Error ? e.message : "Update failed."
+      })
+    );
 }
 
 function setStatus(id: string, status: string) {
   const room = cms.getRoomTypeById(id);
   if (!room) return;
-  cms.upsertRoom({ ...room, status: status as ContentStatus });
+  void cms
+    .upsertRoom({ ...room, status: status as ContentStatus })
+    .catch(e =>
+      $q.notify({
+        type: "negative",
+        message: e instanceof Error ? e.message : "Update failed."
+      })
+    );
 }
 
 function remove(id: string) {
@@ -427,12 +472,24 @@ function remove(id: string) {
     cancel: true,
     persistent: true
   }).onOk(() => {
-    cms.deleteRoom(id);
-    $q.notify({ type: "positive", message: "Room deleted." });
+    void cms
+      .deleteRoom(id)
+      .then(() => $q.notify({ type: "positive", message: "Room deleted." }))
+      .catch(e =>
+        $q.notify({
+          type: "negative",
+          message: e instanceof Error ? e.message : "Delete failed."
+        })
+      );
   });
 }
 
-onMounted(() => {
+onMounted(async () => {
+  await Promise.all([
+    cms.ensureHotels(),
+    cms.ensureLocations(),
+    cms.ensureRoomTypes()
+  ]);
   const hotelId = String(route.query.hotelId || "");
   if (cms.hotels.some(h => h.id === hotelId)) hotelFilter.value = hotelId;
   const s = String(route.query.status || "");
@@ -483,6 +540,7 @@ watch([hotelFilter, statusFilter, query], () => {
   border: 1px solid rgba(28, 36, 33, 0.08);
   border-radius: 16px;
   overflow: hidden;
+  box-shadow: 0 1px 0 rgba(28, 36, 33, 0.03);
 }
 
 .room-group__head {
@@ -490,35 +548,31 @@ watch([hotelFilter, statusFilter, query], () => {
   justify-content: space-between;
   align-items: flex-start;
   gap: 1rem;
-  padding: 1rem 1.1rem;
-  background: #faf9f7;
+  padding: 1.05rem 1.15rem;
+  background: linear-gradient(180deg, #f7f5f1 0%, #faf9f7 100%);
   border-bottom: 1px solid rgba(28, 36, 33, 0.06);
 }
 
-.room-group__crumb,
-.room-row__level {
+.room-group__level {
   margin: 0;
   font-size: 0.66rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--gy-gold-deep);
-}
-
-.room-group__crumb span {
-  margin: 0 0.35rem;
-  opacity: 0.55;
+  font-weight: 600;
 }
 
 .room-group__title {
-  margin: 0.2rem 0 0;
+  margin: 0.25rem 0 0;
   font-family: var(--font-display);
-  font-size: 1.25rem;
+  font-size: clamp(1.2rem, 2vw, 1.4rem);
   font-weight: 700;
   letter-spacing: -0.02em;
+  line-height: 1.2;
 }
 
 .room-group__meta {
-  margin: 0.2rem 0 0;
+  margin: 0.25rem 0 0;
   font-size: 0.82rem;
   color: var(--gy-muted);
 }
@@ -529,61 +583,176 @@ watch([hotelFilter, statusFilter, query], () => {
   gap: 0.35rem;
 }
 
-.room-rows {
+.room-cards {
   display: grid;
-  gap: 0.55rem;
-  padding: 0.85rem 1rem 1rem;
+  gap: 0.65rem;
+  padding: 0.9rem 1rem 1.05rem;
 }
 
-.room-row {
+.room-card {
   display: grid;
-  grid-template-columns: 64px 1fr auto auto;
-  gap: 0.85rem;
-  align-items: center;
-  padding: 0.7rem 0.75rem;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  gap: 0.85rem 1rem;
+  align-items: start;
+  padding: 0.85rem 0.9rem;
   border: 1px solid rgba(28, 36, 33, 0.07);
-  border-radius: 12px;
+  border-radius: 14px;
+  background: #fff;
+  transition: border-color 0.15s ease;
 }
 
-.room-row__thumb {
-  width: 64px;
-  height: 52px;
+.room-card:hover {
+  border-color: rgba(154, 123, 60, 0.35);
+}
+
+.room-card__media,
+.room-card__thumb {
+  width: 5rem;
+  height: 4rem;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.room-card__media {
+  overflow: hidden;
+  background: var(--gy-stone, #e8e4dc);
+}
+
+.room-card__media img {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  border-radius: 8px;
-  background: var(--gy-stone);
-}
-
-.room-row__name {
-  margin: 0.15rem 0 0;
-  font-size: 1rem;
-  font-weight: 650;
-}
-
-.room-row__facts {
-  margin: 0.2rem 0 0;
-  font-size: 0.8rem;
-  color: var(--gy-muted);
-}
-
-.room-row__inv label {
   display: block;
-  margin-bottom: 0.2rem;
-  font-size: 0.68rem;
-  letter-spacing: 0.06em;
+}
+
+.room-card__thumb {
+  display: grid;
+  place-items: center;
+  background: rgba(154, 123, 60, 0.1);
+  color: var(--gy-gold-deep);
+}
+
+.room-card__body {
+  min-width: 0;
+}
+
+.room-card__topline {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.room-card__crumb {
+  margin: 0;
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
+  color: var(--gy-gold-deep);
+  font-weight: 600;
+}
+
+.room-card__status {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: lowercase;
+  background: rgba(28, 36, 33, 0.06);
   color: var(--gy-muted);
 }
 
-.room-row__side {
-  display: grid;
-  gap: 0.35rem;
-  justify-items: end;
+.room-card__status[data-status="published"] {
+  background: rgba(46, 125, 80, 0.12);
+  color: #1e6b3a;
 }
 
-.room-row__actions {
+.room-card__status[data-status="draft"] {
+  background: rgba(154, 123, 60, 0.14);
+  color: var(--gy-gold-deep);
+}
+
+.room-card__name {
+  margin: 0.35rem 0 0;
+  font-family: var(--font-display);
+  font-size: 1.08rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: var(--gy-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.room-card__desc {
+  margin: 0.35rem 0 0;
+  font-size: 0.82rem;
+  color: var(--gy-muted);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.room-card__chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.1rem;
+  gap: 0.35rem;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.room-card__chips li {
+  padding: 0.18rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(28, 36, 33, 0.05);
+  color: var(--gy-ink);
+  font-size: 0.74rem;
+  font-weight: 500;
+}
+
+.room-card__inv {
+  display: grid;
+  gap: 0.25rem;
+  justify-items: stretch;
+  min-width: 5.5rem;
+}
+
+.room-card__inv label {
+  margin: 0;
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gy-muted);
+  font-weight: 600;
+}
+
+.room-card__inv-input {
+  max-width: 5.5rem;
+  background: #fff;
+}
+
+.room-card__side {
+  display: grid;
+  gap: 0.4rem;
+  justify-items: end;
+  align-content: start;
+}
+
+.room-card__status-select {
+  min-width: 118px;
+  background: #fff;
+}
+
+.room-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem;
   justify-content: flex-end;
 }
 
@@ -596,19 +765,28 @@ watch([hotelFilter, statusFilter, query], () => {
   border: 1px dashed rgba(28, 36, 33, 0.15);
 }
 
-@media (max-width: 900px) {
-  .room-row {
-    grid-template-columns: 56px 1fr;
+@media (max-width: 960px) {
+  .room-card {
+    grid-template-columns: auto minmax(0, 1fr);
   }
 
-  .room-row__inv,
-  .room-row__side {
+  .room-card__inv,
+  .room-card__side {
     grid-column: 1 / -1;
     justify-items: start;
   }
 
-  .room-row__actions {
+  .room-card__side {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .room-card__actions {
     justify-content: flex-start;
+    width: 100%;
   }
 
   .room-group__head {

@@ -488,7 +488,15 @@ function applyRouteQuery() {
   }
 }
 
-onMounted(applyRouteQuery);
+onMounted(async () => {
+  await Promise.all([
+    cms.ensureBookings(),
+    cms.ensureHotels(),
+    cms.ensureRoomTypes(),
+    cms.ensureRatePlans()
+  ]);
+  applyRouteQuery();
+});
 watch(() => route.query, applyRouteQuery);
 
 function defaultCheckIn() {
@@ -710,7 +718,7 @@ function invalidatePreview() {
   searched.value = false;
 }
 
-function checkAvailability() {
+async function checkAvailability() {
   if (formError.value) {
     searched.value = false;
     preview.value = null;
@@ -719,7 +727,7 @@ function checkAvailability() {
   }
   searched.value = true;
   const hotel = cms.getHotelById(form.hotelId);
-  const results = cms.searchAvailability({
+  const results = await cms.searchAvailability({
     locationSlug: "",
     hotelSlug: hotel?.slug ?? "",
     checkIn: form.checkIn,
@@ -737,7 +745,7 @@ function checkAvailability() {
     ) ?? null;
 }
 
-function create() {
+async function create() {
   submitted.value = true;
   if (!form.fullName.trim() || !emailValid.value || !form.phone.trim()) {
     $q.notify({ type: "negative", message: "Guest contact details are required." });
@@ -747,12 +755,12 @@ function create() {
     $q.notify({ type: "negative", message: formError.value });
     return;
   }
-  checkAvailability();
+  await checkAvailability();
   if (!preview.value) {
     $q.notify({ type: "negative", message: "No availability for this selection." });
     return;
   }
-  const result = cms.createBooking({
+  const result = await cms.createBooking({
     hotelId: form.hotelId,
     roomTypeId: form.roomTypeId,
     ratePlanId: form.ratePlanId,
@@ -788,7 +796,7 @@ function openDetail(b: Booking) {
   detailOpen.value = true;
 }
 
-function setStatus(reference: string, status: string) {
+async function setStatus(reference: string, status: string) {
   if (status === "confirmed") {
     const booking = cms.getBookingByReference(reference);
     if (booking) {
@@ -797,7 +805,7 @@ function setStatus(reference: string, status: string) {
     }
   }
 
-  cms.updateBookingStatus(reference, status as BookingStatus);
+  await cms.updateBookingStatus(reference, status as BookingStatus);
   if (detailBooking.value?.reference === reference) {
     detailBooking.value = cms.getBookingByReference(reference) ?? detailBooking.value;
   }
@@ -813,8 +821,8 @@ function confirmBooking(b: Booking) {
     cancel: { flat: true, label: "Cancel", noCaps: true },
     ok: { unelevated: true, label: "OK, confirm", color: "primary", noCaps: true },
     persistent: true
-  }).onOk(() => {
-    cms.updateBookingStatus(b.reference, "confirmed");
+  }).onOk(async () => {
+    await cms.updateBookingStatus(b.reference, "confirmed");
     if (detailBooking.value?.reference === b.reference) {
       detailBooking.value =
         cms.getBookingByReference(b.reference) ?? detailBooking.value;

@@ -2,56 +2,42 @@
 
 Hotel portfolio and booking website for [www.greyon.com.kh](https://www.greyon.com.kh).
 
-**Frontend:** Quasar Vue 3 SPA (Pinia CMS + mock by default)  
-**Backend:** NestJS + PostgreSQL in `api/` (optional; wire with `VITE_USE_API=true`)
+**Frontend:** Quasar Vue 3 SPA  
+**Backend:** [greyon-engine](../greyon-engine) (Laravel session API)
 
 ## Quick start (frontend)
 
 ```bash
 npm install
+cp .env.example .env
 npm run dev
 ```
 
-App: http://localhost:9000
+App: http://localhost:9000 (or the port Quasar prints). Local mode proxies `/engine` to greyon-engine.
 
-## Optional Nest API
+## Backend
 
-```bash
-cd api
-cp .env.example .env
-# Create Postgres DB greyon, then:
-npm install
-# SEED_ON_BOOT=true in .env for demo data
-npm run start:dev
-```
+Run **greyon-engine** separately (Herd / `php artisan serve`). Seed demo admins and packages from that repo.
 
-API: http://localhost:3000/api
-
-Frontend `.env`:
+SPA `.env`:
 
 ```
+VITE_APP_MODE=local
 VITE_USE_API=true
-VITE_API_BASE_URL=http://localhost:3000/api
 ```
 
-## MVP features
+## Features
 
-- Public: Home, Hotels, Locations (6), News, Booking flow, Contact
-- Admin CMS at `/admin` with role-based demo auth (Pinia)
-- Nest: public reads, availability, bookings, JWT login, admin booking status
+- Public: Home, Hotels, Locations, News, Booking flow, Contact
+- Admin CMS at `/admin` (session cookie against greyon-engine)
+- Developer: packages, features, admins via `/developer/*`
 - SEO helpers, robots.txt, sitemap.xml, cookie notice, analytics placeholder
 
 ## Docs
 
 - [docs/LAUNCH_CHECKLIST.md](docs/LAUNCH_CHECKLIST.md)
-- [api/GREYON_API.md](api/GREYON_API.md)
+- [docs/BACKEND_API.md](docs/BACKEND_API.md) (product contract; live implementation is greyon-engine)
 
-## Admin demo users (SPA)
+## Demo accounts (engine seeders)
 
-| Email | Role |
-|-------|------|
-| admin@greyon.com.kh | Super Admin |
-| content@greyon.com.kh | Content Admin |
-| bookings@greyon.com.kh | Booking Admin |
-
-SPA demo: any password. Nest seed users: password `password`.
+Use credentials from greyon-engine seeders (e.g. developer / admin emails with password `password`).

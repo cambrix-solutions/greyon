@@ -64,22 +64,24 @@
         </nav>
 
         <div class="gy-header__actions">
-          <div class="lang-switch">
-            <button
-              type="button"
-              :class="{ active: locale === 'en-US' }"
-              @click="setLocale('en-US')"
-            >
-              {{ $t("lang.en") }}
-            </button>
-            <button
-              type="button"
-              :class="{ active: locale === 'km-KH' }"
-              @click="setLocale('km-KH')"
-            >
-              {{ $t("lang.km") }}
-            </button>
-          </div>
+          <router-link
+            v-if="customer.isAuthenticated"
+            to="/account"
+            class="gy-account-btn gt-xs"
+            :title="customer.displayName"
+          >
+            <span class="gy-account-btn__avatar" aria-hidden="true">{{
+              accountInitials
+            }}</span>
+            <span class="gy-account-btn__label">Account</span>
+          </router-link>
+          <router-link
+            v-else
+            to="/sign-in"
+            class="gy-btn gy-btn--outline gy-btn--sm gt-xs gy-signin-btn"
+          >
+            Sign in
+          </router-link>
           <router-link
             v-if="auth.featureEnabled('booking_public')"
             to="/booking"
@@ -122,22 +124,30 @@
             <q-item-section>{{ item.label }}</q-item-section>
           </q-item>
         </q-list>
-        <div class="row q-gutter-sm q-mt-md">
-          <q-btn
-            outline
-            :label="$t('lang.en')"
-            @click="setLocale('en-US')"
-          />
-          <q-btn
-            outline
-            :label="$t('lang.km')"
-            @click="setLocale('km-KH')"
-          />
+        <div class="q-mt-md">
+          <router-link
+            v-if="customer.isAuthenticated"
+            to="/account"
+            class="gy-btn"
+            style="width: 100%"
+            @click="drawerOpen = false"
+          >
+            My account
+          </router-link>
+          <router-link
+            v-else
+            to="/sign-in"
+            class="gy-btn gy-btn--outline"
+            style="width: 100%"
+            @click="drawerOpen = false"
+          >
+            Sign in
+          </router-link>
         </div>
         <router-link
           v-if="auth.featureEnabled('booking_public')"
           to="/booking"
-          class="gy-btn q-mt-lg"
+          class="gy-btn q-mt-md"
           style="width: 100%"
           @click="drawerOpen = false"
         >
@@ -165,14 +175,26 @@ import { useRoute } from "vue-router";
 import CookieNotice from "@/components/CookieNotice.vue";
 import SiteFooter from "@/components/SiteFooter.vue";
 import { useAuthStore } from "@/stores/auth-store";
+import { useCmsStore } from "@/stores/cms-store";
+import { useCustomerStore } from "@/stores/customer-store";
 
 const auth = useAuthStore();
+const cms = useCmsStore();
+const customer = useCustomerStore();
+customer.hydrate();
 const drawerOpen = ref(false);
 const route = useRoute();
-const { t, locale } = useI18n();
+const { t } = useI18n();
 const homePastHero = ref(false);
 
-let heroObserver: IntersectionObserver | null = null;
+const accountInitials = computed(() => {
+  const parts = customer.displayName.trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return "G";
+  if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
+  return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
+});
+
+let heroScrollBound = false;
 
 const isHome = computed(() => route.path === "/");
 const solidHeader = computed(
@@ -212,47 +234,53 @@ const drawerItems = computed(() => {
   return items;
 });
 
-function setLocale(next: "en-US" | "km-KH") {
-  locale.value = next;
-  localStorage.setItem("greyon_locale", next);
-  document.documentElement.lang = next === "km-KH" ? "km" : "en";
+function syncHomeHeader() {
+  if (!isHome.value) {
+    homePastHero.value = false;
+    return;
+  }
+  // White header once the page has scrolled past one viewport (100vh hero).
+  homePastHero.value = window.scrollY >= window.innerHeight - 1;
 }
 
-function disconnectHeroObserver() {
-  heroObserver?.disconnect();
-  heroObserver = null;
+function bindHeroScroll() {
+  if (!heroScrollBound) {
+    window.addEventListener("scroll", syncHomeHeader, { passive: true });
+    window.addEventListener("resize", syncHomeHeader);
+    heroScrollBound = true;
+  }
+  syncHomeHeader();
 }
 
-function bindHeroObserver() {
-  disconnectHeroObserver();
-  homePastHero.value = false;
-  if (!isHome.value) return;
-
-  const hero = document.getElementById("home-hero");
-  if (!hero) return;
-
-  heroObserver = new IntersectionObserver(
-    ([entry]) => {
-      // Solid white header once the 100vh hero is no longer intersecting the viewport
-      homePastHero.value = !(entry?.isIntersecting ?? true);
-    },
-    { threshold: 0, rootMargin: "0px" }
-  );
-  heroObserver.observe(hero);
+function unbindHeroScroll() {
+  if (!heroScrollBound) return;
+  window.removeEventListener("scroll", syncHomeHeader);
+  window.removeEventListener("resize", syncHomeHeader);
+  heroScrollBound = false;
 }
 
 watch(isHome, async () => {
   await nextTick();
-  bindHeroObserver();
+  syncHomeHeader();
 });
 
+watch(
+  () => route.path,
+  async () => {
+    await nextTick();
+    // After page transition, re-sync (hero may remount).
+    requestAnimationFrame(syncHomeHeader);
+  }
+);
+
 onMounted(async () => {
+  void cms.ensurePublicCatalog();
   await nextTick();
-  bindHeroObserver();
+  bindHeroScroll();
 });
 
 onUnmounted(() => {
-  disconnectHeroObserver();
+  unbindHeroScroll();
 });
 </script>
 
@@ -411,28 +439,73 @@ onUnmounted(() => {
   gap: 0.75rem;
 }
 
-.lang-switch {
+.gy-account-btn {
   display: inline-flex;
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.28rem 0.7rem 0.28rem 0.28rem;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--gy-white);
+  text-decoration: none;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
 }
 
-.gy-header--solid .lang-switch {
-  border-color: rgba(28, 36, 33, 0.18);
+.gy-account-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: var(--gy-gold);
 }
 
-.lang-switch button {
-  border: 0;
+.gy-header--solid .gy-account-btn {
+  border-color: rgba(18, 17, 16, 0.14);
+  background: #fff;
+  color: var(--gy-ink);
+  box-shadow: 0 1px 0 rgba(18, 17, 16, 0.04);
+}
+
+.gy-header--solid .gy-account-btn:hover {
+  border-color: var(--gy-gold-deep);
+  background: rgba(196, 163, 90, 0.1);
+}
+
+.gy-account-btn__avatar {
+  width: 1.7rem;
+  height: 1.7rem;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(145deg, var(--gy-gold), var(--gy-gold-deep));
+  color: var(--gy-ink);
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+}
+
+.gy-signin-btn {
+  border-color: rgba(255, 255, 255, 0.55);
+  color: var(--gy-white);
   background: transparent;
-  color: inherit;
-  padding: 0.35rem 0.55rem;
-  font-size: 0.75rem;
-  cursor: pointer;
-  opacity: 0.7;
 }
 
-.lang-switch button.active {
-  opacity: 1;
-  background: rgba(176, 141, 87, 0.35);
+.gy-signin-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--gy-white);
+  color: var(--gy-white);
+}
+
+.gy-header--solid .gy-signin-btn {
+  border-color: var(--gy-gold-deep);
+  color: var(--gy-gold-deep);
+}
+
+.gy-header--solid .gy-signin-btn:hover {
+  background: var(--gy-gold-deep);
+  color: var(--gy-white);
 }
 
 .gy-drawer {

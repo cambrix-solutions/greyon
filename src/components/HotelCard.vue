@@ -1,5 +1,5 @@
 <template>
-  <article class="hotel-card">
+  <article class="hotel-card gy-card">
     <router-link
       :to="`/hotels/${hotel.slug}`"
       class="gy-card-media hotel-card__media"
@@ -62,13 +62,20 @@ function book() {
 <style scoped>
 .hotel-card {
   display: grid;
-  gap: 1.15rem;
+  gap: 0.85rem;
   height: 100%;
 }
 
 .hotel-card__media {
   position: relative;
   aspect-ratio: 4 / 5;
+}
+
+.hotel-card__body {
+  display: grid;
+  gap: 0.5rem;
+  align-content: start;
+  padding: 0.15rem 0.2rem 0.1rem;
 }
 
 .hotel-card__media img {
@@ -100,12 +107,6 @@ function book() {
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.92);
-}
-
-.hotel-card__body {
-  display: grid;
-  gap: 0.5rem;
-  align-content: start;
 }
 
 .hotel-card__body h3 {

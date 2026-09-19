@@ -349,16 +349,6 @@ async function bookRoom(roomTypeId: string) {
   gap: 0.85rem;
 }
 
-.gallery__item {
-  aspect-ratio: 4 / 3;
-}
-
-.room-list {
-  display: grid;
-  gap: 1.35rem;
-  margin-top: 1.5rem;
-}
-
 .room-card {
   display: grid;
   grid-template-columns: minmax(240px, 320px) 1fr;
@@ -366,12 +356,19 @@ async function bookRoom(roomTypeId: string) {
   padding: 1.1rem;
   background: var(--gy-white);
   border: 1px solid rgba(28, 36, 33, 0.08);
+  border-radius: var(--gy-radius-card);
 }
 
 .room-card__media {
   position: relative;
   aspect-ratio: 4 / 3;
   align-self: start;
+  border-radius: var(--gy-radius-media);
+}
+
+.gallery__item {
+  aspect-ratio: 4 / 3;
+  border-radius: var(--gy-radius-media);
 }
 
 .room-card__badge {

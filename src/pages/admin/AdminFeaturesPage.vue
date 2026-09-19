@@ -1,9 +1,9 @@
 <template>
   <q-page padding class="pkg-page">
     <AdminPageHeader
-      eyebrow="Foundation"
-      title="Packages"
-      subtitle="Pick a package → set roles → toggle features. Assign to people under Users."
+      eyebrow="Access"
+      title="Seat types"
+      subtitle="Bundle a role + features + permissions into a seat. Assign seats under People."
     >
       <template #actions>
         <q-btn
@@ -20,11 +20,13 @@
           no-caps
           color="primary"
           icon="add"
-          label="New package"
+          label="New seat"
           @click="openCreate"
         />
       </template>
     </AdminPageHeader>
+
+    <AccessHubBanner focus="seats" />
 
     <div class="pkg-notice">
       <span>
@@ -32,7 +34,7 @@
         <strong>{{ activePkg?.name ?? "—" }}</strong>
         <template v-if="activePkg?.priceNote"> · {{ activePkg.priceNote }}</template>
       </span>
-      <router-link class="pkg-notice__link" to="/admin/users">Assign on Users →</router-link>
+      <router-link class="pkg-notice__link" to="/admin/users">Assign on People →</router-link>
     </div>
 
     <div class="pkg-layout">
@@ -84,7 +86,8 @@
             <div class="pkg-card__stats">
               <span>{{ pkg.priceNote || "Custom" }}</span>
               <span>{{ shortRoles(pkg.roles) }}</span>
-              <span>{{ pkg.featureKeys.length }} feat</span>
+              <span>{{ featureOnlyCount(pkg) }} feat</span>
+              <span>{{ permissionOnlyCount(pkg) }} perm</span>
               <span>{{ cms.usersOnPackage(pkg.id).length }} user{{
                 cms.usersOnPackage(pkg.id).length === 1 ? "" : "s"
               }}</span>
@@ -142,7 +145,7 @@
               unelevated
               no-caps
               color="primary"
-              label="Save package"
+              label="Save seat"
               :disable="!dirty && !isNew"
               @click="save"
             />
@@ -150,13 +153,28 @@
         </header>
 
         <div class="pkg-editor__body">
-          <!-- Basics -->
+          <ol class="pkg-steps" aria-label="Seat setup flow">
+            <li class="pkg-steps__item">
+              <span class="pkg-steps__n">1</span>
+              <span>Basics</span>
+            </li>
+            <li class="pkg-steps__item">
+              <span class="pkg-steps__n">2</span>
+              <span>Roles &amp; scope</span>
+            </li>
+            <li class="pkg-steps__item">
+              <span class="pkg-steps__n">3</span>
+              <span>Features &amp; permissions</span>
+            </li>
+          </ol>
+
+          <!-- 1 Basics -->
           <div class="pkg-section">
             <div class="pkg-section__head">
-              <h3>Basics</h3>
+              <h3><span class="pkg-section__step">1</span> Basics</h3>
             </div>
             <div class="pkg-basics">
-              <q-input v-model="form.name" label="Package name" outlined dense />
+              <q-input v-model="form.name" label="Seat name" outlined dense />
               <q-input
                 v-model="form.priceNote"
                 label="Price / plan note"
@@ -176,16 +194,18 @@
             </div>
           </div>
 
-          <!-- Roles -->
+          <!-- 2 Roles & scope -->
           <div class="pkg-section">
             <div class="pkg-section__head">
-              <h3>Roles granted</h3>
+              <h3><span class="pkg-section__step">2</span> Roles &amp; scope</h3>
               <span class="pkg-section__meta"
                 >{{ form.roles.length }} selected · who can use this seat</span
               >
             </div>
             <p class="pkg-section__hint">
-              Managers get location scope; hotel admins get hotel scope (set on Users).
+              Each role carries a scope type. Property lists (locations / hotels) are
+              set when you assign this seat on
+              <router-link to="/admin/users">People</router-link>.
             </p>
             <div class="pkg-roles">
               <button
@@ -205,21 +225,30 @@
                 <span class="pkg-role__text">
                   <strong>{{ opt.label }}</strong>
                   <small>{{ roleHints[opt.value] }}</small>
+                  <em class="pkg-role__scope">{{ roleScopeLabel[opt.value] }}</em>
                 </span>
               </button>
             </div>
           </div>
 
-          <!-- Features -->
+          <!-- 3 Features + 4 Permissions (nested) -->
           <div class="pkg-section">
             <div class="pkg-section__head">
-              <h3>Features</h3>
+              <h3>
+                <span class="pkg-section__step">3</span>
+                Features &amp; permissions
+              </h3>
               <span class="pkg-section__meta"
-                >{{ form.featureKeys.length }} on ·
+                >{{ selectedFeatureCount }} features ·
+                {{ selectedPermissionCount }} permissions ·
                 {{ adminOnCount }}/{{ adminTotal }} admin ·
                 {{ publicOnCount }}/{{ publicTotal }} public</span
               >
             </div>
+            <p class="pkg-section__hint">
+              Turn on a <strong>feature</strong> (module), then open it to grant
+              nested <strong>permissions</strong>. Permissions belong to their feature.
+            </p>
 
             <div class="pkg-feat-toolbar">
               <q-input
@@ -227,7 +256,7 @@
                 dense
                 outlined
                 clearable
-                placeholder="Search features…"
+                placeholder="Search features or permissions…"
                 style="min-width: min(100%, 220px); background: #fff"
               >
                 <template #prepend><q-icon name="search" size="18px" /></template>
@@ -288,14 +317,26 @@
                     >
                     <template v-if="node.children.length">
                       <span class="pkg-mod__count"
-                        >{{ childOnCount(node) }}/{{ node.children.length }}</span
+                        >{{ childOnCount(node) }}/{{
+                          node.children.length
+                        }}
+                        perms</span
                       >
                       <q-btn
                         flat
                         dense
                         round
                         size="sm"
-                        :icon="expanded[node.parent.key] ? 'expand_less' : 'expand_more'"
+                        :icon="
+                          expanded[node.parent.key]
+                            ? 'expand_less'
+                            : 'expand_more'
+                        "
+                        :aria-label="
+                          expanded[node.parent.key]
+                            ? 'Hide permissions'
+                            : 'Show permissions'
+                        "
                         @click="toggleExpand(node.parent.key)"
                       />
                     </template>
@@ -307,7 +348,7 @@
                   class="pkg-mod__subs"
                 >
                   <div class="pkg-mod__subs-bar">
-                    <span>Sub-features</span>
+                    <span>Permissions under {{ node.parent.label }}</span>
                     <button
                       type="button"
                       class="pkg-mod__link"
@@ -336,7 +377,8 @@
                         :model-value="form.featureKeys.includes(child.key)"
                         dense
                         @update:model-value="
-                          (v: boolean | null) => toggleFeat(child.key, Boolean(v))
+                          (v: boolean | null) =>
+                            toggleFeat(child.key, Boolean(v))
                         "
                       />
                       <span>
@@ -360,10 +402,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from "vue";
+import { computed, onMounted, reactive, ref, watch } from "vue";
 import { useQuasar } from "quasar";
 import AdminPageHeader from "@/components/admin/AdminPageHeader.vue";
-import { PACKAGE_CLIENT_ROLES } from "@/data/seed-packages";
+import AccessHubBanner from "@/components/admin/AccessHubBanner.vue";
+import { PACKAGE_CLIENT_ROLES } from "@/constants/roles";
 import { roleLabels } from "@/stores/auth-store";
 import { useCmsStore } from "@/stores/cms-store";
 import type { AdminRole, ProductFeature, ProductPackage } from "@/types/greyon";
@@ -381,17 +424,37 @@ const featTab = ref<"admin" | "public">("admin");
 const expanded = reactive<Record<string, boolean>>({});
 const snapshot = ref("");
 
+onMounted(async () => {
+  await cms.ensureDeveloperBundle();
+  if (!selectedId.value && cms.activePackageId) {
+    selectedId.value = cms.activePackageId;
+  }
+});
+
 const roleOptions = [
   { label: roleLabels.developer, value: "developer" as AdminRole },
   ...PACKAGE_CLIENT_ROLES.map(r => ({ label: roleLabels[r], value: r }))
 ];
 
 const roleHints: Record<AdminRole, string> = {
-  developer: "Build packages & assign users",
-  admin: "Org-wide across package features",
-  manager: "Scoped to assigned locations",
-  hotel_admin: "Scoped to assigned hotels",
-  customer: "Public site only — no admin",
+  developer: "Platform owner — packages & full access",
+  admin: "Org admin — locations + assign Manager / Hotel desk",
+  manager: "Runs assigned destinations (many OK)",
+  hotel_admin: "Front desk for assigned hotels",
+  customer: "Guest — public site, own bookings only",
+  org_admin: "",
+  location_admin: "",
+  super_admin: "",
+  content_admin: "",
+  booking_admin: ""
+};
+
+const roleScopeLabel: Record<AdminRole, string> = {
+  developer: "Scope: global",
+  admin: "Scope: all locations",
+  manager: "Scope: assigned locations",
+  hotel_admin: "Scope: assigned hotels",
+  customer: "Scope: own bookings",
   org_admin: "",
   location_admin: "",
   super_admin: "",
@@ -500,6 +563,19 @@ const publicOnCount = computed(
     ).length
 );
 
+const selectedFeatureCount = computed(
+  () =>
+    form.featureKeys.filter(k =>
+      cms.features.some(f => f.key === k && !f.parentKey)
+    ).length
+);
+const selectedPermissionCount = computed(
+  () =>
+    form.featureKeys.filter(k =>
+      cms.features.some(f => f.key === k && Boolean(f.parentKey))
+    ).length
+);
+
 function formSnapshot() {
   return {
     name: form.name,
@@ -518,6 +594,18 @@ function shortRoles(roles: AdminRole[]) {
   return roles.map(r => roleLabels[r]?.replace(" admin", "") ?? r).join(" · ");
 }
 
+function featureOnlyCount(pkg: ProductPackage) {
+  return pkg.featureKeys.filter(k =>
+    cms.features.some(f => f.key === k && !f.parentKey)
+  ).length;
+}
+
+function permissionOnlyCount(pkg: ProductPackage) {
+  return pkg.featureKeys.filter(k =>
+    cms.features.some(f => f.key === k && Boolean(f.parentKey))
+  ).length;
+}
+
 function childOnCount(node: FeatNode) {
   return node.children.filter(c => form.featureKeys.includes(c.key)).length;
 }
@@ -528,10 +616,10 @@ function toggleExpand(key: string) {
 
 function ensureParentsExpanded() {
   for (const node of [...featureTree.value.admin, ...featureTree.value.public]) {
-    if (node.children.length && !(node.parent.key in expanded)) {
-      // Auto-open modules that have children (Locations especially)
-      expanded[node.parent.key] = true;
-    }
+    if (!node.children.length) continue;
+    const parentOn = form.featureKeys.includes(node.parent.key);
+    const childOn = node.children.some(c => form.featureKeys.includes(c.key));
+    if (parentOn || childOn) expanded[node.parent.key] = true;
   }
 }
 
@@ -577,7 +665,14 @@ function toggleFeat(key: string, on: boolean) {
   if (on) {
     set.add(key);
     const feat = cms.features.find(f => f.key === key);
-    if (feat?.parentKey) set.add(feat.parentKey);
+    if (feat?.parentKey) {
+      set.add(feat.parentKey);
+      expanded[feat.parentKey] = true;
+    } else {
+      // Enabling a feature → show its permissions
+      const hasPerms = cms.features.some(f => f.parentKey === key);
+      if (hasPerms) expanded[key] = true;
+    }
   } else {
     set.delete(key);
     cms.features
@@ -613,7 +708,7 @@ function openCreate() {
   snapshot.value = "";
 }
 
-function save() {
+async function save() {
   if (!form.name.trim()) {
     $q.notify({ type: "negative", message: "Package name is required." });
     return;
@@ -622,18 +717,25 @@ function save() {
     $q.notify({ type: "negative", message: "Pick at least one role." });
     return;
   }
-  const saved = cms.upsertPackage({
-    ...(isNew.value ? {} : { id: selectedId.value }),
-    name: form.name.trim(),
-    description: form.description,
-    priceNote: form.priceNote,
-    featureKeys: form.featureKeys,
-    roles: form.roles
-  });
-  isNew.value = false;
-  selectedId.value = saved.id;
-  loadForm(saved);
-  $q.notify({ type: "positive", message: `Saved “${saved.name}”.` });
+  try {
+    const saved = await cms.upsertPackage({
+      ...(isNew.value ? {} : { id: selectedId.value }),
+      name: form.name.trim(),
+      description: form.description,
+      priceNote: form.priceNote,
+      featureKeys: form.featureKeys,
+      roles: form.roles
+    });
+    isNew.value = false;
+    selectedId.value = saved.id;
+    loadForm(saved);
+    $q.notify({ type: "positive", message: `Saved “${saved.name}”.` });
+  } catch (e) {
+    $q.notify({
+      type: "negative",
+      message: e instanceof Error ? e.message : "Save failed."
+    });
+  }
 }
 
 function activate(id: string) {
@@ -644,12 +746,22 @@ function activate(id: string) {
   });
 }
 
-function duplicateActive() {
+async function duplicateActive() {
   if (!activePkg.value) return;
-  const copy = cms.duplicatePackage(activePkg.value.id);
-  if (!copy) return;
-  selectPackage(copy.id);
-  $q.notify({ type: "info", message: "Duplicated — customize and save when ready." });
+  try {
+    const copy = await cms.duplicatePackage(activePkg.value.id);
+    if (!copy) return;
+    selectPackage(copy.id);
+    $q.notify({
+      type: "info",
+      message: "Duplicated — customize and save when ready."
+    });
+  } catch (e) {
+    $q.notify({
+      type: "negative",
+      message: e instanceof Error ? e.message : "Duplicate failed."
+    });
+  }
 }
 
 function remove() {
@@ -666,10 +778,17 @@ function remove() {
     title: `Delete “${pkg.name}”?`,
     cancel: true,
     persistent: true
-  }).onOk(() => {
-    cms.deletePackage(pkg.id);
-    selectPackage(cms.activePackageId);
-    $q.notify({ type: "positive", message: "Package deleted." });
+  }).onOk(async () => {
+    try {
+      await cms.deletePackage(pkg.id);
+      selectPackage(cms.activePackageId);
+      $q.notify({ type: "positive", message: "Package deleted." });
+    } catch (e) {
+      $q.notify({
+        type: "negative",
+        message: e instanceof Error ? e.message : "Delete failed."
+      });
+    }
   });
 }
 </script>
@@ -909,12 +1028,45 @@ function remove() {
   padding: 0 1.2rem 1.5rem;
 }
 
+.pkg-steps {
+  list-style: none;
+  margin: 1rem 0 0.35rem;
+  padding: 0.65rem 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 1rem;
+  background: #faf9f7;
+  border: 1px solid rgba(28, 36, 33, 0.06);
+  border-radius: 10px;
+}
+
+.pkg-steps__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  color: var(--gy-muted);
+  font-weight: 600;
+}
+
+.pkg-steps__n {
+  display: grid;
+  place-items: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 999px;
+  background: rgba(154, 123, 60, 0.15);
+  color: var(--gy-gold-deep);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
 .pkg-section {
   padding: 1.15rem 0 0.25rem;
   border-top: 1px solid rgba(28, 36, 33, 0.06);
 }
 
-.pkg-section:first-child {
+.pkg-section:first-of-type {
   border-top: 0;
 }
 
@@ -932,6 +1084,29 @@ function remove() {
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--gy-gold-deep);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.pkg-section__step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-width: 1.35rem;
+  height: 1.35rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: rgba(154, 123, 60, 0.15);
+  color: var(--gy-gold-deep);
+  font-size: 0.68rem;
+  letter-spacing: 0;
+  text-transform: none;
+  font-weight: 700;
+  white-space: nowrap;
+  line-height: 1;
+  box-sizing: border-box;
 }
 
 .pkg-section__meta {
@@ -958,8 +1133,9 @@ function remove() {
 
 .pkg-roles {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 0.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.55rem;
+  align-items: stretch;
 }
 
 .pkg-role {
@@ -968,13 +1144,15 @@ function remove() {
   gap: 0.65rem;
   align-items: start;
   text-align: left;
-  padding: 0.7rem 0.75rem;
+  padding: 0.75rem 0.8rem;
   border: 1px solid rgba(28, 36, 33, 0.1);
   border-radius: 10px;
   background: #faf9f7;
   cursor: pointer;
   font: inherit;
   color: inherit;
+  min-height: 6.5rem;
+  height: 100%;
   transition:
     border-color 0.15s ease,
     background 0.15s ease;
@@ -1004,17 +1182,37 @@ function remove() {
   color: #fff;
 }
 
+.pkg-role__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 100%;
+}
+
 .pkg-role__text strong {
   display: block;
   font-size: 0.9rem;
+  line-height: 1.25;
 }
 
 .pkg-role__text small {
   display: block;
-  margin-top: 0.15rem;
+  margin-top: 0.2rem;
   font-size: 0.75rem;
   color: var(--gy-muted);
-  line-height: 1.3;
+  line-height: 1.35;
+  flex: 1;
+}
+
+.pkg-role__scope {
+  display: block;
+  margin-top: 0.45rem;
+  font-size: 0.68rem;
+  font-style: normal;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--gy-gold-deep);
+  font-weight: 700;
 }
 
 .pkg-feat-toolbar {

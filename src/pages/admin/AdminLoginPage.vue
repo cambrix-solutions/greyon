@@ -2,24 +2,17 @@
   <q-layout view="hHh lpR fFf" class="admin-login-layout">
     <q-page-container>
       <q-page class="flex flex-center admin-login">
+        <div
+          class="admin-login__bg"
+          aria-hidden="true"
+        />
+        <div class="admin-login__veil" aria-hidden="true" />
+        <div class="admin-login__glow" aria-hidden="true" />
+
         <form v-reveal class="login-card" @submit.prevent="onSubmit">
           <p class="gy-eyebrow">Greyon CMS</p>
           <h1 class="gy-display">Admin login</h1>
-          <p class="gy-muted">Any password works for demo accounts.</p>
-
-          <div class="demo-accounts">
-            <button
-              v-for="acct in demoAccounts"
-              :key="acct.email"
-              type="button"
-              class="demo-accounts__row"
-              @click="email = acct.email"
-            >
-              <span class="demo-accounts__role">{{ acct.role }}</span>
-              <span class="demo-accounts__pkg">{{ acct.package }}</span>
-              <code>{{ acct.email }}</code>
-            </button>
-          </div>
+          <p class="gy-muted">Sign in with your Greyon admin account.</p>
 
           <label>
             Email
@@ -28,6 +21,7 @@
               type="email"
               required
               autocomplete="username"
+              placeholder="you@greyon.com.kh"
             />
           </label>
           <label>
@@ -37,10 +31,13 @@
               type="password"
               required
               autocomplete="current-password"
+              placeholder="••••••••"
             />
           </label>
           <p v-if="error" class="error">{{ error }}</p>
-          <button class="gy-btn" type="submit">Sign in</button>
+          <button class="gy-btn" type="submit" :disabled="submitting">
+            {{ submitting ? "Signing in…" : "Sign in" }}
+          </button>
           <router-link to="/" class="back">← Back to site</router-link>
         </form>
       </q-page>
@@ -56,27 +53,26 @@ import { useAuthStore } from "@/stores/auth-store";
 const auth = useAuthStore();
 const router = useRouter();
 const route = useRoute();
-const email = ref("admin@greyon.com.kh");
-const password = ref("demo");
+const email = ref("");
+const password = ref("");
 const error = ref("");
+const submitting = ref(false);
 
-const demoAccounts = [
-  { email: "admin@greyon.com.kh", role: "Admin", package: "Admin · Full suite" },
-  { email: "pp@greyon.com.kh", role: "Manager · PP", package: "Manager · Booking Pro" },
-  { email: "sr@greyon.com.kh", role: "Manager · SR", package: "Manager · Content+" },
-  { email: "angkor@greyon.com.kh", role: "Hotel admin", package: "Hotel Admin · Booking Pro" },
-  { email: "hotel@greyon.com.kh", role: "Hotel admin", package: "Hotel Admin · Core" }
-];
-
-function onSubmit() {
-  const result = auth.login(email.value, password.value);
-  if (!result.ok) {
-    error.value = result.message;
-    return;
-  }
+async function onSubmit() {
+  submitting.value = true;
   error.value = "";
-  const redirect = typeof route.query.redirect === "string" ? route.query.redirect : "/admin";
-  void router.push(redirect);
+  try {
+    const result = await auth.login(email.value, password.value);
+    if (!result.ok) {
+      error.value = result.message;
+      return;
+    }
+    const redirect =
+      typeof route.query.redirect === "string" ? route.query.redirect : "/admin";
+    void router.push(redirect);
+  } finally {
+    submitting.value = false;
+  }
 }
 </script>
 
@@ -87,19 +83,84 @@ function onSubmit() {
 }
 
 .admin-login {
-  background:
-    radial-gradient(ellipse 70% 50% at 20% 0%, rgba(196, 163, 90, 0.16), transparent 55%),
-    #f6f5f2;
+  position: relative;
+  overflow: hidden;
   padding: 1.5rem;
+  background: #121110;
+}
+
+.admin-login__bg {
+  position: absolute;
+  inset: -2%;
+  background:
+    url("https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1800&q=80")
+      center / cover;
+  transform: scale(1.06);
+  animation: admin-login-drift 32s ease-in-out infinite alternate;
+  z-index: 0;
+}
+
+.admin-login__veil {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    linear-gradient(
+      160deg,
+      rgba(18, 17, 16, 0.72) 0%,
+      rgba(18, 17, 16, 0.55) 45%,
+      rgba(18, 17, 16, 0.7) 100%
+    ),
+    linear-gradient(180deg, rgba(18, 17, 16, 0.25), rgba(18, 17, 16, 0.5));
+}
+
+.admin-login__glow {
+  position: absolute;
+  inset: auto auto -18% -8%;
+  width: min(50vw, 480px);
+  height: min(50vw, 480px);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(196, 163, 90, 0.26) 0%,
+    transparent 70%
+  );
+  filter: blur(8px);
+  z-index: 0;
+  pointer-events: none;
+  animation: admin-login-glow 10s ease-in-out infinite alternate;
 }
 
 .login-card {
+  position: relative;
+  z-index: 1;
   width: min(440px, 100%);
-  padding: 1.75rem 1.5rem 1.5rem;
-  background: #fff;
-  border: 1px solid rgba(28, 36, 33, 0.08);
+  padding: 1.85rem 1.6rem 1.55rem;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.35);
   border-radius: 18px;
-  box-shadow: 0 24px 48px rgba(18, 17, 16, 0.08);
+  box-shadow:
+    0 30px 70px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(196, 163, 90, 0.1);
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+}
+
+.login-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 1.4rem;
+  right: 1.4rem;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--gy-gold) 20%,
+    var(--gy-gold-deep) 50%,
+    var(--gy-gold) 80%,
+    transparent
+  );
 }
 
 .login-card h1 {
@@ -107,51 +168,8 @@ function onSubmit() {
   font-size: 1.75rem;
 }
 
-.demo-accounts {
-  display: grid;
-  gap: 0.35rem;
-  margin: 1rem 0 1.15rem;
-  max-height: 220px;
-  overflow: auto;
-  padding: 0.35rem;
-  background: #faf9f7;
-  border-radius: 12px;
-  border: 1px solid rgba(28, 36, 33, 0.06);
-}
-
-.demo-accounts__row {
-  display: grid;
-  grid-template-columns: 1.1fr 0.9fr auto;
-  gap: 0.35rem;
-  align-items: center;
-  width: 100%;
-  padding: 0.45rem 0.55rem;
-  border: 0;
-  border-radius: 8px;
-  background: transparent;
-  text-align: left;
-  cursor: pointer;
-  font: inherit;
-}
-
-.demo-accounts__row:hover {
-  background: rgba(154, 123, 60, 0.1);
-}
-
-.demo-accounts__role {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--gy-ink);
-}
-
-.demo-accounts__pkg {
-  font-size: 0.72rem;
-  color: var(--gy-gold-deep);
-}
-
-.demo-accounts__row code {
-  font-size: 0.68rem;
-  color: var(--gy-muted);
+.login-card .gy-muted {
+  margin: 0 0 1.15rem;
 }
 
 .login-card label {
@@ -163,17 +181,29 @@ function onSubmit() {
 }
 
 .login-card input {
-  padding: 0.65rem 0.75rem;
+  padding: 0.75rem 0.9rem;
   border: 1px solid rgba(28, 36, 33, 0.14);
   border-radius: 10px;
   font: inherit;
   color: var(--gy-ink);
+  background: var(--gy-sand);
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.login-card input:focus {
+  outline: none;
+  border-color: var(--gy-gold);
   background: #fff;
+  box-shadow: 0 0 0 3px rgba(196, 163, 90, 0.18);
 }
 
 .login-card .gy-btn {
   width: 100%;
   margin-top: 0.35rem;
+  border-radius: 10px;
 }
 
 .error {
@@ -194,10 +224,21 @@ function onSubmit() {
   color: var(--gy-gold-deep);
 }
 
-@media (max-width: 520px) {
-  .demo-accounts__row {
-    grid-template-columns: 1fr;
-    gap: 0.1rem;
+@keyframes admin-login-drift {
+  from {
+    transform: scale(1.06) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.12) translate3d(-1.5%, -1%, 0);
+  }
+}
+
+@keyframes admin-login-glow {
+  from {
+    opacity: 0.55;
+  }
+  to {
+    opacity: 0.9;
   }
 }
 </style>

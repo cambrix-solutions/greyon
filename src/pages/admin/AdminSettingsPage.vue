@@ -3,10 +3,9 @@
     <AdminPageHeader
       eyebrow="System"
       title="SEO / Settings"
-      subtitle="Site defaults, contact, payment MVP flag, and sitemap export."
+      subtitle="Site defaults, contact, and payment MVP flag."
     >
       <template #actions>
-        <q-btn outline no-caps color="primary" label="Download sitemap" @click="downloadSitemap" />
         <q-btn unelevated no-caps color="primary" label="Save settings" @click="save" />
       </template>
     </AdminPageHeader>
@@ -22,7 +21,6 @@
               label="Public site URL"
               outlined
               dense
-              hint="Used for sitemap absolute URLs"
             />
             <q-input v-model="form.defaultTitle" label="Default meta title" outlined dense />
             <q-input
@@ -73,50 +71,56 @@
             />
           </q-card-section>
         </q-card>
-
-        <q-card flat bordered class="bg-white">
-          <q-card-section>
-            <div class="text-subtitle1 q-mb-sm">Sitemap</div>
-            <p class="text-body2 text-grey-8 q-mb-md">
-              Generate from published hotels, locations, and news. Preview at
-              <router-link to="/sitemap">/sitemap</router-link>.
-            </p>
-            <q-btn outline color="primary" no-caps label="Download sitemap.xml" @click="downloadSitemap" />
-          </q-card-section>
-        </q-card>
       </div>
     </div>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { reactive } from "vue";
+import { onMounted, reactive } from "vue";
 import { useQuasar } from "quasar";
 import AdminPageHeader from "@/components/admin/AdminPageHeader.vue";
-import { useCmsStore } from "@/stores/cms-store";
-import { buildCmsSitemapEntries, buildSitemapXml, downloadTextFile } from "@/utils/sitemap";
+import { useCmsStore, type SiteSettings } from "@/stores/cms-store";
 
 const cms = useCmsStore();
 const $q = useQuasar();
-const form = reactive({ ...cms.settings });
 
-function save() {
-  cms.saveSettings({ ...form });
-  $q.notify({ type: "positive", message: "Settings saved." });
+function cloneSettings(s: SiteSettings): SiteSettings {
+  return {
+    ...s,
+    heroSlides: s.heroSlides.map(slide => ({ ...slide }))
+  };
 }
 
-function downloadSitemap() {
-  const base = (form.siteUrl || cms.settings.siteUrl || "https://www.greyon.com.kh").replace(
-    /\/$/,
-    ""
-  );
-  const entries = buildCmsSitemapEntries({
-    hotels: cms.publishedHotels,
-    locations: cms.publishedLocations,
-    news: cms.publishedNews
-  });
-  downloadTextFile("sitemap.xml", buildSitemapXml(base, entries));
-  $q.notify({ type: "positive", message: "sitemap.xml downloaded." });
+const form = reactive(cloneSettings(cms.settings));
+
+onMounted(async () => {
+  await cms.ensureSettings();
+  Object.assign(form, cloneSettings(cms.settings));
+});
+
+async function save() {
+  try {
+    await cms.saveSettings({
+      siteName: form.siteName,
+      siteUrl: form.siteUrl,
+      defaultTitle: form.defaultTitle,
+      defaultDescription: form.defaultDescription,
+      ogImage: form.ogImage,
+      analyticsId: form.analyticsId,
+      contactEmail: form.contactEmail,
+      contactPhone: form.contactPhone,
+      paymentEnabled: form.paymentEnabled,
+      paymentNote: form.paymentNote
+    });
+    Object.assign(form, cloneSettings(cms.settings));
+    $q.notify({ type: "positive", message: "Settings saved." });
+  } catch (e) {
+    $q.notify({
+      type: "negative",
+      message: e instanceof Error ? e.message : "Save failed."
+    });
+  }
 }
 </script>
 

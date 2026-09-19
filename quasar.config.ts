@@ -11,7 +11,7 @@ export default defineConfig(ctx => {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
-    boot: ["i18n", "analytics", "motion"],
+    boot: ["api", "catalog", "i18n", "analytics", "motion"],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#css
     css: ["app.css"],
@@ -40,6 +40,12 @@ export default defineConfig(ctx => {
         strict: true,
         vueShim: true
         // extendTsConfig (tsConfig) {}
+      },
+
+      // Quasar Vite 3 defaults client env to QCLI_ only — without this,
+      // VITE_* keys from .env are stripped and isApiEnabled() stays false.
+      env: {
+        clientPrefix: "VITE_"
       },
 
       // https://v2.quasar.dev/quasar-cli-vite/page-routing-with-vue-router#filename-based-routing
@@ -86,7 +92,36 @@ export default defineConfig(ctx => {
     devServer: {
       // vueDevtools: true,
       // https: true,
-      open: true // opens browser window automatically
+      open: true, // opens browser window automatically
+      // Same-origin proxy so greyon-engine session cookies work from localhost:9000
+      // (avoids cross-site SameSite issues). Target must match Herd: greyon-engine.test
+      proxy: {
+        "/engine": {
+          target: "https://greyon-engine.test",
+          changeOrigin: true,
+          secure: false,
+          rewrite: (path: string) => path.replace(/^\/engine/, ""),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          configure: (proxy: any) => {
+            proxy.on(
+              "proxyRes",
+              (proxyRes: {
+                headers: Record<string, string | string[] | undefined>;
+              }) => {
+                const raw = proxyRes.headers["set-cookie"];
+                if (!raw) return;
+                const cookies = Array.isArray(raw) ? raw : [raw];
+                proxyRes.headers["set-cookie"] = cookies.map(cookie =>
+                  cookie
+                    .replace(/;\s*Domain=[^;]*/gi, "")
+                    .replace(/;\s*Secure/gi, "")
+                    .replace(/;\s*SameSite=[^;]*/gi, "; SameSite=Lax")
+                );
+              }
+            );
+          }
+        }
+      }
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#framework

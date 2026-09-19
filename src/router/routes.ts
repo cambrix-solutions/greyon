@@ -1,5 +1,6 @@
 import type { RouteRecordRaw } from "vue-router";
 import { useAuthStore } from "@/stores/auth-store";
+import { useCustomerStore } from "@/stores/customer-store";
 
 const routes: RouteRecordRaw[] = [
   {
@@ -89,6 +90,44 @@ const routes: RouteRecordRaw[] = [
         name: "contact",
         component: () => import("@/pages/ContactPage.vue"),
         meta: { title: "Contact | Greyon", solidHeader: true }
+      },
+      {
+        path: "sign-in",
+        name: "sign-in",
+        component: () => import("@/pages/SignInPage.vue"),
+        meta: { title: "Sign in | Greyon", solidHeader: true }
+      },
+      {
+        path: "sign-up",
+        name: "sign-up",
+        component: () => import("@/pages/SignUpPage.vue"),
+        meta: { title: "Sign up | Greyon", solidHeader: true }
+      },
+      {
+        path: "auth/google/complete",
+        name: "google-auth-complete",
+        component: () => import("@/pages/GoogleAuthCompletePage.vue"),
+        meta: { title: "Signing in | Greyon", solidHeader: true }
+      },
+      {
+        path: "account",
+        name: "account",
+        component: () => import("@/pages/AccountPage.vue"),
+        meta: {
+          title: "My account | Greyon",
+          solidHeader: true,
+          requiresCustomer: true
+        }
+      },
+      {
+        path: "account/bookings/:reference",
+        name: "account-booking",
+        component: () => import("@/pages/AccountBookingPage.vue"),
+        meta: {
+          title: "Booking details | Greyon",
+          solidHeader: true,
+          requiresCustomer: true
+        }
       },
       {
         path: "sitemap",
@@ -194,6 +233,12 @@ const routes: RouteRecordRaw[] = [
         meta: { title: "Media | Greyon Admin", perm: "media" }
       },
       {
+        path: "hero-slides",
+        name: "admin-hero-slides",
+        component: () => import("@/pages/admin/AdminHeroSlidesPage.vue"),
+        meta: { title: "Hero slides | Greyon Admin", perm: "settings" }
+      },
+      {
         path: "settings",
         name: "admin-settings",
         component: () => import("@/pages/admin/AdminSettingsPage.vue"),
@@ -209,7 +254,17 @@ const routes: RouteRecordRaw[] = [
         path: "features",
         name: "admin-features",
         component: () => import("@/pages/admin/AdminFeaturesPage.vue"),
-        meta: { title: "Features | Greyon Admin", perm: "features" }
+        meta: { title: "Packages | Greyon Admin", perm: "features" }
+      },
+      {
+        path: "access-catalog",
+        name: "admin-access-catalog",
+        component: () => import("@/pages/admin/AdminAccessCatalogPage.vue"),
+        meta: {
+          title: "Access catalog | Greyon Admin",
+          perm: "features",
+          developerOnly: true
+        }
       }
     ]
   },
@@ -241,6 +296,15 @@ export function setupRouterGuards(
     }
 
     const auth = useAuthStore();
+    const customer = useCustomerStore();
+    customer.hydrate();
+
+    if (to.meta.requiresCustomer && !customer.isAuthenticated) {
+      return {
+        name: "sign-in",
+        query: { redirect: to.fullPath }
+      };
+    }
 
     // Public product gates → 404-style denied
     if (to.name === "booking" && !auth.featureEnabled("booking_public")) {
@@ -287,6 +351,14 @@ export function setupRouterGuards(
           name: "access-denied",
           query: {
             message: `Your user package does not include “${perm}”.`
+          }
+        };
+      }
+      if (to.meta.developerOnly && !auth.isDeveloper) {
+        return {
+          name: "access-denied",
+          query: {
+            message: "Only the platform developer can manage the access catalog."
           }
         };
       }

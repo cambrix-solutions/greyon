@@ -98,38 +98,53 @@
         </header>
 
         <div class="hotel-cards">
-          <article v-for="hotel in group.hotels" :key="hotel.id" class="hotel-card">
-            <img
-              v-if="hotel.heroImage"
-              :src="hotel.heroImage"
-              alt=""
-              class="hotel-card__media"
-            />
-            <div class="hotel-card__body">
-              <p class="hotel-card__crumb">
-                {{ group.locationName }}
-                <span aria-hidden="true">/</span>
-                Hotel
-              </p>
-              <h3 class="hotel-card__name">{{ hotel.name }}</h3>
-              <p class="hotel-card__slug">{{ hotel.slug }}</p>
-              <p class="hotel-card__desc">{{ hotel.shortDescription }}</p>
-              <div class="hotel-card__stats">
-                <span
-                  >{{ roomCount(hotel.id) }} room type{{
-                    roomCount(hotel.id) === 1 ? "" : "s"
-                  }}</span
-                >
-                <span v-if="hotel.featured" class="hotel-card__feat">Featured</span>
-              </div>
+          <article
+            v-for="hotel in group.hotels"
+            :key="hotel.id"
+            class="hotel-card"
+            :class="{ 'hotel-card--has-media': Boolean(hotel.heroImage) }"
+          >
+            <div v-if="hotel.heroImage" class="hotel-card__media">
+              <img :src="hotel.heroImage" :alt="hotel.name" />
             </div>
+            <div v-else class="hotel-card__thumb" aria-hidden="true">
+              <q-icon name="apartment" size="22px" />
+            </div>
+
+            <div class="hotel-card__body">
+              <div class="hotel-card__topline">
+                <p class="hotel-card__crumb">Hotel</p>
+                <span
+                  class="hotel-card__status"
+                  :data-status="hotel.status"
+                  >{{ hotel.status }}</span
+                >
+                <span v-if="hotel.featured" class="hotel-card__feat-pill"
+                  >Featured</span
+                >
+              </div>
+              <h3 class="hotel-card__name">{{ hotel.name }}</h3>
+              <p class="hotel-card__slug">/{{ hotel.slug }}</p>
+              <p v-if="hotel.shortDescription" class="hotel-card__desc">
+                {{ hotel.shortDescription }}
+              </p>
+              <ul class="hotel-card__chips">
+                <li>
+                  {{ roomCount(hotel.id) }} room type{{
+                    roomCount(hotel.id) === 1 ? "" : "s"
+                  }}
+                </li>
+                <li v-if="hotel.address">{{ shortAddress(hotel.address) }}</li>
+              </ul>
+            </div>
+
             <div class="hotel-card__side">
               <q-select
                 dense
                 outlined
                 :model-value="hotel.status"
                 :options="cms.statusOptions"
-                style="min-width: 120px"
+                class="hotel-card__status-select"
                 @update:model-value="(v: string) => setStatus(hotel.id, v)"
               />
               <q-toggle
@@ -147,7 +162,14 @@
                   label="Rooms"
                   :to="`/admin/rooms?hotelId=${hotel.id}`"
                 />
-                <q-btn flat dense no-caps color="primary" label="Edit" @click="openEdit(hotel)" />
+                <q-btn
+                  flat
+                  dense
+                  no-caps
+                  color="primary"
+                  label="Edit"
+                  @click="openEdit(hotel)"
+                />
                 <q-btn
                   flat
                   dense
@@ -155,8 +177,19 @@
                   icon="open_in_new"
                   :to="`/hotels/${hotel.slug}`"
                   target="_blank"
-                />
-                <q-btn flat dense round icon="delete" color="negative" @click="remove(hotel.id)" />
+                >
+                  <q-tooltip>View live</q-tooltip>
+                </q-btn>
+                <q-btn
+                  flat
+                  dense
+                  round
+                  icon="delete"
+                  color="negative"
+                  @click="remove(hotel.id)"
+                >
+                  <q-tooltip>Delete</q-tooltip>
+                </q-btn>
               </div>
             </div>
           </article>
@@ -357,7 +390,12 @@ const grouped = computed(() => {
 });
 
 function roomCount(hotelId: string) {
-  return cms.getRoomTypesByHotelId(hotelId).length;
+  return cms.roomTypes.filter(r => r.hotelId === hotelId).length;
+}
+
+function shortAddress(address: string) {
+  const part = address.split(",")[0]?.trim() ?? address;
+  return part.length > 36 ? `${part.slice(0, 34)}…` : part;
 }
 
 function blank(locationId?: string) {
@@ -419,41 +457,64 @@ function save() {
     $q.notify({ type: "negative", message: "Name and location are required." });
     return;
   }
-  cms.upsertHotel({
-    ...(editing.value ? { id: editing.value } : {}),
-    name: form.name,
-    ...(form.slug ? { slug: form.slug } : {}),
-    locationId: form.locationId,
-    shortDescription: form.shortDescription,
-    description: form.description,
-    address: form.address,
-    phone: form.phone,
-    email: form.email,
-    checkInTime: form.checkInTime || "14:00",
-    checkOutTime: form.checkOutTime || "12:00",
-    ...(form.heroImage ? { heroImage: form.heroImage } : {}),
-    gallery: gallery.value.filter(Boolean),
-    amenities: amenitiesText.value
-      .split(",")
-      .map(s => s.trim())
-      .filter(Boolean),
-    status: form.status,
-    featured: form.featured
-  });
-  dialog.value = false;
-  $q.notify({ type: "positive", message: "Hotel saved." });
+  void (async () => {
+    try {
+      await cms.upsertHotel({
+        ...(editing.value ? { id: editing.value } : {}),
+        name: form.name,
+        ...(form.slug ? { slug: form.slug } : {}),
+        locationId: form.locationId,
+        shortDescription: form.shortDescription,
+        description: form.description,
+        address: form.address,
+        phone: form.phone,
+        email: form.email,
+        checkInTime: form.checkInTime || "14:00",
+        checkOutTime: form.checkOutTime || "12:00",
+        ...(form.heroImage ? { heroImage: form.heroImage } : {}),
+        gallery: gallery.value.filter(Boolean),
+        amenities: amenitiesText.value
+          .split(",")
+          .map(s => s.trim())
+          .filter(Boolean),
+        status: form.status,
+        featured: form.featured
+      });
+      dialog.value = false;
+      $q.notify({ type: "positive", message: "Hotel saved." });
+    } catch (e) {
+      $q.notify({
+        type: "negative",
+        message: e instanceof Error ? e.message : "Save failed."
+      });
+    }
+  })();
 }
 
 function setStatus(id: string, status: string) {
   const hotel = cms.getHotelById(id);
   if (!hotel) return;
-  cms.upsertHotel({ ...hotel, status: status as ContentStatus });
+  void cms
+    .upsertHotel({ ...hotel, status: status as ContentStatus })
+    .catch(e =>
+      $q.notify({
+        type: "negative",
+        message: e instanceof Error ? e.message : "Update failed."
+      })
+    );
 }
 
 function toggleFeatured(id: string, featured: boolean) {
   const hotel = cms.getHotelById(id);
   if (!hotel) return;
-  cms.upsertHotel({ ...hotel, featured });
+  void cms
+    .upsertHotel({ ...hotel, featured })
+    .catch(e =>
+      $q.notify({
+        type: "negative",
+        message: e instanceof Error ? e.message : "Update failed."
+      })
+    );
 }
 
 function remove(id: string) {
@@ -463,8 +524,15 @@ function remove(id: string) {
     cancel: true,
     persistent: true
   }).onOk(() => {
-    cms.deleteHotel(id);
-    $q.notify({ type: "positive", message: "Hotel deleted." });
+    void cms
+      .deleteHotel(id)
+      .then(() => $q.notify({ type: "positive", message: "Hotel deleted." }))
+      .catch(e =>
+        $q.notify({
+          type: "negative",
+          message: e instanceof Error ? e.message : "Delete failed."
+        })
+      );
   });
 }
 
@@ -477,7 +545,12 @@ function syncQuery() {
   void router.replace({ query: next });
 }
 
-onMounted(() => {
+onMounted(async () => {
+  await Promise.all([
+    cms.ensureHotels(),
+    cms.ensureLocations(),
+    cms.ensureRoomTypes()
+  ]);
   const s = String(route.query.status || "");
   if (cms.statusOptions.includes(s as ContentStatus)) statusFilter.value = s;
   const loc = String(route.query.locationId || "");
@@ -524,6 +597,7 @@ watch([statusFilter, locationFilter, featuredOnly, query], syncQuery);
   border: 1px solid rgba(28, 36, 33, 0.08);
   border-radius: 16px;
   overflow: hidden;
+  box-shadow: 0 1px 0 rgba(28, 36, 33, 0.03);
 }
 
 .hotel-group__head {
@@ -531,35 +605,31 @@ watch([statusFilter, locationFilter, featuredOnly, query], syncQuery);
   justify-content: space-between;
   align-items: flex-start;
   gap: 1rem;
-  padding: 1rem 1.1rem;
-  background: #faf9f7;
+  padding: 1.05rem 1.15rem;
+  background: linear-gradient(180deg, #f7f5f1 0%, #faf9f7 100%);
   border-bottom: 1px solid rgba(28, 36, 33, 0.06);
 }
 
-.hotel-group__level,
-.hotel-card__crumb {
+.hotel-group__level {
   margin: 0;
   font-size: 0.66rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--gy-gold-deep);
-}
-
-.hotel-card__crumb span {
-  margin: 0 0.35rem;
-  opacity: 0.55;
+  font-weight: 600;
 }
 
 .hotel-group__title {
-  margin: 0.2rem 0 0;
+  margin: 0.25rem 0 0;
   font-family: var(--font-display);
-  font-size: 1.25rem;
+  font-size: clamp(1.25rem, 2vw, 1.45rem);
   font-weight: 700;
   letter-spacing: -0.02em;
+  line-height: 1.2;
 }
 
 .hotel-group__meta {
-  margin: 0.2rem 0 0;
+  margin: 0.25rem 0 0;
   font-size: 0.82rem;
   color: var(--gy-muted);
 }
@@ -573,67 +643,163 @@ watch([statusFilter, locationFilter, featuredOnly, query], syncQuery);
 .hotel-cards {
   display: grid;
   gap: 0.65rem;
-  padding: 0.85rem 1rem 1rem;
+  padding: 0.9rem 1rem 1.05rem;
 }
 
 .hotel-card {
   display: grid;
-  grid-template-columns: 96px 1fr auto;
-  gap: 0.9rem;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.9rem 1rem;
   align-items: start;
-  padding: 0.75rem;
+  padding: 0.85rem 0.9rem;
   border: 1px solid rgba(28, 36, 33, 0.07);
-  border-radius: 12px;
+  border-radius: 14px;
   background: #fff;
+  transition: border-color 0.15s ease;
+}
+
+.hotel-card:hover {
+  border-color: rgba(154, 123, 60, 0.35);
+}
+
+.hotel-card__media,
+.hotel-card__thumb {
+  width: 5.25rem;
+  height: 4rem;
+  border-radius: 10px;
+  flex-shrink: 0;
 }
 
 .hotel-card__media {
-  width: 96px;
-  height: 72px;
+  overflow: hidden;
+  background: var(--gy-stone, #e8e4dc);
+}
+
+.hotel-card__media img {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  border-radius: 8px;
-  background: var(--gy-stone);
+  display: block;
 }
 
-.hotel-card__name {
-  margin: 0.2rem 0 0;
-  font-size: 1.05rem;
-  font-weight: 650;
-  letter-spacing: -0.01em;
+.hotel-card__thumb {
+  display: grid;
+  place-items: center;
+  background: rgba(154, 123, 60, 0.1);
+  color: var(--gy-gold-deep);
 }
 
-.hotel-card__slug,
-.hotel-card__desc {
-  margin: 0.2rem 0 0;
-  font-size: 0.82rem;
+.hotel-card__body {
+  min-width: 0;
+}
+
+.hotel-card__topline {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.hotel-card__crumb {
+  margin: 0;
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gy-gold-deep);
+  font-weight: 600;
+}
+
+.hotel-card__status {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: lowercase;
+  background: rgba(28, 36, 33, 0.06);
   color: var(--gy-muted);
 }
 
+.hotel-card__status[data-status="published"] {
+  background: rgba(46, 125, 80, 0.12);
+  color: #1e6b3a;
+}
+
+.hotel-card__status[data-status="draft"] {
+  background: rgba(154, 123, 60, 0.14);
+  color: var(--gy-gold-deep);
+}
+
+.hotel-card__feat-pill {
+  display: inline-flex;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 650;
+  background: rgba(154, 123, 60, 0.14);
+  color: var(--gy-gold-deep);
+}
+
+.hotel-card__name {
+  margin: 0.35rem 0 0;
+  font-family: var(--font-display);
+  font-size: 1.12rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: var(--gy-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hotel-card__slug {
+  margin: 0.25rem 0 0;
+  font-size: 0.78rem;
+  color: var(--gy-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
 .hotel-card__desc {
+  margin: 0.4rem 0 0;
+  font-size: 0.84rem;
+  color: var(--gy-muted);
+  line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.hotel-card__stats {
+.hotel-card__chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.45rem;
-  margin-top: 0.45rem;
-  font-size: 0.78rem;
-  color: var(--gy-muted);
+  gap: 0.35rem;
+  margin: 0.55rem 0 0;
+  padding: 0;
+  list-style: none;
 }
 
-.hotel-card__feat {
-  color: var(--gy-gold-deep);
-  font-weight: 600;
+.hotel-card__chips li {
+  padding: 0.18rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(28, 36, 33, 0.05);
+  color: var(--gy-ink);
+  font-size: 0.74rem;
+  font-weight: 500;
 }
 
 .hotel-card__side {
   display: grid;
   gap: 0.4rem;
   justify-items: end;
+  align-content: start;
+}
+
+.hotel-card__status-select {
+  min-width: 118px;
+  background: #fff;
 }
 
 .hotel-card__actions {
@@ -664,17 +830,22 @@ watch([statusFilter, locationFilter, featuredOnly, query], syncQuery);
 
 @media (max-width: 860px) {
   .hotel-card {
-    grid-template-columns: 72px 1fr;
+    grid-template-columns: auto minmax(0, 1fr);
   }
 
   .hotel-card__side {
     grid-column: 1 / -1;
     justify-items: start;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
     width: 100%;
+    gap: 0.5rem;
   }
 
   .hotel-card__actions {
     justify-content: flex-start;
+    width: 100%;
   }
 
   .hotel-group__head {

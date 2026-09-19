@@ -163,7 +163,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref } from "vue";
 import { useQuasar } from "quasar";
 import AdminDialog from "@/components/admin/AdminDialog.vue";
 import AdminFormSection from "@/components/admin/AdminFormSection.vue";
@@ -173,6 +173,11 @@ import type { ContentStatus, NewsArticle } from "@/types/greyon";
 
 const cms = useCmsStore();
 const $q = useQuasar();
+
+onMounted(() => {
+  void cms.ensureNews();
+});
+
 const dialog = ref(false);
 const editing = ref<string | null>(null);
 const query = ref("");
@@ -231,38 +236,59 @@ function openEdit(item: NewsArticle) {
   dialog.value = true;
 }
 
-function save() {
+async function save() {
   if (!form.title) {
     $q.notify({ type: "negative", message: "Title is required." });
     return;
   }
-  cms.upsertNews({
-    ...(editing.value ? { id: editing.value } : {}),
-    title: form.title,
-    slug: form.slug,
-    coverImage: form.coverImage,
-    excerpt: form.excerpt,
-    body: form.body,
-    publishedAt: form.publishedAt,
-    status: form.status,
-    ...(form.seoTitle ? { seoTitle: form.seoTitle } : {}),
-    ...(form.seoDescription ? { seoDescription: form.seoDescription } : {})
-  });
-  dialog.value = false;
-  $q.notify({ type: "positive", message: "Article saved." });
+  try {
+    await cms.upsertNews({
+      ...(editing.value ? { id: editing.value } : {}),
+      title: form.title,
+      slug: form.slug,
+      coverImage: form.coverImage,
+      excerpt: form.excerpt,
+      body: form.body,
+      publishedAt: form.publishedAt,
+      status: form.status,
+      ...(form.seoTitle ? { seoTitle: form.seoTitle } : {}),
+      ...(form.seoDescription ? { seoDescription: form.seoDescription } : {})
+    });
+    dialog.value = false;
+    $q.notify({ type: "positive", message: "Article saved." });
+  } catch (e) {
+    $q.notify({
+      type: "negative",
+      message: e instanceof Error ? e.message : "Save failed."
+    });
+  }
 }
 
-function setStatus(id: string, status: string) {
+async function setStatus(id: string, status: string) {
   const item = cms.news.find(n => n.id === id);
   if (!item) return;
-  cms.upsertNews({ ...item, status: status as ContentStatus });
-  $q.notify({ type: "positive", message: `Article → ${status}` });
+  try {
+    await cms.upsertNews({ ...item, status: status as ContentStatus });
+    $q.notify({ type: "positive", message: `Article → ${status}` });
+  } catch (e) {
+    $q.notify({
+      type: "negative",
+      message: e instanceof Error ? e.message : "Update failed."
+    });
+  }
 }
 
 function remove(id: string) {
-  $q.dialog({ title: "Delete article?", cancel: true, persistent: true }).onOk(() => {
-    cms.deleteNews(id);
-    $q.notify({ type: "positive", message: "Article deleted." });
+  $q.dialog({ title: "Delete article?", cancel: true, persistent: true }).onOk(async () => {
+    try {
+      await cms.deleteNews(id);
+      $q.notify({ type: "positive", message: "Article deleted." });
+    } catch (e) {
+      $q.notify({
+        type: "negative",
+        message: e instanceof Error ? e.message : "Delete failed."
+      });
+    }
   });
 }
 </script>

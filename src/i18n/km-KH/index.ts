@@ -30,7 +30,7 @@ export default {
     featured: "សណ្ឋាគារពិសេស",
     stayWith: "ស្នាក់នៅជាមួយ Greyon",
     exploreBy: "រុករកតាមទីតាំង",
-    sixDestinations: "ទីតាំងទាំងប្រាំមួយ",
+    destinationsCount: "គ្មានទីតាំង | ទីតាំង ១ | ទីតាំង {n}",
     storyEyebrow: "រឿងរ៉ាវ Greyon",
     storyTitle: "សេវាភ្ញៀវថ្នាក់ខ្ពស់ ជាប់នឹងមូលដ្ឋាន",
     storyBody:

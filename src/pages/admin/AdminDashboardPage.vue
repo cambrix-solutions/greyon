@@ -291,7 +291,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useQuasar } from "quasar";
 import { useAuthStore } from "@/stores/auth-store";
 import { useCmsStore } from "@/stores/cms-store";
@@ -305,6 +305,16 @@ const cms = useCmsStore();
 const $q = useQuasar();
 const search = ref("");
 const focus = ref<Focus>("all");
+const loading = ref(true);
+
+onMounted(async () => {
+  loading.value = true;
+  try {
+    await cms.ensureDashboardData();
+  } finally {
+    loading.value = false;
+  }
+});
 
 const today = new Date().toISOString().slice(0, 10);
 
@@ -445,6 +455,12 @@ const quickActions = computed(() =>
       perm: "news"
     },
     {
+      label: "Hero slides",
+      to: "/admin/hero-slides",
+      icon: "view_carousel",
+      perm: "settings"
+    },
+    {
       label: "Site settings",
       to: "/admin/settings",
       icon: "tune",
@@ -535,8 +551,8 @@ function isArrivalToday(b: Booking) {
   return b.checkIn === today;
 }
 
-function setBookingStatus(reference: string, status: BookingStatus) {
-  cms.updateBookingStatus(reference, status);
+async function setBookingStatus(reference: string, status: BookingStatus) {
+  await cms.updateBookingStatus(reference, status);
   $q.notify({
     type: "positive",
     message: `Booking ${reference} → ${status}`
@@ -551,10 +567,10 @@ function confirmAllPending() {
     message: `This will confirm ${pending.length} reservation${pending.length === 1 ? "" : "s"}.`,
     cancel: true,
     persistent: true
-  }).onOk(() => {
-    for (const b of pending) {
-      cms.updateBookingStatus(b.reference, "confirmed");
-    }
+  }).onOk(async () => {
+    await Promise.all(
+      pending.map(b => cms.updateBookingStatus(b.reference, "confirmed"))
+    );
     $q.notify({
       type: "positive",
       message: `Confirmed ${pending.length} booking${pending.length === 1 ? "" : "s"}.`
@@ -562,8 +578,8 @@ function confirmAllPending() {
   });
 }
 
-function setEnquiryStatus(id: string, status: EnquiryStatus) {
-  cms.updateEnquiry(id, { status });
+async function setEnquiryStatus(id: string, status: EnquiryStatus) {
+  await cms.updateEnquiry(id, { status });
   $q.notify({
     type: "positive",
     message: `Enquiry marked ${status.replaceAll("_", " ")}.`
@@ -581,13 +597,14 @@ async function copyText(value: string) {
 
 function resetData() {
   $q.dialog({
-    title: "Reset demo data?",
-    message: "Restores seed content and clears bookings/enquiries.",
+    title: "Re-sync from engine?",
+    message:
+      "Clears the local cache and reloads catalog data from greyon-engine. Does not reset the database.",
     cancel: true,
     persistent: true
-  }).onOk(() => {
-    cms.resetToSeed();
-    $q.notify({ type: "positive", message: "Demo data reset." });
+  }).onOk(async () => {
+    await cms.resetToSeed();
+    $q.notify({ type: "positive", message: "Local cache re-synced." });
   });
 }
 </script>
@@ -595,7 +612,8 @@ function resetData() {
 <style scoped>
 .dash {
   padding: clamp(1rem, 2.2vw, 1.5rem);
-  max-width: 1180px;
+  width: 100%;
+  max-width: none;
 }
 
 .dash__head {

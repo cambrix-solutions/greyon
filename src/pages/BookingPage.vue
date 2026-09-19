@@ -159,10 +159,56 @@
 
       <!-- 4 Guest -->
       <section v-else-if="booking.step === 4" class="panel">
-        <h2 class="gy-display panel-title">Guest details</h2>
+        <h2 class="gy-display panel-title">Who’s staying</h2>
         <p class="panel-sub gy-muted">
-          We’ll use these details for your reservation request.
+          Lead guest contact for this reservation — an account is optional.
         </p>
+
+        <div
+          v-if="customer.isAuthenticated"
+          class="guest-account guest-account--in"
+        >
+          <p class="guest-account__title">
+            Booking with your Greyon account
+          </p>
+          <p class="guest-account__copy">
+            {{ customer.displayName }} · {{ customer.user?.email }}
+          </p>
+          <p class="guest-account__hint gy-muted">
+            This stay will appear under My account. Confirm or edit the
+            contact details below if someone else is the lead guest.
+          </p>
+        </div>
+        <div v-else class="guest-account guest-account--out">
+          <p class="guest-account__title">Save this stay to an account?</p>
+          <p class="guest-account__copy gy-muted">
+            Sign in so confirmation and details sync to My account. Or continue
+            as a guest with the form below — no account required.
+          </p>
+          <div class="guest-account__actions">
+            <router-link
+              class="gy-btn gy-btn--outline"
+              :to="{
+                name: 'sign-in',
+                query: { redirect: '/booking' }
+              }"
+              @click="booking.prepareAuthReturn()"
+            >
+              Sign in
+            </router-link>
+            <router-link
+              class="guest-account__link"
+              :to="{
+                name: 'sign-up',
+                query: { redirect: '/booking' }
+              }"
+              @click="booking.prepareAuthReturn()"
+            >
+              Create account
+            </router-link>
+          </div>
+        </div>
+
         <form class="form-grid" @submit.prevent="booking.goToReview()">
           <label :class="{ 'is-invalid': showGuestError('fullName') }">
             Full name *
@@ -351,7 +397,29 @@
         </div>
 
         <div class="panel-actions">
-          <router-link to="/" class="gy-btn">Back home</router-link>
+          <router-link
+            v-if="customer.isAuthenticated"
+            :to="{
+              name: 'account-booking',
+              params: { reference: booking.confirmedBooking.reference }
+            }"
+            class="gy-btn"
+          >
+            View booking details
+          </router-link>
+          <router-link
+            v-else
+            :to="{
+              name: 'sign-in',
+              query: {
+                redirect: `/account/bookings/${booking.confirmedBooking.reference}`
+              }
+            }"
+            class="gy-btn"
+          >
+            Sign in to track stays
+          </router-link>
+          <router-link to="/" class="gy-btn gy-btn--outline">Back home</router-link>
           <button
             class="gy-btn gy-btn--light"
             type="button"
@@ -366,11 +434,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, onMounted, watch } from "vue";
 import BookingSearchWidget from "@/components/BookingSearchWidget.vue";
 import SeoHead from "@/components/SeoHead.vue";
 import { useBookingStore } from "@/stores/booking-store";
 import { useCmsStore } from "@/stores/cms-store";
+import { useCustomerStore } from "@/stores/customer-store";
 import {
   formatStayRange,
   hotelCheckInTime,
@@ -379,6 +448,23 @@ import {
 
 const booking = useBookingStore();
 const cms = useCmsStore();
+const customer = useCustomerStore();
+customer.hydrate();
+
+onMounted(() => {
+  // After sign-in return: restore draft (if any) and fill account details.
+  booking.restoreDraft();
+  if (customer.isAuthenticated && booking.step >= 4) {
+    booking.applyCustomerToGuest();
+  }
+});
+
+watch(
+  () => customer.isAuthenticated,
+  (ok) => {
+    if (ok && booking.step >= 4) booking.applyCustomerToGuest();
+  }
+);
 
 const stepItems = [
   { n: 1, label: "Search" },
@@ -398,7 +484,7 @@ const stepTitle = computed(() => {
     case 3:
       return "Room details";
     case 4:
-      return "Guest details";
+      return "Who’s staying";
     case 5:
       return "Review";
     case 6:
@@ -687,6 +773,53 @@ function showGuestError(field: "fullName" | "email" | "phone") {
   gap: 0.95rem;
   max-width: 36rem;
   margin-top: 1rem;
+}
+
+.guest-account {
+  max-width: 36rem;
+  margin-top: 1rem;
+  padding: 1rem 1.05rem;
+  border: 1px solid rgba(28, 36, 33, 0.1);
+  background: var(--gy-cream);
+  display: grid;
+  gap: 0.35rem;
+}
+
+.guest-account--in {
+  border-color: rgba(196, 163, 90, 0.45);
+  background: rgba(196, 163, 90, 0.08);
+}
+
+.guest-account__title {
+  margin: 0;
+  font-weight: 600;
+  color: var(--gy-ink);
+}
+
+.guest-account__copy,
+.guest-account__hint {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.guest-account__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  margin-top: 0.45rem;
+}
+
+.guest-account__link {
+  color: var(--gy-gold-deep);
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.guest-account__link:hover {
+  text-decoration: underline;
 }
 
 .form-row {

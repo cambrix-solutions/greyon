@@ -1,4 +1,9 @@
-import { apiFetch, isApiEnabled } from "@/services/api";
+import {
+  createPublicBooking,
+  createPublicEnquiry,
+  getBookingByReference as fetchBookingByReference,
+  searchAvailability as fetchAvailability
+} from "@/services/engine/ops";
 import { useCmsStore } from "@/stores/cms-store";
 import type {
   AvailabilityResult,
@@ -8,22 +13,10 @@ import type {
   Enquiry
 } from "@/types/greyon";
 
-/** Pinia CMS by default; Nest API when VITE_USE_API=true. */
-
-export function searchAvailability(params: BookingSearchParams) {
-  if (!isApiEnabled()) {
-    return useCmsStore().searchAvailability(params);
-  }
-  const qs = new URLSearchParams({
-    checkIn: params.checkIn,
-    checkOut: params.checkOut,
-    rooms: String(params.rooms),
-    adults: String(params.adults),
-    children: String(params.children),
-    ...(params.locationSlug ? { locationSlug: params.locationSlug } : {}),
-    ...(params.hotelSlug ? { hotelSlug: params.hotelSlug } : {})
-  });
-  return apiFetch<AvailabilityResult[]>(`/availability?${qs.toString()}`);
+export async function searchAvailability(
+  params: BookingSearchParams
+): Promise<AvailabilityResult[]> {
+  return fetchAvailability(params);
 }
 
 export async function createBooking(input: {
@@ -37,74 +30,12 @@ export async function createBooking(input: {
   children: number;
   guest: BookingGuest;
 }): Promise<{ ok: true; booking: Booking } | { ok: false; message: string }> {
-  if (!isApiEnabled()) {
-    return useCmsStore().createBooking(input);
-  }
   try {
-    const saved = await apiFetch<{
-      id: string;
-      reference: string;
-      hotelId: string;
-      roomTypeId: string;
-      ratePlanId: string;
-      checkIn: string;
-      checkOut: string;
-      rooms: number;
-      adults: number;
-      children: number;
-      guestFullName: string;
-      guestEmail: string;
-      guestPhone: string;
-      specialRequests?: string;
-      subtotal: number;
-      taxesFees: number;
-      total: number;
-      status: Booking["status"];
-      source: "website" | "admin";
-      createdAt: string;
-    }>("/bookings", {
-      method: "POST",
-      body: JSON.stringify({
-        hotelId: input.hotelId,
-        roomTypeId: input.roomTypeId,
-        ratePlanId: input.ratePlanId,
-        checkIn: input.checkIn,
-        checkOut: input.checkOut,
-        rooms: input.rooms,
-        adults: input.adults,
-        children: input.children,
-        guestFullName: input.guest.fullName,
-        guestEmail: input.guest.email,
-        guestPhone: input.guest.phone,
-        specialRequests: input.guest.specialRequests
-      })
-    });
-    const booking: Booking = {
-      id: saved.id,
-      reference: saved.reference,
-      hotelId: saved.hotelId,
-      roomTypeId: saved.roomTypeId,
-      ratePlanId: saved.ratePlanId,
-      checkIn: saved.checkIn,
-      checkOut: saved.checkOut,
-      rooms: saved.rooms,
-      adults: saved.adults,
-      children: saved.children,
-      guest: {
-        fullName: saved.guestFullName,
-        email: saved.guestEmail,
-        phone: saved.guestPhone,
-        ...(saved.specialRequests
-          ? { specialRequests: saved.specialRequests }
-          : {})
-      },
-      subtotal: Number(saved.subtotal),
-      taxesFees: Number(saved.taxesFees),
-      total: Number(saved.total),
-      status: saved.status,
-      source: saved.source,
-      createdAt: saved.createdAt
-    };
+    const booking = await createPublicBooking(input);
+    const cms = useCmsStore();
+    const idx = cms.bookings.findIndex((b: Booking) => b.id === booking.id);
+    if (idx >= 0) cms.bookings[idx] = booking;
+    else cms.bookings.unshift(booking);
     return { ok: true, booking };
   } catch (e) {
     return {
@@ -114,11 +45,8 @@ export async function createBooking(input: {
   }
 }
 
-export function getBookingByReference(reference: string) {
-  if (!isApiEnabled()) {
-    return useCmsStore().getBookingByReference(reference);
-  }
-  return apiFetch(`/bookings/${reference}`);
+export async function getBookingByReference(reference: string) {
+  return fetchBookingByReference(reference);
 }
 
 export function listBookings(): Booking[] {
@@ -135,13 +63,10 @@ export function updateBookingStatus(
 export async function createEnquiry(
   input: Omit<Enquiry, "id" | "status" | "createdAt" | "internalNotes">
 ) {
-  if (!isApiEnabled()) {
-    return useCmsStore().createEnquiry(input);
-  }
-  return apiFetch("/enquiries", {
-    method: "POST",
-    body: JSON.stringify(input)
-  });
+  const enquiry = await createPublicEnquiry(input);
+  const cms = useCmsStore();
+  cms.enquiries.unshift(enquiry);
+  return enquiry;
 }
 
 export function listEnquiries(): Enquiry[] {

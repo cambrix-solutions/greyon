@@ -7,7 +7,16 @@
     />
 
     <section id="home-hero" class="home-hero">
-      <img class="home-hero__image" :src="heroImage" alt="Greyon hotel stay" />
+      <div class="home-hero__slides" aria-hidden="true">
+        <img
+          v-for="(slide, i) in heroSlides"
+          :key="`${i}-${slide.src}`"
+          class="home-hero__image"
+          :class="{ 'is-active': i === heroIndex }"
+          :src="slide.src"
+          :alt="slide.alt || 'Greyon hotel stay'"
+        />
+      </div>
       <div class="home-hero__veil" />
       <div class="gy-container home-hero__content">
         <div v-reveal class="home-hero__intro">
@@ -31,6 +40,24 @@
           compact
           class="home-hero__search"
         />
+        <div
+          v-if="heroSlides.length > 1"
+          class="home-hero__dots"
+          role="tablist"
+          aria-label="Hero slides"
+        >
+          <button
+            v-for="(slide, i) in heroSlides"
+            :key="`dot-${i}`"
+            type="button"
+            class="home-hero__dot"
+            :class="{ 'is-active': i === heroIndex }"
+            :aria-label="`Show slide ${i + 1}`"
+            :aria-selected="i === heroIndex"
+            role="tab"
+            @click="goToSlide(i)"
+          />
+        </div>
       </div>
     </section>
 
@@ -62,7 +89,9 @@
         <header v-reveal class="section-intro section-intro--row">
           <div>
             <p class="gy-eyebrow">{{ $t("home.exploreBy") }}</p>
-            <h2 class="gy-display section-title">{{ $t("home.sixDestinations") }}</h2>
+            <h2 class="gy-display section-title">
+              {{ $t("home.destinationsCount", locations.length) }}
+            </h2>
           </div>
           <router-link to="/locations" class="gy-link-arrow">
             All locations
@@ -70,7 +99,10 @@
           </router-link>
         </header>
       </div>
-      <div class="location-strip">
+      <div
+        class="location-strip"
+        :style="{ '--loc-count': Math.max(locations.length, 1) }"
+      >
         <router-link
           v-for="(loc, i) in locations"
           :key="loc.id"
@@ -143,17 +175,68 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import BookingSearchWidget from "@/components/BookingSearchWidget.vue";
 import HotelCard from "@/components/HotelCard.vue";
 import SeoHead from "@/components/SeoHead.vue";
 import { useAuthStore } from "@/stores/auth-store";
 import { useCmsStore } from "@/stores/cms-store";
 
+const FALLBACK_HERO =
+  "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=2000&q=80";
+
 const cms = useCmsStore();
 const auth = useAuthStore();
-const heroImage =
-  "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=2000&q=80";
+
+const heroSlides = computed(() => {
+  const slides = cms.settings.heroSlides?.filter(s => s.src) ?? [];
+  if (slides.length) return slides;
+  return [{ src: FALLBACK_HERO, alt: "Greyon hotel stay" }];
+});
+
+const heroImage = computed(
+  () => heroSlides.value[0]?.src ?? FALLBACK_HERO
+);
+
+const heroIndex = ref(0);
+let timer: ReturnType<typeof setInterval> | null = null;
+
+function clearTimer() {
+  if (timer) {
+    clearInterval(timer);
+    timer = null;
+  }
+}
+
+function startTimer() {
+  clearTimer();
+  if (heroSlides.value.length < 2) return;
+  timer = setInterval(() => {
+    heroIndex.value = (heroIndex.value + 1) % heroSlides.value.length;
+  }, 6500);
+}
+
+function goToSlide(i: number) {
+  heroIndex.value = i;
+  startTimer();
+}
+
+watch(
+  heroSlides,
+  slides => {
+    if (heroIndex.value >= slides.length) heroIndex.value = 0;
+    startTimer();
+  },
+  { immediate: true }
+);
+
+onMounted(() => {
+  void cms.ensurePublicCatalog();
+  startTimer();
+});
+
+onUnmounted(() => clearTimer());
+
 const featuredHotels = computed(() =>
   cms.publishedHotels.filter(h => h.featured).slice(0, 3)
 );
@@ -180,14 +263,59 @@ const latestNews = computed(() => cms.publishedNews.slice(0, 3));
   overflow: hidden;
 }
 
+.home-hero__slides {
+  position: absolute;
+  inset: 0;
+}
+
 .home-hero__image {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transform: scale(1.04);
+  opacity: 0;
+  transform: scale(1.06);
+  transition: opacity 1.1s ease;
+  animation: none;
+}
+
+.home-hero__image.is-active {
+  opacity: 1;
   animation: hero-ken 22s ease-out forwards;
+  z-index: 0;
+}
+
+.home-hero__dots {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  gap: 0.45rem;
+  justify-content: flex-start;
+  margin-top: 0.35rem;
+}
+
+.home-hero__dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    width 0.2s ease;
+}
+
+.home-hero__dot.is-active {
+  width: 1.35rem;
+  background: var(--gy-gold);
+}
+
+.home-hero__dot:hover {
+  background: rgba(255, 255, 255, 0.75);
 }
 
 .home-hero__veil {
@@ -314,7 +442,7 @@ const latestNews = computed(() => cms.publishedNews.slice(0, 3));
 
 .location-strip {
   display: grid;
-  grid-template-columns: repeat(6, minmax(140px, 1fr));
+  grid-template-columns: repeat(var(--loc-count, 3), minmax(140px, 1fr));
   gap: 0;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
@@ -435,7 +563,7 @@ const latestNews = computed(() => cms.publishedNews.slice(0, 3));
   }
 
   .location-strip {
-    grid-template-columns: repeat(6, minmax(160px, 1fr));
+    grid-template-columns: repeat(var(--loc-count, 3), minmax(160px, 1fr));
   }
 }
 

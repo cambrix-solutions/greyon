@@ -139,7 +139,10 @@ function applyRouteQuery() {
   syncingFromRoute = false;
 }
 
-onMounted(applyRouteQuery);
+onMounted(async () => {
+  await cms.ensureEnquiries();
+  applyRouteQuery();
+});
 watch(() => route.query.status, applyRouteQuery);
 watch(statusFilter, value => {
   if (syncingFromRoute) return;
@@ -165,21 +168,21 @@ const filtered = computed(() => {
   });
 });
 
-function setStatus(id: string, status: string) {
-  cms.updateEnquiry(id, { status: status as EnquiryStatus });
+async function setStatus(id: string, status: string) {
+  await cms.updateEnquiry(id, { status: status as EnquiryStatus });
   $q.notify({
     type: "positive",
     message: `Enquiry → ${status.replaceAll("_", " ")}`
   });
 }
 
-function setNotes(id: string, internalNotes: string) {
-  cms.updateEnquiry(id, { internalNotes });
+async function setNotes(id: string, internalNotes: string) {
+  await cms.updateEnquiry(id, { internalNotes });
 }
 
 function remove(id: string) {
-  $q.dialog({ title: "Delete enquiry?", cancel: true, persistent: true }).onOk(() => {
-    cms.deleteEnquiry(id);
+  $q.dialog({ title: "Delete enquiry?", cancel: true, persistent: true }).onOk(async () => {
+    await cms.deleteEnquiry(id);
     $q.notify({ type: "positive", message: "Enquiry deleted." });
   });
 }

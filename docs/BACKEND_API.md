@@ -1,15 +1,11 @@
 # Greyon Backend API — Handoff Spec
 
-**For:** Backend developer — **Laravel + Breeze** (API stack) + PostgreSQL (or MySQL)  
-**Frontend today:** Quasar Vue SPA — Pinia + `localStorage` mock (`src/types/greyon.ts`)  
-**Goal:** Build a real Laravel API so the SPA can set `VITE_USE_API=true` and stop using mock data  
-**Base URL:** `https://{host}/api`  
-**JSON:** camelCase request/response bodies (or configure Laravel API Resources to match)  
-**Auth:** **Laravel Breeze** with **API** scaffolding (uses Sanctum under the hood). Send `Authorization: Bearer <token>` on all `/admin/*` routes  
+**Status:** Implemented in **greyon-engine** (Laravel). The Quasar SPA talks to it with session cookies (`VITE_USE_API=true`). Nest `/api` and SPA seed mocks are removed.
 
-> **Repo note:** The NestJS stub in `/api` is **not** the production backend. Keep it for reference for now. **Delete `/api` when the Laravel + Breeze API is integrated** with the SPA.
+**JSON:** camelCase request/response bodies (Laravel API Resources)  
+**Auth:** Session cookies on `admin` / `developer` / `web` guards (CSRF disabled for JSON clients). Not Sanctum Bearer.
 
-> This document is the product contract. Implement it in **Laravel + Breeze** — ignore Nest-specific layout in older stubs.
+> This document remains the product contract. Prefer live routes in greyon-engine (`routes/admin.php`, `developer.php`, `public.php`) when they differ from older sketches below (e.g. packages live under `/developer/*`, not `/admin/*`).
 
 ---
 
@@ -576,7 +572,7 @@ Align with SPA demos for QA:
 | `hotel@greyon.com.kh` | Hotel Admin · Core | hotel Riverside (PP) |
 | `guest@example.com` | Customer | no admin |
 
-Reference package feature sets: see frontend `src/data/seed-packages.ts` and `src/data/seed-features.ts`.
+Reference package feature sets: greyon-engine `FeatureSeeder` / `PackageSeeder` (SPA loads them via `/developer/features` and `/developer/packages`).
 
 ---
 
@@ -597,11 +593,15 @@ Reference package feature sets: see frontend `src/data/seed-packages.ts` and `sr
 
 ## 13. Frontend wiring
 
+> **Live backend:** sibling repo **`greyon-engine`** uses **session cookies** (not Sanctum Bearer). See `docs/ENGINE_INTEGRATION.md`.
+> API hosts are selected via **`VITE_APP_MODE`** + `src/helpers/api/apiConfig.ts` (IBPF-style).
+
 Quasar env:
 
 ```
+VITE_APP_MODE=local
 VITE_USE_API=true
-VITE_API_BASE_URL=http://localhost:3000/api
+# optional: VITE_ENGINE_URL=https://greyon-engine.test
 ```
 
 SPA types: `src/types/greyon.ts`  
@@ -659,7 +659,7 @@ Auth: **Laravel Breeze (API)** → Sanctum bearer tokens.
 Map Breeze login to return the same `{ accessToken, user }` shape as section 6 — extend the user payload with `roles`, `featureKeys`, `packages`, `locationIds`, `hotelIds`.  
 Guards: `auth:sanctum` → permission (`can`) → query-level hotel/location scope.
 
-When Laravel + Breeze is live and the Quasar app points at it (`VITE_USE_API=true`), **remove the Nest `/api` folder** from this repo.
+Nest `/api` and SPA seed mocks have been removed; the live backend is greyon-engine.
 
 ---
 
