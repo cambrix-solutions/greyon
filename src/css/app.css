@@ -348,7 +348,9 @@ a {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  transition: gap 0.25s ease, color 0.25s ease;
+  transition:
+    gap 0.25s ease,
+    color 0.25s ease;
 }
 
 .gy-link-arrow:hover {
@@ -413,4 +415,3 @@ a {
     transform: none;
   }
 }
-

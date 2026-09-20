@@ -67,13 +67,19 @@
     </div>
 
     <div v-reveal="{ delay: '80ms' }" class="hotel-groups">
-      <section v-for="group in grouped" :key="group.locationId" class="hotel-group">
+      <section
+        v-for="group in grouped"
+        :key="group.locationId"
+        class="hotel-group"
+      >
         <header class="hotel-group__head">
           <div>
             <p class="hotel-group__level">Location</p>
             <h2 class="hotel-group__title">{{ group.locationName }}</h2>
             <p class="hotel-group__meta">
-              {{ group.hotels.length }} hotel{{ group.hotels.length === 1 ? "" : "s" }}
+              {{ group.hotels.length }} hotel{{
+                group.hotels.length === 1 ? "" : "s"
+              }}
             </p>
           </div>
           <div class="hotel-group__links">
@@ -114,11 +120,9 @@
             <div class="hotel-card__body">
               <div class="hotel-card__topline">
                 <p class="hotel-card__crumb">Hotel</p>
-                <span
-                  class="hotel-card__status"
-                  :data-status="hotel.status"
-                  >{{ hotel.status }}</span
-                >
+                <span class="hotel-card__status" :data-status="hotel.status">{{
+                  hotel.status
+                }}</span>
                 <span v-if="hotel.featured" class="hotel-card__feat-pill"
                   >Featured</span
                 >
@@ -151,7 +155,9 @@
                 dense
                 :model-value="Boolean(hotel.featured)"
                 label="Featured"
-                @update:model-value="(v: boolean) => toggleFeatured(hotel.id, v)"
+                @update:model-value="
+                  (v: boolean) => toggleFeatured(hotel.id, v)
+                "
               />
               <div class="hotel-card__actions">
                 <q-btn
@@ -198,7 +204,13 @@
 
       <div v-if="!grouped.length" class="hotel-groups__empty">
         No hotels match.
-        <q-btn flat dense color="primary" label="Add hotel" @click="openCreate" />
+        <q-btn
+          flat
+          dense
+          color="primary"
+          label="Add hotel"
+          @click="openCreate"
+        />
       </div>
     </div>
 
@@ -211,8 +223,8 @@
       subtitle="Link this property to a location, then add room types under it."
     >
       <template #notice>
-        Required relationship: <strong>Location → Hotel → Rooms</strong>. Pick the parent
-        location first.
+        Required relationship: <strong>Location → Hotel → Rooms</strong>. Pick
+        the parent location first.
       </template>
       <AdminFormSection title="Essentials" :columns="2">
         <q-input v-model="form.name" label="Hotel name" outlined dense />
@@ -259,10 +271,16 @@
           <q-toggle v-model="form.featured" label="Featured on home" />
         </div>
       </AdminFormSection>
-      <AdminFormSection title="Gallery" hint="Extra photos for the hotel detail page.">
+      <AdminFormSection
+        title="Gallery"
+        hint="Extra photos for the hotel detail page."
+      >
         <GalleryEditor v-model="gallery" label="Hotel gallery" />
       </AdminFormSection>
-      <AdminFormSection title="About the stay" hint="Longer copy for the hotel detail page.">
+      <AdminFormSection
+        title="About the stay"
+        hint="Longer copy for the hotel detail page."
+      >
         <q-input
           v-model="form.description"
           label="Full description"
@@ -279,11 +297,29 @@
         />
       </AdminFormSection>
       <AdminFormSection title="Contact & hours" :columns="2">
-        <q-input v-model="form.address" label="Address" outlined dense class="admin-form-span-2" />
+        <q-input
+          v-model="form.address"
+          label="Address"
+          outlined
+          dense
+          class="admin-form-span-2"
+        />
         <q-input v-model="form.phone" label="Phone" outlined dense />
         <q-input v-model="form.email" label="Email" outlined dense />
-        <q-input v-model="form.checkInTime" type="time" label="Check-in" outlined dense />
-        <q-input v-model="form.checkOutTime" type="time" label="Check-out" outlined dense />
+        <q-input
+          v-model="form.checkInTime"
+          type="time"
+          label="Check-in"
+          outlined
+          dense
+        />
+        <q-input
+          v-model="form.checkOutTime"
+          type="time"
+          label="Check-out"
+          outlined
+          dense
+        />
       </AdminFormSection>
       <template #actions>
         <q-btn flat no-caps label="Cancel" v-close-popup />
@@ -358,7 +394,8 @@ const filtered = computed(() => {
   const q = query.value.trim().toLowerCase();
   return cms.hotels.filter(h => {
     if (!auth.canAccessHotel(h.id)) return false;
-    if (statusFilter.value !== "all" && h.status !== statusFilter.value) return false;
+    if (statusFilter.value !== "all" && h.status !== statusFilter.value)
+      return false;
     if (locationFilter.value !== "all" && h.locationId !== locationFilter.value)
       return false;
     if (featuredOnly.value && !h.featured) return false;
@@ -496,27 +533,23 @@ function save() {
 function setStatus(id: string, status: string) {
   const hotel = cms.getHotelById(id);
   if (!hotel) return;
-  void cms
-    .upsertHotel({ ...hotel, status: status as ContentStatus })
-    .catch(e =>
-      $q.notify({
-        type: "negative",
-        message: e instanceof Error ? e.message : "Update failed."
-      })
-    );
+  void cms.upsertHotel({ ...hotel, status: status as ContentStatus }).catch(e =>
+    $q.notify({
+      type: "negative",
+      message: e instanceof Error ? e.message : "Update failed."
+    })
+  );
 }
 
 function toggleFeatured(id: string, featured: boolean) {
   const hotel = cms.getHotelById(id);
   if (!hotel) return;
-  void cms
-    .upsertHotel({ ...hotel, featured })
-    .catch(e =>
-      $q.notify({
-        type: "negative",
-        message: e instanceof Error ? e.message : "Update failed."
-      })
-    );
+  void cms.upsertHotel({ ...hotel, featured }).catch(e =>
+    $q.notify({
+      type: "negative",
+      message: e instanceof Error ? e.message : "Update failed."
+    })
+  );
 }
 
 function remove(id: string) {

@@ -60,7 +60,8 @@
       Base rate plans below. Hotel check-in / check-out
       <strong>times</strong> come from each hotel (edit under Hotels).
       <template v-if="auth.isDeveloper">
-        Inventory is per night — use List or Calendar below to set units, stop-sell, and prices.
+        Inventory is per night — use List or Calendar below to set units,
+        stop-sell, and prices.
       </template>
     </q-banner>
 
@@ -84,7 +85,13 @@
             <td>{{ plan.taxPercent }}% + {{ plan.serviceFeePercent }}%</td>
             <td>{{ plan.status }}</td>
             <td>
-              <q-btn flat dense color="primary" label="Edit" @click="openEdit(plan)" />
+              <q-btn
+                flat
+                dense
+                color="primary"
+                label="Edit"
+                @click="openEdit(plan)"
+              />
               <q-btn
                 v-if="auth.isDeveloper"
                 flat
@@ -93,13 +100,25 @@
                 label="Inventory"
                 @click="jumpToInventory(plan.roomTypeId)"
               />
-              <q-btn flat dense color="negative" label="Delete" @click="remove(plan.id)" />
+              <q-btn
+                flat
+                dense
+                color="negative"
+                label="Delete"
+                @click="remove(plan.id)"
+              />
             </td>
           </tr>
           <tr v-if="!filteredPlans.length">
             <td colspan="6" class="text-grey">
               No rate plans match.
-              <q-btn flat dense color="primary" label="Add rate plan" @click="openCreate" />
+              <q-btn
+                flat
+                dense
+                color="primary"
+                label="Add rate plan"
+                @click="openCreate"
+              />
             </td>
           </tr>
         </tbody>
@@ -123,7 +142,10 @@
     </div>
 
     <template v-if="auth.isDeveloper">
-      <div id="inventory-section" class="row items-center justify-between q-mb-md q-mt-lg">
+      <div
+        id="inventory-section"
+        class="row items-center justify-between q-mb-md q-mt-lg"
+      >
         <h2 class="text-h6 q-ma-none">Inventory & rates</h2>
         <q-btn-toggle
           v-model="inventoryView"
@@ -210,7 +232,7 @@
                   type="number"
                   style="max-width: 90px"
                   :model-value="unitsValue(day)"
-                  @update:model-value="(v) => setUnits(day, Number(v))"
+                  @update:model-value="v => setUnits(day, Number(v))"
                 />
               </td>
               <td>
@@ -229,7 +251,7 @@
                   style="max-width: 110px"
                   :disable="!selectedPlanId"
                   :model-value="priceValue(day)"
-                  @update:model-value="(v) => setPrice(day, Number(v))"
+                  @update:model-value="v => setPrice(day, Number(v))"
                 />
               </td>
               <td>
@@ -242,7 +264,7 @@
                     :disable="!selectedPlanId"
                     :model-value="minStayValue(day)"
                     label="min"
-                    @update:model-value="(v) => setMinStay(day, v)"
+                    @update:model-value="v => setMinStay(day, v)"
                   />
                   <q-input
                     dense
@@ -252,7 +274,7 @@
                     :disable="!selectedPlanId"
                     :model-value="maxStayValue(day)"
                     label="max"
-                    @update:model-value="(v) => setMaxStay(day, v)"
+                    @update:model-value="v => setMaxStay(day, v)"
                   />
                 </div>
               </td>
@@ -294,7 +316,9 @@
               'cal__cell--today': cell.date === today,
               'cal__cell--stop': cell.inMonth && stopSellValue(cell.date),
               'cal__cell--low':
-                cell.inMonth && !stopSellValue(cell.date) && freeUnits(cell.date) <= 1
+                cell.inMonth &&
+                !stopSellValue(cell.date) &&
+                freeUnits(cell.date) <= 1
             }"
             :disabled="!cell.inMonth || !selectedRoomId"
             @click="openDayEditor(cell.date)"
@@ -302,7 +326,11 @@
             <span class="cal__day">{{ cell.day }}</span>
             <template v-if="cell.inMonth && selectedRoomId">
               <span class="cal__meta">
-                {{ stopSellValue(cell.date) ? "Stop" : `${freeUnits(cell.date)} free` }}
+                {{
+                  stopSellValue(cell.date)
+                    ? "Stop"
+                    : `${freeUnits(cell.date)} free`
+                }}
               </span>
               <span v-if="selectedPlanId" class="cal__price">
                 ${{ priceValue(cell.date) }}
@@ -337,7 +365,12 @@
           class="admin-form-span-2"
         />
         <q-input v-model="form.name" label="Plan name" outlined dense />
-        <q-input v-model="form.mealBenefit" label="Meal / benefit" outlined dense />
+        <q-input
+          v-model="form.mealBenefit"
+          label="Meal / benefit"
+          outlined
+          dense
+        />
         <q-input
           v-model="form.description"
           label="Description"
@@ -346,9 +379,26 @@
           class="admin-form-span-2"
         />
       </AdminFormSection>
-      <AdminFormSection title="Pricing" hint="Nightly base price plus tax and service fee percentages." :columns="3">
-        <q-input v-model.number="form.basePrice" type="number" label="Base price" outlined dense prefix="$" />
-        <q-input v-model.number="form.taxPercent" type="number" label="Tax %" outlined dense />
+      <AdminFormSection
+        title="Pricing"
+        hint="Nightly base price plus tax and service fee percentages."
+        :columns="3"
+      >
+        <q-input
+          v-model.number="form.basePrice"
+          type="number"
+          label="Base price"
+          outlined
+          dense
+          prefix="$"
+        />
+        <q-input
+          v-model.number="form.taxPercent"
+          type="number"
+          label="Tax %"
+          outlined
+          dense
+        />
         <q-input
           v-model.number="form.serviceFeePercent"
           type="number"
@@ -396,71 +446,88 @@
         :title="editingDay ? `Edit ${formatDate(editingDay)}` : 'Edit day'"
         :subtitle="dayDialogSubtitle"
       >
-      <template v-if="editingDay">
-        <AdminFormSection
-          title="Availability"
-          hint="Units available for this night after stop-sell and bookings."
-          :columns="2"
-        >
-          <q-input
-            v-model.number="dayForm.units"
-            type="number"
-            label="Available units"
-            outlined
-            dense
+        <template v-if="editingDay">
+          <AdminFormSection
+            title="Availability"
+            hint="Units available for this night after stop-sell and bookings."
+            :columns="2"
+          >
+            <q-input
+              v-model.number="dayForm.units"
+              type="number"
+              label="Available units"
+              outlined
+              dense
+            />
+            <div class="day-toggle">
+              <q-toggle
+                v-model="dayForm.stopSell"
+                label="Stop-sell this night"
+              />
+            </div>
+            <p class="day-preview admin-form-span-2">
+              Booked: {{ cms.bookedOnNight(selectedRoomId, editingDay) }} · Free
+              preview:
+              {{
+                dayForm.stopSell
+                  ? 0
+                  : Math.max(
+                      0,
+                      Number(dayForm.units) -
+                        cms.bookedOnNight(selectedRoomId, editingDay)
+                    )
+              }}
+            </p>
+          </AdminFormSection>
+          <AdminFormSection title="Price & stay rules" :columns="3">
+            <q-input
+              v-model.number="dayForm.price"
+              type="number"
+              label="Night price"
+              outlined
+              dense
+              prefix="$"
+              :disable="!selectedPlanId"
+              :hint="selectedPlanId ? undefined : 'Select a rate plan first'"
+            />
+            <q-input
+              v-model.number="dayForm.minStay"
+              type="number"
+              label="Min stay"
+              outlined
+              dense
+              :disable="!selectedPlanId"
+              clearable
+            />
+            <q-input
+              v-model.number="dayForm.maxStay"
+              type="number"
+              label="Max stay"
+              outlined
+              dense
+              :disable="!selectedPlanId"
+              clearable
+            />
+          </AdminFormSection>
+        </template>
+        <template #actions>
+          <q-btn
+            flat
+            no-caps
+            color="grey-8"
+            label="Clear day"
+            @click="clearEditingDay"
           />
-          <div class="day-toggle">
-            <q-toggle v-model="dayForm.stopSell" label="Stop-sell this night" />
-          </div>
-          <p class="day-preview admin-form-span-2">
-            Booked: {{ cms.bookedOnNight(selectedRoomId, editingDay) }} · Free preview:
-            {{
-              dayForm.stopSell
-                ? 0
-                : Math.max(
-                    0,
-                    Number(dayForm.units) - cms.bookedOnNight(selectedRoomId, editingDay)
-                  )
-            }}
-          </p>
-        </AdminFormSection>
-        <AdminFormSection title="Price & stay rules" :columns="3">
-          <q-input
-            v-model.number="dayForm.price"
-            type="number"
-            label="Night price"
-            outlined
-            dense
-            prefix="$"
-            :disable="!selectedPlanId"
-            :hint="selectedPlanId ? undefined : 'Select a rate plan first'"
+          <q-space />
+          <q-btn flat no-caps label="Cancel" v-close-popup />
+          <q-btn
+            color="primary"
+            unelevated
+            no-caps
+            label="Save day"
+            @click="saveDayEditor"
           />
-          <q-input
-            v-model.number="dayForm.minStay"
-            type="number"
-            label="Min stay"
-            outlined
-            dense
-            :disable="!selectedPlanId"
-            clearable
-          />
-          <q-input
-            v-model.number="dayForm.maxStay"
-            type="number"
-            label="Max stay"
-            outlined
-            dense
-            :disable="!selectedPlanId"
-            clearable
-          />
-        </AdminFormSection>
-      </template>
-      <template #actions>
-        <q-btn flat no-caps color="grey-8" label="Clear day" @click="clearEditingDay" />
-        <q-space />
-        <q-btn flat no-caps label="Cancel" v-close-popup />
-        <q-btn color="primary" unelevated no-caps label="Save day" @click="saveDayEditor" />
-      </template>
+        </template>
       </AdminDialog>
     </template>
   </q-page>
@@ -581,7 +648,10 @@ const filteredPlans = computed(() => {
   const allowed = new Set(auth.scopedRatePlans.map(p => p.id));
   return cms.ratePlans.filter(plan => {
     if (!allowed.has(plan.id)) return false;
-    if (planStatusFilter.value !== "all" && plan.status !== planStatusFilter.value) {
+    if (
+      planStatusFilter.value !== "all" &&
+      plan.status !== planStatusFilter.value
+    ) {
       return false;
     }
     if (planRoomFilter.value && plan.roomTypeId !== planRoomFilter.value) {
@@ -605,9 +675,7 @@ const pagedPlans = computed(() => {
 });
 
 const planRangeStart = computed(() =>
-  filteredPlans.value.length
-    ? (planPage.value - 1) * planPageSize.value + 1
-    : 0
+  filteredPlans.value.length ? (planPage.value - 1) * planPageSize.value + 1 : 0
 );
 
 const planRangeEnd = computed(() =>
@@ -725,7 +793,9 @@ function monthStart(date: Date) {
 
 function shiftMonth(delta: number) {
   const d = parseYmd(monthCursor.value);
-  monthCursor.value = monthStart(new Date(d.getFullYear(), d.getMonth() + delta, 1));
+  monthCursor.value = monthStart(
+    new Date(d.getFullYear(), d.getMonth() + delta, 1)
+  );
 }
 
 function goToday() {
@@ -741,7 +811,10 @@ function roomBase() {
 }
 
 function unitsValue(date: string) {
-  return cms.getAvailability(selectedRoomId.value, date)?.availableUnits ?? roomBase();
+  return (
+    cms.getAvailability(selectedRoomId.value, date)?.availableUnits ??
+    roomBase()
+  );
 }
 
 function stopSellValue(date: string) {
@@ -760,7 +833,9 @@ function priceValue(date: string) {
   if (!selectedPlanId.value) return "";
   const plan = cms.getRatePlanById(selectedPlanId.value);
   return (
-    cms.getRateForDate(selectedPlanId.value, date)?.price ?? plan?.basePrice ?? 0
+    cms.getRateForDate(selectedPlanId.value, date)?.price ??
+    plan?.basePrice ??
+    0
   );
 }
 
@@ -859,7 +934,11 @@ function saveDayEditor() {
     availableUnits: Number(dayForm.units),
     stopSell: dayForm.stopSell
   });
-  if (selectedPlanId.value && dayForm.price !== null && !Number.isNaN(Number(dayForm.price))) {
+  if (
+    selectedPlanId.value &&
+    dayForm.price !== null &&
+    !Number.isNaN(Number(dayForm.price))
+  ) {
     cms.upsertRateCalendar({
       ratePlanId: selectedPlanId.value,
       date,
@@ -904,7 +983,10 @@ function openEdit(plan: RatePlan) {
 
 function save() {
   if (!form.name || !form.roomTypeId) {
-    $q.notify({ type: "negative", message: "Name and room type are required." });
+    $q.notify({
+      type: "negative",
+      message: "Name and room type are required."
+    });
     return;
   }
   void (async () => {
@@ -925,7 +1007,11 @@ function save() {
 }
 
 function remove(id: string) {
-  $q.dialog({ title: "Delete rate plan?", cancel: true, persistent: true }).onOk(() => {
+  $q.dialog({
+    title: "Delete rate plan?",
+    cancel: true,
+    persistent: true
+  }).onOk(() => {
     void cms
       .deleteRate(id)
       .then(() => $q.notify({ type: "positive", message: "Rate deleted." }))

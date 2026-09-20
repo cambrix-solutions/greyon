@@ -3,7 +3,12 @@
   "version": "0.0.1",
   "private": true,
   "description": "Greyon hotel portfolio and booking website",
-  "keywords": ["greyon", "quasar", "hotel", "booking"],
+  "keywords": [
+    "booking",
+    "greyon",
+    "hotel",
+    "quasar"
+  ],
   "author": "rernvirak-max <rernvirak5@gmail.com>",
   "type": "module",
   "scripts": {
@@ -32,7 +37,7 @@
     "oxlint": "^1.x",
     "oxlint-tsgolint": "^7.0.2001",
     "postcss": "^8.5.8",
-    "typescript": "^6.0.0",
+    "typescript": "~5.9.3",
     "vue-tsc": "^3.3.3"
   },
   "engines": {

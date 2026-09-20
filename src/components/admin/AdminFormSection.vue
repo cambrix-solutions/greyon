@@ -1,6 +1,9 @@
 <template>
   <section class="admin-form-section">
-    <header v-if="title || hint || $slots.aside" class="admin-form-section__head">
+    <header
+      v-if="title || hint || $slots.aside"
+      class="admin-form-section__head"
+    >
       <div class="admin-form-section__copy">
         <p v-if="eyebrow" class="admin-form-section__eyebrow">{{ eyebrow }}</p>
         <h3 v-if="title" class="admin-form-section__title">{{ title }}</h3>

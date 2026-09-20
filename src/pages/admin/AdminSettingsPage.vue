@@ -6,7 +6,13 @@
       subtitle="Site defaults, contact, and payment MVP flag."
     >
       <template #actions>
-        <q-btn unelevated no-caps color="primary" label="Save settings" @click="save" />
+        <q-btn
+          unelevated
+          no-caps
+          color="primary"
+          label="Save settings"
+          @click="save"
+        />
       </template>
     </AdminPageHeader>
 
@@ -22,7 +28,12 @@
               outlined
               dense
             />
-            <q-input v-model="form.defaultTitle" label="Default meta title" outlined dense />
+            <q-input
+              v-model="form.defaultTitle"
+              label="Default meta title"
+              outlined
+              dense
+            />
             <q-input
               v-model="form.defaultDescription"
               label="Default meta description"
@@ -30,7 +41,12 @@
               outlined
               autogrow
             />
-            <q-input v-model="form.ogImage" label="Default Open Graph image URL" outlined dense />
+            <q-input
+              v-model="form.ogImage"
+              label="Default Open Graph image URL"
+              outlined
+              dense
+            />
             <q-input
               v-model="form.analyticsId"
               label="Analytics / GTM ID"
@@ -46,8 +62,18 @@
           <q-card-section>
             <div class="text-subtitle1 q-mb-md">Contact</div>
             <div class="q-gutter-md">
-              <q-input v-model="form.contactEmail" label="Public contact email" outlined dense />
-              <q-input v-model="form.contactPhone" label="Public contact phone" outlined dense />
+              <q-input
+                v-model="form.contactEmail"
+                label="Public contact email"
+                outlined
+                dense
+              />
+              <q-input
+                v-model="form.contactPhone"
+                label="Public contact phone"
+                outlined
+                dense
+              />
             </div>
           </q-card-section>
         </q-card>

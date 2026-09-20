@@ -6,7 +6,14 @@
       :subtitle="`${filtered.length} articles · site stories, not property inventory`"
     >
       <template #actions>
-        <q-btn outline no-caps color="primary" label="View live" to="/news" target="_blank" />
+        <q-btn
+          outline
+          no-caps
+          color="primary"
+          label="View live"
+          to="/news"
+          target="_blank"
+        />
         <q-btn
           unelevated
           no-caps
@@ -41,8 +48,8 @@
     </AdminPageHeader>
 
     <p v-reveal class="pub-note">
-      News sits outside the property tree. Locations, hotels, and rooms stay linked by foreign keys;
-      articles publish independently to the public site.
+      News sits outside the property tree. Locations, hotels, and rooms stay
+      linked by foreign keys; articles publish independently to the public site.
     </p>
 
     <div v-reveal="{ delay: '80ms' }" class="news-grid">
@@ -53,7 +60,9 @@
         <div class="news-card__body">
           <div class="news-card__top">
             <span class="news-card__date">{{ item.publishedAt }}</span>
-            <span class="news-card__status" :data-status="item.status">{{ item.status }}</span>
+            <span class="news-card__status" :data-status="item.status">{{
+              item.status
+            }}</span>
           </div>
           <h2 class="news-card__title">{{ item.title }}</h2>
           <p class="news-card__excerpt">{{ item.excerpt }}</p>
@@ -69,7 +78,14 @@
             @update:model-value="(v: string) => setStatus(item.id, v)"
           />
           <div class="news-card__actions">
-            <q-btn flat dense no-caps color="primary" label="Edit" @click="openEdit(item)" />
+            <q-btn
+              flat
+              dense
+              no-caps
+              color="primary"
+              label="Edit"
+              @click="openEdit(item)"
+            />
             <q-btn
               v-if="item.status === 'published'"
               flat
@@ -102,7 +118,13 @@
 
       <div v-if="!filtered.length" class="news-grid__empty">
         No articles match.
-        <q-btn flat dense color="primary" label="Add article" @click="openCreate" />
+        <q-btn
+          flat
+          dense
+          color="primary"
+          label="Add article"
+          @click="openCreate"
+        />
       </div>
     </div>
 
@@ -133,9 +155,18 @@
       </AdminFormSection>
       <AdminFormSection title="Details" :columns="2">
         <q-input v-model="form.slug" label="URL slug" outlined dense />
-        <q-input v-model="form.publishedAt" type="date" label="Publish date" outlined dense />
+        <q-input
+          v-model="form.publishedAt"
+          type="date"
+          label="Publish date"
+          outlined
+          dense
+        />
       </AdminFormSection>
-      <AdminFormSection title="Story" hint="Excerpt appears in lists; body is the full article.">
+      <AdminFormSection
+        title="Story"
+        hint="Excerpt appears in lists; body is the full article."
+      >
         <q-input v-model="form.excerpt" label="Excerpt" outlined dense />
         <q-input
           v-model="form.body"
@@ -148,7 +179,12 @@
       </AdminFormSection>
       <AdminFormSection title="SEO" :columns="2">
         <q-input v-model="form.seoTitle" label="SEO title" outlined dense />
-        <q-input v-model="form.seoDescription" label="SEO description" outlined dense />
+        <q-input
+          v-model="form.seoDescription"
+          label="SEO description"
+          outlined
+          dense
+        />
       </AdminFormSection>
       <template #actions>
         <q-btn flat no-caps label="Cancel" v-close-popup />
@@ -204,9 +240,12 @@ const form = reactive({
 const filtered = computed(() => {
   const q = query.value.trim().toLowerCase();
   return cms.news.filter(item => {
-    if (statusFilter.value !== "all" && item.status !== statusFilter.value) return false;
+    if (statusFilter.value !== "all" && item.status !== statusFilter.value)
+      return false;
     if (!q) return true;
-    return `${item.title} ${item.excerpt} ${item.slug}`.toLowerCase().includes(q);
+    return `${item.title} ${item.excerpt} ${item.slug}`
+      .toLowerCase()
+      .includes(q);
   });
 });
 
@@ -281,17 +320,19 @@ async function setStatus(id: string, status: string) {
 }
 
 function remove(id: string) {
-  $q.dialog({ title: "Delete article?", cancel: true, persistent: true }).onOk(async () => {
-    try {
-      await cms.deleteNews(id);
-      $q.notify({ type: "positive", message: "Article deleted." });
-    } catch (e) {
-      $q.notify({
-        type: "negative",
-        message: e instanceof Error ? e.message : "Delete failed."
-      });
+  $q.dialog({ title: "Delete article?", cancel: true, persistent: true }).onOk(
+    async () => {
+      try {
+        await cms.deleteNews(id);
+        $q.notify({ type: "positive", message: "Article deleted." });
+      } catch (e) {
+        $q.notify({
+          type: "negative",
+          message: e instanceof Error ? e.message : "Delete failed."
+        });
+      }
     }
-  });
+  );
 }
 </script>
 

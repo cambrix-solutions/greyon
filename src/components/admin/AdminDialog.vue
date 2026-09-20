@@ -145,7 +145,11 @@ function onUpdate(value: boolean) {
   padding: 1.25rem 1.4rem 1.1rem;
   border-bottom: 1px solid rgba(28, 36, 33, 0.07);
   background:
-    radial-gradient(ellipse 80% 120% at 0% 0%, rgba(196, 163, 90, 0.12), transparent 55%),
+    radial-gradient(
+      ellipse 80% 120% at 0% 0%,
+      rgba(196, 163, 90, 0.12),
+      transparent 55%
+    ),
     linear-gradient(180deg, #fbfaf8 0%, #fff 100%);
   flex-shrink: 0;
 }
@@ -247,7 +251,8 @@ function onUpdate(value: boolean) {
   border-color: rgba(28, 36, 33, 0.12);
 }
 
-.admin-dialog__body :deep(.q-field--outlined.q-field--focused .q-field__control:before) {
+.admin-dialog__body
+  :deep(.q-field--outlined.q-field--focused .q-field__control:before) {
   border-color: var(--gy-gold-deep);
 }
 

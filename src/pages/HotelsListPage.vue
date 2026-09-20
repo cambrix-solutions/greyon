@@ -18,7 +18,11 @@
           Location
           <select v-model="locationFilter">
             <option value="">All locations</option>
-            <option v-for="loc in cms.publishedLocations" :key="loc.id" :value="loc.id">
+            <option
+              v-for="loc in cms.publishedLocations"
+              :key="loc.id"
+              :value="loc.id"
+            >
               {{ loc.name }}
             </option>
           </select>

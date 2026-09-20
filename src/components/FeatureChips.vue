@@ -1,10 +1,15 @@
 <template>
-  <ul class="feature-chips" :class="[`feature-chips--${size}`, { 'feature-chips--on-dark': onDark }]">
+  <ul
+    class="feature-chips"
+    :class="[`feature-chips--${size}`, { 'feature-chips--on-dark': onDark }]"
+  >
     <li v-for="item in items" :key="item">
       <q-icon v-if="showIcons" :name="iconFor(item)" size="14px" />
       <span>{{ item }}</span>
     </li>
-    <li v-if="moreCount > 0" class="feature-chips__more">+{{ moreCount }} more</li>
+    <li v-if="moreCount > 0" class="feature-chips__more"
+      >+{{ moreCount }} more</li
+    >
   </ul>
 </template>
 
@@ -29,12 +34,21 @@ function iconFor(label: string) {
   const key = label.toLowerCase();
   if (key.includes("wifi") || key.includes("wi-fi")) return "wifi";
   if (key.includes("pool")) return "pool";
-  if (key.includes("restaurant") || key.includes("dining") || key.includes("breakfast"))
+  if (
+    key.includes("restaurant") ||
+    key.includes("dining") ||
+    key.includes("breakfast")
+  )
     return "restaurant";
   if (key.includes("spa")) return "spa";
   if (key.includes("park")) return "local_parking";
   if (key.includes("gym") || key.includes("fitness")) return "fitness_center";
-  if (key.includes("view") || key.includes("ocean") || key.includes("river") || key.includes("garden"))
+  if (
+    key.includes("view") ||
+    key.includes("ocean") ||
+    key.includes("river") ||
+    key.includes("garden")
+  )
     return "visibility";
   if (key.includes("terrace") || key.includes("balcony")) return "deck";
   if (key.includes("bath") || key.includes("shower")) return "bathtub";
@@ -42,8 +56,10 @@ function iconFor(label: string) {
   if (key.includes("bar") || key.includes("mini")) return "local_bar";
   if (key.includes("bike") || key.includes("bicycle")) return "pedal_bike";
   if (key.includes("tour") || key.includes("desk")) return "map";
-  if (key.includes("ac") || key.includes("fan") || key.includes("air")) return "ac_unit";
-  if (key.includes("living") || key.includes("lounge") || key.includes("suite")) return "weekend";
+  if (key.includes("ac") || key.includes("fan") || key.includes("air"))
+    return "ac_unit";
+  if (key.includes("living") || key.includes("lounge") || key.includes("suite"))
+    return "weekend";
   return "check";
 }
 </script>

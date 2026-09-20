@@ -144,7 +144,9 @@ export const useAuthStore = defineStore("auth", () => {
   });
 
   const roles = computed(() =>
-    engineGuard.value ? engineRoles.value : useCmsStore().getUserRoles(user.value)
+    engineGuard.value
+      ? engineRoles.value
+      : useCmsStore().getUserRoles(user.value)
   );
   const role = computed<AdminRole | null>(() => roles.value[0] ?? null);
   const featureKeys = computed(() =>
@@ -154,8 +156,7 @@ export const useAuthStore = defineStore("auth", () => {
   );
 
   const isDeveloper = computed(
-    () =>
-      engineGuard.value === "developer" || roles.value.includes("developer")
+    () => engineGuard.value === "developer" || roles.value.includes("developer")
   );
 
   function persistLocalSession(
@@ -329,14 +330,16 @@ export const useAuthStore = defineStore("auth", () => {
     if (isDeveloper.value) return true;
     if (roles.value.some(r => globalRoles.includes(r))) return true;
     let ok = false;
-    if (roles.value.includes("manager") || roles.value.includes("location_admin")) {
+    if (
+      roles.value.includes("manager") ||
+      roles.value.includes("location_admin")
+    ) {
       ok = (u.locationIds ?? []).includes(locationId);
     }
     if (!ok && roles.value.includes("hotel_admin")) {
       const cms = useCmsStore();
       ok = cms.hotels.some(
-        h =>
-          h.locationId === locationId && (u.hotelIds ?? []).includes(h.id)
+        h => h.locationId === locationId && (u.hotelIds ?? []).includes(h.id)
       );
     }
     return ok;
@@ -348,18 +351,20 @@ export const useAuthStore = defineStore("auth", () => {
     if (isDeveloper.value) return true;
     if (roles.value.some(r => globalRoles.includes(r))) return true;
     let ok = false;
-    if (roles.value.includes("hotel_admin") || roles.value.includes("booking_admin")) {
+    if (
+      roles.value.includes("hotel_admin") ||
+      roles.value.includes("booking_admin")
+    ) {
       ok = (u.hotelIds ?? []).includes(hotelId);
     }
     if (
       !ok &&
-      (roles.value.includes("manager") || roles.value.includes("location_admin"))
+      (roles.value.includes("manager") ||
+        roles.value.includes("location_admin"))
     ) {
       const cms = useCmsStore();
       const hotel = cms.getHotelById(hotelId);
-      ok = Boolean(
-        hotel && (u.locationIds ?? []).includes(hotel.locationId)
-      );
+      ok = Boolean(hotel && (u.locationIds ?? []).includes(hotel.locationId));
     }
     return ok;
   }

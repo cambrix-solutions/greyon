@@ -48,11 +48,25 @@
               outlined
               :model-value="item.alt"
               label="Alt text"
-              @update:model-value="(v) => cms.updateMedia(item.id, { alt: String(v ?? '') })"
+              @update:model-value="
+                v => cms.updateMedia(item.id, { alt: String(v ?? '') })
+              "
             />
             <div class="row q-gutter-sm">
-              <q-btn dense flat color="primary" label="Copy" @click="copy(item.src)" />
-              <q-btn dense flat color="negative" label="Delete" @click="remove(item.id)" />
+              <q-btn
+                dense
+                flat
+                color="primary"
+                label="Copy"
+                @click="copy(item.src)"
+              />
+              <q-btn
+                dense
+                flat
+                color="negative"
+                label="Delete"
+                @click="remove(item.id)"
+              />
             </div>
           </q-card-section>
         </q-card>
@@ -73,7 +87,10 @@
       title="Add media"
       subtitle="Drop an image or paste a hosted URL for hotels, rooms, and news."
     >
-      <AdminFormSection title="Image" hint="Prefer hosted URLs in production; local uploads stay in this browser.">
+      <AdminFormSection
+        title="Image"
+        hint="Prefer hosted URLs in production; local uploads stay in this browser."
+      >
         <ImageDropField v-model="src" title="Drop hotel / room image" />
         <q-input
           v-model="alt"
@@ -156,16 +173,18 @@ function copy(value: string) {
 }
 
 function remove(id: string) {
-  $q.dialog({ title: "Delete media?", cancel: true, persistent: true }).onOk(async () => {
-    try {
-      await cms.deleteMedia(id);
-    } catch (e) {
-      $q.notify({
-        type: "negative",
-        message: e instanceof Error ? e.message : "Delete failed."
-      });
+  $q.dialog({ title: "Delete media?", cancel: true, persistent: true }).onOk(
+    async () => {
+      try {
+        await cms.deleteMedia(id);
+      } catch (e) {
+        $q.notify({
+          type: "negative",
+          message: e instanceof Error ? e.message : "Delete failed."
+        });
+      }
     }
-  });
+  );
 }
 </script>
 

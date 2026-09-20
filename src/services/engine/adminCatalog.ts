@@ -137,7 +137,10 @@ export async function createLocation(input: LocationInput) {
   return mapEngineLocation(location);
 }
 
-export async function updateLocation(id: string, input: Partial<LocationInput>) {
+export async function updateLocation(
+  id: string,
+  input: Partial<LocationInput>
+) {
   const { location } = await engineAPI.patch<{ location: EngineLocation }>(
     `/admin/locations/${numId(id)}`,
     input
@@ -150,10 +153,13 @@ export async function destroyLocation(id: string) {
 }
 
 export async function createHotel(input: HotelInput) {
-  const { hotel } = await engineAPI.post<{ hotel: EngineHotel }>("/admin/hotels", {
-    ...input,
-    locationId: numId(input.locationId)
-  });
+  const { hotel } = await engineAPI.post<{ hotel: EngineHotel }>(
+    "/admin/hotels",
+    {
+      ...input,
+      locationId: numId(input.locationId)
+    }
+  );
   return mapEngineHotel(hotel);
 }
 
@@ -179,7 +185,10 @@ export async function createRoomType(input: RoomTypeInput) {
   return mapEngineRoomType(roomType);
 }
 
-export async function updateRoomType(id: string, input: Partial<RoomTypeInput>) {
+export async function updateRoomType(
+  id: string,
+  input: Partial<RoomTypeInput>
+) {
   const body: Record<string, unknown> = { ...input };
   if (input.hotelId !== undefined) body.hotelId = numId(input.hotelId);
   const { roomType } = await engineAPI.patch<{ roomType: EngineRoomType }>(
@@ -201,7 +210,10 @@ export async function createRatePlan(input: RatePlanInput) {
   return mapEngineRatePlan(ratePlan);
 }
 
-export async function updateRatePlan(id: string, input: Partial<RatePlanInput>) {
+export async function updateRatePlan(
+  id: string,
+  input: Partial<RatePlanInput>
+) {
   const body: Record<string, unknown> = { ...input };
   if (input.roomTypeId !== undefined) body.roomTypeId = numId(input.roomTypeId);
   const { ratePlan } = await engineAPI.patch<{ ratePlan: EngineRatePlan }>(

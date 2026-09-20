@@ -94,7 +94,12 @@ export async function createAdminBooking(input: {
   rooms: number;
   adults: number;
   children: number;
-  guest: { fullName: string; email: string; phone: string; specialRequests?: string };
+  guest: {
+    fullName: string;
+    email: string;
+    phone: string;
+    specialRequests?: string;
+  };
   status?: BookingStatus;
   notes?: string;
 }) {
@@ -146,7 +151,8 @@ export async function updateAdminEnquiry(
 ) {
   const body: Record<string, unknown> = {};
   if (patch.status !== undefined) body.status = patch.status;
-  if (patch.internalNotes !== undefined) body.internalNotes = patch.internalNotes;
+  if (patch.internalNotes !== undefined)
+    body.internalNotes = patch.internalNotes;
   const { enquiry } = await engineAPI.patch<{ enquiry: EngineEnquiry }>(
     `/admin/enquiries/${numId(id)}`,
     body

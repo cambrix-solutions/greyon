@@ -32,9 +32,13 @@
       <span>
         Site default:
         <strong>{{ activePkg?.name ?? "—" }}</strong>
-        <template v-if="activePkg?.priceNote"> · {{ activePkg.priceNote }}</template>
+        <template v-if="activePkg?.priceNote">
+          · {{ activePkg.priceNote }}</template
+        >
       </span>
-      <router-link class="pkg-notice__link" to="/admin/users">Assign on People →</router-link>
+      <router-link class="pkg-notice__link" to="/admin/users"
+        >Assign on People →</router-link
+      >
     </div>
 
     <div class="pkg-layout">
@@ -78,7 +82,9 @@
           >
             <div class="pkg-card__top">
               <span class="pkg-card__name">{{ pkg.name }}</span>
-              <span v-if="pkg.id === cms.activePackageId" class="pkg-card__badge"
+              <span
+                v-if="pkg.id === cms.activePackageId"
+                class="pkg-card__badge"
                 >Default</span
               >
             </div>
@@ -88,9 +94,11 @@
               <span>{{ shortRoles(pkg.roles) }}</span>
               <span>{{ featureOnlyCount(pkg) }} feat</span>
               <span>{{ permissionOnlyCount(pkg) }} perm</span>
-              <span>{{ cms.usersOnPackage(pkg.id).length }} user{{
-                cms.usersOnPackage(pkg.id).length === 1 ? "" : "s"
-              }}</span>
+              <span
+                >{{ cms.usersOnPackage(pkg.id).length }} user{{
+                  cms.usersOnPackage(pkg.id).length === 1 ? "" : "s"
+                }}</span
+              >
             </div>
           </button>
 
@@ -197,14 +205,16 @@
           <!-- 2 Roles & scope -->
           <div class="pkg-section">
             <div class="pkg-section__head">
-              <h3><span class="pkg-section__step">2</span> Roles &amp; scope</h3>
+              <h3
+                ><span class="pkg-section__step">2</span> Roles &amp; scope</h3
+              >
               <span class="pkg-section__meta"
                 >{{ form.roles.length }} selected · who can use this seat</span
               >
             </div>
             <p class="pkg-section__hint">
-              Each role carries a scope type. Property lists (locations / hotels) are
-              set when you assign this seat on
+              Each role carries a scope type. Property lists (locations /
+              hotels) are set when you assign this seat on
               <router-link to="/admin/users">People</router-link>.
             </p>
             <div class="pkg-roles">
@@ -225,7 +235,9 @@
                 <span class="pkg-role__text">
                   <strong>{{ opt.label }}</strong>
                   <small>{{ roleHints[opt.value] }}</small>
-                  <em class="pkg-role__scope">{{ roleScopeLabel[opt.value] }}</em>
+                  <em class="pkg-role__scope">{{
+                    roleScopeLabel[opt.value]
+                  }}</em>
                 </span>
               </button>
             </div>
@@ -247,7 +259,8 @@
             </div>
             <p class="pkg-section__hint">
               Turn on a <strong>feature</strong> (module), then open it to grant
-              nested <strong>permissions</strong>. Permissions belong to their feature.
+              nested <strong>permissions</strong>. Permissions belong to their
+              feature.
             </p>
 
             <div class="pkg-feat-toolbar">
@@ -259,7 +272,9 @@
                 placeholder="Search features or permissions…"
                 style="min-width: min(100%, 220px); background: #fff"
               >
-                <template #prepend><q-icon name="search" size="18px" /></template>
+                <template #prepend
+                  ><q-icon name="search" size="18px"
+                /></template>
               </q-input>
               <div class="pkg-feat-toolbar__tabs">
                 <button
@@ -296,7 +311,9 @@
                   <label class="pkg-mod__toggle">
                     <q-checkbox
                       :model-value="form.featureKeys.includes(node.parent.key)"
-                      :disable="node.parent.key === 'features' && !isCustomerOnly"
+                      :disable="
+                        node.parent.key === 'features' && !isCustomerOnly
+                      "
                       dense
                       @update:model-value="
                         (v: boolean | null) =>
@@ -495,7 +512,7 @@ const editing = computed(() =>
         roles: form.roles,
         isSystem: false
       } as ProductPackage)
-    : cms.packages.find(p => p.id === selectedId.value) ?? null
+    : (cms.packages.find(p => p.id === selectedId.value) ?? null)
 );
 
 const activePkg = computed(() =>
@@ -509,7 +526,8 @@ const filteredPackages = computed(() => {
       return false;
     }
     if (!q) return true;
-    const hay = `${pkg.name} ${pkg.description} ${pkg.roles.join(" ")}`.toLowerCase();
+    const hay =
+      `${pkg.name} ${pkg.description} ${pkg.roles.join(" ")}`.toLowerCase();
     return hay.includes(q);
   });
 });
@@ -534,9 +552,10 @@ const visibleModules = computed(() => {
   const q = featQuery.value.trim().toLowerCase();
   if (!q) return nodes;
   return nodes.filter(n => {
-    const parentHit = `${n.parent.label} ${n.parent.description} ${n.parent.key}`
-      .toLowerCase()
-      .includes(q);
+    const parentHit =
+      `${n.parent.label} ${n.parent.description} ${n.parent.key}`
+        .toLowerCase()
+        .includes(q);
     const childHit = n.children.some(c =>
       `${c.label} ${c.description} ${c.key}`.toLowerCase().includes(q)
     );
@@ -544,11 +563,11 @@ const visibleModules = computed(() => {
   });
 });
 
-const adminTotal = computed(() =>
-  cms.features.filter(f => f.category === "admin").length
+const adminTotal = computed(
+  () => cms.features.filter(f => f.category === "admin").length
 );
-const publicTotal = computed(() =>
-  cms.features.filter(f => f.category === "public").length
+const publicTotal = computed(
+  () => cms.features.filter(f => f.category === "public").length
 );
 const adminOnCount = computed(
   () =>
@@ -615,7 +634,10 @@ function toggleExpand(key: string) {
 }
 
 function ensureParentsExpanded() {
-  for (const node of [...featureTree.value.admin, ...featureTree.value.public]) {
+  for (const node of [
+    ...featureTree.value.admin,
+    ...featureTree.value.public
+  ]) {
     if (!node.children.length) continue;
     const parentOn = form.featureKeys.includes(node.parent.key);
     const childOn = node.children.some(c => form.featureKeys.includes(c.key));
@@ -628,7 +650,9 @@ function loadForm(pkg: ProductPackage) {
   form.description = pkg.description;
   form.priceNote = pkg.priceNote;
   form.featureKeys = [...pkg.featureKeys];
-  form.roles = [...(pkg.roles?.length ? pkg.roles : (["admin"] as AdminRole[]))];
+  form.roles = [
+    ...(pkg.roles?.length ? pkg.roles : (["admin"] as AdminRole[]))
+  ];
   ensureParentsExpanded();
   markClean();
 }

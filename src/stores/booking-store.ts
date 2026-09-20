@@ -7,16 +7,9 @@ import type {
   BookingGuest,
   BookingSearchParams
 } from "@/types/greyon";
-import {
-  createBooking,
-  searchAvailability
-} from "@/services/bookingService";
+import { createBooking, searchAvailability } from "@/services/bookingService";
 import { useCustomerStore } from "@/stores/customer-store";
-import {
-  addLocalDays,
-  nightsBetweenLocal,
-  toLocalYmd
-} from "@/utils/datetime";
+import { addLocalDays, nightsBetweenLocal, toLocalYmd } from "@/utils/datetime";
 
 const DRAFT_KEY = "greyon_booking_draft";
 
@@ -81,8 +74,10 @@ export const useBookingStore = defineStore("booking", () => {
     if (nightsBetweenLocal(checkIn, checkOut) < 1) {
       return "Stay must include at least one night.";
     }
-    if (!Number.isFinite(rooms) || rooms < 1) return "At least 1 room is required.";
-    if (!Number.isFinite(adults) || adults < 1) return "At least 1 adult is required.";
+    if (!Number.isFinite(rooms) || rooms < 1)
+      return "At least 1 room is required.";
+    if (!Number.isFinite(adults) || adults < 1)
+      return "At least 1 adult is required.";
     if (!Number.isFinite(children) || children < 0) {
       return "Children cannot be negative.";
     }
@@ -91,14 +86,17 @@ export const useBookingStore = defineStore("booking", () => {
 
   const guestErrors = computed(() => {
     const errors: Partial<Record<"fullName" | "email" | "phone", string>> = {};
-    if (!guest.value.fullName.trim()) errors.fullName = "Full name is required.";
+    if (!guest.value.fullName.trim())
+      errors.fullName = "Full name is required.";
     if (!guest.value.email.trim()) errors.email = "Email is required.";
     else if (!isEmail(guest.value.email)) errors.email = "Enter a valid email.";
     if (!guest.value.phone.trim()) errors.phone = "Phone is required.";
     return errors;
   });
 
-  const guestValid = computed(() => Object.keys(guestErrors.value).length === 0);
+  const guestValid = computed(
+    () => Object.keys(guestErrors.value).length === 0
+  );
 
   function persistDraft() {
     if (typeof sessionStorage === "undefined") return;
@@ -148,8 +146,10 @@ export const useBookingStore = defineStore("booking", () => {
       errorMessage.value = "";
 
       let nextStep = Math.min(Math.max(1, draft.step), 5);
-      if (nextStep >= 3 && !selected.value) nextStep = results.value.length ? 2 : 1;
-      if (nextStep >= 2 && !results.value.length && !selected.value) nextStep = 1;
+      if (nextStep >= 3 && !selected.value)
+        nextStep = results.value.length ? 2 : 1;
+      if (nextStep >= 2 && !results.value.length && !selected.value)
+        nextStep = 1;
       step.value = nextStep;
       applyCustomerToGuest();
       return true;

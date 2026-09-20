@@ -2,7 +2,13 @@
   <div class="gallery-editor">
     <div class="row items-center justify-between q-mb-sm">
       <div class="text-subtitle2">{{ label }}</div>
-      <q-btn dense flat color="primary" label="Add image" @click="showAdd = true" />
+      <q-btn
+        dense
+        flat
+        color="primary"
+        label="Add image"
+        @click="showAdd = true"
+      />
     </div>
     <div v-if="!modelValue.length" class="text-caption text-grey-7 q-mb-sm">
       No gallery images yet.
@@ -23,10 +29,12 @@
             <q-input
               dense
               outlined
-              :model-value="isDataUrl(src) ? 'Local upload (stored in browser)' : src"
+              :model-value="
+                isDataUrl(src) ? 'Local upload (stored in browser)' : src
+              "
               :readonly="isDataUrl(src)"
               label="Image"
-              @update:model-value="(v) => update(index, String(v ?? ''))"
+              @update:model-value="v => update(index, String(v ?? ''))"
             />
           </div>
           <div class="col-auto row q-gutter-xs no-wrap">
@@ -44,7 +52,13 @@
               :disable="index === modelValue.length - 1"
               @click="move(index, 1)"
             />
-            <q-btn dense flat color="negative" icon="delete" @click="remove(index)" />
+            <q-btn
+              dense
+              flat
+              color="negative"
+              icon="delete"
+              @click="remove(index)"
+            />
           </div>
         </div>
       </q-card>

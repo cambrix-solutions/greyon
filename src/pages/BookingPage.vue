@@ -34,7 +34,9 @@
         {{ cms.settings.paymentNote || $t("booking.paymentNotice") }}
       </p>
 
-      <p v-if="booking.errorMessage" class="error">{{ booking.errorMessage }}</p>
+      <p v-if="booking.errorMessage" class="error">{{
+        booking.errorMessage
+      }}</p>
 
       <!-- 1 Search -->
       <section v-if="booking.step === 1" v-reveal class="panel">
@@ -103,7 +105,8 @@
           </article>
         </div>
         <p v-else class="empty-note">
-          No bookable inventory for this search. Try different dates or occupancy.
+          No bookable inventory for this search. Try different dates or
+          occupancy.
         </p>
       </section>
 
@@ -137,7 +140,9 @@
             Subtotal ${{ booking.selected.subtotal.toFixed(2) }} + taxes/fees
             ${{ booking.selected.taxesFees.toFixed(2) }}
           </p>
-          <p class="policy">{{ booking.selected.ratePlan.cancellationPolicy }}</p>
+          <p class="policy">{{
+            booking.selected.ratePlan.cancellationPolicy
+          }}</p>
         </div>
         <div class="panel-actions">
           <button
@@ -168,15 +173,13 @@
           v-if="customer.isAuthenticated"
           class="guest-account guest-account--in"
         >
-          <p class="guest-account__title">
-            Booking with your Greyon account
-          </p>
+          <p class="guest-account__title"> Booking with your Greyon account </p>
           <p class="guest-account__copy">
             {{ customer.displayName }} · {{ customer.user?.email }}
           </p>
           <p class="guest-account__hint gy-muted">
-            This stay will appear under My account. Confirm or edit the
-            contact details below if someone else is the lead guest.
+            This stay will appear under My account. Confirm or edit the contact
+            details below if someone else is the lead guest.
           </p>
         </div>
         <div v-else class="guest-account guest-account--out">
@@ -316,7 +319,10 @@
         </div>
 
         <p class="policy">{{ booking.selected.ratePlan.cancellationPolicy }}</p>
-        <p v-if="!cms.settings.paymentEnabled" class="payment-note payment-note--inline">
+        <p
+          v-if="!cms.settings.paymentEnabled"
+          class="payment-note payment-note--inline"
+        >
           {{ $t("booking.reservationOnly") }}
         </p>
 
@@ -419,7 +425,9 @@
           >
             Sign in to track stays
           </router-link>
-          <router-link to="/" class="gy-btn gy-btn--outline">Back home</router-link>
+          <router-link to="/" class="gy-btn gy-btn--outline"
+            >Back home</router-link
+          >
           <button
             class="gy-btn gy-btn--light"
             type="button"
@@ -461,7 +469,7 @@ onMounted(() => {
 
 watch(
   () => customer.isAuthenticated,
-  (ok) => {
+  ok => {
     if (ok && booking.step >= 4) booking.applyCustomerToGuest();
   }
 );
@@ -858,7 +866,9 @@ textarea {
   text-transform: none;
   letter-spacing: normal;
   color: var(--gy-ink);
-  transition: border-color 0.2s ease, background 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
 }
 
 input:focus,

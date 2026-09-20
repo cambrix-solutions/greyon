@@ -49,7 +49,10 @@ function applySeo() {
 }
 
 onMounted(applySeo);
-watch(() => [props.title, props.description, props.image, props.jsonLd], applySeo);
+watch(
+  () => [props.title, props.description, props.image, props.jsonLd],
+  applySeo
+);
 </script>
 
 <template>

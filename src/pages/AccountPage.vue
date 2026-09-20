@@ -10,7 +10,10 @@
       <div class="account-hero__veil" aria-hidden="true" />
       <div class="gy-container account-hero__content">
         <p v-reveal class="account-hero__brand gy-display">Greyon</p>
-        <p v-reveal="{ delay: '50ms' }" class="gy-eyebrow account-hero__eyebrow">
+        <p
+          v-reveal="{ delay: '50ms' }"
+          class="gy-eyebrow account-hero__eyebrow"
+        >
           {{ greeting }}
         </p>
         <h1 v-reveal="{ delay: '90ms' }" class="gy-display account-hero__title">
@@ -63,7 +66,9 @@
                 <p class="gy-eyebrow">Stays</p>
                 <h2 class="gy-display account-block__title">Upcoming & past</h2>
               </div>
-              <router-link to="/booking" class="gy-btn gy-btn--outline account-block__cta"
+              <router-link
+                to="/booking"
+                class="gy-btn gy-btn--outline account-block__cta"
                 >Book a stay</router-link
               >
             </header>
@@ -82,7 +87,11 @@
               >
             </div>
             <ul v-else class="account-stays">
-              <li v-for="stay in myBookings" :key="stay.id" class="account-stay">
+              <li
+                v-for="stay in myBookings"
+                :key="stay.id"
+                class="account-stay"
+              >
                 <router-link
                   :to="{
                     name: 'account-booking',
@@ -103,15 +112,18 @@
                       <p class="account-stay__hotel">
                         {{ stay.hotelName || hotelLabel(stay.hotelId) }}
                       </p>
-                      <span class="account-stay__status">{{ stay.status }}</span>
+                      <span class="account-stay__status">{{
+                        stay.status
+                      }}</span>
                     </div>
                     <p class="account-stay__meta">
                       {{ stay.roomTypeName || roomLabel(stay.roomTypeId) }}
                       · {{ formatStayRange(stay.checkIn, stay.checkOut) }}
                     </p>
                     <p class="account-stay__ref">
-                      Ref <strong>{{ stay.reference }}</strong>
-                      · ${{ stay.total.toFixed(2) }}
+                      Ref <strong>{{ stay.reference }}</strong> · ${{
+                        stay.total.toFixed(2)
+                      }}
                       <span class="account-stay__open">View details →</span>
                     </p>
                   </div>
@@ -124,7 +136,9 @@
             <header class="account-block__head">
               <div>
                 <p class="gy-eyebrow">Explore</p>
-                <h2 class="gy-display account-block__title">Continue your trip</h2>
+                <h2 class="gy-display account-block__title"
+                  >Continue your trip</h2
+                >
               </div>
             </header>
             <div class="account-explore">
@@ -148,7 +162,9 @@
             <header class="account-block__head account-block__head--pad">
               <div>
                 <p class="gy-eyebrow">Greyon hotels</p>
-                <h2 class="gy-display account-block__title">Stay inspiration</h2>
+                <h2 class="gy-display account-block__title"
+                  >Stay inspiration</h2
+                >
               </div>
               <router-link to="/hotels" class="account-empty__link"
                 >View all →</router-link
@@ -273,9 +289,8 @@ async function onLogout() {
 .account-hero__media {
   position: absolute;
   inset: 0;
-  background:
-    url("https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=1800&q=80")
-      center / cover;
+  background: url("https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=1800&q=80")
+    center / cover;
   transform: scale(1.04);
   animation: account-hero-drift 28s ease-in-out infinite alternate;
 }

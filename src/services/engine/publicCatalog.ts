@@ -11,7 +11,13 @@ import {
   type EngineRatePlan,
   type EngineRoomType
 } from "@/services/engine/mappers";
-import type { Hotel, Location, NewsArticle, RatePlan, RoomType } from "@/types/greyon";
+import type {
+  Hotel,
+  Location,
+  NewsArticle,
+  RatePlan,
+  RoomType
+} from "@/types/greyon";
 
 export type PublicCatalog = {
   locations: Location[];

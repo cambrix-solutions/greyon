@@ -100,7 +100,9 @@
             </thead>
             <tbody>
               <tr v-for="row in roles" :key="row.id">
-                <td><code>{{ row.name }}</code></td>
+                <td
+                  ><code>{{ row.name }}</code></td
+                >
                 <td>
                   <q-badge outline color="primary">{{ row.scope }}</q-badge>
                 </td>
@@ -142,7 +144,9 @@
             </thead>
             <tbody>
               <tr v-for="row in features" :key="row.id">
-                <td><code>{{ row.key }}</code></td>
+                <td
+                  ><code>{{ row.key }}</code></td
+                >
                 <td>
                   <div>{{ row.label }}</div>
                   <div class="text-caption text-grey-7">
@@ -153,7 +157,13 @@
                 <td>{{ row.permissionCount }}</td>
                 <td>{{ row.sortOrder }}</td>
                 <td class="text-right">
-                  <q-btn flat dense round icon="edit" @click="editFeature(row)" />
+                  <q-btn
+                    flat
+                    dense
+                    round
+                    icon="edit"
+                    @click="editFeature(row)"
+                  />
                   <q-btn
                     flat
                     dense
@@ -191,7 +201,9 @@
             </thead>
             <tbody>
               <tr v-for="row in permissions" :key="row.id">
-                <td><code>{{ row.key }}</code></td>
+                <td
+                  ><code>{{ row.key }}</code></td
+                >
                 <td>
                   <div>{{ row.label }}</div>
                   <div class="text-caption text-grey-7">
@@ -238,7 +250,13 @@
       size="md"
     >
       <div class="q-gutter-md">
-        <q-input v-model="roleForm.name" label="Name (key)" outlined dense :disable="Boolean(roleForm.id)" />
+        <q-input
+          v-model="roleForm.name"
+          label="Name (key)"
+          outlined
+          dense
+          :disable="Boolean(roleForm.id)"
+        />
         <q-input
           v-model="roleForm.description"
           label="Description"
@@ -256,11 +274,22 @@
           emit-value
           map-options
         />
-        <q-toggle v-model="roleForm.isGlobal" label="Global (no property scope required)" color="primary" />
+        <q-toggle
+          v-model="roleForm.isGlobal"
+          label="Global (no property scope required)"
+          color="primary"
+        />
       </div>
       <template #actions>
         <q-btn flat no-caps label="Cancel" v-close-popup />
-        <q-btn unelevated no-caps color="primary" label="Save" :loading="saving" @click="saveRole" />
+        <q-btn
+          unelevated
+          no-caps
+          color="primary"
+          label="Save"
+          :loading="saving"
+          @click="saveRole"
+        />
       </template>
     </AdminDialog>
 
@@ -272,7 +301,13 @@
       size="md"
     >
       <div class="q-gutter-md">
-        <q-input v-model="featureForm.key" label="Key" outlined dense hint="e.g. bookings" />
+        <q-input
+          v-model="featureForm.key"
+          label="Key"
+          outlined
+          dense
+          hint="e.g. bookings"
+        />
         <q-input v-model="featureForm.label" label="Label" outlined dense />
         <q-input
           v-model="featureForm.description"
@@ -301,7 +336,14 @@
       </div>
       <template #actions>
         <q-btn flat no-caps label="Cancel" v-close-popup />
-        <q-btn unelevated no-caps color="primary" label="Save" :loading="saving" @click="saveFeature" />
+        <q-btn
+          unelevated
+          no-caps
+          color="primary"
+          label="Save"
+          :loading="saving"
+          @click="saveFeature"
+        />
       </template>
     </AdminDialog>
 
@@ -660,7 +702,8 @@ function removeRole(row: AccessRole) {
 function removeFeature(row: AccessFeature) {
   $q.dialog({
     title: `Delete feature “${row.key}”?`,
-    message: "Remove it from packages first, and delete or reassign its permissions.",
+    message:
+      "Remove it from packages first, and delete or reassign its permissions.",
     cancel: true,
     persistent: true
   }).onOk(async () => {

@@ -6,8 +6,22 @@
       :subtitle="`${filtered.length} destinations · hotels nest under each · rooms under hotels`"
     >
       <template #actions>
-        <q-btn outline no-caps color="primary" label="View live" to="/locations" target="_blank" />
-        <q-btn unelevated no-caps color="primary" icon="add" label="Add location" @click="openCreate" />
+        <q-btn
+          outline
+          no-caps
+          color="primary"
+          label="View live"
+          to="/locations"
+          target="_blank"
+        />
+        <q-btn
+          unelevated
+          no-caps
+          color="primary"
+          icon="add"
+          label="Add location"
+          @click="openCreate"
+        />
       </template>
       <template #toolbar>
         <q-input
@@ -77,7 +91,14 @@
               @update:model-value="(v: string) => setStatus(loc.id, v)"
             />
             <div class="loc-card__actions">
-              <q-btn flat dense round icon="edit" color="primary" @click="openEdit(loc)">
+              <q-btn
+                flat
+                dense
+                round
+                icon="edit"
+                color="primary"
+                @click="openEdit(loc)"
+              >
                 <q-tooltip>Edit location</q-tooltip>
               </q-btn>
               <q-btn
@@ -90,7 +111,14 @@
               >
                 <q-tooltip>View live</q-tooltip>
               </q-btn>
-              <q-btn flat dense round icon="delete" color="negative" @click="remove(loc.id)">
+              <q-btn
+                flat
+                dense
+                round
+                icon="delete"
+                color="negative"
+                @click="remove(loc.id)"
+              >
                 <q-tooltip>Delete</q-tooltip>
               </q-btn>
             </div>
@@ -116,7 +144,11 @@
           </div>
 
           <div v-if="hotelsFor(loc.id).length" class="hotel-rows">
-            <div v-for="hotel in hotelsFor(loc.id)" :key="hotel.id" class="hotel-row">
+            <div
+              v-for="hotel in hotelsFor(loc.id)"
+              :key="hotel.id"
+              class="hotel-row"
+            >
               <div class="hotel-row__thumb" aria-hidden="true">
                 <img v-if="hotel.heroImage" :src="hotel.heroImage" alt="" />
                 <q-icon v-else name="apartment" size="22px" />
@@ -130,9 +162,11 @@
                   {{ hotel.name }}
                 </router-link>
                 <p class="hotel-row__meta">
-                  <span>{{ roomCount(hotel.id) }} room type{{
-                    roomCount(hotel.id) === 1 ? "" : "s"
-                  }}</span>
+                  <span
+                    >{{ roomCount(hotel.id) }} room type{{
+                      roomCount(hotel.id) === 1 ? "" : "s"
+                    }}</span
+                  >
                   <span class="hotel-row__dot">·</span>
                   <span>{{ hotel.status }}</span>
                   <template v-if="hotel.featured">
@@ -169,7 +203,13 @@
 
       <div v-if="!filtered.length" class="loc-hub__empty">
         No locations match.
-        <q-btn flat dense color="primary" label="Add location" @click="openCreate" />
+        <q-btn
+          flat
+          dense
+          color="primary"
+          label="Add location"
+          @click="openCreate"
+        />
       </div>
     </div>
 
@@ -182,8 +222,8 @@
       subtitle="A destination guests browse first. Hotels nest under this record."
     >
       <template #notice>
-        Hotels link here with <strong>locationId</strong> — locations never “own” rooms
-        directly.
+        Hotels link here with <strong>locationId</strong> — locations never
+        “own” rooms directly.
       </template>
       <AdminFormSection title="Essentials" :columns="2">
         <q-input v-model="form.name" label="Location name" outlined dense />
@@ -202,7 +242,10 @@
           class="admin-form-span-2"
         />
       </AdminFormSection>
-      <AdminFormSection title="Details" hint="Optional slug and story for the public destinations page.">
+      <AdminFormSection
+        title="Details"
+        hint="Optional slug and story for the public destinations page."
+      >
         <q-input
           v-model="form.slug"
           label="URL slug"
@@ -227,7 +270,13 @@
       </AdminFormSection>
       <template #actions>
         <q-btn flat no-caps label="Cancel" v-close-popup />
-        <q-btn color="primary" unelevated no-caps :label="editing ? 'Save changes' : 'Create location'" @click="save" />
+        <q-btn
+          color="primary"
+          unelevated
+          no-caps
+          :label="editing ? 'Save changes' : 'Create location'"
+          @click="save"
+        />
       </template>
     </AdminDialog>
   </q-page>
@@ -280,7 +329,8 @@ const filtered = computed(() => {
   const q = query.value.trim().toLowerCase();
   return cms.locations.filter(loc => {
     if (!auth.canAccessLocation(loc.id)) return false;
-    if (statusFilter.value !== "all" && loc.status !== statusFilter.value) return false;
+    if (statusFilter.value !== "all" && loc.status !== statusFilter.value)
+      return false;
     if (!q) return true;
     return `${loc.name} ${loc.slug} ${loc.description} ${loc.highlights.join(" ")}`
       .toLowerCase()

@@ -2,14 +2,14 @@
 
 ## Status
 
-| Slice | Status |
-|-------|--------|
-| IBPF-style `apiConfig` + `engineAPI` | done |
-| Admin / developer session login | done |
-| Public catalog hydrate (`GET /catalog`) | done |
-| Admin locations / hotels / rooms / rates CRUD | done |
-| Bookings / availability / news / enquiries | engine not ready — still mock |
-| Developer packages / features UI | not wired yet |
+| Slice                                         | Status                        |
+| --------------------------------------------- | ----------------------------- |
+| IBPF-style `apiConfig` + `engineAPI`          | done                          |
+| Admin / developer session login               | done                          |
+| Public catalog hydrate (`GET /catalog`)       | done                          |
+| Admin locations / hotels / rooms / rates CRUD | done                          |
+| Bookings / availability / news / enquiries    | engine not ready — still mock |
+| Developer packages / features UI              | not wired yet                 |
 
 ## Local setup
 
@@ -35,13 +35,13 @@ IDs are numeric on the engine and stringified in the SPA.
 
 ## Code map
 
-| Path | Role |
-|------|------|
-| `src/helpers/api/*` | `apiConfig`, `createApiClient`, `engineAPI` |
-| `src/services/engine/*` | auth, public/admin catalog, mappers |
+| Path                      | Role                                            |
+| ------------------------- | ----------------------------------------------- |
+| `src/helpers/api/*`       | `apiConfig`, `createApiClient`, `engineAPI`     |
+| `src/services/engine/*`   | auth, public/admin catalog, mappers             |
 | `src/stores/cms-store.ts` | `syncCatalogFromEngine` + engine-backed upserts |
-| `src/boot/catalog.ts` | public hydrate on app start |
-| Engine `GET /catalog` | published locations+hotels+rooms+rates |
+| `src/boot/catalog.ts`     | public hydrate on app start                     |
+| Engine `GET /catalog`     | published locations+hotels+rooms+rates          |
 
 ## Next slices
 

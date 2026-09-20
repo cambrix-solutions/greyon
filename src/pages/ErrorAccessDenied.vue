@@ -45,7 +45,11 @@ const isAdmin = computed(() => auth.isAuthenticated);
   place-items: center;
   padding: 2rem 1.25rem;
   background:
-    radial-gradient(ellipse 70% 50% at 50% 0%, rgba(196, 163, 90, 0.18), transparent 55%),
+    radial-gradient(
+      ellipse 70% 50% at 50% 0%,
+      rgba(196, 163, 90, 0.18),
+      transparent 55%
+    ),
     #f6f5f2;
   color: var(--gy-ink);
 }

@@ -14,7 +14,9 @@
         <router-link to="/" class="gy-logo gy-display">Greyon</router-link>
 
         <nav class="gy-nav gt-sm">
-          <router-link to="/" class="gy-nav__link">{{ $t("nav.home") }}</router-link>
+          <router-link to="/" class="gy-nav__link">{{
+            $t("nav.home")
+          }}</router-link>
           <router-link
             v-if="auth.featureEnabled('news_public')"
             to="/news"
@@ -22,12 +24,17 @@
             >{{ $t("nav.news") }}</router-link
           >
 
-          <div v-if="auth.featureEnabled('portfolios')" class="gy-nav__dropdown">
+          <div
+            v-if="auth.featureEnabled('portfolios')"
+            class="gy-nav__dropdown"
+          >
             <button class="gy-nav__link gy-nav__dropbtn" type="button">
               {{ $t("nav.portfolios") }}
             </button>
             <div class="gy-nav__menu">
-              <router-link to="/hotels">{{ $t("portfolios.hotel") }}</router-link>
+              <router-link to="/hotels">{{
+                $t("portfolios.hotel")
+              }}</router-link>
               <router-link to="/portfolios/service-apartment">{{
                 $t("portfolios.serviceApartment")
               }}</router-link>
@@ -39,12 +46,9 @@
               }}</router-link>
             </div>
           </div>
-          <router-link
-            v-else
-            to="/hotels"
-            class="gy-nav__link"
-            >{{ $t("portfolios.hotel") }}</router-link
-          >
+          <router-link v-else to="/hotels" class="gy-nav__link">{{
+            $t("portfolios.hotel")
+          }}</router-link>
 
           <router-link to="/locations" class="gy-nav__link">{{
             $t("nav.location")
@@ -198,8 +202,7 @@ let heroScrollBound = false;
 
 const isHome = computed(() => route.path === "/");
 const solidHeader = computed(
-  () =>
-    route.meta.solidHeader === true || !isHome.value || homePastHero.value
+  () => route.meta.solidHeader === true || !isHome.value || homePastHero.value
 );
 
 const drawerItems = computed(() => {

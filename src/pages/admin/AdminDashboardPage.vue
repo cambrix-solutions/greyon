@@ -337,12 +337,16 @@ const newEnquiryCount = computed(
 );
 const arrivalsToday = computed(() =>
   myBookings.value.filter(
-    b => b.checkIn === today && (b.status === "pending" || b.status === "confirmed")
+    b =>
+      b.checkIn === today &&
+      (b.status === "pending" || b.status === "confirmed")
   )
 );
 const departuresToday = computed(() =>
   myBookings.value.filter(
-    b => b.checkOut === today && (b.status === "confirmed" || b.status === "completed")
+    b =>
+      b.checkOut === today &&
+      (b.status === "confirmed" || b.status === "completed")
   )
 );
 const todayCount = computed(
@@ -360,7 +364,9 @@ const monthRevenue = computed(() => {
     .filter(
       b =>
         b.createdAt.startsWith(prefix) &&
-        (b.status === "confirmed" || b.status === "completed" || b.status === "pending")
+        (b.status === "confirmed" ||
+          b.status === "completed" ||
+          b.status === "pending")
     )
     .reduce((sum, b) => sum + b.total, 0);
 });
@@ -400,9 +406,7 @@ const cards = computed(() => [
   {
     label: "Bookings",
     value: myBookings.value.length,
-    hint: pendingCount.value
-      ? `${pendingCount.value} pending`
-      : "All clear",
+    hint: pendingCount.value ? `${pendingCount.value} pending` : "All clear",
     icon: "book_online",
     to: pendingCount.value
       ? "/admin/bookings?status=pending"
@@ -481,7 +485,12 @@ function matchesBooking(b: Booking) {
   );
 }
 
-function matchesEnquiry(e: { name: string; subject: string; email: string; message: string }) {
+function matchesEnquiry(e: {
+  name: string;
+  subject: string;
+  email: string;
+  message: string;
+}) {
   if (!q.value) return true;
   return `${e.name} ${e.subject} ${e.email} ${e.message}`
     .toLowerCase()

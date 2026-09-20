@@ -3,7 +3,9 @@
     <p class="gy-eyebrow">Greyon</p>
     <h1 class="gy-display">{{ title }}</h1>
     <p class="auth-complete__msg">{{ message }}</p>
-    <router-link v-if="failed" to="/sign-in" class="gy-btn">Back to sign in</router-link>
+    <router-link v-if="failed" to="/sign-in" class="gy-btn"
+      >Back to sign in</router-link
+    >
   </q-page>
 </template>
 

@@ -2,10 +2,7 @@
   <q-layout view="hHh lpR fFf" class="admin-login-layout">
     <q-page-container>
       <q-page class="flex flex-center admin-login">
-        <div
-          class="admin-login__bg"
-          aria-hidden="true"
-        />
+        <div class="admin-login__bg" aria-hidden="true" />
         <div class="admin-login__veil" aria-hidden="true" />
         <div class="admin-login__glow" aria-hidden="true" />
 
@@ -68,7 +65,9 @@ async function onSubmit() {
       return;
     }
     const redirect =
-      typeof route.query.redirect === "string" ? route.query.redirect : "/admin";
+      typeof route.query.redirect === "string"
+        ? route.query.redirect
+        : "/admin";
     void router.push(redirect);
   } finally {
     submitting.value = false;
@@ -92,9 +91,8 @@ async function onSubmit() {
 .admin-login__bg {
   position: absolute;
   inset: -2%;
-  background:
-    url("https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1800&q=80")
-      center / cover;
+  background: url("https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1800&q=80")
+    center / cover;
   transform: scale(1.06);
   animation: admin-login-drift 32s ease-in-out infinite alternate;
   z-index: 0;

@@ -140,7 +140,9 @@
         <header v-reveal class="section-intro section-intro--row">
           <div>
             <p class="gy-eyebrow">{{ $t("home.latestNews") }}</p>
-            <h2 class="gy-display section-title">{{ $t("home.fromGreyon") }}</h2>
+            <h2 class="gy-display section-title">{{
+              $t("home.fromGreyon")
+            }}</h2>
           </div>
           <router-link to="/news" class="gy-link-arrow">
             {{ $t("home.allNews") }}
@@ -163,7 +165,9 @@
             <div class="news-row__copy">
               <p class="gy-eyebrow">{{ item.publishedAt }}</p>
               <h3 class="gy-display">
-                <router-link :to="`/news/${item.slug}`">{{ item.title }}</router-link>
+                <router-link :to="`/news/${item.slug}`">{{
+                  item.title
+                }}</router-link>
               </h3>
               <p class="news-row__excerpt">{{ item.excerpt }}</p>
             </div>
@@ -194,9 +198,7 @@ const heroSlides = computed(() => {
   return [{ src: FALLBACK_HERO, alt: "Greyon hotel stay" }];
 });
 
-const heroImage = computed(
-  () => heroSlides.value[0]?.src ?? FALLBACK_HERO
-);
+const heroImage = computed(() => heroSlides.value[0]?.src ?? FALLBACK_HERO);
 
 const heroIndex = ref(0);
 let timer: ReturnType<typeof setInterval> | null = null;
@@ -328,7 +330,11 @@ const latestNews = computed(() => cms.publishedNews.slice(0, 3));
       rgba(12, 11, 10, 0.18) 52%,
       rgba(12, 11, 10, 0.4) 100%
     ),
-    linear-gradient(180deg, rgba(12, 11, 10, 0.15) 0%, rgba(12, 11, 10, 0.72) 100%);
+    linear-gradient(
+      180deg,
+      rgba(12, 11, 10, 0.15) 0%,
+      rgba(12, 11, 10, 0.72) 100%
+    );
 }
 
 .home-hero__content {

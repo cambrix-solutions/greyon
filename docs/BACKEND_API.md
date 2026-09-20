@@ -46,12 +46,12 @@ Property hierarchy:
 
 **Scope (data isolation):**
 
-| Seat | Field on user | Sees |
-|------|---------------|------|
-| `developer` / `admin` | — | All locations & hotels |
-| `manager` | `locationIds[]` | Hotels + bookings in those destinations only |
-| `hotel_admin` | `hotelIds[]` | Those hotels only |
-| `customer` | — | Public site only (no admin) |
+| Seat                  | Field on user   | Sees                                         |
+| --------------------- | --------------- | -------------------------------------------- |
+| `developer` / `admin` | —               | All locations & hotels                       |
+| `manager`             | `locationIds[]` | Hotels + bookings in those destinations only |
+| `hotel_admin`         | `hotelIds[]`    | Those hotels only                            |
+| `customer`            | —               | Public site only (no admin)                  |
 
 **Who can assign packages?** Only `developer`. End users cannot add packages to themselves.
 
@@ -84,20 +84,20 @@ can(user, perm) =
 
 ### Role × permission matrix
 
-| Permission | developer | admin | manager | hotel_admin | customer |
-|------------|:---------:|:-----:|:-------:|:-----------:|:--------:|
-| `dashboard` | ✓ | ✓ | ✓ | ✓ | |
-| `locations` (+ `locations_*`) | ✓ | ✓ | ✓ | | |
-| `hotels` | ✓ | ✓ | ✓ | ✓ | |
-| `rooms` | ✓ | ✓ | ✓ | ✓ | |
-| `rates` | ✓ | ✓ | ✓ | ✓ | |
-| `bookings` | ✓ | ✓ | ✓ | ✓ | |
-| `news` | ✓ | ✓ | ✓ | | |
-| `enquiries` | ✓ | ✓ | * | * | |
-| `media` | ✓ | ✓ | | | |
-| `settings` | ✓ | ✓ | | | |
-| `users` | ✓ | ✓ | self read | self read | |
-| `features` (packages UI) | ✓ | | | | |
+| Permission                    | developer | admin |  manager  | hotel_admin | customer |
+| ----------------------------- | :-------: | :---: | :-------: | :---------: | :------: |
+| `dashboard`                   |     ✓     |   ✓   |     ✓     |      ✓      |          |
+| `locations` (+ `locations_*`) |     ✓     |   ✓   |     ✓     |             |          |
+| `hotels`                      |     ✓     |   ✓   |     ✓     |      ✓      |          |
+| `rooms`                       |     ✓     |   ✓   |     ✓     |      ✓      |          |
+| `rates`                       |     ✓     |   ✓   |     ✓     |      ✓      |          |
+| `bookings`                    |     ✓     |   ✓   |     ✓     |      ✓      |          |
+| `news`                        |     ✓     |   ✓   |     ✓     |             |          |
+| `enquiries`                   |     ✓     |   ✓   |     *     |      *      |          |
+| `media`                       |     ✓     |   ✓   |           |             |          |
+| `settings`                    |     ✓     |   ✓   |           |             |          |
+| `users`                       |     ✓     |   ✓   | self read |  self read  |          |
+| `features` (packages UI)      |     ✓     |       |           |             |          |
 
 \* Contact enquiries have **no hotelId** today. Until you add optional `hotelId` / `locationId` on enquiries, only **global** seats (`developer`, `admin`) should list them. Managers / hotel admins get an empty list.
 
@@ -109,39 +109,39 @@ Seed these keys (table `features`). `enabled` for **public** visitors is derived
 
 ### Admin parents
 
-| key | label |
-|-----|--------|
-| `dashboard` | Dashboard |
-| `locations` | Locations (parent) |
-| `hotels` | Hotels |
-| `rooms` | Room types |
-| `rates` | Rates & availability |
-| `bookings` | Bookings |
-| `news` | News |
-| `media` | Media library (add-on) |
-| `enquiries` | Enquiries |
-| `settings` | SEO / Settings |
-| `users` | Users |
-| `features` | Packages builder |
+| key         | label                  |
+| ----------- | ---------------------- |
+| `dashboard` | Dashboard              |
+| `locations` | Locations (parent)     |
+| `hotels`    | Hotels                 |
+| `rooms`     | Room types             |
+| `rates`     | Rates & availability   |
+| `bookings`  | Bookings               |
+| `news`      | News                   |
+| `media`     | Media library (add-on) |
+| `enquiries` | Enquiries              |
+| `settings`  | SEO / Settings         |
+| `users`     | Users                  |
+| `features`  | Packages builder       |
 
 ### Admin children (`parentKey = locations`)
 
-| key | Purpose |
-|-----|---------|
-| `locations_list` | Edit destination content |
+| key                  | Purpose                         |
+| -------------------- | ------------------------------- |
+| `locations_list`     | Edit destination content        |
 | `locations_managers` | Assign managers per destination |
-| `locations_hotels` | Hotels under locations |
-| `locations_publish` | Publish / archive |
-| `locations_seo` | SEO fields |
+| `locations_hotels`   | Hotels under locations          |
+| `locations_publish`  | Publish / archive               |
+| `locations_seo`      | SEO fields                      |
 
 ### Public
 
-| key | Gates |
-|-----|--------|
-| `booking_public` | `/booking` |
-| `news_public` | `/news` |
-| `contact_public` | `/contact` |
-| `portfolios` | Portfolio stubs |
+| key              | Gates           |
+| ---------------- | --------------- |
+| `booking_public` | `/booking`      |
+| `news_public`    | `/news`         |
+| `contact_public` | `/contact`      |
+| `portfolios`     | Portfolio stubs |
 
 ---
 
@@ -149,59 +149,59 @@ Seed these keys (table `features`). `enabled` for **public** visitors is derived
 
 ### `features`
 
-| Column | Type | Notes |
-|--------|------|-------|
-| id | uuid PK | |
-| key | varchar UNIQUE | |
-| label | varchar | |
-| description | text | |
-| category | `admin` \| `public` | |
-| parent_key | varchar NULL | e.g. `locations` |
-| paid_add_on | boolean | |
-| sort_order | int | optional |
+| Column      | Type                | Notes            |
+| ----------- | ------------------- | ---------------- |
+| id          | uuid PK             |                  |
+| key         | varchar UNIQUE      |                  |
+| label       | varchar             |                  |
+| description | text                |                  |
+| category    | `admin` \| `public` |                  |
+| parent_key  | varchar NULL        | e.g. `locations` |
+| paid_add_on | boolean             |                  |
+| sort_order  | int                 | optional         |
 
 ### `packages`
 
-| Column | Type | Notes |
-|--------|------|-------|
-| id | uuid PK | |
-| name | varchar | |
-| description | text | |
-| price_note | varchar | Internal label |
-| roles | jsonb / text[] | e.g. `["manager"]` |
-| feature_keys | jsonb / text[] | |
-| is_system | boolean | System rows cannot be deleted |
-| created_at / updated_at | timestamptz | |
+| Column                  | Type           | Notes                         |
+| ----------------------- | -------------- | ----------------------------- |
+| id                      | uuid PK        |                               |
+| name                    | varchar        |                               |
+| description             | text           |                               |
+| price_note              | varchar        | Internal label                |
+| roles                   | jsonb / text[] | e.g. `["manager"]`            |
+| feature_keys            | jsonb / text[] |                               |
+| is_system               | boolean        | System rows cannot be deleted |
+| created_at / updated_at | timestamptz    |                               |
 
 ### `user_packages`
 
-| Column | Type |
-|--------|------|
-| id | uuid PK |
-| user_id | uuid FK → users ON DELETE CASCADE |
-| package_id | uuid FK → packages ON DELETE RESTRICT |
-| UNIQUE (user_id, package_id) | |
+| Column                       | Type                                  |
+| ---------------------------- | ------------------------------------- |
+| id                           | uuid PK                               |
+| user_id                      | uuid FK → users ON DELETE CASCADE     |
+| package_id                   | uuid FK → packages ON DELETE RESTRICT |
+| UNIQUE (user_id, package_id) |                                       |
 
 ### `users`
 
 **Remove** any `role` or `package_id` column.
 
-| Column | Type | Notes |
-|--------|------|-------|
-| id | uuid PK | |
-| name | varchar | |
-| email | varchar UNIQUE | |
-| password_hash | varchar | |
-| location_ids | uuid[] / jsonb | Managers |
-| hotel_ids | uuid[] / jsonb | Hotel admins |
-| active | boolean | |
-| created_at / updated_at | timestamptz | |
+| Column                  | Type           | Notes        |
+| ----------------------- | -------------- | ------------ |
+| id                      | uuid PK        |              |
+| name                    | varchar        |              |
+| email                   | varchar UNIQUE |              |
+| password_hash           | varchar        |              |
+| location_ids            | uuid[] / jsonb | Managers     |
+| hotel_ids               | uuid[] / jsonb | Hotel admins |
+| active                  | boolean        |              |
+| created_at / updated_at | timestamptz    |              |
 
 ### `site_settings` (single row)
 
-| Column | Type |
-|--------|------|
-| id | int PK (= 1) |
+| Column            | Type               |
+| ----------------- | ------------------ |
+| id                | int PK (= 1)       |
 | active_package_id | uuid FK → packages | Site default for public feature flags |
 
 ### Content (already familiar)
@@ -290,8 +290,8 @@ When user has both `admin` and `manager`, **global wins** for data scope.
 
 **Errors**
 
-- `401` invalid credentials  
-- `403` customer-only account trying admin login  
+- `401` invalid credentials
+- `403` customer-only account trying admin login
 
 Token is a Sanctum personal access token (Breeze API). Prefer reloading roles/features from DB per request (or short cache).
 
@@ -311,21 +311,21 @@ All require Bearer token + `can(user, ...)`.
 
 ### Features
 
-| Method | Path | Who | Description |
-|--------|------|-----|-------------|
-| GET | `/admin/features` | seats with `users` or `features` | Full catalog (tree) |
+| Method | Path              | Who                              | Description         |
+| ------ | ----------------- | -------------------------------- | ------------------- |
+| GET    | `/admin/features` | seats with `users` or `features` | Full catalog (tree) |
 
 ### Packages (developer only)
 
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/admin/packages` | List (+ user counts) |
-| GET | `/admin/packages/:id` | Detail |
-| POST | `/admin/packages` | Create |
-| PATCH | `/admin/packages/:id` | Update |
-| DELETE | `/admin/packages/:id` | Block if `isSystem` |
-| POST | `/admin/packages/:id/duplicate` | Copy |
-| POST | `/admin/packages/:id/activate` | Set site default |
+| Method | Path                            | Description          |
+| ------ | ------------------------------- | -------------------- |
+| GET    | `/admin/packages`               | List (+ user counts) |
+| GET    | `/admin/packages/:id`           | Detail               |
+| POST   | `/admin/packages`               | Create               |
+| PATCH  | `/admin/packages/:id`           | Update               |
+| DELETE | `/admin/packages/:id`           | Block if `isSystem`  |
+| POST   | `/admin/packages/:id/duplicate` | Copy                 |
+| POST   | `/admin/packages/:id/activate`  | Set site default     |
 
 **Create / patch body**
 
@@ -355,20 +355,20 @@ All require Bearer token + `can(user, ...)`.
 
 **Validation**
 
-- `roles` non-empty  
-- Unknown feature keys → `400`  
+- `roles` non-empty
+- Unknown feature keys → `400`
 - Non-customer packages should include `dashboard` (and usually `features` key for matrix consistency)
 
 ### Users
 
-| Method | Path | Who | Description |
-|--------|------|-----|-------------|
-| GET | `/admin/users` | developer: all; others: self | Include packages, roles, scope |
-| GET | `/admin/users/:id` | developer or self | |
-| POST | `/admin/users` | developer | |
-| PATCH | `/admin/users/:id` | developer | |
-| DELETE | `/admin/users/:id` | developer | Keep ≥1 developer |
-| PUT | `/admin/users/:id/packages` | developer | Replace M2M set |
+| Method | Path                        | Who                          | Description                    |
+| ------ | --------------------------- | ---------------------------- | ------------------------------ |
+| GET    | `/admin/users`              | developer: all; others: self | Include packages, roles, scope |
+| GET    | `/admin/users/:id`          | developer or self            |                                |
+| POST   | `/admin/users`              | developer                    |                                |
+| PATCH  | `/admin/users/:id`          | developer                    |                                |
+| DELETE | `/admin/users/:id`          | developer                    | Keep ≥1 developer              |
+| PUT    | `/admin/users/:id/packages` | developer                    | Replace M2M set                |
 
 **Create / patch body**
 
@@ -385,10 +385,10 @@ All require Bearer token + `can(user, ...)`.
 
 **Validation**
 
-- ≥1 `packageIds`  
-- Effective roles include `manager` → `locationIds` required  
-- Effective roles include `hotel_admin` → `hotelIds` required  
-- Clear unused scope when roles no longer need it  
+- ≥1 `packageIds`
+- Effective roles include `manager` → `locationIds` required
+- Effective roles include `hotel_admin` → `hotelIds` required
+- Clear unused scope when roles no longer need it
 - Non-developer cannot change own packages or scope (read-only “My access”)
 
 **PUT packages body**
@@ -405,23 +405,23 @@ Apply **permission** + **hotel/location scope** on every list/get/write.
 
 ### Locations — perm `locations`
 
-| Method | Path | Scope |
-|--------|------|-------|
-| GET | `/admin/locations` | `canAccessLocation` |
-| GET | `/admin/locations/:id` | |
-| POST | `/admin/locations` | global / allowed |
-| PATCH | `/admin/locations/:id` | |
-| DELETE | `/admin/locations/:id` | |
+| Method | Path                   | Scope               |
+| ------ | ---------------------- | ------------------- |
+| GET    | `/admin/locations`     | `canAccessLocation` |
+| GET    | `/admin/locations/:id` |                     |
+| POST   | `/admin/locations`     | global / allowed    |
+| PATCH  | `/admin/locations/:id` |                     |
+| DELETE | `/admin/locations/:id` |                     |
 
 **Body fields:** `name`, `slug`, `description`, `heroImage`, `gallery[]`, `highlights[]`, `status`, `seoTitle`, `seoDescription`
 
 ### Hotels — perm `hotels`
 
-| Method | Path | Scope |
-|--------|------|-------|
-| GET | `/admin/hotels` | `canAccessHotel` |
-| GET | `/admin/hotels/:id` | |
-| POST / PATCH / DELETE | `/admin/hotels…` | |
+| Method                | Path                | Scope            |
+| --------------------- | ------------------- | ---------------- |
+| GET                   | `/admin/hotels`     | `canAccessHotel` |
+| GET                   | `/admin/hotels/:id` |                  |
+| POST / PATCH / DELETE | `/admin/hotels…`    |                  |
 
 **Body fields:** `name`, `slug`, `locationId`, `shortDescription`, `description`, `address`, `coordinates {lat,lng}`, `phone`, `email`, `heroImage`, `gallery[]`, `amenities[]`, `policies[]`, `checkInTime`, `checkOutTime`, `featured`, `status`, SEO fields
 
@@ -448,12 +448,12 @@ PUT  /admin/rate-calendar         { ratePlanId, date, price, minStay?, maxStay? 
 
 ### Bookings — perm `bookings` (**critical scope**)
 
-| Method | Path | Notes |
-|--------|------|-------|
-| GET | `/admin/bookings?status=&q=` | Filter by scoped hotels |
-| GET | `/admin/bookings/:reference` | 404 if out of scope |
-| PATCH | `/admin/bookings/:reference/status` | `{ "status": "confirmed" }` |
-| POST | `/admin/bookings` | Admin-created; hotel must be in scope |
+| Method | Path                                | Notes                                 |
+| ------ | ----------------------------------- | ------------------------------------- |
+| GET    | `/admin/bookings?status=&q=`        | Filter by scoped hotels               |
+| GET    | `/admin/bookings/:reference`        | 404 if out of scope                   |
+| PATCH  | `/admin/bookings/:reference/status` | `{ "status": "confirmed" }`           |
+| POST   | `/admin/bookings`                   | Admin-created; hotel must be in scope |
 
 Statuses: `pending` \| `confirmed` \| `cancelled` \| `completed`
 
@@ -485,18 +485,18 @@ Site SEO defaults, contact email, and optionally read `activePackageId` (activat
 
 No auth. Gate by **site default package** public `featureKeys`.
 
-| Method | Path | Feature gate |
-|--------|------|----------------|
-| GET | `/hotels` | — (published only) |
-| GET | `/hotels/:slug` | |
-| GET | `/locations` | |
-| GET | `/locations/:slug` | |
-| GET | `/news` | `news_public` |
-| GET | `/news/:slug` | `news_public` |
-| GET | `/availability` | `booking_public` |
-| POST | `/bookings` | `booking_public` |
-| GET | `/bookings/:reference` | guest lookup |
-| POST | `/enquiries` | `contact_public` |
+| Method | Path                   | Feature gate       |
+| ------ | ---------------------- | ------------------ |
+| GET    | `/hotels`              | — (published only) |
+| GET    | `/hotels/:slug`        |                    |
+| GET    | `/locations`           |                    |
+| GET    | `/locations/:slug`     |                    |
+| GET    | `/news`                | `news_public`      |
+| GET    | `/news/:slug`          | `news_public`      |
+| GET    | `/availability`        | `booking_public`   |
+| POST   | `/bookings`            | `booking_public`   |
+| GET    | `/bookings/:reference` | guest lookup       |
+| POST   | `/enquiries`           | `contact_public`   |
 
 If gate is off → `404`.
 
@@ -544,16 +544,20 @@ Response includes `reference` (e.g. `GRY-XXXXXX`), totals, `status: "pending"`.
 
 ## 10. Error conventions
 
-| Status | When |
-|--------|------|
-| 400 | Validation failed |
-| 401 | Missing / invalid Bearer token |
-| 403 | Authenticated but no permission (or customer on admin) |
-| 404 | Not found, out of scope, or public feature disabled |
-| 409 | Booking conflict / no availability |
+| Status | When                                                   |
+| ------ | ------------------------------------------------------ |
+| 400    | Validation failed                                      |
+| 401    | Missing / invalid Bearer token                         |
+| 403    | Authenticated but no permission (or customer on admin) |
+| 404    | Not found, out of scope, or public feature disabled    |
+| 409    | Booking conflict / no availability                     |
 
 ```json
-{ "statusCode": 403, "message": "Missing permission: features", "error": "Forbidden" }
+{
+  "statusCode": 403,
+  "message": "Missing permission: features",
+  "error": "Forbidden"
+}
 ```
 
 ---
@@ -562,15 +566,15 @@ Response includes `reference` (e.g. `GRY-XXXXXX`), totals, `status: "pending"`.
 
 Align with SPA demos for QA:
 
-| Email | Package idea | Scope |
-|-------|--------------|--------|
-| `dev@greyon.com.kh` | Platform Developer | global |
-| `admin@greyon.com.kh` | Admin · Full suite | global |
-| `pp@greyon.com.kh` | Manager · Booking Pro | location Phnom Penh |
-| `sr@greyon.com.kh` | Manager · Content+ | location Siem Reap |
-| `angkor@greyon.com.kh` | Hotel Admin · Booking Pro | hotel Angkor |
-| `hotel@greyon.com.kh` | Hotel Admin · Core | hotel Riverside (PP) |
-| `guest@example.com` | Customer | no admin |
+| Email                  | Package idea              | Scope                |
+| ---------------------- | ------------------------- | -------------------- |
+| `dev@greyon.com.kh`    | Platform Developer        | global               |
+| `admin@greyon.com.kh`  | Admin · Full suite        | global               |
+| `pp@greyon.com.kh`     | Manager · Booking Pro     | location Phnom Penh  |
+| `sr@greyon.com.kh`     | Manager · Content+        | location Siem Reap   |
+| `angkor@greyon.com.kh` | Hotel Admin · Booking Pro | hotel Angkor         |
+| `hotel@greyon.com.kh`  | Hotel Admin · Core        | hotel Riverside (PP) |
+| `guest@example.com`    | Customer                  | no admin             |
 
 Reference package feature sets: greyon-engine `FeatureSeeder` / `PackageSeeder` (SPA loads them via `/developer/features` and `/developer/packages`).
 
@@ -578,15 +582,15 @@ Reference package feature sets: greyon-engine `FeatureSeeder` / `PackageSeeder` 
 
 ## 12. Acceptance tests
 
-1. Login `sr@…` → `GET /admin/bookings` → **only** Siem Reap hotels.  
-2. Login `hotel@…` → only Riverside hotel data.  
-3. Login `admin@…` → all bookings.  
-4. Login `pp@…` → `GET /admin/packages` → `403`.  
-5. Login `dev@…` → can assign packages; user cannot self-assign.  
-6. Manager with empty `locationIds` → empty hotels/bookings (not everything).  
-7. Package `roles: ["admin","manager"]` → global scope wins when `admin` present.  
-8. Site default without `booking_public` → public `POST /bookings` → `404`.  
-9. Customer → admin login → `403`.  
+1. Login `sr@…` → `GET /admin/bookings` → **only** Siem Reap hotels.
+2. Login `hotel@…` → only Riverside hotel data.
+3. Login `admin@…` → all bookings.
+4. Login `pp@…` → `GET /admin/packages` → `403`.
+5. Login `dev@…` → can assign packages; user cannot self-assign.
+6. Manager with empty `locationIds` → empty hotels/bookings (not everything).
+7. Package `roles: ["admin","manager"]` → global scope wins when `admin` present.
+8. Site default without `booking_public` → public `POST /bookings` → `404`.
+9. Customer → admin login → `403`.
 10. Delete last developer → `400`.
 
 ---
@@ -663,4 +667,4 @@ Nest `/api` and SPA seed mocks have been removed; the live backend is greyon-eng
 
 ---
 
-*Questions while building: match SPA seeds and types above. Prefer 404 for out-of-scope and disabled public features.*
+_Questions while building: match SPA seeds and types above. Prefer 404 for out-of-scope and disabled public features._

@@ -1,6 +1,7 @@
 # Greyon — Launch, QA & Content Checklist
 
 ## Environments
+
 - [ ] Staging URL + HTTPS
 - [ ] Production domain `www.greyon.com.kh` / `greyon.site` DNS + SSL
 - [ ] greyon-engine (Laravel) + database backups scheduled
@@ -10,6 +11,7 @@
 - [ ] Production secrets rotated (`APP_KEY`, DB credentials, SMTP)
 
 ## Content entry (business approved)
+
 - [x] Logo, brand colors, typography (Poppins + Syne titles; white/gold)
 - [x] Demo hotel names, addresses, coordinates, phone/email (engine seeders)
 - [x] Room types, capacities, amenities, inventory (engine)
@@ -19,6 +21,7 @@
 - [ ] Privacy / Terms / Booking terms final legal copy (placeholders present)
 
 ## QA scenarios
+
 - [x] Home hero + booking search widget (desktop/mobile) — implemented
 - [x] Hotels list filters (location + keyword)
 - [x] Hotel detail gallery, rooms, Book Now context
@@ -35,11 +38,13 @@
 - [ ] Chrome, Edge, Safari, iOS/Android smoke test (run before go-live)
 
 ## UAT & handover
+
 - [ ] Business owner sign-off on content and booking rules
 - [ ] Admin users provisioned (greyon-engine seed / developer UI)
 - [ ] Monitoring/logging enabled
 - [ ] Production deploy checklist completed
 
 ## Runtime
+
 - Quasar SPA always uses greyon-engine (`VITE_USE_API=true`, `VITE_APP_MODE=local|staging|production`)
 - Local: Vite `/engine` proxy → greyon-engine (see `.env.example`)

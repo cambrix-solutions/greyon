@@ -149,7 +149,13 @@
     >
       <AdminFormSection title="Profile" :columns="2">
         <q-input v-model="form.name" label="Full name" outlined dense />
-        <q-input v-model="form.email" type="email" label="Email" outlined dense />
+        <q-input
+          v-model="form.email"
+          type="email"
+          label="Email"
+          outlined
+          dense
+        />
       </AdminFormSection>
       <AdminFormSection
         title="Seat (role)"
@@ -223,9 +229,7 @@ const cms = useCmsStore();
 const auth = useAuthStore();
 const $q = useQuasar();
 
-const canManagePeople = computed(
-  () => auth.isDeveloper || auth.can("users")
-);
+const canManagePeople = computed(() => auth.isDeveloper || auth.can("users"));
 
 onMounted(() => {
   void cms.ensureTeamBundle();
@@ -286,8 +290,9 @@ const developerCount = computed(
 const me = computed(() => {
   if (!auth.user) return null;
   return (
-    cms.users.find(u => u.id === auth.user!.id || u.email === auth.user!.email) ??
-    auth.user
+    cms.users.find(
+      u => u.id === auth.user!.id || u.email === auth.user!.email
+    ) ?? auth.user
   );
 });
 

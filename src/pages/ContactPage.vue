@@ -28,7 +28,11 @@
         </div>
       </div>
 
-      <form v-reveal="{ delay: '120ms' }" class="contact-form" @submit.prevent="onSubmit">
+      <form
+        v-reveal="{ delay: '120ms' }"
+        class="contact-form"
+        @submit.prevent="onSubmit"
+      >
         <h2 class="gy-display">Enquiry</h2>
         <label>
           Full name

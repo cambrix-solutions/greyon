@@ -43,10 +43,8 @@ export function createApiClient(
   baseURL: string,
   options: CreateApiClientOptions = {}
 ): ApiClient {
-  const {
-    withCredentials = true,
-    bearerStorageKey = "greyon_api_token"
-  } = options;
+  const { withCredentials = true, bearerStorageKey = "greyon_api_token" } =
+    options;
   const root = baseURL.replace(/\/$/, "");
 
   async function request<T>(path: string, init?: RequestInit): Promise<T> {

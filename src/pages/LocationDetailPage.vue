@@ -9,7 +9,9 @@
       <img :src="location.heroImage" :alt="location.name" />
       <div class="loc-hero__content gy-container">
         <p v-reveal class="gy-eyebrow">Location</p>
-        <h1 v-reveal="{ delay: '80ms' }" class="gy-display">{{ location.name }}</h1>
+        <h1 v-reveal="{ delay: '80ms' }" class="gy-display">{{
+          location.name
+        }}</h1>
       </div>
     </section>
     <div class="gy-container gy-section">
@@ -60,7 +62,9 @@ const router = useRouter();
 const booking = useBookingStore();
 const cms = useCmsStore();
 
-const location = computed(() => cms.getLocationBySlug(String(route.params.slug)));
+const location = computed(() =>
+  cms.getLocationBySlug(String(route.params.slug))
+);
 const hotelsHere = computed(() =>
   location.value
     ? cms.publishedHotels.filter(h => h.locationId === location.value?.id)

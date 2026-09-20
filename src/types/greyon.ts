@@ -1,9 +1,5 @@
 export type ContentStatus = "draft" | "published" | "archived";
-export type BookingStatus =
-  | "pending"
-  | "confirmed"
-  | "cancelled"
-  | "completed";
+export type BookingStatus = "pending" | "confirmed" | "cancelled" | "completed";
 export type EnquiryStatus = "new" | "in_progress" | "closed";
 
 /**
@@ -253,4 +249,3 @@ export interface BookingSearchParams {
   adults: number;
   children: number;
 }
-

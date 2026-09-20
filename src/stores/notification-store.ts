@@ -82,5 +82,7 @@ export const useNotificationStore = defineStore("notifications", () => {
 });
 
 if (import.meta.hot) {
-  import.meta.hot.accept(acceptHMRUpdate(useNotificationStore, import.meta.hot));
+  import.meta.hot.accept(
+    acceptHMRUpdate(useNotificationStore, import.meta.hot)
+  );
 }

@@ -1,9 +1,6 @@
 <template>
   <q-page class="gy-section">
-    <SeoHead
-      :title="`${title} | Greyon`"
-      :description="description"
-    />
+    <SeoHead :title="`${title} | Greyon`" :description="description" />
     <div class="gy-container coming-soon">
       <p class="gy-eyebrow">{{ $t("nav.portfolios") }}</p>
       <h1 class="gy-display">{{ title }}</h1>
@@ -35,7 +32,8 @@ const { t } = useI18n();
 const kind = computed(() => String(route.meta.portfolioKind || "future"));
 
 const title = computed(() => {
-  if (kind.value === "service-apartment") return t("portfolios.serviceApartment");
+  if (kind.value === "service-apartment")
+    return t("portfolios.serviceApartment");
   if (kind.value === "boutique") return t("portfolios.boutique");
   if (kind.value === "resort") return t("portfolios.resort");
   return t("portfolios.comingSoon");

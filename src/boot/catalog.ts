@@ -6,8 +6,7 @@ import { useCmsStore } from "@/stores/cms-store";
  * Skip on /admin/* so login doesn't hit /catalog + /settings.
  */
 export default defineBoot(async () => {
-  const path =
-    typeof window !== "undefined" ? window.location.pathname : "/";
+  const path = typeof window !== "undefined" ? window.location.pathname : "/";
   if (path === "/admin" || path.startsWith("/admin/")) return;
 
   const cms = useCmsStore();

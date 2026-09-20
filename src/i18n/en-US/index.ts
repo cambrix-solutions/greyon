@@ -25,7 +25,8 @@ export default {
     browseHotels: "Browse hotels"
   },
   home: {
-    subhead: "Calm stays across Cambodia’s city lights, coastlines, and quiet countryside.",
+    subhead:
+      "Calm stays across Cambodia’s city lights, coastlines, and quiet countryside.",
     viewHotels: "View Hotels",
     featured: "Featured hotels",
     stayWith: "Stay with Greyon",

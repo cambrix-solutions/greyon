@@ -14,7 +14,13 @@
           :disable="slides.length >= 12"
           @click="addSlide"
         />
-        <q-btn unelevated no-caps color="primary" label="Save slides" @click="save" />
+        <q-btn
+          unelevated
+          no-caps
+          color="primary"
+          label="Save slides"
+          @click="save"
+        />
       </template>
     </AdminPageHeader>
 
@@ -53,7 +59,12 @@
                     label="Image URL"
                     class="q-mb-sm"
                   />
-                  <q-input v-model="slide.alt" dense outlined label="Alt text" />
+                  <q-input
+                    v-model="slide.alt"
+                    dense
+                    outlined
+                    label="Alt text"
+                  />
                 </div>
                 <div class="col-auto column q-gutter-xs">
                   <q-btn

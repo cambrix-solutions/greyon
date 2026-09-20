@@ -96,8 +96,7 @@ export const useCustomerStore = defineStore("customer", () => {
     } catch (e) {
       return {
         ok: false as const,
-        message:
-          e instanceof ApiError ? e.message : "Google sign-in failed."
+        message: e instanceof ApiError ? e.message : "Google sign-in failed."
       };
     }
   }

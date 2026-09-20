@@ -26,13 +26,13 @@ Coolify does **not** wait on GitHub Actions by default. Use Actions as a quality
 
 ### Build settings
 
-| Setting | Value |
-|---------|--------|
-| Build Pack | **Dockerfile** |
-| Dockerfile location | `/Dockerfile` |
-| Base Directory | `/` |
-| Ports Exposes | **80** |
-| Health check path | `/` (optional) |
+| Setting             | Value          |
+| ------------------- | -------------- |
+| Build Pack          | **Dockerfile** |
+| Dockerfile location | `/Dockerfile`  |
+| Base Directory      | `/`            |
+| Ports Exposes       | **80**         |
+| Health check path   | `/` (optional) |
 
 Nixpacks/static also works (`nixpacks.toml`), but **Dockerfile is preferred** (nginx + SPA history mode).
 
@@ -40,11 +40,11 @@ Nixpacks/static also works (`nixpacks.toml`), but **Dockerfile is preferred** (n
 
 Set these as **build** variables (baked into Vite):
 
-| Key | Value |
-|-----|--------|
-| `VITE_APP_MODE` | `production` |
-| `VITE_USE_API` | `true` |
-| `VITE_ENGINE_URL` | `https://engine.greyon.site` |
+| Key                      | Value                        |
+| ------------------------ | ---------------------------- |
+| `VITE_APP_MODE`          | `production`                 |
+| `VITE_USE_API`           | `true`                       |
+| `VITE_ENGINE_URL`        | `https://engine.greyon.site` |
 | `VITE_ENGINE_PUBLIC_URL` | `https://engine.greyon.site` |
 
 If empty, the SPA falls back to `apiConfig.ts` production hosts (`engine.greyon.site`).

@@ -9,7 +9,11 @@
       <slot name="actions" />
     </div>
   </header>
-  <div v-if="$slots.toolbar" v-reveal="{ delay: '90ms' }" class="admin-page-toolbar">
+  <div
+    v-if="$slots.toolbar"
+    v-reveal="{ delay: '90ms' }"
+    class="admin-page-toolbar"
+  >
     <slot name="toolbar" />
   </div>
 </template>

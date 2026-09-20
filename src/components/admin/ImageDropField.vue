@@ -1,7 +1,10 @@
 <template>
   <div
     class="image-drop"
-    :class="{ 'image-drop--active': dragging, 'image-drop--has-preview': Boolean(previewSrc) }"
+    :class="{
+      'image-drop--active': dragging,
+      'image-drop--has-preview': Boolean(previewSrc)
+    }"
     @dragenter.prevent="dragging = true"
     @dragover.prevent="dragging = true"
     @dragleave.prevent="onDragLeave"

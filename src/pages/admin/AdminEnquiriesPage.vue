@@ -6,7 +6,13 @@
       :subtitle="`${filtered.length} enquiries shown`"
     >
       <template #actions>
-        <q-btn outline no-caps color="primary" label="Export JSON" @click="exportAll" />
+        <q-btn
+          outline
+          no-caps
+          color="primary"
+          label="Export JSON"
+          @click="exportAll"
+        />
       </template>
       <template #toolbar>
         <q-select
@@ -28,83 +34,91 @@
       </template>
     </AdminPageHeader>
 
-    <div v-reveal="{ delay: '120ms' }" class="admin-scroll"><q-markup-table flat bordered class="bg-white">
-      <thead>
-        <tr>
-          <th class="text-left">When</th>
-          <th class="text-left">Name</th>
-          <th class="text-left">Subject</th>
-          <th class="text-left">Contact</th>
-          <th class="text-left">Status</th>
-          <th class="text-left">Notes</th>
-          <th class="text-left">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="item in filtered" :key="item.id">
-          <td>{{ formatDateTime(item.createdAt) }}</td>
-          <td>{{ item.name }}</td>
-          <td>
-            <div>{{ item.subject }}</div>
-            <div class="text-caption text-grey-7">{{ item.message }}</div>
-          </td>
-          <td>
-            <div>{{ item.email }}</div>
-            <div class="text-caption">{{ item.phone }}</div>
-          </td>
-          <td>
-            <q-select
-              dense
-              outlined
-              :model-value="item.status"
-              :options="cms.enquiryStatusOptions"
-              style="min-width: 140px"
-              @update:model-value="(v: string) => setStatus(item.id, v)"
-            />
-          </td>
-          <td style="min-width: 180px">
-            <q-input
-              dense
-              outlined
-              :model-value="item.internalNotes || ''"
-              placeholder="Internal notes"
-              @update:model-value="(v) => setNotes(item.id, String(v ?? ''))"
-            />
-          </td>
-          <td>
-            <q-btn
-              flat
-              dense
-              color="primary"
-              icon="mail"
-              :href="`mailto:${item.email}?subject=Re: ${encodeURIComponent(item.subject)}`"
-            />
-            <q-btn
-              v-if="item.status === 'new'"
-              flat
-              dense
-              color="primary"
-              label="Start"
-              @click="setStatus(item.id, 'in_progress')"
-            />
-            <q-btn
-              v-if="item.status !== 'closed'"
-              flat
-              dense
-              color="positive"
-              label="Close"
-              @click="setStatus(item.id, 'closed')"
-            />
-            <q-btn flat dense color="negative" label="Delete" @click="remove(item.id)" />
-          </td>
-        </tr>
-        <tr v-if="!filtered.length">
-          <td colspan="7" class="text-grey">
-            No enquiries match. Submit one from /contact.
-          </td>
-        </tr>
-      </tbody>
-    </q-markup-table></div>
+    <div v-reveal="{ delay: '120ms' }" class="admin-scroll"
+      ><q-markup-table flat bordered class="bg-white">
+        <thead>
+          <tr>
+            <th class="text-left">When</th>
+            <th class="text-left">Name</th>
+            <th class="text-left">Subject</th>
+            <th class="text-left">Contact</th>
+            <th class="text-left">Status</th>
+            <th class="text-left">Notes</th>
+            <th class="text-left">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="item in filtered" :key="item.id">
+            <td>{{ formatDateTime(item.createdAt) }}</td>
+            <td>{{ item.name }}</td>
+            <td>
+              <div>{{ item.subject }}</div>
+              <div class="text-caption text-grey-7">{{ item.message }}</div>
+            </td>
+            <td>
+              <div>{{ item.email }}</div>
+              <div class="text-caption">{{ item.phone }}</div>
+            </td>
+            <td>
+              <q-select
+                dense
+                outlined
+                :model-value="item.status"
+                :options="cms.enquiryStatusOptions"
+                style="min-width: 140px"
+                @update:model-value="(v: string) => setStatus(item.id, v)"
+              />
+            </td>
+            <td style="min-width: 180px">
+              <q-input
+                dense
+                outlined
+                :model-value="item.internalNotes || ''"
+                placeholder="Internal notes"
+                @update:model-value="v => setNotes(item.id, String(v ?? ''))"
+              />
+            </td>
+            <td>
+              <q-btn
+                flat
+                dense
+                color="primary"
+                icon="mail"
+                :href="`mailto:${item.email}?subject=Re: ${encodeURIComponent(item.subject)}`"
+              />
+              <q-btn
+                v-if="item.status === 'new'"
+                flat
+                dense
+                color="primary"
+                label="Start"
+                @click="setStatus(item.id, 'in_progress')"
+              />
+              <q-btn
+                v-if="item.status !== 'closed'"
+                flat
+                dense
+                color="positive"
+                label="Close"
+                @click="setStatus(item.id, 'closed')"
+              />
+              <q-btn
+                flat
+                dense
+                color="negative"
+                label="Delete"
+                @click="remove(item.id)"
+              />
+            </td>
+          </tr>
+          <tr v-if="!filtered.length">
+            <td colspan="7" class="text-grey">
+              No enquiries match. Submit one from /contact.
+            </td>
+          </tr>
+        </tbody>
+      </q-markup-table></div
+    >
   </q-page>
 </template>
 
@@ -146,7 +160,10 @@ onMounted(async () => {
 watch(() => route.query.status, applyRouteQuery);
 watch(statusFilter, value => {
   if (syncingFromRoute) return;
-  const next = { ...route.query } as Record<string, string | string[] | undefined>;
+  const next = { ...route.query } as Record<
+    string,
+    string | string[] | undefined
+  >;
   if (value === "all") {
     delete next.status;
   } else {
@@ -181,10 +198,12 @@ async function setNotes(id: string, internalNotes: string) {
 }
 
 function remove(id: string) {
-  $q.dialog({ title: "Delete enquiry?", cancel: true, persistent: true }).onOk(async () => {
-    await cms.deleteEnquiry(id);
-    $q.notify({ type: "positive", message: "Enquiry deleted." });
-  });
+  $q.dialog({ title: "Delete enquiry?", cancel: true, persistent: true }).onOk(
+    async () => {
+      await cms.deleteEnquiry(id);
+      $q.notify({ type: "positive", message: "Enquiry deleted." });
+    }
+  );
 }
 
 function exportAll() {

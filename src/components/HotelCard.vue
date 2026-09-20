@@ -10,7 +10,9 @@
 
     <div class="hotel-card__body">
       <h3 class="gy-display">
-        <router-link :to="`/hotels/${hotel.slug}`">{{ hotel.name }}</router-link>
+        <router-link :to="`/hotels/${hotel.slug}`">{{
+          hotel.name
+        }}</router-link>
       </h3>
       <p class="hotel-card__desc">{{ hotel.shortDescription }}</p>
 
@@ -19,7 +21,11 @@
           From <strong>${{ fromPrice }}</strong>
           <span>/ night</span>
         </p>
-        <button class="gy-btn gy-btn--light gy-btn--sm" type="button" @click="book">
+        <button
+          class="gy-btn gy-btn--light gy-btn--sm"
+          type="button"
+          @click="book"
+        >
           Book
         </button>
       </div>

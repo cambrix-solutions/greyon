@@ -291,7 +291,11 @@ export function setupRouterGuards(
     }
 
     // Public admin login / access denied — never block
-    if (to.name === "admin-login" || to.name === "access-denied" || to.meta.publicAdmin) {
+    if (
+      to.name === "admin-login" ||
+      to.name === "access-denied" ||
+      to.meta.publicAdmin
+    ) {
       return true;
     }
 
@@ -358,7 +362,8 @@ export function setupRouterGuards(
         return {
           name: "access-denied",
           query: {
-            message: "Only the platform developer can manage the access catalog."
+            message:
+              "Only the platform developer can manage the access catalog."
           }
         };
       }

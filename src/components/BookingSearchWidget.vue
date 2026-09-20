@@ -1,15 +1,15 @@
 <template>
-  <form class="gy-search" :class="{ 'gy-search--compact': compact }" @submit.prevent="onSubmit">
+  <form
+    class="gy-search"
+    :class="{ 'gy-search--compact': compact }"
+    @submit.prevent="onSubmit"
+  >
     <div class="gy-search__fields">
       <label>
         <span>Location</span>
         <select v-model="local.locationSlug">
           <option value="">All locations</option>
-          <option
-            v-for="loc in locations"
-            :key="loc.id"
-            :value="loc.slug"
-          >
+          <option v-for="loc in locations" :key="loc.id" :value="loc.slug">
             {{ loc.name }}
           </option>
         </select>
@@ -35,30 +35,15 @@
       </label>
       <label>
         <span>Rooms</span>
-        <input
-          v-model.number="local.rooms"
-          type="number"
-          min="1"
-          max="5"
-        />
+        <input v-model.number="local.rooms" type="number" min="1" max="5" />
       </label>
       <label>
         <span>Adults</span>
-        <input
-          v-model.number="local.adults"
-          type="number"
-          min="1"
-          max="8"
-        />
+        <input v-model.number="local.adults" type="number" min="1" max="8" />
       </label>
       <label>
         <span>Children</span>
-        <input
-          v-model.number="local.children"
-          type="number"
-          min="0"
-          max="6"
-        />
+        <input v-model.number="local.children" type="number" min="0" max="6" />
       </label>
     </div>
 
@@ -90,11 +75,7 @@ import { useRouter } from "vue-router";
 import { useBookingStore } from "@/stores/booking-store";
 import { useCmsStore } from "@/stores/cms-store";
 import type { BookingSearchParams } from "@/types/greyon";
-import {
-  addLocalDays,
-  nightsBetweenLocal,
-  toLocalYmd
-} from "@/utils/datetime";
+import { addLocalDays, nightsBetweenLocal, toLocalYmd } from "@/utils/datetime";
 
 const props = withDefaults(
   defineProps<{
@@ -154,8 +135,7 @@ const localError = computed(() => {
 const fieldError = computed(() => ({
   checkIn: attempted.value && (!local.checkIn || local.checkIn < today),
   checkOut:
-    attempted.value &&
-    (!local.checkOut || local.checkOut <= local.checkIn)
+    attempted.value && (!local.checkOut || local.checkOut <= local.checkIn)
 }));
 
 function onCheckInChange() {

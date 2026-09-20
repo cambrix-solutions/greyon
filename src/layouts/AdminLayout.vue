@@ -68,7 +68,10 @@
                 </button>
               </div>
               <q-separator />
-              <div v-if="notifications.loading && !notifications.items.length" class="admin-notify-menu__empty">
+              <div
+                v-if="notifications.loading && !notifications.items.length"
+                class="admin-notify-menu__empty"
+              >
                 Loading…
               </div>
               <div
@@ -90,13 +93,17 @@
                     <q-item-label class="admin-notify-menu__item-title">{{
                       item.title
                     }}</q-item-label>
-                    <q-item-label caption lines="2">{{ item.body }}</q-item-label>
+                    <q-item-label caption lines="2">{{
+                      item.body
+                    }}</q-item-label>
                   </q-item-section>
                 </q-item>
               </q-list>
               <q-separator />
               <q-item clickable v-close-popup to="/admin/bookings">
-                <q-item-section class="text-primary">View all bookings</q-item-section>
+                <q-item-section class="text-primary"
+                  >View all bookings</q-item-section
+                >
               </q-item>
             </q-menu>
           </button>
@@ -117,12 +124,16 @@
               <span class="admin-account__name">{{ displayName }}</span>
               <span class="admin-account__role">
                 {{ roleLabel
-                }}<template v-if="packageSummary"
-                  > · {{ packageSummary }}</template
+                }}<template v-if="packageSummary">
+                  · {{ packageSummary }}</template
                 >
               </span>
             </span>
-            <q-icon name="expand_more" size="18px" class="admin-account__chevron gt-xs" />
+            <q-icon
+              name="expand_more"
+              size="18px"
+              class="admin-account__chevron gt-xs"
+            />
 
             <q-menu
               anchor="bottom right"
@@ -134,7 +145,9 @@
                 <span class="admin-account-menu__avatar">{{ initials }}</span>
                 <div>
                   <p class="admin-account-menu__name">{{ displayName }}</p>
-                  <p class="admin-account-menu__email">{{ auth.user?.email }}</p>
+                  <p class="admin-account-menu__email">{{
+                    auth.user?.email
+                  }}</p>
                   <p class="admin-account-menu__badge">{{ roleLabel }}</p>
                   <p v-if="packageSummary" class="admin-account-menu__pkg">
                     {{ packageSummary }}
@@ -218,7 +231,9 @@
               </q-item-section>
               <q-item-section>
                 <q-item-label>{{ item.label }}</q-item-label>
-                <q-item-label v-if="item.caption" caption>{{ item.caption }}</q-item-label>
+                <q-item-label v-if="item.caption" caption>{{
+                  item.caption
+                }}</q-item-label>
               </q-item-section>
             </q-item>
           </q-list>
@@ -339,7 +354,6 @@ onUnmounted(() => {
   notifications.stopPolling();
 });
 
-
 const pendingBookings = computed(
   () => auth.scopedBookings.filter(b => b.status === "pending").length
 );
@@ -404,7 +418,13 @@ type NavItem = {
 };
 
 const nav = computed<NavItem[]>(() => [
-  { label: "Dashboard", to: "/admin", icon: "dashboard", perm: "dashboard", group: "primary" },
+  {
+    label: "Dashboard",
+    to: "/admin",
+    icon: "dashboard",
+    perm: "dashboard",
+    group: "primary"
+  },
   {
     label: "Locations",
     to: "/admin/locations",
@@ -432,8 +452,20 @@ const nav = computed<NavItem[]>(() => [
     depth: 1,
     caption: "Under a hotel"
   },
-  { label: "News", to: "/admin/news", icon: "newspaper", perm: "news", group: "publishing" },
-  { label: "Media", to: "/admin/media", icon: "photo_library", perm: "media", group: "publishing" },
+  {
+    label: "News",
+    to: "/admin/news",
+    icon: "newspaper",
+    perm: "news",
+    group: "publishing"
+  },
+  {
+    label: "Media",
+    to: "/admin/media",
+    icon: "photo_library",
+    perm: "media",
+    group: "publishing"
+  },
   {
     label: "Hero slides",
     to: "/admin/hero-slides",
@@ -464,7 +496,13 @@ const nav = computed<NavItem[]>(() => [
     group: "ops",
     ...(newEnquiries.value ? { badge: newEnquiries.value } : {})
   },
-  { label: "SEO / Settings", to: "/admin/settings", icon: "settings", perm: "settings", group: "system" },
+  {
+    label: "SEO / Settings",
+    to: "/admin/settings",
+    icon: "settings",
+    perm: "settings",
+    group: "system"
+  },
   {
     label: "People",
     to: "/admin/users",
@@ -497,12 +535,22 @@ const visibleNav = computed(() =>
     return true;
   })
 );
-const primaryNav = computed(() => visibleNav.value.filter(i => i.group === "primary"));
-const propertyNav = computed(() => visibleNav.value.filter(i => i.group === "properties"));
-const publishingNav = computed(() => visibleNav.value.filter(i => i.group === "publishing"));
+const primaryNav = computed(() =>
+  visibleNav.value.filter(i => i.group === "primary")
+);
+const propertyNav = computed(() =>
+  visibleNav.value.filter(i => i.group === "properties")
+);
+const publishingNav = computed(() =>
+  visibleNav.value.filter(i => i.group === "publishing")
+);
 const opsNav = computed(() => visibleNav.value.filter(i => i.group === "ops"));
-const systemNav = computed(() => visibleNav.value.filter(i => i.group === "system"));
-const accessNav = computed(() => visibleNav.value.filter(i => i.group === "access"));
+const systemNav = computed(() =>
+  visibleNav.value.filter(i => i.group === "system")
+);
+const accessNav = computed(() =>
+  visibleNav.value.filter(i => i.group === "access")
+);
 
 async function onLogout() {
   notifications.clear();
@@ -622,7 +670,9 @@ async function onOpenNotification(item: StaffNotification) {
   background: #fff;
   color: var(--gy-ink);
   cursor: pointer;
-  transition: background 0.2s ease, border-color 0.2s ease;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .admin-bell:hover {
@@ -914,7 +964,9 @@ async function onOpenNotification(item: StaffNotification) {
 
 .admin-nav :deep(.q-icon) {
   color: var(--gy-moss);
-  transition: color 0.22s ease, transform 0.22s ease;
+  transition:
+    color 0.22s ease,
+    transform 0.22s ease;
 }
 
 .admin-nav :deep(.q-item:hover .q-icon) {

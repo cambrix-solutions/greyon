@@ -57,8 +57,7 @@ const year = new Date().getFullYear();
 
 <style scoped>
 .gy-footer {
-  background:
-    linear-gradient(180deg, #18201d 0%, var(--gy-ink) 40%);
+  background: linear-gradient(180deg, #18201d 0%, var(--gy-ink) 40%);
   color: rgba(255, 255, 255, 0.88);
   padding: 4rem 0 1.75rem;
   margin-top: auto;
@@ -96,7 +95,9 @@ const year = new Date().getFullYear();
 }
 
 .gy-footer__links a {
-  transition: color 0.25s ease, padding-left 0.25s ease;
+  transition:
+    color 0.25s ease,
+    padding-left 0.25s ease;
 }
 
 .gy-footer__links a:hover {

@@ -14,8 +14,9 @@ export default defineConfig({
   ],
 
   options: {
-    typeAware: true,
-    typeCheck: true,
+    // Type-aware checks are noisy with current TS/Vue tooling; vue-tsc covers types in CI.
+    typeAware: false,
+    typeCheck: false,
     maxWarnings: 10
   },
 

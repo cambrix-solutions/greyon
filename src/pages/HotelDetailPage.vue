@@ -12,8 +12,12 @@
       <div class="detail-hero__veil" />
       <div class="gy-container detail-hero__content">
         <p v-reveal class="gy-eyebrow">{{ locationName }}</p>
-        <h1 v-reveal="{ delay: '80ms' }" class="gy-display">{{ hotel.name }}</h1>
-        <p v-reveal="{ delay: '140ms' }" class="detail-hero__lead">{{ hotel.shortDescription }}</p>
+        <h1 v-reveal="{ delay: '80ms' }" class="gy-display">{{
+          hotel.name
+        }}</h1>
+        <p v-reveal="{ delay: '140ms' }" class="detail-hero__lead">{{
+          hotel.shortDescription
+        }}</p>
       </div>
     </section>
 
@@ -71,7 +75,11 @@
             v-reveal="{ delay: `${Math.min(idx, 5) * 70}ms` }"
             class="gy-card-media gallery__item"
           >
-            <img :src="img" :alt="`${hotel.name} gallery ${idx + 1}`" loading="lazy" />
+            <img
+              :src="img"
+              :alt="`${hotel.name} gallery ${idx + 1}`"
+              loading="lazy"
+            />
           </div>
         </div>
       </section>
@@ -173,8 +181,7 @@ const cms = useCmsStore();
 
 const hotel = computed(() => cms.getHotelBySlug(String(route.params.slug)));
 const locationName = computed(
-  () =>
-    cms.getLocationById(hotel.value?.locationId ?? "")?.name ?? "Cambodia"
+  () => cms.getLocationById(hotel.value?.locationId ?? "")?.name ?? "Cambodia"
 );
 const rooms = computed(() =>
   hotel.value ? cms.getRoomTypesByHotelId(hotel.value.id) : []

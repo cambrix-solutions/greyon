@@ -8,11 +8,17 @@
     />
     <article class="gy-container article">
       <p v-reveal class="gy-eyebrow">{{ article.publishedAt }}</p>
-      <h1 v-reveal="{ delay: '70ms' }" class="gy-display">{{ article.title }}</h1>
+      <h1 v-reveal="{ delay: '70ms' }" class="gy-display">{{
+        article.title
+      }}</h1>
       <div v-reveal="{ delay: '120ms' }" class="gy-card-media article__cover">
         <img :src="article.coverImage" :alt="article.title" />
       </div>
-      <div v-reveal="{ delay: '160ms' }" class="article__body" v-html="article.body" />
+      <div
+        v-reveal="{ delay: '160ms' }"
+        class="article__body"
+        v-html="article.body"
+      />
       <div v-reveal class="share">
         <a
           :href="`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`"
@@ -40,9 +46,7 @@ const route = useRoute();
 const cms = useCmsStore();
 const article = computed(() => cms.getNewsBySlug(String(route.params.slug)));
 const shareUrl = computed(() =>
-  encodeURIComponent(
-    typeof window !== "undefined" ? window.location.href : ""
-  )
+  encodeURIComponent(typeof window !== "undefined" ? window.location.href : "")
 );
 const jsonLd = computed(() =>
   article.value

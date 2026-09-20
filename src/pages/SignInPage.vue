@@ -64,7 +64,11 @@
 
       <p v-if="error" class="auth-error">{{ error }}</p>
 
-      <button class="gy-btn auth-card__submit" type="submit" :disabled="submitting">
+      <button
+        class="gy-btn auth-card__submit"
+        type="submit"
+        :disabled="submitting"
+      >
         {{ submitting ? "Signing in…" : "Sign in" }}
       </button>
 
@@ -82,10 +86,7 @@
 import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import AuthShell from "@/components/AuthShell.vue";
-import {
-  consumeAuthRedirect,
-  setAuthRedirect
-} from "@/helpers/authRedirect";
+import { consumeAuthRedirect, setAuthRedirect } from "@/helpers/authRedirect";
 import { useCustomerStore } from "@/stores/customer-store";
 
 const customer = useCustomerStore();

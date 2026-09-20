@@ -109,7 +109,9 @@
       icon="receipt_long"
       eyebrow="Booking"
       :title="detailBooking?.reference ?? 'Booking'"
-      :subtitle="detailBooking ? `${detailBooking.status} · ${detailBooking.source}` : ''"
+      :subtitle="
+        detailBooking ? `${detailBooking.status} · ${detailBooking.source}` : ''
+      "
     >
       <template v-if="detailBooking">
         <section class="booking-detail__section">
@@ -120,7 +122,8 @@
             {{ roomName(detailBooking.roomTypeId) }}
           </p>
           <p class="muted">
-            {{ detailBooking.rooms }} room(s) · {{ detailBooking.adults }} adults ·
+            {{ detailBooking.rooms }} room(s) ·
+            {{ detailBooking.adults }} adults ·
             {{ detailBooking.children }} children
           </p>
         </section>
@@ -137,7 +140,9 @@
 
         <section class="booking-detail__section">
           <h3>Booking meta</h3>
-          <p class="muted">Booked {{ formatDateTime(detailBooking.createdAt) }}</p>
+          <p class="muted"
+            >Booked {{ formatDateTime(detailBooking.createdAt) }}</p
+          >
         </section>
 
         <section class="booking-detail__section">
@@ -150,7 +155,9 @@
             <span>Taxes / fees</span>
             <strong>${{ detailBooking.taxesFees.toFixed(2) }}</strong>
           </div>
-          <div class="booking-detail__price-row booking-detail__price-row--total">
+          <div
+            class="booking-detail__price-row booking-detail__price-row--total"
+          >
             <span>Total</span>
             <strong>${{ detailBooking.total.toFixed(2) }}</strong>
           </div>
@@ -163,7 +170,9 @@
             outlined
             :model-value="detailBooking.status"
             :options="cms.bookingStatusOptions"
-            @update:model-value="(v: string) => setStatus(detailBooking!.reference, v)"
+            @update:model-value="
+              (v: string) => setStatus(detailBooking!.reference, v)
+            "
           />
         </section>
       </template>
@@ -206,202 +215,203 @@
           </span>
         </div>
 
-            <div class="booking-grid booking-grid--2">
-              <q-select
-                v-model="form.hotelId"
-                :options="hotelOptions"
-                label="Hotel"
-                outlined
-                dense
-                emit-value
-                map-options
-                @update:model-value="onHotelChange"
-              />
-              <q-select
-                v-model="form.roomTypeId"
-                :options="roomOptions"
-                label="Room type"
-                outlined
-                dense
-                emit-value
-                map-options
-                :disable="!roomOptions.length"
-                @update:model-value="onRoomChange"
-              />
-            </div>
+        <div class="booking-grid booking-grid--2">
+          <q-select
+            v-model="form.hotelId"
+            :options="hotelOptions"
+            label="Hotel"
+            outlined
+            dense
+            emit-value
+            map-options
+            @update:model-value="onHotelChange"
+          />
+          <q-select
+            v-model="form.roomTypeId"
+            :options="roomOptions"
+            label="Room type"
+            outlined
+            dense
+            emit-value
+            map-options
+            :disable="!roomOptions.length"
+            @update:model-value="onRoomChange"
+          />
+        </div>
 
-            <q-select
-              v-model="form.ratePlanId"
-              :options="rateOptions"
-              label="Rate plan"
-              outlined
-              dense
-              emit-value
-              map-options
-              :disable="!rateOptions.length"
-              :hint="
-                rateOptions.length
-                  ? undefined
-                  : 'No published rate plan for this room — add one under Rates.'
-              "
-              @update:model-value="invalidatePreview"
-            />
+        <q-select
+          v-model="form.ratePlanId"
+          :options="rateOptions"
+          label="Rate plan"
+          outlined
+          dense
+          emit-value
+          map-options
+          :disable="!rateOptions.length"
+          :hint="
+            rateOptions.length
+              ? undefined
+              : 'No published rate plan for this room — add one under Rates.'
+          "
+          @update:model-value="invalidatePreview"
+        />
 
-            <div class="booking-grid booking-grid--dates">
-              <q-input
-                v-model="form.checkIn"
-                type="date"
-                label="Check-in"
-                outlined
-                dense
-                :min="todayYmd"
-                :error="Boolean(dateError)"
-                :error-message="dateError || undefined"
-                @update:model-value="onCheckInChange"
-              />
-              <q-input
-                v-model="form.checkOut"
-                type="date"
-                label="Check-out"
-                outlined
-                dense
-                :min="minCheckOut"
-                :error="Boolean(dateError)"
-                hide-bottom-space
-                @update:model-value="invalidatePreview"
-              />
-            </div>
+        <div class="booking-grid booking-grid--dates">
+          <q-input
+            v-model="form.checkIn"
+            type="date"
+            label="Check-in"
+            outlined
+            dense
+            :min="todayYmd"
+            :error="Boolean(dateError)"
+            :error-message="dateError || undefined"
+            @update:model-value="onCheckInChange"
+          />
+          <q-input
+            v-model="form.checkOut"
+            type="date"
+            label="Check-out"
+            outlined
+            dense
+            :min="minCheckOut"
+            :error="Boolean(dateError)"
+            hide-bottom-space
+            @update:model-value="invalidatePreview"
+          />
+        </div>
 
-            <p v-if="selectedHotelTimes" class="booking-hint">
-              Arrive from {{ selectedHotelTimes.checkIn }} · depart by
-              {{ selectedHotelTimes.checkOut }}
-              <template v-if="selectedRoom">
-                · room holds {{ selectedRoom.maxAdults }} adults /
-                {{ selectedRoom.maxChildren }} children
-                (max {{ selectedRoom.maxGuests }})
-              </template>
-            </p>
+        <p v-if="selectedHotelTimes" class="booking-hint">
+          Arrive from {{ selectedHotelTimes.checkIn }} · depart by
+          {{ selectedHotelTimes.checkOut }}
+          <template v-if="selectedRoom">
+            · room holds {{ selectedRoom.maxAdults }} adults /
+            {{ selectedRoom.maxChildren }} children (max
+            {{ selectedRoom.maxGuests }})
+          </template>
+        </p>
 
-            <div class="booking-grid booking-grid--occ">
-              <q-input
-                v-model.number="form.rooms"
-                type="number"
-                :min="1"
-                :max="20"
-                label="Rooms"
-                outlined
-                dense
-                :error="Boolean(occupancyError)"
-                hide-bottom-space
-                @update:model-value="onOccupancyChange"
-              />
-              <q-input
-                v-model.number="form.adults"
-                type="number"
-                :min="1"
-                :max="selectedRoom?.maxAdults ?? 20"
-                label="Adults"
-                outlined
-                dense
-                :error="Boolean(occupancyError)"
-                hide-bottom-space
-                @update:model-value="onOccupancyChange"
-              />
-              <q-input
-                v-model.number="form.children"
-                type="number"
-                :min="0"
-                :max="selectedRoom?.maxChildren ?? 20"
-                label="Children"
-                outlined
-                dense
-                :error="Boolean(occupancyError)"
-                :error-message="occupancyError || undefined"
-                @update:model-value="onOccupancyChange"
-              />
-            </div>
-          </section>
+        <div class="booking-grid booking-grid--occ">
+          <q-input
+            v-model.number="form.rooms"
+            type="number"
+            :min="1"
+            :max="20"
+            label="Rooms"
+            outlined
+            dense
+            :error="Boolean(occupancyError)"
+            hide-bottom-space
+            @update:model-value="onOccupancyChange"
+          />
+          <q-input
+            v-model.number="form.adults"
+            type="number"
+            :min="1"
+            :max="selectedRoom?.maxAdults ?? 20"
+            label="Adults"
+            outlined
+            dense
+            :error="Boolean(occupancyError)"
+            hide-bottom-space
+            @update:model-value="onOccupancyChange"
+          />
+          <q-input
+            v-model.number="form.children"
+            type="number"
+            :min="0"
+            :max="selectedRoom?.maxChildren ?? 20"
+            label="Children"
+            outlined
+            dense
+            :error="Boolean(occupancyError)"
+            :error-message="occupancyError || undefined"
+            @update:model-value="onOccupancyChange"
+          />
+        </div>
+      </section>
 
-          <section class="booking-section">
-            <div class="booking-section__bar">
-              <h3 class="booking-section__title">2 · Guest</h3>
-            </div>
-            <div class="booking-grid booking-grid--guest">
-              <q-input
-                v-model="form.fullName"
-                label="Full name *"
-                outlined
-                dense
-                class="booking-span-full"
-                :error="submitted && !form.fullName.trim()"
-                hide-bottom-space
-              />
-              <q-input
-                v-model="form.email"
-                type="email"
-                label="Email *"
-                outlined
-                dense
-                :error="submitted && !emailValid"
-                :error-message="
-                  submitted && !emailValid ? 'Enter a valid email.' : undefined
-                "
-              />
-              <q-input
-                v-model="form.phone"
-                label="Phone *"
-                outlined
-                dense
-                :error="submitted && !form.phone.trim()"
-                hide-bottom-space
-              />
-            </div>
-            <q-input
-              v-model="form.specialRequests"
-              label="Special requests"
-              type="textarea"
-              outlined
-              :input-style="{ minHeight: '72px', maxHeight: '120px' }"
-            />
-            <q-select
-              v-model="form.status"
-              :options="statusCreateOptions"
-              label="Booking status"
-              outlined
-              dense
-              emit-value
-              map-options
-              style="max-width: 220px"
-            />
-          </section>
+      <section class="booking-section">
+        <div class="booking-section__bar">
+          <h3 class="booking-section__title">2 · Guest</h3>
+        </div>
+        <div class="booking-grid booking-grid--guest">
+          <q-input
+            v-model="form.fullName"
+            label="Full name *"
+            outlined
+            dense
+            class="booking-span-full"
+            :error="submitted && !form.fullName.trim()"
+            hide-bottom-space
+          />
+          <q-input
+            v-model="form.email"
+            type="email"
+            label="Email *"
+            outlined
+            dense
+            :error="submitted && !emailValid"
+            :error-message="
+              submitted && !emailValid ? 'Enter a valid email.' : undefined
+            "
+          />
+          <q-input
+            v-model="form.phone"
+            label="Phone *"
+            outlined
+            dense
+            :error="submitted && !form.phone.trim()"
+            hide-bottom-space
+          />
+        </div>
+        <q-input
+          v-model="form.specialRequests"
+          label="Special requests"
+          type="textarea"
+          outlined
+          :input-style="{ minHeight: '72px', maxHeight: '120px' }"
+        />
+        <q-select
+          v-model="form.status"
+          :options="statusCreateOptions"
+          label="Booking status"
+          outlined
+          dense
+          emit-value
+          map-options
+          style="max-width: 220px"
+        />
+      </section>
 
-          <div v-if="preview" class="booking-quote booking-quote--ok">
-            <div class="booking-quote__main">
-              <p class="booking-quote__label">Ready to create</p>
-              <p class="booking-quote__value">${{ preview.total.toFixed(2) }}</p>
-              <p class="booking-quote__breakdown">
-                {{ preview.nights }} night{{ preview.nights === 1 ? "" : "s" }} ·
-                subtotal ${{ preview.subtotal.toFixed(2) }} · tax/fees
-                ${{ preview.taxesFees.toFixed(2) }}
-              </p>
-            </div>
-            <p class="booking-quote__meta">
-              {{ preview.availableUnits }} unit{{
-                preview.availableUnits === 1 ? "" : "s"
-              }}
-              free
-            </p>
-          </div>
-          <div v-else-if="formError" class="booking-quote booking-quote--warn">
-            <p class="booking-quote__label">Fix before checking</p>
-            <p class="booking-quote__meta">{{ formError }}</p>
-          </div>
-          <div v-else-if="searched" class="booking-quote booking-quote--warn">
-            <p class="booking-quote__label">No availability</p>
-            <p class="booking-quote__meta">
-              {{ availabilityHint }}
-            </p>
-          </div>
+      <div v-if="preview" class="booking-quote booking-quote--ok">
+        <div class="booking-quote__main">
+          <p class="booking-quote__label">Ready to create</p>
+          <p class="booking-quote__value">${{ preview.total.toFixed(2) }}</p>
+          <p class="booking-quote__breakdown">
+            {{ preview.nights }} night{{ preview.nights === 1 ? "" : "s" }} ·
+            subtotal ${{ preview.subtotal.toFixed(2) }} · tax/fees ${{
+              preview.taxesFees.toFixed(2)
+            }}
+          </p>
+        </div>
+        <p class="booking-quote__meta">
+          {{ preview.availableUnits }} unit{{
+            preview.availableUnits === 1 ? "" : "s"
+          }}
+          free
+        </p>
+      </div>
+      <div v-else-if="formError" class="booking-quote booking-quote--warn">
+        <p class="booking-quote__label">Fix before checking</p>
+        <p class="booking-quote__meta">{{ formError }}</p>
+      </div>
+      <div v-else-if="searched" class="booking-quote booking-quote--warn">
+        <p class="booking-quote__label">No availability</p>
+        <p class="booking-quote__meta">
+          {{ availabilityHint }}
+        </p>
+      </div>
 
       <template #actions>
         <q-btn flat no-caps label="Cancel" v-close-popup />
@@ -437,7 +447,11 @@ import AdminDialog from "@/components/admin/AdminDialog.vue";
 import AdminPageHeader from "@/components/admin/AdminPageHeader.vue";
 import { useAuthStore } from "@/stores/auth-store";
 import { useCmsStore } from "@/stores/cms-store";
-import type { AvailabilityResult, Booking, BookingStatus } from "@/types/greyon";
+import type {
+  AvailabilityResult,
+  Booking,
+  BookingStatus
+} from "@/types/greyon";
 import {
   addLocalDays,
   formatDateTime,
@@ -528,7 +542,8 @@ const filtered = computed(() => {
   const q = query.value.trim().toLowerCase();
   return cms.bookings.filter(b => {
     if (!auth.canAccessHotel(b.hotelId)) return false;
-    if (statusFilter.value !== "all" && b.status !== statusFilter.value) return false;
+    if (statusFilter.value !== "all" && b.status !== statusFilter.value)
+      return false;
     if (!q) return true;
     return (
       b.reference.toLowerCase().includes(q) ||
@@ -560,7 +575,9 @@ const rateOptions = computed(() =>
     .map(p => ({ label: `${p.name} ($${p.basePrice})`, value: p.id }))
 );
 
-const selectedRoom = computed(() => cms.getRoomTypeById(form.roomTypeId) ?? null);
+const selectedRoom = computed(
+  () => cms.getRoomTypeById(form.roomTypeId) ?? null
+);
 
 const selectedHotelTimes = computed(() => {
   const hotel = cms.getHotelById(form.hotelId);
@@ -590,9 +607,12 @@ const occupancyError = computed(() => {
   const rooms = Number(form.rooms);
   const adults = Number(form.adults);
   const children = Number(form.children);
-  if (!Number.isFinite(rooms) || rooms < 1) return "At least 1 room is required.";
-  if (!Number.isFinite(adults) || adults < 1) return "At least 1 adult is required.";
-  if (!Number.isFinite(children) || children < 0) return "Children cannot be negative.";
+  if (!Number.isFinite(rooms) || rooms < 1)
+    return "At least 1 room is required.";
+  if (!Number.isFinite(adults) || adults < 1)
+    return "At least 1 adult is required.";
+  if (!Number.isFinite(children) || children < 0)
+    return "Children cannot be negative.";
   const room = selectedRoom.value;
   if (!room) return "";
   if (adults > room.maxAdults) {
@@ -750,7 +770,10 @@ async function checkAvailability() {
 async function create() {
   submitted.value = true;
   if (!form.fullName.trim() || !emailValid.value || !form.phone.trim()) {
-    $q.notify({ type: "negative", message: "Guest contact details are required." });
+    $q.notify({
+      type: "negative",
+      message: "Guest contact details are required."
+    });
     return;
   }
   if (formError.value) {
@@ -759,7 +782,10 @@ async function create() {
   }
   await checkAvailability();
   if (!preview.value) {
-    $q.notify({ type: "negative", message: "No availability for this selection." });
+    $q.notify({
+      type: "negative",
+      message: "No availability for this selection."
+    });
     return;
   }
   const result = await cms.createBooking({
@@ -809,7 +835,8 @@ async function setStatus(reference: string, status: string) {
 
   await cms.updateBookingStatus(reference, status as BookingStatus);
   if (detailBooking.value?.reference === reference) {
-    detailBooking.value = cms.getBookingByReference(reference) ?? detailBooking.value;
+    detailBooking.value =
+      cms.getBookingByReference(reference) ?? detailBooking.value;
   }
   $q.notify({ type: "positive", message: `Booking ${reference} → ${status}` });
 }
@@ -821,7 +848,12 @@ function confirmBooking(b: Booking) {
     title: "Confirm booking?",
     message: `Confirm booking ${b.reference} for ${b.guest.fullName}?`,
     cancel: { flat: true, label: "Cancel", noCaps: true },
-    ok: { unelevated: true, label: "OK, confirm", color: "primary", noCaps: true },
+    ok: {
+      unelevated: true,
+      label: "OK, confirm",
+      color: "primary",
+      noCaps: true
+    },
     persistent: true
   }).onOk(async () => {
     await cms.updateBookingStatus(b.reference, "confirmed");
@@ -837,14 +869,16 @@ function confirmBooking(b: Booking) {
 }
 
 function remove(id: string) {
-  $q.dialog({ title: "Delete booking?", cancel: true, persistent: true }).onOk(() => {
-    cms.deleteBooking(id);
-    if (detailBooking.value?.id === id) {
-      detailOpen.value = false;
-      detailBooking.value = null;
+  $q.dialog({ title: "Delete booking?", cancel: true, persistent: true }).onOk(
+    () => {
+      cms.deleteBooking(id);
+      if (detailBooking.value?.id === id) {
+        detailOpen.value = false;
+        detailBooking.value = null;
+      }
+      $q.notify({ type: "positive", message: "Booking deleted." });
     }
-    $q.notify({ type: "positive", message: "Booking deleted." });
-  });
+  );
 }
 </script>
 

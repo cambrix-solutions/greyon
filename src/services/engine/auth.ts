@@ -1,7 +1,11 @@
 import { engineAPI } from "@/helpers/api";
 import type { EngineAdmin, EngineDeveloper } from "@/services/engine/mappers";
 
-export async function adminLogin(email: string, password: string, remember = true) {
+export async function adminLogin(
+  email: string,
+  password: string,
+  remember = true
+) {
   return engineAPI.post<{ admin: EngineAdmin }>("/admin/login", {
     email,
     password,

@@ -1,6 +1,9 @@
 <template>
   <q-page class="gy-section">
-    <SeoHead title="News | Greyon" description="Latest Greyon hospitality news." />
+    <SeoHead
+      title="News | Greyon"
+      description="Latest Greyon hospitality news."
+    />
     <div class="gy-container">
       <div v-reveal>
         <p class="gy-eyebrow">Updates</p>
@@ -22,7 +25,9 @@
           <div class="news-item__body">
             <p class="news-item__date">{{ item.publishedAt }}</p>
             <h2 class="news-item__title">
-              <router-link :to="`/news/${item.slug}`">{{ item.title }}</router-link>
+              <router-link :to="`/news/${item.slug}`">{{
+                item.title
+              }}</router-link>
             </h2>
             <p class="news-item__excerpt">{{ item.excerpt }}</p>
           </div>

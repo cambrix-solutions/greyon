@@ -6,7 +6,13 @@
       :subtitle="`${filtered.length} room types · nested under each hotel`"
     >
       <template #actions>
-        <q-btn outline no-caps color="primary" label="Rates calendar" to="/admin/rates" />
+        <q-btn
+          outline
+          no-caps
+          color="primary"
+          label="Rates calendar"
+          to="/admin/rates"
+        />
         <q-btn
           unelevated
           no-caps
@@ -130,7 +136,7 @@
                 type="number"
                 class="room-card__inv-input"
                 :model-value="room.baseInventory"
-                @update:model-value="(v) => setInventory(room.id, Number(v))"
+                @update:model-value="v => setInventory(room.id, Number(v))"
               />
             </div>
 
@@ -178,7 +184,13 @@
 
       <div v-if="!grouped.length" class="room-groups__empty">
         No rooms match.
-        <q-btn flat dense color="primary" label="Add room" @click="openCreate" />
+        <q-btn
+          flat
+          dense
+          color="primary"
+          label="Add room"
+          @click="openCreate"
+        />
       </div>
     </div>
 
@@ -191,7 +203,8 @@
       subtitle="Room types sit under a hotel and drive inventory, rates, and booking."
     >
       <template #notice>
-        Pick the <strong>parent hotel</strong> — rooms never link straight to a location.
+        Pick the <strong>parent hotel</strong> — rooms never link straight to a
+        location.
       </template>
       <AdminFormSection title="Essentials" :columns="2">
         <q-input v-model="form.name" label="Room type name" outlined dense />
@@ -213,7 +226,10 @@
           class="admin-form-span-2"
         />
       </AdminFormSection>
-      <AdminFormSection title="Details" hint="Shown on hotel detail and booking steps.">
+      <AdminFormSection
+        title="Details"
+        hint="Shown on hotel detail and booking steps."
+      >
         <q-input
           v-model="form.description"
           label="Description"
@@ -239,7 +255,13 @@
           outlined
           dense
         />
-        <q-input v-model.number="form.maxAdults" type="number" label="Max adults" outlined dense />
+        <q-input
+          v-model.number="form.maxAdults"
+          type="number"
+          label="Max adults"
+          outlined
+          dense
+        />
         <q-input
           v-model.number="form.maxChildren"
           type="number"
@@ -247,9 +269,18 @@
           outlined
           dense
         />
-        <q-input v-model.number="form.maxGuests" type="number" label="Max guests" outlined dense />
+        <q-input
+          v-model.number="form.maxGuests"
+          type="number"
+          label="Max guests"
+          outlined
+          dense
+        />
       </AdminFormSection>
-      <AdminFormSection title="Gallery" hint="Photos for the room type on hotel detail.">
+      <AdminFormSection
+        title="Gallery"
+        hint="Photos for the room type on hotel detail."
+      >
         <GalleryEditor v-model="images" label="Room gallery" />
       </AdminFormSection>
       <template #actions>
@@ -322,8 +353,10 @@ const filtered = computed(() => {
   const q = query.value.trim().toLowerCase();
   return cms.roomTypes.filter(r => {
     if (!auth.canAccessHotel(r.hotelId)) return false;
-    if (hotelFilter.value !== "all" && r.hotelId !== hotelFilter.value) return false;
-    if (statusFilter.value !== "all" && r.status !== statusFilter.value) return false;
+    if (hotelFilter.value !== "all" && r.hotelId !== hotelFilter.value)
+      return false;
+    if (statusFilter.value !== "all" && r.status !== statusFilter.value)
+      return false;
     if (!q) return true;
     const hotel = cms.getHotelById(r.hotelId);
     return `${r.name} ${r.bedType} ${r.description} ${hotel?.name ?? ""}`
@@ -442,27 +475,23 @@ function save() {
 function setInventory(id: string, baseInventory: number) {
   const room = cms.getRoomTypeById(id);
   if (!room || Number.isNaN(baseInventory)) return;
-  void cms
-    .upsertRoom({ ...room, baseInventory })
-    .catch(e =>
-      $q.notify({
-        type: "negative",
-        message: e instanceof Error ? e.message : "Update failed."
-      })
-    );
+  void cms.upsertRoom({ ...room, baseInventory }).catch(e =>
+    $q.notify({
+      type: "negative",
+      message: e instanceof Error ? e.message : "Update failed."
+    })
+  );
 }
 
 function setStatus(id: string, status: string) {
   const room = cms.getRoomTypeById(id);
   if (!room) return;
-  void cms
-    .upsertRoom({ ...room, status: status as ContentStatus })
-    .catch(e =>
-      $q.notify({
-        type: "negative",
-        message: e instanceof Error ? e.message : "Update failed."
-      })
-    );
+  void cms.upsertRoom({ ...room, status: status as ContentStatus }).catch(e =>
+    $q.notify({
+      type: "negative",
+      message: e instanceof Error ? e.message : "Update failed."
+    })
+  );
 }
 
 function remove(id: string) {

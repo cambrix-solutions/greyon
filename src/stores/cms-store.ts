@@ -121,7 +121,11 @@ const defaultSettings: SiteSettings = {
 };
 
 function normalizeRole(role: AdminRole): AdminRole {
-  if (role === "org_admin" || role === "super_admin" || role === "content_admin")
+  if (
+    role === "org_admin" ||
+    role === "super_admin" ||
+    role === "content_admin"
+  )
     return "admin";
   if (role === "location_admin") return "manager";
   if (role === "booking_admin") return "hotel_admin";
@@ -444,9 +448,13 @@ export const useCmsStore = defineStore("cms", () => {
   }
 
   async function ensureDeveloperBundle(force = false) {
-    await runEnsure("developer", async () => {
-      await syncDeveloperBundle();
-    }, force);
+    await runEnsure(
+      "developer",
+      async () => {
+        await syncDeveloperBundle();
+      },
+      force
+    );
   }
 
   /** Dashboard: hotels + bookings + enquiries only. */
@@ -545,10 +553,7 @@ export const useCmsStore = defineStore("cms", () => {
     return ratePlans.value.find(r => r.id === id);
   }
 
-  function patchList<T extends { id: string }>(
-    list: { value: T[] },
-    saved: T
-  ) {
+  function patchList<T extends { id: string }>(list: { value: T[] }, saved: T) {
     const idx = list.value.findIndex(x => x.id === saved.id);
     if (idx >= 0) list.value[idx] = saved;
     else list.value.unshift(saved);
@@ -600,7 +605,10 @@ export const useCmsStore = defineStore("cms", () => {
       seoDescription: input.seoDescription
     });
     const saved = input.id
-      ? await updateHotel(input.id, payload as Parameters<typeof updateHotel>[1])
+      ? await updateHotel(
+          input.id,
+          payload as Parameters<typeof updateHotel>[1]
+        )
       : await createHotel(payload as Parameters<typeof createHotel>[0]);
     return patchList(hotels, saved);
   }
@@ -648,7 +656,10 @@ export const useCmsStore = defineStore("cms", () => {
       status: input.status
     });
     const saved = input.id
-      ? await updateRoomType(input.id, payload as Parameters<typeof updateRoomType>[1])
+      ? await updateRoomType(
+          input.id,
+          payload as Parameters<typeof updateRoomType>[1]
+        )
       : await createRoomType(payload as Parameters<typeof createRoomType>[0]);
     return patchList(roomTypes, saved);
   }
@@ -691,7 +702,10 @@ export const useCmsStore = defineStore("cms", () => {
       status: input.status
     });
     const saved = input.id
-      ? await updateRatePlan(input.id, payload as Parameters<typeof updateRatePlan>[1])
+      ? await updateRatePlan(
+          input.id,
+          payload as Parameters<typeof updateRatePlan>[1]
+        )
       : await createRatePlan(payload as Parameters<typeof createRatePlan>[0]);
     return patchList(ratePlans, saved);
   }
@@ -727,7 +741,10 @@ export const useCmsStore = defineStore("cms", () => {
       seoDescription: input.seoDescription
     });
     const saved = input.id
-      ? await updateLocation(input.id, payload as Parameters<typeof updateLocation>[1])
+      ? await updateLocation(
+          input.id,
+          payload as Parameters<typeof updateLocation>[1]
+        )
       : await createLocation(payload as Parameters<typeof createLocation>[0]);
     return patchList(locations, saved);
   }
@@ -836,7 +853,11 @@ export const useCmsStore = defineStore("cms", () => {
     return Array.from({ length: days }, (_, i) => addDays(startDate, i));
   }
 
-  function unitsForNight(roomTypeId: string, date: string, baseInventory: number) {
+  function unitsForNight(
+    roomTypeId: string,
+    date: string,
+    baseInventory: number
+  ) {
     const row = getAvailability(roomTypeId, date);
     if (row?.stopSell) return 0;
     return row?.availableUnits ?? baseInventory;
@@ -1018,7 +1039,9 @@ export const useCmsStore = defineStore("cms", () => {
 
   function usersOnPackage(packageId: string) {
     const ids = new Set(
-      userPackages.value.filter(up => up.packageId === packageId).map(up => up.userId)
+      userPackages.value
+        .filter(up => up.packageId === packageId)
+        .map(up => up.userId)
     );
     return users.value.filter(u => ids.has(u.id));
   }
