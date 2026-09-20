@@ -9,11 +9,16 @@ Auto-deploy the Quasar site from GitHub when `main` updates.
 ## Architecture
 
 ```
-push to main → GitHub webhook → Coolify builds Dockerfile → nginx:80 serves dist/spa
-                     ↘ GitHub Actions CI (lint + typecheck + build) runs in parallel
+push to main → GitHub Actions (lint + build)
+                    ↓ on success
+              curl Coolify deploy webhook → Coolify builds & deploys
 ```
 
-Coolify does **not** wait on GitHub Actions by default. Use Actions as a quality gate; fix red CI before merging.
+GitHub secret (repo → Settings → Secrets → Actions):
+
+- `COOLIFY_DEPLOY_WEBHOOK` — Coolify app → **Webhooks** / Deploy webhook URL
+
+PRs only run CI (no deploy). Manual Coolify deploy still works anytime.
 
 ---
 

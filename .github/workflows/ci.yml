@@ -40,3 +40,16 @@ jobs:
           VITE_ENGINE_URL: https://engine.greyon.site
           VITE_ENGINE_PUBLIC_URL: https://engine.greyon.site
         run: npm run build
+
+      # Coolify Public GitHub source often ignores push webhooks — trigger deploy after CI passes.
+      - name: Deploy (Coolify)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          COOLIFY_DEPLOY_WEBHOOK: ${{ secrets.COOLIFY_DEPLOY_WEBHOOK }}
+        run: |
+          if [ -z "$COOLIFY_DEPLOY_WEBHOOK" ]; then
+            echo "COOLIFY_DEPLOY_WEBHOOK secret is missing"
+            exit 1
+          fi
+          curl --fail --show-error --silent --request GET "$COOLIFY_DEPLOY_WEBHOOK"
+          echo "Coolify deploy triggered"
