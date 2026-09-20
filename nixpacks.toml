@@ -1,0 +1,17 @@
+# Coolify Quasar SPA (static)
+# Coolify UI:
+#   Build strategy   = Nixpacks
+#   Site type        = Static
+#   Base directory   = /
+#   Publish directory = dist/spa
+#   Install / Build  = leave empty (this file owns them)
+#   Start            = leave empty
+
+[phases.setup]
+nixPkgs = ["nodejs_22"]
+
+[phases.install]
+cmds = ["npm ci"]
+
+[phases.build]
+cmds = ["npm run build"]
