@@ -11,6 +11,7 @@
     "lint:check": "oxfmt --check && oxlint",
     "dev": "quasar dev",
     "build": "quasar build",
+    "icons:generate": "node scripts/generate-icons.mjs",
     "typecheck": "vue-tsc --noEmit",
     "postinstall": "quasar prepare --silent"
   },
