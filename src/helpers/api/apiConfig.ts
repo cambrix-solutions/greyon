@@ -19,12 +19,12 @@ export type ApiEndpoints = {
 
 const API_CONFIG: Record<ApiMode, ApiEndpoints> = {
   production: {
-    ENGINE_URL: "https://api.greyon.info",
-    ENGINE_PUBLIC_URL: "https://api.greyon.info"
+    ENGINE_URL: "https://engine.greyon.site",
+    ENGINE_PUBLIC_URL: "https://engine.greyon.site"
   },
   staging: {
-    ENGINE_URL: "https://staging-api.greyon.info",
-    ENGINE_PUBLIC_URL: "https://staging-api.greyon.info"
+    ENGINE_URL: "https://staging-api.greyon.site",
+    ENGINE_PUBLIC_URL: "https://staging-api.greyon.site"
   },
   local: {
     ENGINE_URL: "/engine",
