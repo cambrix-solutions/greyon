@@ -1,7 +1,7 @@
 # Coolify: set Build Pack = Dockerfile (most reliable for Quasar SPA)
 # Ports Exposes = 80
 
-FROM node:22-alpine AS build
+FROM node:24-alpine AS build
 WORKDIR /app
 
 COPY package.json package-lock.json ./

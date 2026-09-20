@@ -4,19 +4,20 @@
 #   Site type          = Static
 #   Base directory     = /
 #   Publish directory  = dist/spa
-#   Install command    = npm ci
+#   Install command    = npm install
 #   Build command      = npm run build
 #   Start command      = (empty)
+#   Env (build):         NIXPACKS_NODE_VERSION=24
 #
-# Keep Install + Build filled in Coolify — empty overrides can break detection.
+# @quasar/app-vite needs Node >= 22.22 — use 24 on Coolify (22.x nixpkgs often lags).
 
 providers = ["node"]
 
 [variables]
-NIXPACKS_NODE_VERSION = "22"
+NIXPACKS_NODE_VERSION = "24"
 
 [phases.setup]
-nixPkgs = ["nodejs_22"]
+nixPkgs = ["nodejs_24"]
 
 [phases.install]
 cmds = ["npm ci"]
