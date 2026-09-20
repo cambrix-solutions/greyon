@@ -480,6 +480,8 @@ function applyRouteQuery() {
   if (status && cms.bookingStatusOptions.includes(status as BookingStatus)) {
     statusFilter.value = status;
   }
+  const q = String(route.query.q || "").trim();
+  if (q) query.value = q;
   if (route.query.create === "1") {
     openCreate();
     const nextQuery = { ...route.query };

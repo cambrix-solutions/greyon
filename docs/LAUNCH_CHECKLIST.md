@@ -2,8 +2,9 @@
 
 ## Environments
 - [ ] Staging URL + HTTPS
-- [ ] Production domain `www.greyon.com.kh` DNS + SSL
+- [ ] Production domain `www.greyon.com.kh` / `greyon.site` DNS + SSL
 - [ ] greyon-engine (Laravel) + database backups scheduled
+- [ ] Coolify CI/CD — see [COOLIFY.md](./COOLIFY.md) (SPA) and engine `docs/COOLIFY.md`
 - [ ] SMTP / mail configured on greyon-engine (booking & enquiry notify)
 - [ ] Media/object storage bucket configured (when leaving URL/data-URL media)
 - [ ] Production secrets rotated (`APP_KEY`, DB credentials, SMTP)

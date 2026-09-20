@@ -214,19 +214,24 @@
         Required relationship: <strong>Location → Hotel → Rooms</strong>. Pick the parent
         location first.
       </template>
-      <AdminFormSection
-        title="Basics"
-        hint="What guests see in listings and search results."
-        :columns="2"
-      >
-        <q-input v-model="form.name" label="Hotel name" outlined dense class="admin-form-span-2" />
-        <q-input
-          v-model="form.slug"
-          label="URL slug"
+      <AdminFormSection title="Essentials" :columns="2">
+        <q-input v-model="form.name" label="Hotel name" outlined dense />
+        <q-select
+          v-model="form.status"
+          :options="cms.statusOptions"
+          label="Status"
           outlined
           dense
-          hint="Leave blank to auto-generate"
         />
+        <q-input
+          v-model="form.heroImage"
+          label="Hero image URL"
+          outlined
+          dense
+          class="admin-form-span-2"
+        />
+      </AdminFormSection>
+      <AdminFormSection title="Details" :columns="2">
         <q-select
           v-model="form.locationId"
           :options="locationOptions"
@@ -237,12 +242,25 @@
           map-options
         />
         <q-input
+          v-model="form.slug"
+          label="URL slug"
+          outlined
+          dense
+          hint="Leave blank to auto-generate"
+        />
+        <q-input
           v-model="form.shortDescription"
           label="Short description"
           outlined
           dense
           class="admin-form-span-2"
         />
+        <div class="admin-form-toggle admin-form-span-2">
+          <q-toggle v-model="form.featured" label="Featured on home" />
+        </div>
+      </AdminFormSection>
+      <AdminFormSection title="Gallery" hint="Extra photos for the hotel detail page.">
+        <GalleryEditor v-model="gallery" label="Hotel gallery" />
       </AdminFormSection>
       <AdminFormSection title="About the stay" hint="Longer copy for the hotel detail page.">
         <q-input
@@ -266,22 +284,6 @@
         <q-input v-model="form.email" label="Email" outlined dense />
         <q-input v-model="form.checkInTime" type="time" label="Check-in" outlined dense />
         <q-input v-model="form.checkOutTime" type="time" label="Check-out" outlined dense />
-      </AdminFormSection>
-      <AdminFormSection title="Media" hint="Hero drives cards; gallery appears on the detail page.">
-        <q-input v-model="form.heroImage" label="Hero image URL" outlined dense />
-        <GalleryEditor v-model="gallery" label="Hotel gallery" />
-      </AdminFormSection>
-      <AdminFormSection title="Publishing" :columns="2">
-        <q-select
-          v-model="form.status"
-          :options="cms.statusOptions"
-          label="Status"
-          outlined
-          dense
-        />
-        <div class="admin-form-toggle">
-          <q-toggle v-model="form.featured" label="Featured on home" />
-        </div>
       </AdminFormSection>
       <template #actions>
         <q-btn flat no-caps label="Cancel" v-close-popup />

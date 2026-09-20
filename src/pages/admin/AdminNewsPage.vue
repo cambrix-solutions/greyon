@@ -114,8 +114,24 @@
       :title="editing ? 'Edit article' : 'Add article'"
       subtitle="Stories for the public news feed — independent of hotels and locations."
     >
-      <AdminFormSection title="Headline" :columns="2">
-        <q-input v-model="form.title" label="Title" outlined dense class="admin-form-span-2" />
+      <AdminFormSection title="Essentials" :columns="2">
+        <q-input v-model="form.title" label="Title" outlined dense />
+        <q-select
+          v-model="form.status"
+          :options="cms.statusOptions"
+          label="Status"
+          outlined
+          dense
+        />
+        <q-input
+          v-model="form.coverImage"
+          label="Cover image URL"
+          outlined
+          dense
+          class="admin-form-span-2"
+        />
+      </AdminFormSection>
+      <AdminFormSection title="Details" :columns="2">
         <q-input v-model="form.slug" label="URL slug" outlined dense />
         <q-input v-model="form.publishedAt" type="date" label="Publish date" outlined dense />
       </AdminFormSection>
@@ -130,23 +146,9 @@
           hint="HTML allowed"
         />
       </AdminFormSection>
-      <AdminFormSection title="Cover & SEO" :columns="2">
-        <q-input
-          v-model="form.coverImage"
-          label="Cover image URL"
-          outlined
-          dense
-          class="admin-form-span-2"
-        />
+      <AdminFormSection title="SEO" :columns="2">
         <q-input v-model="form.seoTitle" label="SEO title" outlined dense />
         <q-input v-model="form.seoDescription" label="SEO description" outlined dense />
-        <q-select
-          v-model="form.status"
-          :options="cms.statusOptions"
-          label="Status"
-          outlined
-          dense
-        />
       </AdminFormSection>
       <template #actions>
         <q-btn flat no-caps label="Cancel" v-close-popup />

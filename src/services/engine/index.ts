@@ -7,4 +7,5 @@ export * from "@/services/engine/adminTeam";
 export * from "@/services/engine/ops";
 export * from "@/services/engine/cmsOps";
 export * from "@/services/engine/developer";
+export * from "@/services/engine/notifications";
 export * from "@/services/engine/mappers";

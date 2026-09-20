@@ -185,22 +185,31 @@
         Hotels link here with <strong>locationId</strong> — locations never “own” rooms
         directly.
       </template>
-      <AdminFormSection
-        title="Identity"
-        hint="Name and URL slug shown on the public destinations pages."
-        :columns="2"
-      >
-        <q-input v-model="form.name" label="Location name" outlined dense class="admin-form-span-2" />
+      <AdminFormSection title="Essentials" :columns="2">
+        <q-input v-model="form.name" label="Location name" outlined dense />
+        <q-select
+          v-model="form.status"
+          :options="cms.statusOptions"
+          label="Status"
+          outlined
+          dense
+        />
+        <q-input
+          v-model="form.heroImage"
+          label="Hero image URL"
+          outlined
+          dense
+          class="admin-form-span-2"
+        />
+      </AdminFormSection>
+      <AdminFormSection title="Details" hint="Optional slug and story for the public destinations page.">
         <q-input
           v-model="form.slug"
           label="URL slug"
           outlined
           dense
-          hint="e.g. sihanoukville"
-          class="admin-form-span-2"
+          hint="e.g. sihanoukville — leave blank to auto-generate"
         />
-      </AdminFormSection>
-      <AdminFormSection title="Story" hint="Help guests feel the place before they pick a hotel.">
         <q-input
           v-model="form.description"
           label="Description"
@@ -214,22 +223,6 @@
           outlined
           dense
           hint="Comma-separated, e.g. Riverside, Royal Palace, Central Market"
-        />
-      </AdminFormSection>
-      <AdminFormSection title="Media & status" :columns="2">
-        <q-input
-          v-model="form.heroImage"
-          label="Hero image URL"
-          outlined
-          dense
-          class="admin-form-span-2"
-        />
-        <q-select
-          v-model="form.status"
-          :options="cms.statusOptions"
-          label="Status"
-          outlined
-          dense
         />
       </AdminFormSection>
       <template #actions>

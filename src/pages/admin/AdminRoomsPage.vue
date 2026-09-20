@@ -193,7 +193,15 @@
       <template #notice>
         Pick the <strong>parent hotel</strong> — rooms never link straight to a location.
       </template>
-      <AdminFormSection title="Parent & name" :columns="2">
+      <AdminFormSection title="Essentials" :columns="2">
+        <q-input v-model="form.name" label="Room type name" outlined dense />
+        <q-select
+          v-model="form.status"
+          :options="cms.statusOptions"
+          label="Status"
+          outlined
+          dense
+        />
         <q-select
           v-model="form.hotelId"
           :options="hotelOptions"
@@ -204,9 +212,8 @@
           map-options
           class="admin-form-span-2"
         />
-        <q-input v-model="form.name" label="Room type name" outlined dense class="admin-form-span-2" />
       </AdminFormSection>
-      <AdminFormSection title="Description" hint="Shown on hotel detail and booking steps.">
+      <AdminFormSection title="Details" hint="Shown on hotel detail and booking steps.">
         <q-input
           v-model="form.description"
           label="Description"
@@ -242,16 +249,8 @@
         />
         <q-input v-model.number="form.maxGuests" type="number" label="Max guests" outlined dense />
       </AdminFormSection>
-      <AdminFormSection title="Gallery & status">
+      <AdminFormSection title="Gallery" hint="Photos for the room type on hotel detail.">
         <GalleryEditor v-model="images" label="Room gallery" />
-        <q-select
-          v-model="form.status"
-          :options="cms.statusOptions"
-          label="Status"
-          outlined
-          dense
-          style="max-width: 220px"
-        />
       </AdminFormSection>
       <template #actions>
         <q-btn flat no-caps label="Cancel" v-close-popup />

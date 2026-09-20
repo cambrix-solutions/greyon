@@ -36,6 +36,71 @@
             </router-link>
           </div>
 
+          <button
+            type="button"
+            class="admin-bell"
+            aria-label="Booking notifications"
+            aria-haspopup="menu"
+          >
+            <q-icon name="notifications" size="20px" />
+            <span v-if="notifications.unreadCount" class="admin-bell__badge">
+              {{
+                notifications.unreadCount > 99
+                  ? "99+"
+                  : notifications.unreadCount
+              }}
+            </span>
+            <q-menu
+              anchor="bottom right"
+              self="top right"
+              :offset="[0, 8]"
+              class="admin-notify-menu"
+            >
+              <div class="admin-notify-menu__head">
+                <p class="admin-notify-menu__title">Bookings</p>
+                <button
+                  v-if="notifications.unreadCount"
+                  type="button"
+                  class="admin-notify-menu__action"
+                  @click="onMarkAllRead"
+                >
+                  Mark all read
+                </button>
+              </div>
+              <q-separator />
+              <div v-if="notifications.loading && !notifications.items.length" class="admin-notify-menu__empty">
+                Loading…
+              </div>
+              <div
+                v-else-if="!notifications.items.length"
+                class="admin-notify-menu__empty"
+              >
+                No booking alerts yet
+              </div>
+              <q-list v-else dense class="admin-notify-menu__list">
+                <q-item
+                  v-for="item in notifications.items"
+                  :key="item.id"
+                  clickable
+                  v-close-popup
+                  :class="{ 'is-unread': !item.readAt }"
+                  @click="onOpenNotification(item)"
+                >
+                  <q-item-section>
+                    <q-item-label class="admin-notify-menu__item-title">{{
+                      item.title
+                    }}</q-item-label>
+                    <q-item-label caption lines="2">{{ item.body }}</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+              <q-separator />
+              <q-item clickable v-close-popup to="/admin/bookings">
+                <q-item-section class="text-primary">View all bookings</q-item-section>
+              </q-item>
+            </q-menu>
+          </button>
+
           <router-link to="/" target="_blank" class="admin-link gt-xs">
             <q-icon name="open_in_new" size="16px" />
             View site
@@ -253,15 +318,27 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useRouter } from "vue-router";
+import type { StaffNotification } from "@/services/engine/notifications";
 import { roleLabels, useAuthStore } from "@/stores/auth-store";
 import { useCmsStore } from "@/stores/cms-store";
+import { useNotificationStore } from "@/stores/notification-store";
 
 const auth = useAuthStore();
 const cms = useCmsStore();
+const notifications = useNotificationStore();
 const router = useRouter();
 const leftOpen = ref(true);
+
+onMounted(() => {
+  notifications.startPolling();
+});
+
+onUnmounted(() => {
+  notifications.stopPolling();
+});
+
 
 const pendingBookings = computed(
   () => auth.scopedBookings.filter(b => b.status === "pending").length
@@ -428,8 +505,30 @@ const systemNav = computed(() => visibleNav.value.filter(i => i.group === "syste
 const accessNav = computed(() => visibleNav.value.filter(i => i.group === "access"));
 
 async function onLogout() {
+  notifications.clear();
   await auth.logout();
   void router.push("/admin/login");
+}
+
+async function onMarkAllRead() {
+  try {
+    await notifications.markAllRead();
+  } catch {
+    /* ignore */
+  }
+}
+
+async function onOpenNotification(item: StaffNotification) {
+  try {
+    if (!item.readAt) await notifications.markRead(item.id);
+  } catch {
+    /* ignore */
+  }
+  const ref =
+    typeof item.data?.reference === "string" ? item.data.reference : null;
+  void router.push(
+    ref ? `/admin/bookings?q=${encodeURIComponent(ref)}` : "/admin/bookings"
+  );
 }
 </script>
 
@@ -510,6 +609,91 @@ async function onLogout() {
   display: flex;
   align-items: center;
   gap: 0.35rem;
+}
+
+.admin-bell {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 2.15rem;
+  height: 2.15rem;
+  border: 1px solid rgba(18, 17, 16, 0.08);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--gy-ink);
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.admin-bell:hover {
+  background: #f7f2e8;
+  border-color: rgba(176, 141, 87, 0.35);
+}
+
+.admin-bell__badge {
+  position: absolute;
+  top: -0.15rem;
+  right: -0.15rem;
+  min-width: 1.05rem;
+  height: 1.05rem;
+  padding: 0 0.25rem;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--gy-forest);
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 650;
+  line-height: 1;
+}
+
+.admin-notify-menu {
+  min-width: min(22rem, 92vw);
+}
+
+.admin-notify-menu__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 0.9rem 0.55rem;
+}
+
+.admin-notify-menu__title {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 650;
+}
+
+.admin-notify-menu__action {
+  border: 0;
+  background: transparent;
+  color: var(--gy-forest);
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+.admin-notify-menu__empty {
+  padding: 1.25rem 0.9rem;
+  color: var(--gy-muted);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.admin-notify-menu__list {
+  max-height: 22rem;
+  overflow: auto;
+}
+
+.admin-notify-menu__list .is-unread {
+  background: rgba(176, 141, 87, 0.08);
+}
+
+.admin-notify-menu__item-title {
+  font-weight: 650;
+  font-size: 0.86rem;
 }
 
 .admin-alert {
