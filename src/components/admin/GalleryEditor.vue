@@ -70,7 +70,7 @@
       icon="add_photo_alternate"
       eyebrow="Gallery"
       title="Add gallery image"
-      subtitle="Drop a file or paste an image URL for this gallery."
+      subtitle="Paste an image URL for this gallery (file drops are preview-only)."
     >
       <AdminFormSection title="Image">
         <ImageDropField v-model="pendingSrc" title="Drop or browse image" />
@@ -92,6 +92,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from "vue";
+import { useQuasar } from "quasar";
 import AdminDialog from "@/components/admin/AdminDialog.vue";
 import AdminFormSection from "@/components/admin/AdminFormSection.vue";
 import ImageDropField from "@/components/admin/ImageDropField.vue";
@@ -108,6 +109,7 @@ const emit = defineEmits<{
   "update:modelValue": [value: string[]];
 }>();
 
+const $q = useQuasar();
 const showAdd = ref(false);
 const pendingSrc = ref("");
 
@@ -121,6 +123,13 @@ function isDataUrl(src: string) {
 
 function confirmAdd() {
   if (!pendingSrc.value) return;
+  if (isDataUrl(pendingSrc.value)) {
+    $q.notify({
+      type: "negative",
+      message: "Paste an image URL — local file drops are not saved to the server."
+    });
+    return;
+  }
   emit("update:modelValue", [...props.modelValue, pendingSrc.value]);
   showAdd.value = false;
   pendingSrc.value = "";
