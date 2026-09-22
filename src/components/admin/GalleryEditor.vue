@@ -126,7 +126,8 @@ function confirmAdd() {
   if (isDataUrl(pendingSrc.value)) {
     $q.notify({
       type: "negative",
-      message: "Paste an image URL — local file drops are not saved to the server."
+      message:
+        "Paste an image URL — local file drops are not saved to the server."
     });
     return;
   }

@@ -3,6 +3,7 @@
 Auto-deploy the Quasar site from GitHub when `main` updates.
 
 **Repo:** `https://github.com/cambrix-solutions/greyon.git`  
+**Coolify panel:** `https://coolify.ictcenter.blog/`  
 **Suggested domain:** `https://greyon.site` (or `www.greyon.com.kh`)  
 **API:** `https://engine.greyon.site` (see greyon-engine Coolify app)
 
