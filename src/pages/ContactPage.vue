@@ -50,11 +50,7 @@
           Destination
           <select v-model="form.locationId" required>
             <option disabled value="">Select a destination</option>
-            <option
-              v-for="loc in destinations"
-              :key="loc.id"
-              :value="loc.id"
-            >
+            <option v-for="loc in destinations" :key="loc.id" :value="loc.id">
               {{ loc.name }}
             </option>
           </select>

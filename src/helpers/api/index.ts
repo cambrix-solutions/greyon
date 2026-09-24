@@ -4,7 +4,11 @@ export {
   getApiEndpoints
 } from "@/helpers/api/apiConfig";
 export type { ApiMode, ApiEndpoints } from "@/helpers/api/apiConfig";
-export { createApiClient, ApiError, setUnauthorizedHandler } from "@/helpers/api/createApiClient";
+export {
+  createApiClient,
+  ApiError,
+  setUnauthorizedHandler
+} from "@/helpers/api/createApiClient";
 export type {
   ApiClient,
   CreateApiClientOptions

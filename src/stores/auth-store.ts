@@ -148,7 +148,9 @@ export const useAuthStore = defineStore("auth", () => {
 
     try {
       user.value = JSON.parse(raw) as AdminUser;
-      const guard = localStorage.getItem(ENGINE_GUARD_KEY) as EngineGuard | null;
+      const guard = localStorage.getItem(
+        ENGINE_GUARD_KEY
+      ) as EngineGuard | null;
       if (guard === "admin" || guard === "developer") {
         engineGuard.value = guard;
       }

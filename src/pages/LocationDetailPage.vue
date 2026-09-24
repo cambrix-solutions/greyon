@@ -81,9 +81,7 @@ const mapPoint = computed(() => {
   return c;
 });
 
-const mapEmbedUrl = computed(
-  () => hotelsHere.value[0]?.mapEmbedUrl ?? null
-);
+const mapEmbedUrl = computed(() => hotelsHere.value[0]?.mapEmbedUrl ?? null);
 
 function bookHere() {
   if (!location.value) return;

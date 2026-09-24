@@ -549,9 +549,7 @@ export function mapEngineBooking(row: EngineBooking): Booking {
 export function mapEngineEnquiry(row: EngineEnquiry): Enquiry {
   return {
     id: String(row.id),
-    ...(row.locationId != null
-      ? { locationId: String(row.locationId) }
-      : {}),
+    ...(row.locationId != null ? { locationId: String(row.locationId) } : {}),
     ...(row.location?.name ? { locationName: row.location.name } : {}),
     name: row.name,
     email: row.email,

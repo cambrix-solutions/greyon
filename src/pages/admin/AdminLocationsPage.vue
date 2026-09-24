@@ -94,7 +94,9 @@
               :status="loc.status"
               :status-options="cms.statusOptions"
               :status-disable="!auth.can('locations_publish')"
-              :primary-label="auth.canDestinationDetail() ? 'Manage' : undefined"
+              :primary-label="
+                auth.canDestinationDetail() ? 'Manage' : undefined
+              "
               :primary-show="auth.canDestinationDetail()"
               :primary-to="`/admin/locations/${loc.id}`"
               :actions="[
@@ -135,7 +137,8 @@
             </h3>
             <q-btn
               v-if="
-                auth.canAction('hotels', 'create') && auth.canDestinationDetail()
+                auth.canAction('hotels', 'create') &&
+                auth.canDestinationDetail()
               "
               flat
               dense
@@ -252,10 +255,7 @@
           hint="Requires Locations: Publish permission"
         />
       </AdminFormSection>
-      <AdminFormSection
-        title="Hero image"
-        hint="Drop, browse, or paste a URL."
-      >
+      <AdminFormSection title="Hero image" hint="Drop, browse, or paste a URL.">
         <ImageDropField
           v-model="form.heroImage"
           title="Drop or browse hero image"

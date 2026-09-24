@@ -46,9 +46,7 @@ function pair(a: string | undefined, b: string | undefined): MapCoords | null {
 /** Normalize paste: bare URL, share link, or full &lt;iframe&gt; HTML. */
 function normalizePaste(raw: string): string {
   const text = raw.trim();
-  const iframeSrc = text.match(
-    /<iframe[^>]+src=["']([^"']+)["']/i
-  );
+  const iframeSrc = text.match(/<iframe[^>]+src=["']([^"']+)["']/i);
   if (iframeSrc?.[1]) return iframeSrc[1].trim();
   return text;
 }
@@ -62,15 +60,11 @@ export function parseMapLink(raw: string): MapCoords | null {
   if (!text) return null;
 
   // Plain "10.6104, 104.1814" or "10.6104 104.1814"
-  const plain = text.match(
-    /^(-?\d+(?:\.\d+)?)\s*[, ]\s*(-?\d+(?:\.\d+)?)$/
-  );
+  const plain = text.match(/^(-?\d+(?:\.\d+)?)\s*[, ]\s*(-?\d+(?:\.\d+)?)$/);
   if (plain) return pair(plain[1], plain[2]);
 
   // Google embed pb=… often uses !2d{lng}!3d{lat}
-  const embed2d3d = text.match(
-    /!2d(-?\d+(?:\.\d+)?)!3d(-?\d+(?:\.\d+)?)/
-  );
+  const embed2d3d = text.match(/!2d(-?\d+(?:\.\d+)?)!3d(-?\d+(?:\.\d+)?)/);
   if (embed2d3d) {
     const coords = pair(embed2d3d[2], embed2d3d[1]); // lat from 3d, lng from 2d
     if (coords) return coords;

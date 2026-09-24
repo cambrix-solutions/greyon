@@ -139,9 +139,7 @@
             <q-icon
               class="prop-hotel__chevron"
               :name="
-                expandedHotelId === hotel.id
-                  ? 'expand_less'
-                  : 'expand_more'
+                expandedHotelId === hotel.id ? 'expand_less' : 'expand_more'
               "
               size="22px"
             />
@@ -197,7 +195,7 @@
                 <p>
                   {{ room.bedType }} · {{ room.roomSize }} · max
                   {{ room.maxGuests }} guests · {{ room.baseInventory }} to sell
-                    / night
+                  / night
                 </p>
               </div>
               <div class="prop-room__actions">
@@ -273,7 +271,12 @@
       subtitle="Hero image and story guests see on the destinations page."
     >
       <AdminFormSection title="Essentials" :columns="2">
-        <q-input v-model="locForm.name" label="Destination name" outlined dense />
+        <q-input
+          v-model="locForm.name"
+          label="Destination name"
+          outlined
+          dense
+        />
         <q-select
           v-model="locForm.status"
           :options="cms.statusOptions"
@@ -357,10 +360,7 @@
           <q-toggle v-model="hotelForm.featured" label="Featured on home" />
         </div>
       </AdminFormSection>
-      <AdminFormSection
-        title="Hero image"
-        hint="Drop, browse, or paste a URL."
-      >
+      <AdminFormSection title="Hero image" hint="Drop, browse, or paste a URL.">
         <ImageDropField
           v-model="hotelForm.heroImage"
           title="Drop or browse hero image"
@@ -776,7 +776,9 @@ function openEditHotel(hotel: Hotel) {
 const hasHotelMapPin = computed(() => {
   const lat = Number(hotelForm.lat);
   const lng = Number(hotelForm.lng);
-  return Number.isFinite(lat) && Number.isFinite(lng) && (lat !== 0 || lng !== 0);
+  return (
+    Number.isFinite(lat) && Number.isFinite(lng) && (lat !== 0 || lng !== 0)
+  );
 });
 
 function saveHotel() {

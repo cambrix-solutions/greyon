@@ -61,8 +61,8 @@
       Set the default price for each room below. Hotel check-in / check-out
       <strong>times</strong> come from each hotel (edit under Hotels).
       <template v-if="auth.isDeveloper">
-        How many rooms you can sell each night is set in List or Calendar —
-        open rooms, close a night, and change prices there.
+        How many rooms you can sell each night is set in List or Calendar — open
+        rooms, close a night, and change prices there.
       </template>
     </q-banner>
 

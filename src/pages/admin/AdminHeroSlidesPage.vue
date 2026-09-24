@@ -73,7 +73,9 @@
                     dense
                     flat
                     icon="arrow_upward"
-                    :disable="index === 0 || !auth.canAction('settings', 'update')"
+                    :disable="
+                      index === 0 || !auth.canAction('settings', 'update')
+                    "
                     @click="moveSlide(index, -1)"
                   />
                   <q-btn

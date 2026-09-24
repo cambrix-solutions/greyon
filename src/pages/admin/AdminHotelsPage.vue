@@ -220,8 +220,8 @@
       subtitle="Link this property to a destination, then add room types under it."
     >
       <template #notice>
-        Required relationship: <strong>Destination → Hotel → Rooms</strong>. Pick
-        the parent destination first.
+        Required relationship: <strong>Destination → Hotel → Rooms</strong>.
+        Pick the parent destination first.
       </template>
       <AdminFormSection title="Essentials" :columns="2">
         <q-input v-model="form.name" label="Hotel name" outlined dense />
@@ -233,10 +233,7 @@
           dense
         />
       </AdminFormSection>
-      <AdminFormSection
-        title="Hero image"
-        hint="Drop, browse, or paste a URL."
-      >
+      <AdminFormSection title="Hero image" hint="Drop, browse, or paste a URL.">
         <ImageDropField
           v-model="form.heroImage"
           title="Drop or browse hero image"
@@ -413,9 +410,7 @@ const hasFormMapPin = computed(() => {
   const lat = Number(form.lat);
   const lng = Number(form.lng);
   return (
-    Number.isFinite(lat) &&
-    Number.isFinite(lng) &&
-    (lat !== 0 || lng !== 0)
+    Number.isFinite(lat) && Number.isFinite(lng) && (lat !== 0 || lng !== 0)
   );
 });
 
@@ -538,7 +533,10 @@ function openEdit(hotel: Hotel) {
 
 function save() {
   if (!form.name || !form.locationId) {
-    $q.notify({ type: "negative", message: "Name and destination are required." });
+    $q.notify({
+      type: "negative",
+      message: "Name and destination are required."
+    });
     return;
   }
   void (async () => {

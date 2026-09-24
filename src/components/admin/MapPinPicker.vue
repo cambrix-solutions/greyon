@@ -134,9 +134,7 @@ const hasPin = computed(() => {
   const lat = Number(props.lat);
   const lng = Number(props.lng);
   return (
-    Number.isFinite(lat) &&
-    Number.isFinite(lng) &&
-    !(lat === 0 && lng === 0)
+    Number.isFinite(lat) && Number.isFinite(lng) && !(lat === 0 && lng === 0)
   );
 });
 
@@ -160,7 +158,9 @@ function applyParsed(text: string) {
   emit("update:embedUrl", embed);
 
   if (/<iframe/i.test(text) || text.length > 120) {
-    link.value = embed ? "Google Maps embed applied" : "Google Maps pin applied";
+    link.value = embed
+      ? "Google Maps embed applied"
+      : "Google Maps pin applied";
   }
 }
 

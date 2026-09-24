@@ -105,8 +105,7 @@
           </article>
         </div>
         <p v-else class="empty-note">
-          No rooms available for this search. Try different dates or
-          occupancy.
+          No rooms available for this search. Try different dates or occupancy.
         </p>
       </section>
 
