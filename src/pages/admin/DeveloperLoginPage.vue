@@ -50,7 +50,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth-store";
 
@@ -61,6 +61,23 @@ const email = ref("");
 const password = ref("");
 const error = ref("");
 const submitting = ref(false);
+
+function leaveIfAuthed() {
+  auth.hydrate();
+  if (!auth.isAuthenticated) return false;
+  const redirect =
+    typeof route.query.redirect === "string" &&
+    route.query.redirect.startsWith("/") &&
+    !route.query.redirect.startsWith("//")
+      ? route.query.redirect
+      : "/admin";
+  void router.replace(redirect);
+  return true;
+}
+
+onMounted(() => {
+  leaveIfAuthed();
+});
 
 async function onSubmit() {
   submitting.value = true;

@@ -131,7 +131,41 @@ export const useAuthStore = defineStore("auth", () => {
     // Already live in this tab — don't re-hit /me on every admin navigation.
     if (user.value && token.value) return;
 
-    // Never refresh while sitting on a login screen (stale /me 401s were
+    // Always restore the local session from storage first (including on
+    // login URLs). Skipping that left token set but user null, so the
+    // "already signed in → leave login" redirect never fired.
+    if (!token.value) {
+      token.value =
+        typeof localStorage !== "undefined"
+          ? localStorage.getItem("greyon_admin_token")
+          : null;
+    }
+    const raw =
+      typeof localStorage !== "undefined"
+        ? localStorage.getItem("greyon_admin_user")
+        : null;
+    if (!raw || !token.value) return;
+
+    try {
+      user.value = JSON.parse(raw) as AdminUser;
+      const guard = localStorage.getItem(ENGINE_GUARD_KEY) as EngineGuard | null;
+      if (guard === "admin" || guard === "developer") {
+        engineGuard.value = guard;
+      }
+      engineRoles.value = JSON.parse(
+        localStorage.getItem(ENGINE_ROLES_KEY) || "[]"
+      ) as AdminRole[];
+      engineFeatureKeys.value = JSON.parse(
+        localStorage.getItem(ENGINE_FEATURES_KEY) || "[]"
+      ) as string[];
+    } catch {
+      user.value = null;
+      engineRoles.value = [];
+      engineFeatureKeys.value = [];
+      return;
+    }
+
+    // Never call /me while sitting on a login screen (stale 401s were
     // racing with a fresh login and clearing the new session).
     if (typeof window !== "undefined") {
       const path = window.location.pathname;
@@ -145,28 +179,6 @@ export const useAuthStore = defineStore("auth", () => {
       }
     }
 
-    const raw =
-      typeof localStorage !== "undefined"
-        ? localStorage.getItem("greyon_admin_user")
-        : null;
-    if (!raw || !token.value) return;
-
-    user.value = JSON.parse(raw) as AdminUser;
-    try {
-      const guard = localStorage.getItem(ENGINE_GUARD_KEY) as EngineGuard | null;
-      if (guard === "admin" || guard === "developer") {
-        engineGuard.value = guard;
-      }
-      engineRoles.value = JSON.parse(
-        localStorage.getItem(ENGINE_ROLES_KEY) || "[]"
-      ) as AdminRole[];
-      engineFeatureKeys.value = JSON.parse(
-        localStorage.getItem(ENGINE_FEATURES_KEY) || "[]"
-      ) as string[];
-    } catch {
-      engineRoles.value = [];
-      engineFeatureKeys.value = [];
-    }
     void refreshEngineSession();
   }
 

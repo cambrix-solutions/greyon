@@ -306,17 +306,33 @@ export function setupRouterGuards(
       document.title = String(to.meta.title);
     }
 
-    // Public admin / developer login / access denied — never block
-    if (
-      to.name === "admin-login" ||
-      to.name === "developer-login" ||
-      to.name === "access-denied" ||
-      to.meta.publicAdmin
-    ) {
+    const auth = useAuthStore();
+
+    // Already signed in as admin/developer → skip login screens.
+    if (to.name === "admin-login" || to.name === "developer-login") {
+      auth.hydrate();
+      if (auth.isAuthenticated) {
+        const raw = to.query.redirect;
+        const redirect =
+          typeof raw === "string" &&
+          raw.startsWith("/") &&
+          !raw.startsWith("//") &&
+          raw !== "/admin/login" &&
+          !raw.startsWith("/admin/login/") &&
+          raw !== "/developer/login" &&
+          !raw.startsWith("/developer/login/")
+            ? raw
+            : { name: "admin-dashboard" as const };
+        return redirect;
+      }
       return true;
     }
 
-    const auth = useAuthStore();
+    // Access denied and other publicAdmin pages — never block
+    if (to.name === "access-denied" || to.meta.publicAdmin) {
+      return true;
+    }
+
     const customer = useCustomerStore();
     customer.hydrate();
 
