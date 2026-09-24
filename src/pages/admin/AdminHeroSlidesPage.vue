@@ -7,6 +7,7 @@
     >
       <template #actions>
         <q-btn
+          v-if="auth.canAction('settings', 'create')"
           outline
           no-caps
           color="primary"
@@ -15,6 +16,7 @@
           @click="addSlide"
         />
         <q-btn
+          v-if="auth.canAction('settings', 'update')"
           unelevated
           no-caps
           color="primary"
@@ -71,17 +73,21 @@
                     dense
                     flat
                     icon="arrow_upward"
-                    :disable="index === 0"
+                    :disable="index === 0 || !auth.canAction('settings', 'update')"
                     @click="moveSlide(index, -1)"
                   />
                   <q-btn
                     dense
                     flat
                     icon="arrow_downward"
-                    :disable="index === slides.length - 1"
+                    :disable="
+                      index === slides.length - 1 ||
+                      !auth.canAction('settings', 'update')
+                    "
                     @click="moveSlide(index, 1)"
                   />
                   <q-btn
+                    v-if="auth.canAction('settings', 'delete')"
                     dense
                     flat
                     color="negative"
@@ -102,10 +108,12 @@
 import { onMounted, ref } from "vue";
 import { useQuasar } from "quasar";
 import AdminPageHeader from "@/components/admin/AdminPageHeader.vue";
+import { useAuthStore } from "@/stores/auth-store";
 import { useCmsStore } from "@/stores/cms-store";
 import type { HeroSlide } from "@/services/engine/mappers";
 
 const cms = useCmsStore();
+const auth = useAuthStore();
 const $q = useQuasar();
 const slides = ref<HeroSlide[]>([]);
 

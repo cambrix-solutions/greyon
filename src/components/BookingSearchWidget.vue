@@ -2,13 +2,14 @@
   <form
     class="gy-search"
     :class="{ 'gy-search--compact': compact }"
+    novalidate
     @submit.prevent="onSubmit"
   >
     <div class="gy-search__fields">
       <label>
-        <span>Location</span>
+        <span>Destination</span>
         <select v-model="local.locationSlug">
-          <option value="">All locations</option>
+          <option value="">All destinations</option>
           <option v-for="loc in locations" :key="loc.id" :value="loc.slug">
             {{ loc.name }}
           </option>
@@ -21,6 +22,8 @@
           type="date"
           required
           :min="today"
+          :aria-invalid="Boolean(fieldError.checkIn)"
+          :aria-describedby="showError ? 'booking-search-error' : undefined"
           @change="onCheckInChange"
         />
       </label>
@@ -31,7 +34,22 @@
           type="date"
           required
           :min="minCheckOut"
+          :aria-invalid="Boolean(fieldError.checkOut)"
+          :aria-describedby="
+            fieldError.checkOut && dateRangeInvalid
+              ? 'booking-checkout-error'
+              : showError
+                ? 'booking-search-error'
+                : undefined
+          "
         />
+        <span
+          v-if="fieldError.checkOut && dateRangeInvalid"
+          id="booking-checkout-error"
+          class="gy-search__field-error"
+        >
+          Check-out must be after check-in.
+        </span>
       </label>
       <label>
         <span>Rooms</span>
@@ -47,7 +65,12 @@
       </label>
     </div>
 
-    <p v-if="attempted && localError" class="gy-search__error" role="alert">
+    <p
+      v-if="showError"
+      id="booking-search-error"
+      class="gy-search__error"
+      role="alert"
+    >
       {{ localError }}
     </p>
     <p v-else-if="nightCount > 0 && !compact" class="gy-search__nights">
@@ -111,12 +134,19 @@ const nightCount = computed(() =>
   nightsBetweenLocal(local.checkIn, local.checkOut)
 );
 
+const dateRangeInvalid = computed(
+  () =>
+    Boolean(local.checkIn) &&
+    Boolean(local.checkOut) &&
+    local.checkOut <= local.checkIn
+);
+
 const localError = computed(() => {
   if (!local.checkIn || !local.checkOut) {
     return "Choose check-in and check-out dates.";
   }
   if (local.checkIn < today) return "Check-in cannot be in the past.";
-  if (local.checkOut <= local.checkIn) {
+  if (dateRangeInvalid.value) {
     return "Check-out must be after check-in.";
   }
   if (nightCount.value < 1) return "Stay must include at least one night.";
@@ -132,14 +162,26 @@ const localError = computed(() => {
   return "";
 });
 
-const fieldError = computed(() => ({
-  checkIn: attempted.value && (!local.checkIn || local.checkIn < today),
-  checkOut:
-    attempted.value && (!local.checkOut || local.checkOut <= local.checkIn)
-}));
+/** Date issues surface immediately; other rules wait until submit. */
+const showError = computed(
+  () =>
+    Boolean(localError.value) &&
+    (attempted.value ||
+      dateRangeInvalid.value ||
+      Boolean(local.checkIn && local.checkIn < today))
+);
+
+const fieldError = computed(() => {
+  const highlightDates = attempted.value || showError.value;
+  return {
+    checkIn: highlightDates && (!local.checkIn || local.checkIn < today),
+    checkOut:
+      highlightDates && (!local.checkOut || local.checkOut <= local.checkIn)
+  };
+});
 
 function onCheckInChange() {
-  if (local.checkOut <= local.checkIn) {
+  if (local.checkOut && local.checkOut <= local.checkIn) {
     local.checkOut = addLocalDays(local.checkIn, 1);
   }
 }
@@ -229,6 +271,15 @@ async function onSubmit() {
   border: 1px solid rgba(176, 141, 87, 0.45);
   color: #6b4a1e;
   font-size: 0.86rem;
+}
+
+.gy-search__field-error {
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: normal;
+  text-transform: none;
+  color: #9a3412;
+  line-height: 1.3;
 }
 
 .gy-search__nights {

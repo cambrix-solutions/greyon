@@ -15,6 +15,7 @@
           target="_blank"
         />
         <q-btn
+          v-if="auth.canAction('hotels', 'create')"
           unelevated
           no-caps
           color="primary"
@@ -51,7 +52,7 @@
           outlined
           emit-value
           map-options
-          label="Location"
+          label="Destination"
           style="min-width: 180px; background: #fff"
         />
         <q-toggle v-model="featuredOnly" label="Featured only" dense />
@@ -59,7 +60,7 @@
     </AdminPageHeader>
 
     <div v-reveal class="tree-legend">
-      <span><strong>Parent</strong> Location</span>
+      <span><strong>Parent</strong> Destination</span>
       <span class="tree-legend__arrow">→</span>
       <span><strong>This page</strong> Hotel</span>
       <span class="tree-legend__arrow">→</span>
@@ -74,7 +75,7 @@
       >
         <header class="hotel-group__head">
           <div>
-            <p class="hotel-group__level">Location</p>
+            <p class="hotel-group__level">Destination</p>
             <h2 class="hotel-group__title">{{ group.locationName }}</h2>
             <p class="hotel-group__meta">
               {{ group.hotels.length }} hotel{{
@@ -84,14 +85,18 @@
           </div>
           <div class="hotel-group__links">
             <q-btn
+              v-if="
+                group.locationId !== 'orphan' && auth.canDestinationDetail()
+              "
               flat
               dense
               no-caps
               color="primary"
-              label="Open location"
-              :to="`/admin/locations`"
+              label="Open destination"
+              :to="`/admin/locations/${group.locationId}`"
             />
             <q-btn
+              v-if="auth.canAction('hotels', 'create')"
               outline
               dense
               no-caps
@@ -143,60 +148,51 @@
             </div>
 
             <div class="hotel-card__side">
-              <q-select
-                dense
-                outlined
-                :model-value="hotel.status"
-                :options="cms.statusOptions"
-                class="hotel-card__status-select"
-                @update:model-value="(v: string) => setStatus(hotel.id, v)"
-              />
-              <q-toggle
-                dense
-                :model-value="Boolean(hotel.featured)"
-                label="Featured"
-                @update:model-value="
-                  (v: boolean) => toggleFeatured(hotel.id, v)
-                "
-              />
-              <div class="hotel-card__actions">
-                <q-btn
-                  outline
-                  dense
-                  no-caps
-                  color="primary"
-                  label="Rooms"
-                  :to="`/admin/rooms?hotelId=${hotel.id}`"
-                />
-                <q-btn
-                  flat
-                  dense
-                  no-caps
-                  color="primary"
-                  label="Edit"
-                  @click="openEdit(hotel)"
-                />
-                <q-btn
-                  flat
-                  dense
-                  round
-                  icon="open_in_new"
-                  :to="`/hotels/${hotel.slug}`"
-                  target="_blank"
-                >
-                  <q-tooltip>View live</q-tooltip>
-                </q-btn>
-                <q-btn
-                  flat
-                  dense
-                  round
-                  icon="delete"
-                  color="negative"
-                  @click="remove(hotel.id)"
-                >
-                  <q-tooltip>Delete</q-tooltip>
-                </q-btn>
-              </div>
+              <AdminEntityActions
+                :status="hotel.status"
+                :status-options="cms.statusOptions"
+                :status-disable="!auth.canAction('hotels', 'update')"
+                primary-label="Rooms"
+                :primary-to="`/admin/rooms?hotelId=${hotel.id}`"
+                :actions="[
+                  {
+                    key: 'edit',
+                    icon: 'edit',
+                    tip: 'Edit hotel',
+                    show: auth.canAction('hotels', 'update'),
+                    onClick: () => openEdit(hotel)
+                  },
+                  {
+                    key: 'live',
+                    icon: 'open_in_new',
+                    tip: 'View live',
+                    to: `/hotels/${hotel.slug}`,
+                    target: '_blank'
+                  },
+                  {
+                    key: 'delete',
+                    icon: 'delete',
+                    tip: 'Delete',
+                    danger: true,
+                    show: auth.canAction('hotels', 'delete'),
+                    onClick: () => remove(hotel.id)
+                  }
+                ]"
+                @update:status="(v: string) => setStatus(hotel.id, v)"
+              >
+                <template #meta>
+                  <q-toggle
+                    dense
+                    :model-value="Boolean(hotel.featured)"
+                    label="Featured"
+                    class="hotel-card__feat-toggle"
+                    :disable="!auth.canAction('hotels', 'update')"
+                    @update:model-value="
+                      (v: boolean) => toggleFeatured(hotel.id, v)
+                    "
+                  />
+                </template>
+              </AdminEntityActions>
             </div>
           </article>
         </div>
@@ -205,6 +201,7 @@
       <div v-if="!grouped.length" class="hotel-groups__empty">
         No hotels match.
         <q-btn
+          v-if="auth.canAction('hotels', 'create')"
           flat
           dense
           color="primary"
@@ -220,11 +217,11 @@
       icon="apartment"
       eyebrow="Properties"
       :title="editing ? 'Edit hotel' : 'Add hotel'"
-      subtitle="Link this property to a location, then add room types under it."
+      subtitle="Link this property to a destination, then add room types under it."
     >
       <template #notice>
-        Required relationship: <strong>Location → Hotel → Rooms</strong>. Pick
-        the parent location first.
+        Required relationship: <strong>Destination → Hotel → Rooms</strong>. Pick
+        the parent destination first.
       </template>
       <AdminFormSection title="Essentials" :columns="2">
         <q-input v-model="form.name" label="Hotel name" outlined dense />
@@ -235,19 +232,21 @@
           outlined
           dense
         />
-        <q-input
+      </AdminFormSection>
+      <AdminFormSection
+        title="Hero image"
+        hint="Drop, browse, or paste a URL."
+      >
+        <ImageDropField
           v-model="form.heroImage"
-          label="Hero image URL"
-          outlined
-          dense
-          class="admin-form-span-2"
+          title="Drop or browse hero image"
         />
       </AdminFormSection>
       <AdminFormSection title="Details" :columns="2">
         <q-select
           v-model="form.locationId"
           :options="locationOptions"
-          label="Parent location"
+          label="Parent destination"
           outlined
           dense
           emit-value
@@ -321,9 +320,23 @@
           dense
         />
       </AdminFormSection>
+      <AdminFormSection title="Map pin">
+        <MapPinPicker
+          v-if="dialog"
+          v-model:lat="form.lat"
+          v-model:lng="form.lng"
+          v-model:embed-url="form.mapEmbedUrl"
+          class="admin-form-span-2"
+        />
+      </AdminFormSection>
       <template #actions>
         <q-btn flat no-caps label="Cancel" v-close-popup />
         <q-btn
+          v-if="
+            editing
+              ? auth.canAction('hotels', 'update')
+              : auth.canAction('hotels', 'create')
+          "
           color="primary"
           unelevated
           no-caps
@@ -340,9 +353,12 @@ import { computed, onMounted, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 import AdminDialog from "@/components/admin/AdminDialog.vue";
+import AdminEntityActions from "@/components/admin/AdminEntityActions.vue";
 import AdminFormSection from "@/components/admin/AdminFormSection.vue";
 import AdminPageHeader from "@/components/admin/AdminPageHeader.vue";
 import GalleryEditor from "@/components/admin/GalleryEditor.vue";
+import ImageDropField from "@/components/admin/ImageDropField.vue";
+import MapPinPicker from "@/components/admin/MapPinPicker.vue";
 import { useAuthStore } from "@/stores/auth-store";
 import { useCmsStore } from "@/stores/cms-store";
 import type { ContentStatus, Hotel } from "@/types/greyon";
@@ -370,7 +386,7 @@ const locationOptions = computed(() =>
   cms.locations.map(l => ({ label: l.name, value: l.id }))
 );
 const locationFilterOptions = computed(() => [
-  { label: "All locations", value: "all" },
+  { label: "All destinations", value: "all" },
   ...locationOptions.value
 ]);
 
@@ -381,6 +397,9 @@ const form = reactive({
   shortDescription: "",
   description: "",
   address: "",
+  lat: null as number | null,
+  lng: null as number | null,
+  mapEmbedUrl: null as string | null,
   phone: "",
   email: "",
   checkInTime: "14:00",
@@ -388,6 +407,16 @@ const form = reactive({
   heroImage: "",
   status: "draft" as ContentStatus,
   featured: false
+});
+
+const hasFormMapPin = computed(() => {
+  const lat = Number(form.lat);
+  const lng = Number(form.lng);
+  return (
+    Number.isFinite(lat) &&
+    Number.isFinite(lng) &&
+    (lat !== 0 || lng !== 0)
+  );
 });
 
 const filtered = computed(() => {
@@ -448,6 +477,9 @@ function blank(locationId?: string) {
   form.shortDescription = "";
   form.description = "";
   form.address = "";
+  form.lat = null;
+  form.lng = null;
+  form.mapEmbedUrl = null;
   form.phone = "";
   form.email = "";
   form.checkInTime = "14:00";
@@ -479,6 +511,19 @@ function openEdit(hotel: Hotel) {
   form.shortDescription = hotel.shortDescription;
   form.description = hotel.description;
   form.address = hotel.address;
+  form.lat =
+    hotel.coordinates &&
+    Number.isFinite(hotel.coordinates.lat) &&
+    (hotel.coordinates.lat !== 0 || hotel.coordinates.lng !== 0)
+      ? hotel.coordinates.lat
+      : null;
+  form.lng =
+    hotel.coordinates &&
+    Number.isFinite(hotel.coordinates.lng) &&
+    (hotel.coordinates.lat !== 0 || hotel.coordinates.lng !== 0)
+      ? hotel.coordinates.lng
+      : null;
+  form.mapEmbedUrl = hotel.mapEmbedUrl || null;
   form.phone = hotel.phone;
   form.email = hotel.email;
   form.checkInTime = hotel.checkInTime || "14:00";
@@ -493,7 +538,7 @@ function openEdit(hotel: Hotel) {
 
 function save() {
   if (!form.name || !form.locationId) {
-    $q.notify({ type: "negative", message: "Name and location are required." });
+    $q.notify({ type: "negative", message: "Name and destination are required." });
     return;
   }
   void (async () => {
@@ -506,6 +551,15 @@ function save() {
         shortDescription: form.shortDescription,
         description: form.description,
         address: form.address,
+        ...(hasFormMapPin.value
+          ? {
+              coordinates: {
+                lat: Number(form.lat),
+                lng: Number(form.lng)
+              }
+            }
+          : {}),
+        mapEmbedUrl: form.mapEmbedUrl || null,
         phone: form.phone,
         email: form.email,
         checkInTime: form.checkInTime || "14:00",
@@ -826,22 +880,18 @@ watch([statusFilter, locationFilter, featuredOnly, query], syncQuery);
 }
 
 .hotel-card__side {
-  display: grid;
-  gap: 0.4rem;
-  justify-items: end;
-  align-content: start;
-}
-
-.hotel-card__status-select {
-  min-width: 118px;
-  background: #fff;
-}
-
-.hotel-card__actions {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.15rem;
   justify-content: flex-end;
+  align-items: flex-start;
+}
+
+.hotel-card__feat-toggle {
+  padding: 0.15rem 0.55rem;
+  border-radius: 10px;
+  border: 1px solid rgba(28, 25, 23, 0.1);
+  background: #fff;
+  box-shadow: 0 1px 0 rgba(28, 25, 23, 0.03);
+  min-height: 34px;
 }
 
 .hotel-groups__empty {
@@ -870,15 +920,6 @@ watch([statusFilter, locationFilter, featuredOnly, query], syncQuery);
 
   .hotel-card__side {
     grid-column: 1 / -1;
-    justify-items: start;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    width: 100%;
-    gap: 0.5rem;
-  }
-
-  .hotel-card__actions {
     justify-content: flex-start;
     width: 100%;
   }

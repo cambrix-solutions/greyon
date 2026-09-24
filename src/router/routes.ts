@@ -71,13 +71,13 @@ const routes: RouteRecordRaw[] = [
         path: "locations",
         name: "locations",
         component: () => import("@/pages/LocationsListPage.vue"),
-        meta: { title: "Locations | Greyon", solidHeader: true }
+        meta: { title: "Destinations | Greyon", solidHeader: true }
       },
       {
         path: "locations/:slug",
         name: "location-detail",
         component: () => import("@/pages/LocationDetailPage.vue"),
-        meta: { title: "Location | Greyon", solidHeader: true }
+        meta: { title: "Destination | Greyon", solidHeader: true }
       },
       {
         path: "booking",
@@ -174,6 +174,12 @@ const routes: RouteRecordRaw[] = [
     meta: { title: "Admin Login | Greyon", publicAdmin: true }
   },
   {
+    path: "/developer/login",
+    name: "developer-login",
+    component: () => import("@/pages/admin/DeveloperLoginPage.vue"),
+    meta: { title: "Developer Login | Greyon", publicAdmin: true }
+  },
+  {
     path: "/admin",
     component: () => import("@/layouts/AdminLayout.vue"),
     meta: { requiresAuth: true },
@@ -200,7 +206,7 @@ const routes: RouteRecordRaw[] = [
         path: "rates",
         name: "admin-rates",
         component: () => import("@/pages/admin/AdminRatesPage.vue"),
-        meta: { title: "Rates | Greyon Admin", perm: "rates" }
+        meta: { title: "Prices & rooms | Greyon Admin", perm: "rates" }
       },
       {
         path: "bookings",
@@ -212,7 +218,17 @@ const routes: RouteRecordRaw[] = [
         path: "locations",
         name: "admin-locations",
         component: () => import("@/pages/admin/AdminLocationsPage.vue"),
-        meta: { title: "Locations | Greyon Admin", perm: "locations" }
+        meta: { title: "Destinations | Greyon Admin", perm: "locations" }
+      },
+      {
+        path: "locations/:id",
+        name: "admin-location-detail",
+        component: () => import("@/pages/admin/AdminLocationDetailPage.vue"),
+        meta: {
+          title: "Destination | Greyon Admin",
+          perm: "locations",
+          destinationDetail: true
+        }
       },
       {
         path: "news",
@@ -290,9 +306,10 @@ export function setupRouterGuards(
       document.title = String(to.meta.title);
     }
 
-    // Public admin login / access denied — never block
+    // Public admin / developer login / access denied — never block
     if (
       to.name === "admin-login" ||
+      to.name === "developer-login" ||
       to.name === "access-denied" ||
       to.meta.publicAdmin
     ) {
@@ -346,7 +363,13 @@ export function setupRouterGuards(
     if (to.meta.requiresAuth || to.path.startsWith("/admin")) {
       auth.hydrate();
       if (!auth.isAuthenticated) {
-        return { name: "admin-login", query: { redirect: to.fullPath } };
+        const preferDeveloper =
+          typeof sessionStorage !== "undefined" &&
+          sessionStorage.getItem("greyon_login_guard") === "developer";
+        return {
+          name: preferDeveloper ? "developer-login" : "admin-login",
+          query: { redirect: to.fullPath }
+        };
       }
       // Every admin page: user_package features + roles first
       const perm = to.meta.perm as string | undefined;
@@ -355,6 +378,15 @@ export function setupRouterGuards(
           name: "access-denied",
           query: {
             message: `Your user package does not include “${perm}”.`
+          }
+        };
+      }
+      if (to.meta.destinationDetail && !auth.canDestinationDetail()) {
+        return {
+          name: "access-denied",
+          query: {
+            message:
+              "Your seat does not include Destination detail (locations_detail)."
           }
         };
       }

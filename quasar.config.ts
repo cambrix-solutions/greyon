@@ -1,9 +1,28 @@
 // Configuration for your app
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file
 
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { defineConfig } from "#q-app";
 
+/** Read a non-VITE_ key from `.env` (Quasar clientPrefix strips those from process.env). */
+function envFromDotenv(key: string): string | undefined {
+  try {
+    const raw = readFileSync(resolve(process.cwd(), ".env"), "utf8");
+    const match = raw.match(new RegExp(`^${key}=(.*)$`, "m"));
+    const value = match?.[1]?.trim().replace(/^["']|["']$/g, "");
+    return value || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export default defineConfig(ctx => {
+  const engineProxyTarget =
+    process.env.ENGINE_PROXY_TARGET?.trim() ||
+    envFromDotenv("ENGINE_PROXY_TARGET") ||
+    "https://greyon-engine.test";
+
   return {
     // https://v2.quasar.dev/quasar-cli-vite/prefetch-feature
     // preFetch: true,
@@ -93,11 +112,11 @@ export default defineConfig(ctx => {
       // vueDevtools: true,
       // https: true,
       open: true, // opens browser window automatically
-      // Same-origin proxy so greyon-engine session cookies work from localhost:9000
-      // (avoids cross-site SameSite issues). Target must match Herd: greyon-engine.test
+      // Same-origin proxy so greyon-engine session cookies work from localhost.
+      // Override with ENGINE_PROXY_TARGET in `.env` (e.g. http://127.0.0.1:9080).
       proxy: {
         "/engine": {
-          target: "https://greyon-engine.test",
+          target: engineProxyTarget,
           changeOrigin: true,
           secure: false,
           rewrite: (path: string) => path.replace(/^\/engine/, ""),

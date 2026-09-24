@@ -3,7 +3,7 @@
     <AdminPageHeader
       eyebrow="Publishing"
       title="News"
-      :subtitle="`${filtered.length} articles · site stories, not property inventory`"
+      :subtitle="`${filtered.length} articles · site stories, not room stock`"
     >
       <template #actions>
         <q-btn
@@ -15,6 +15,7 @@
           target="_blank"
         />
         <q-btn
+          v-if="auth.canAction('news', 'create')"
           unelevated
           no-caps
           color="primary"
@@ -69,56 +70,53 @@
           <p class="news-card__slug">{{ item.slug }}</p>
         </div>
         <div class="news-card__foot">
-          <q-select
-            dense
-            outlined
-            :model-value="item.status"
-            :options="cms.statusOptions"
-            style="min-width: 120px"
-            @update:model-value="(v: string) => setStatus(item.id, v)"
+          <AdminEntityActions
+            :status="item.status"
+            :status-options="cms.statusOptions"
+            :status-disable="!auth.canAction('news', 'update')"
+            :primary-label="
+              item.status !== 'published' && auth.canAction('news', 'update')
+                ? 'Publish'
+                : undefined
+            "
+            :primary-show="
+              item.status !== 'published' && auth.canAction('news', 'update')
+            "
+            :actions="[
+              {
+                key: 'edit',
+                icon: 'edit',
+                tip: 'Edit article',
+                show: auth.canAction('news', 'update'),
+                onClick: () => openEdit(item)
+              },
+              {
+                key: 'live',
+                icon: 'open_in_new',
+                tip: 'View live',
+                show: item.status === 'published',
+                to: `/news/${item.slug}`,
+                target: '_blank'
+              },
+              {
+                key: 'delete',
+                icon: 'delete',
+                tip: 'Delete',
+                danger: true,
+                show: auth.canAction('news', 'delete'),
+                onClick: () => remove(item.id)
+              }
+            ]"
+            @update:status="(v: string) => setStatus(item.id, v)"
+            @primary="setStatus(item.id, 'published')"
           />
-          <div class="news-card__actions">
-            <q-btn
-              flat
-              dense
-              no-caps
-              color="primary"
-              label="Edit"
-              @click="openEdit(item)"
-            />
-            <q-btn
-              v-if="item.status === 'published'"
-              flat
-              dense
-              round
-              icon="open_in_new"
-              :to="`/news/${item.slug}`"
-              target="_blank"
-            />
-            <q-btn
-              v-if="item.status !== 'published'"
-              flat
-              dense
-              no-caps
-              color="positive"
-              label="Publish"
-              @click="setStatus(item.id, 'published')"
-            />
-            <q-btn
-              flat
-              dense
-              round
-              icon="delete"
-              color="negative"
-              @click="remove(item.id)"
-            />
-          </div>
         </div>
       </article>
 
       <div v-if="!filtered.length" class="news-grid__empty">
         No articles match.
         <q-btn
+          v-if="auth.canAction('news', 'create')"
           flat
           dense
           color="primary"
@@ -189,6 +187,11 @@
       <template #actions>
         <q-btn flat no-caps label="Cancel" v-close-popup />
         <q-btn
+          v-if="
+            editing
+              ? auth.canAction('news', 'update')
+              : auth.canAction('news', 'create')
+          "
           color="primary"
           unelevated
           no-caps
@@ -204,12 +207,15 @@
 import { computed, onMounted, reactive, ref } from "vue";
 import { useQuasar } from "quasar";
 import AdminDialog from "@/components/admin/AdminDialog.vue";
+import AdminEntityActions from "@/components/admin/AdminEntityActions.vue";
 import AdminFormSection from "@/components/admin/AdminFormSection.vue";
 import AdminPageHeader from "@/components/admin/AdminPageHeader.vue";
+import { useAuthStore } from "@/stores/auth-store";
 import { useCmsStore } from "@/stores/cms-store";
 import type { ContentStatus, NewsArticle } from "@/types/greyon";
 
 const cms = useCmsStore();
+const auth = useAuthStore();
 const $q = useQuasar();
 
 onMounted(() => {
@@ -436,16 +442,10 @@ function remove(id: string) {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 0.5rem;
   padding: 0.65rem 1rem 0.9rem;
   border-top: 1px solid rgba(28, 36, 33, 0.06);
-}
-
-.news-card__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.1rem;
 }
 
 .news-grid__empty {

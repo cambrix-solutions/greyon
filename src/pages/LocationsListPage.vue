@@ -1,13 +1,13 @@
 <template>
   <q-page class="gy-section">
     <SeoHead
-      title="Locations | Greyon"
+      title="Destinations | Greyon"
       description="Explore Greyon hotels in Phnom Penh, Sihanoukville, Kampot, Kep, Siem Reap and Battambang."
     />
     <div class="gy-container">
       <div v-reveal>
-        <p class="gy-eyebrow">Destinations</p>
-        <h1 class="gy-display page-title">Locations</h1>
+        <p class="gy-eyebrow">Greyon</p>
+        <h1 class="gy-display page-title">Destinations</h1>
       </div>
       <div class="gy-grid-3">
         <router-link

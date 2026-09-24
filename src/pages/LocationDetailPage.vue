@@ -8,7 +8,7 @@
     <section class="loc-hero gy-card-media">
       <img :src="location.heroImage" :alt="location.name" />
       <div class="loc-hero__content gy-container">
-        <p v-reveal class="gy-eyebrow">Location</p>
+        <p v-reveal class="gy-eyebrow">Destination</p>
         <h1 v-reveal="{ delay: '80ms' }" class="gy-display">{{
           location.name
         }}</h1>
@@ -26,7 +26,11 @@
       </div>
       <section v-if="mapPoint" v-reveal class="map-block">
         <h2 class="gy-display">Map</h2>
-        <MapEmbed :lat="mapPoint.lat" :lng="mapPoint.lng" />
+        <MapEmbed
+          :lat="mapPoint.lat"
+          :lng="mapPoint.lng"
+          :embed-url="mapEmbedUrl"
+        />
       </section>
       <h2 v-reveal class="gy-display">Greyon hotels here</h2>
       <div class="gy-grid-3 q-mt-md">
@@ -44,7 +48,7 @@
     </div>
   </q-page>
   <q-page v-else class="gy-section gy-container">
-    <h1 class="gy-display">Location not found</h1>
+    <h1 class="gy-display">Destination not found</h1>
   </q-page>
 </template>
 
@@ -70,7 +74,16 @@ const hotelsHere = computed(() =>
     ? cms.publishedHotels.filter(h => h.locationId === location.value?.id)
     : []
 );
-const mapPoint = computed(() => hotelsHere.value[0]?.coordinates ?? null);
+const mapPoint = computed(() => {
+  const c = hotelsHere.value[0]?.coordinates;
+  if (!c || !Number.isFinite(c.lat) || !Number.isFinite(c.lng)) return null;
+  if (c.lat === 0 && c.lng === 0) return null;
+  return c;
+});
+
+const mapEmbedUrl = computed(
+  () => hotelsHere.value[0]?.mapEmbedUrl ?? null
+);
 
 function bookHere() {
   if (!location.value) return;

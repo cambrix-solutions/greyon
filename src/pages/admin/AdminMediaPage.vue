@@ -7,6 +7,7 @@
     >
       <template #actions>
         <q-btn
+          v-if="auth.canAction('media', 'create')"
           unelevated
           no-caps
           color="primary"
@@ -48,6 +49,7 @@
               outlined
               :model-value="item.alt"
               label="Alt text"
+              :disable="!auth.canAction('media', 'update')"
               @update:model-value="
                 v => cms.updateMedia(item.id, { alt: String(v ?? '') })
               "
@@ -61,6 +63,7 @@
                 @click="copy(item.src)"
               />
               <q-btn
+                v-if="auth.canAction('media', 'delete')"
                 dense
                 flat
                 color="negative"
@@ -75,7 +78,13 @@
     <q-banner v-else class="bg-white" rounded>
       No media yet. Drop images or paste a URL to get started.
       <template #action>
-        <q-btn flat color="primary" label="Add media" @click="openAdd" />
+        <q-btn
+          v-if="auth.canAction('media', 'create')"
+          flat
+          color="primary"
+          label="Add media"
+          @click="openAdd"
+        />
       </template>
     </q-banner>
 
@@ -122,9 +131,11 @@ import AdminDialog from "@/components/admin/AdminDialog.vue";
 import AdminFormSection from "@/components/admin/AdminFormSection.vue";
 import AdminPageHeader from "@/components/admin/AdminPageHeader.vue";
 import ImageDropField from "@/components/admin/ImageDropField.vue";
+import { useAuthStore } from "@/stores/auth-store";
 import { useCmsStore } from "@/stores/cms-store";
 
 const cms = useCmsStore();
+const auth = useAuthStore();
 const $q = useQuasar();
 
 onMounted(() => {

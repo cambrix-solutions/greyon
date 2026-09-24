@@ -16,6 +16,7 @@
             to="/admin/features"
           />
           <q-btn
+            v-if="auth.canAction('users', 'create')"
             unelevated
             no-caps
             color="primary"
@@ -71,6 +72,7 @@
               <td class="text-caption">{{ scopeLabel(user) }}</td>
               <td>
                 <q-btn
+                  v-if="auth.canAction('users', 'update')"
                   flat
                   dense
                   color="primary"
@@ -79,6 +81,7 @@
                   @click="openEdit(user)"
                 />
                 <q-btn
+                  v-if="auth.canAction('users', 'delete')"
                   flat
                   dense
                   color="negative"
@@ -110,11 +113,12 @@
             <p class="label">Role</p>
             <p>
               <span
-                v-for="r in cms.getUserRoles(me)"
-                :key="r"
+                v-for="seat in seatsFor(me)"
+                :key="`role-${seat.id}`"
                 class="role-pill"
-                >{{ roleLabels[r] }}</span
+                >{{ seat.label }}</span
               >
+              <span v-if="!seatsFor(me).length" class="text-grey-6">None</span>
             </p>
           </section>
           <section>
@@ -208,7 +212,18 @@
       </AdminFormSection>
       <template #actions>
         <q-btn flat no-caps label="Cancel" v-close-popup />
-        <q-btn unelevated no-caps color="primary" label="Save" @click="save" />
+        <q-btn
+          v-if="
+            editing
+              ? auth.canAction('users', 'update')
+              : auth.canAction('users', 'create')
+          "
+          unelevated
+          no-caps
+          color="primary"
+          label="Save"
+          @click="save"
+        />
       </template>
     </AdminDialog>
   </q-page>
@@ -242,11 +257,13 @@ const editing = ref<string | null>(null);
 const query = ref("");
 
 function seatLabel(pkg: { name: string; roles: string[]; priceNote?: string }) {
+  // Prefer seat name so city packages read "Manager · Kampot", not plain "Manager".
+  if (pkg.name?.trim()) return pkg.name.trim();
   const roles = pkg.roles
     .map(r => roleLabels[r as keyof typeof roleLabels] ?? r)
     .join(" + ");
   const note = pkg.priceNote ? ` · ${pkg.priceNote}` : "";
-  return `${roles}${note}`;
+  return `${roles || "Seat"}${note}`;
 }
 
 const assignablePackages = computed(() => {

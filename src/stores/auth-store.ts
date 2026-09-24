@@ -1,6 +1,5 @@
 import { defineStore, acceptHMRUpdate } from "pinia";
 import { computed, ref } from "vue";
-import { ApiError } from "@/services/api";
 import {
   adminLogin,
   adminLogout,
@@ -13,85 +12,6 @@ import {
 } from "@/services/engine";
 import { useCmsStore } from "@/stores/cms-store";
 import type { AdminRole, AdminUser } from "@/types/greyon";
-
-const ALL_ADMIN = [
-  "dashboard",
-  "hotels",
-  "rooms",
-  "rates",
-  "bookings",
-  "locations",
-  "locations_list",
-  "locations_managers",
-  "locations_hotels",
-  "locations_publish",
-  "locations_seo",
-  "news",
-  "enquiries",
-  "media",
-  "settings",
-  "users",
-  "features"
-] as const;
-
-/** Role → permissions (features still required via packages) */
-const rolePermissions: Record<AdminRole, readonly string[]> = {
-  developer: ALL_ADMIN,
-  admin: ALL_ADMIN.filter(p => p !== "features"),
-  org_admin: ALL_ADMIN.filter(p => p !== "features"),
-  super_admin: ALL_ADMIN.filter(p => p !== "features"),
-  content_admin: ALL_ADMIN.filter(p => p !== "features"),
-  manager: [
-    "dashboard",
-    "hotels",
-    "rooms",
-    "rates",
-    "bookings",
-    "locations",
-    "locations_list",
-    "locations_managers",
-    "locations_hotels",
-    "locations_publish",
-    "locations_seo",
-    "news",
-    "enquiries",
-    "users"
-  ],
-  location_admin: [
-    "dashboard",
-    "hotels",
-    "rooms",
-    "rates",
-    "bookings",
-    "locations",
-    "locations_list",
-    "locations_managers",
-    "locations_hotels",
-    "locations_publish",
-    "locations_seo",
-    "news",
-    "enquiries",
-    "users"
-  ],
-  hotel_admin: [
-    "dashboard",
-    "hotels",
-    "rooms",
-    "rates",
-    "bookings",
-    "enquiries",
-    "users"
-  ],
-  booking_admin: [
-    "dashboard",
-    "rooms",
-    "rates",
-    "bookings",
-    "enquiries",
-    "users"
-  ],
-  customer: []
-};
 
 export const roleLabels: Record<AdminRole, string> = {
   developer: "Developer",
@@ -119,6 +39,19 @@ type EngineGuard = "admin" | "developer";
 const ENGINE_GUARD_KEY = "greyon_engine_guard";
 const ENGINE_ROLES_KEY = "greyon_engine_roles";
 const ENGINE_FEATURES_KEY = "greyon_engine_features";
+
+/** Ignore stale 401s for a few seconds after a successful login. */
+let loginGraceUntil = 0;
+/** Bumps on every persist/clear so in-flight /me calls can't wipe a new session. */
+let sessionEpoch = 0;
+
+function markLoginGrace(ms = 5000) {
+  loginGraceUntil = Date.now() + ms;
+}
+
+function inLoginGrace() {
+  return Date.now() < loginGraceUntil;
+}
 
 export const useAuthStore = defineStore("auth", () => {
   const user = ref<AdminUser | null>(null);
@@ -166,6 +99,7 @@ export const useAuthStore = defineStore("auth", () => {
     nextRoles: AdminRole[],
     nextFeatures: string[]
   ) {
+    sessionEpoch += 1;
     user.value = nextUser;
     token.value = nextToken;
     engineGuard.value = guard;
@@ -180,6 +114,7 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   function clearLocalSession() {
+    sessionEpoch += 1;
     user.value = null;
     token.value = null;
     engineGuard.value = null;
@@ -193,6 +128,23 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   function hydrate() {
+    // Already live in this tab — don't re-hit /me on every admin navigation.
+    if (user.value && token.value) return;
+
+    // Never refresh while sitting on a login screen (stale /me 401s were
+    // racing with a fresh login and clearing the new session).
+    if (typeof window !== "undefined") {
+      const path = window.location.pathname;
+      if (
+        path === "/admin/login" ||
+        path.startsWith("/admin/login/") ||
+        path === "/developer/login" ||
+        path.startsWith("/developer/login/")
+      ) {
+        return;
+      }
+    }
+
     const raw =
       typeof localStorage !== "undefined"
         ? localStorage.getItem("greyon_admin_user")
@@ -201,6 +153,10 @@ export const useAuthStore = defineStore("auth", () => {
 
     user.value = JSON.parse(raw) as AdminUser;
     try {
+      const guard = localStorage.getItem(ENGINE_GUARD_KEY) as EngineGuard | null;
+      if (guard === "admin" || guard === "developer") {
+        engineGuard.value = guard;
+      }
       engineRoles.value = JSON.parse(
         localStorage.getItem(ENGINE_ROLES_KEY) || "[]"
       ) as AdminRole[];
@@ -216,9 +172,12 @@ export const useAuthStore = defineStore("auth", () => {
 
   async function refreshEngineSession() {
     if (!engineGuard.value) return;
+    if (inLoginGrace()) return;
+    const epoch = sessionEpoch;
     try {
       if (engineGuard.value === "developer") {
         const { developer } = await developerMe();
+        if (epoch !== sessionEpoch) return;
         const mapped = mapEngineDeveloperToUser(developer);
         persistLocalSession(
           mapped.user,
@@ -231,6 +190,7 @@ export const useAuthStore = defineStore("auth", () => {
         return;
       }
       const { admin } = await adminMe();
+      if (epoch !== sessionEpoch) return;
       const mapped = mapEngineAdminToUser(admin);
       persistLocalSession(
         mapped.user,
@@ -240,12 +200,19 @@ export const useAuthStore = defineStore("auth", () => {
         mapped.featureKeys
       );
       void useCmsStore().syncCatalogFromEngine("admin");
-    } catch {
-      clearLocalSession();
+    } catch (e) {
+      if (epoch !== sessionEpoch || inLoginGrace()) return;
+      const status =
+        e && typeof e === "object" && "status" in e
+          ? Number((e as { status: number }).status)
+          : 0;
+      if (status === 401 || status === 419) {
+        clearLocalSession();
+      }
     }
   }
 
-  async function login(email: string, password: string) {
+  async function loginAdmin(email: string, password: string) {
     try {
       const { admin } = await adminLogin(email, password);
       const mapped = mapEngineAdminToUser(admin);
@@ -255,6 +222,7 @@ export const useAuthStore = defineStore("auth", () => {
           message: "This admin has no packages assigned."
         };
       }
+      markLoginGrace();
       persistLocalSession(
         mapped.user,
         `engine.admin.${mapped.user.id}`,
@@ -262,29 +230,47 @@ export const useAuthStore = defineStore("auth", () => {
         mapped.roles,
         mapped.featureKeys
       );
+      if (typeof sessionStorage !== "undefined") {
+        sessionStorage.setItem("greyon_login_guard", "admin");
+      }
       void useCmsStore().syncCatalogFromEngine("admin");
       return { ok: true as const };
-    } catch (adminErr) {
-      try {
-        const { developer } = await developerLogin(email, password);
-        const mapped = mapEngineDeveloperToUser(developer);
-        persistLocalSession(
-          mapped.user,
-          `engine.developer.${mapped.user.id}`,
-          "developer",
-          mapped.roles,
-          mapped.featureKeys
-        );
-        void useCmsStore().syncCatalogFromEngine("developer");
-        return { ok: true as const };
-      } catch (devErr) {
-        const err = adminErr instanceof ApiError ? adminErr : devErr;
-        return {
-          ok: false as const,
-          message: err instanceof Error ? err.message : "Invalid credentials."
-        };
-      }
+    } catch (e) {
+      return {
+        ok: false as const,
+        message: e instanceof Error ? e.message : "Invalid credentials."
+      };
     }
+  }
+
+  async function loginDeveloper(email: string, password: string) {
+    try {
+      const { developer } = await developerLogin(email, password);
+      const mapped = mapEngineDeveloperToUser(developer);
+      markLoginGrace();
+      persistLocalSession(
+        mapped.user,
+        `engine.developer.${mapped.user.id}`,
+        "developer",
+        mapped.roles,
+        mapped.featureKeys
+      );
+      if (typeof sessionStorage !== "undefined") {
+        sessionStorage.setItem("greyon_login_guard", "developer");
+      }
+      void useCmsStore().syncCatalogFromEngine("developer");
+      return { ok: true as const };
+    } catch (e) {
+      return {
+        ok: false as const,
+        message: e instanceof Error ? e.message : "Invalid credentials."
+      };
+    }
+  }
+
+  /** @deprecated Prefer loginAdmin / loginDeveloper — kept for callers expecting login(). */
+  async function login(email: string, password: string) {
+    return loginAdmin(email, password);
   }
 
   async function logout() {
@@ -297,18 +283,42 @@ export const useAuthStore = defineStore("auth", () => {
     clearLocalSession();
   }
 
+  /**
+   * Expired engine session (401). Clears local auth and sends the user
+   * back to the matching login route (admin vs developer).
+   */
+  function handleUnauthorized() {
+    if (inLoginGrace()) return;
+    const wasDeveloper = engineGuard.value === "developer";
+    clearLocalSession();
+    if (typeof window === "undefined") return;
+    const { pathname, search } = window.location;
+    if (!pathname.startsWith("/admin") && !pathname.startsWith("/developer")) {
+      return;
+    }
+    if (
+      pathname === "/admin/login" ||
+      pathname.startsWith("/admin/login/") ||
+      pathname === "/developer/login" ||
+      pathname.startsWith("/developer/login/")
+    ) {
+      return;
+    }
+    const redirect = pathname + search;
+    const loginPath = wasDeveloper ? "/developer/login" : "/admin/login";
+    window.location.assign(
+      `${loginPath}?redirect=${encodeURIComponent(redirect)}`
+    );
+  }
+
   function featureEnabled(key: string) {
     if (isDeveloper.value) return true;
     const cms = useCmsStore();
 
     if (user.value) {
-      const keys = featureKeys.value;
-      if (keys.includes(key)) return true;
-      const children = cms.features.filter(f => f.parentKey === key);
-      if (children.some(c => keys.includes(c.key))) return true;
-      const feat = cms.features.find(f => f.key === key);
-      if (feat?.parentKey && keys.includes(feat.parentKey)) return true;
-      return false;
+      // Exact key only — unchecking a package permission must take effect
+      // for every assignee (matches AccessService::hasPermission / can).
+      return featureKeys.value.includes(key);
     }
 
     const feat = cms.features.find(f => f.key === key);
@@ -316,12 +326,53 @@ export const useAuthStore = defineStore("auth", () => {
     return feat.enabled;
   }
 
+  /**
+   * Module or fine-grained permission check.
+   * Aligns with engine AccessService: package featureKeys + permissionKeys
+   * are the gate (SPA merges both into session featureKeys at login).
+   */
   function can(permission: string) {
     if (!user.value) return false;
-    // Platform developer: every module + action.
     if (isDeveloper.value) return true;
-    if (!featureEnabled(permission)) return false;
-    return roles.value.some(r => rolePermissions[r]?.includes(permission));
+    return featureEnabled(permission);
+  }
+
+  /** Create / update / delete — uses `{module}_create` style keys from the seat. */
+  function canAction(
+    module: string,
+    action: "list" | "create" | "update" | "delete"
+  ) {
+    if (!user.value) return false;
+    if (isDeveloper.value) return true;
+    const crudKey = `${module}_${action}`;
+    const keys = featureKeys.value;
+    // If this seat has any fine-grained `{module}_*` permissions (e.g.
+    // locations_create), require the specific action key — do NOT fall back
+    // to the parent module. Admin sessions often lack the developer feature
+    // catalog, so we key off the session keys themselves.
+    const usesFineGrained = keys.some(k => k.startsWith(`${module}_`));
+    if (usesFineGrained) return keys.includes(crudKey);
+    const catalogHasCrud = useCmsStore().features.some(
+      f => f.key === crudKey && f.parentKey === module
+    );
+    if (catalogHasCrud) return keys.includes(crudKey);
+    return featureEnabled(module);
+  }
+
+  /**
+   * Destination detail hub (`/admin/locations/:id`) — hotels & rooms under one city.
+   * Prefers `locations_detail`; falls back to list/view or the parent module.
+   */
+  function canDestinationDetail() {
+    if (!user.value) return false;
+    if (isDeveloper.value) return true;
+    const keys = featureKeys.value;
+    if (keys.includes("locations_detail")) return true;
+    const fine = keys.some(k => k.startsWith("locations_"));
+    if (fine) {
+      return keys.includes("locations_list") || keys.includes("locations");
+    }
+    return featureEnabled("locations");
   }
 
   function canAccessLocation(locationId: string) {
@@ -414,8 +465,14 @@ export const useAuthStore = defineStore("auth", () => {
     scopedRatePlans,
     scopedEnquiries,
     login,
+    loginAdmin,
+    loginDeveloper,
     logout,
+    handleUnauthorized,
+    refreshEngineSession,
     can,
+    canAction,
+    canDestinationDetail,
     featureEnabled,
     canAccessLocation,
     canAccessHotel,

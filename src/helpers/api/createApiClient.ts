@@ -22,6 +22,63 @@ type EngineErrorBody = {
   errors?: Record<string, string[]>;
 };
 
+type UnauthorizedHandler = (error: ApiError) => void;
+
+let unauthorizedHandler: UnauthorizedHandler | null = null;
+let unauthorizedHandling = false;
+
+/** Register a global 401 handler (wired from boot to avoid circular imports). */
+export function setUnauthorizedHandler(handler: UnauthorizedHandler | null) {
+  unauthorizedHandler = handler;
+}
+
+function notifyUnauthorized(error: ApiError) {
+  if (!unauthorizedHandler || unauthorizedHandling) return;
+  unauthorizedHandling = true;
+  try {
+    unauthorizedHandler(error);
+  } finally {
+    window.setTimeout(() => {
+      unauthorizedHandling = false;
+    }, 1500);
+  }
+}
+
+/** Avoid dumping HTML error pages (e.g. Herd 404) into the UI. */
+function messageFromErrorBody(
+  status: number,
+  text: string,
+  body: EngineErrorBody | string | undefined
+): string {
+  if (typeof body === "object" && body) {
+    if (typeof body.message === "string" && body.message.trim()) {
+      return body.message;
+    }
+    if (typeof body.error === "string" && body.error.trim()) {
+      return body.error;
+    }
+  }
+
+  const trimmed = text.trim();
+  const looksHtml =
+    /^<!DOCTYPE\s+html/i.test(trimmed) ||
+    /^<html[\s>]/i.test(trimmed) ||
+    /<title>\s*Herd\s*-\s*Site not found/i.test(trimmed);
+
+  if (looksHtml) {
+    if (/Herd\s*-\s*Site not found/i.test(trimmed) || status === 404) {
+      return "Booking API is unreachable. Check that greyon-engine is running in Herd (https://greyon-engine.test).";
+    }
+    return `Booking API returned an unexpected response (${status}).`;
+  }
+
+  if (trimmed && trimmed.length <= 280 && !trimmed.includes("<")) {
+    return trimmed;
+  }
+
+  return `API error ${status}`;
+}
+
 export type CreateApiClientOptions = {
   /** Default true — required for greyon-engine session cookies */
   withCredentials?: boolean;
@@ -75,17 +132,37 @@ export function createApiClient(
       } catch {
         body = text;
       }
-      const message =
-        typeof body === "object" && body?.message
-          ? body.message
-          : text || `API error ${response.status}`;
-      throw new ApiError(response.status, message, body);
+      const error = new ApiError(
+        response.status,
+        messageFromErrorBody(response.status, text, body),
+        body
+      );
+      // Only treat /me 401 as session death. Resource 401s (e.g. a
+      // developer briefly hitting an admin-only path, or a soft gate)
+      // must not clear a still-valid local session — that felt like a
+      // random logout when opening Destinations / Hotels / Rooms.
+      if (response.status === 401) {
+        const soft =
+          /\/login(?:\?|$)/.test(path) ||
+          /\/notifications(?:\/|$|\?)/.test(path);
+        const sessionProbe = /\/(?:admin|developer)\/me(?:\?|$)/.test(path);
+        if (!soft && sessionProbe) notifyUnauthorized(error);
+      }
+      throw error;
     }
 
     if (response.status === 204) return undefined as T;
     const text = await response.text();
     if (!text) return undefined as T;
-    return JSON.parse(text) as T;
+    try {
+      return JSON.parse(text) as T;
+    } catch {
+      throw new ApiError(
+        response.status,
+        messageFromErrorBody(response.status, text, text),
+        text
+      );
+    }
   }
 
   function withJsonBody<T>(

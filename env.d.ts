@@ -6,6 +6,11 @@
  *
  * https://quasar.dev/quasar-cli-vite/handling-import-meta-env#type-inference
  */
+declare module "*.png" {
+  const src: string;
+  export default src;
+}
+
 interface ImportMetaEnv {
   readonly VITE_USE_API?: string;
   readonly VITE_APP_MODE?: string;

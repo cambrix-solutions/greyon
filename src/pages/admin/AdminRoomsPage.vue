@@ -14,6 +14,7 @@
           to="/admin/rates"
         />
         <q-btn
+          v-if="auth.canAction('rooms', 'create')"
           unelevated
           no-caps
           color="primary"
@@ -87,6 +88,7 @@
               :to="`/admin/hotels?locationId=${group.locationId}`"
             />
             <q-btn
+              v-if="auth.canAction('rooms', 'create')"
               outline
               dense
               no-caps
@@ -128,55 +130,66 @@
               </ul>
             </div>
 
-            <div class="room-card__inv">
-              <label>Inventory</label>
-              <q-input
-                dense
-                outlined
-                type="number"
-                class="room-card__inv-input"
-                :model-value="room.baseInventory"
-                @update:model-value="v => setInventory(room.id, Number(v))"
-              />
-            </div>
-
-            <div class="room-card__side">
-              <q-select
-                dense
-                outlined
-                :model-value="room.status"
-                :options="cms.statusOptions"
-                class="room-card__status-select"
-                @update:model-value="(v: string) => setStatus(room.id, v)"
-              />
-              <div class="room-card__actions">
-                <q-btn
-                  flat
-                  dense
-                  no-caps
-                  color="primary"
-                  label="Edit"
-                  @click="openEdit(room)"
-                />
-                <q-btn
-                  outline
-                  dense
-                  no-caps
-                  color="primary"
-                  label="Rates"
-                  :to="`/admin/rates?roomId=${room.id}`"
-                />
-                <q-btn
-                  flat
-                  dense
-                  round
-                  icon="delete"
-                  color="negative"
-                  @click="remove(room.id)"
-                >
-                  <q-tooltip>Delete</q-tooltip>
-                </q-btn>
-              </div>
+            <div class="room-card__controls">
+              <AdminEntityActions
+                stack
+                :status="room.status"
+                :status-options="cms.statusOptions"
+                :status-disable="!auth.canAction('rooms', 'update')"
+                primary-label="Rates"
+                :primary-to="`/admin/rates?roomId=${room.id}`"
+                :actions="[
+                  {
+                    key: 'edit',
+                    icon: 'edit',
+                    tip: 'Edit room',
+                    show: auth.canAction('rooms', 'update'),
+                    onClick: () => openEdit(room)
+                  },
+                  {
+                    key: 'delete',
+                    icon: 'delete',
+                    tip: 'Delete',
+                    danger: true,
+                    show: auth.canAction('rooms', 'delete'),
+                    onClick: () => remove(room.id)
+                  }
+                ]"
+                @update:status="(v: string) => setStatus(room.id, v)"
+              >
+                <template #meta>
+                  <div class="room-card__inv">
+                    <label>
+                      Sell per night
+                      <q-icon
+                        name="info_outline"
+                        size="14px"
+                        class="room-card__inv-info"
+                      >
+                        <q-tooltip max-width="220px">
+                          Default number of this room you can sell each night.
+                          Change specific dates under Prices &amp; rooms.
+                        </q-tooltip>
+                      </q-icon>
+                    </label>
+                    <q-input
+                      dense
+                      outlined
+                      type="number"
+                      class="room-card__inv-input"
+                      :model-value="room.baseInventory"
+                      :disable="!auth.canAction('rooms', 'update')"
+                      @update:model-value="
+                        v => setInventory(room.id, Number(v))
+                      "
+                    >
+                      <template #append>
+                        <span class="room-card__inv-unit">rooms</span>
+                      </template>
+                    </q-input>
+                  </div>
+                </template>
+              </AdminEntityActions>
             </div>
           </article>
         </div>
@@ -185,6 +198,7 @@
       <div v-if="!grouped.length" class="room-groups__empty">
         No rooms match.
         <q-btn
+          v-if="auth.canAction('rooms', 'create')"
           flat
           dense
           color="primary"
@@ -200,7 +214,7 @@
       icon="bed"
       eyebrow="Properties"
       :title="editing ? 'Edit room' : 'Add room'"
-      subtitle="Room types sit under a hotel and drive inventory, rates, and booking."
+      subtitle="Room types sit under a hotel and drive how many rooms you can sell, prices, and booking."
     >
       <template #notice>
         Pick the <strong>parent hotel</strong> — rooms never link straight to a
@@ -251,7 +265,8 @@
         <q-input
           v-model.number="form.baseInventory"
           type="number"
-          label="Base inventory"
+          label="Sell per night (default)"
+          hint="How many of this room type you can sell each night, unless a day is changed under Prices & rooms."
           outlined
           dense
         />
@@ -286,6 +301,11 @@
       <template #actions>
         <q-btn flat no-caps label="Cancel" v-close-popup />
         <q-btn
+          v-if="
+            editing
+              ? auth.canAction('rooms', 'update')
+              : auth.canAction('rooms', 'create')
+          "
           color="primary"
           unelevated
           no-caps
@@ -302,6 +322,7 @@ import { computed, onMounted, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 import AdminDialog from "@/components/admin/AdminDialog.vue";
+import AdminEntityActions from "@/components/admin/AdminEntityActions.vue";
 import AdminFormSection from "@/components/admin/AdminFormSection.vue";
 import AdminPageHeader from "@/components/admin/AdminPageHeader.vue";
 import GalleryEditor from "@/components/admin/GalleryEditor.vue";
@@ -619,9 +640,9 @@ watch([hotelFilter, statusFilter, query], () => {
 
 .room-card {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   gap: 0.85rem 1rem;
-  align-items: start;
+  align-items: center;
   padding: 0.85rem 0.9rem;
   border: 1px solid rgba(28, 36, 33, 0.07);
   border-radius: 14px;
@@ -744,15 +765,23 @@ watch([hotelFilter, statusFilter, query], () => {
   font-weight: 500;
 }
 
+.room-card__controls {
+  display: flex;
+  justify-content: flex-end;
+}
+
 .room-card__inv {
   display: grid;
   gap: 0.25rem;
   justify-items: stretch;
-  min-width: 5.5rem;
+  min-width: 7.5rem;
 }
 
 .room-card__inv label {
   margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
   font-size: 0.66rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -760,28 +789,34 @@ watch([hotelFilter, statusFilter, query], () => {
   font-weight: 600;
 }
 
+.room-card__inv-info {
+  letter-spacing: 0;
+  color: var(--gy-gold-deep);
+  opacity: 0.9;
+  cursor: help;
+}
+
+.room-card__inv-unit {
+  font-size: 0.72rem;
+  color: var(--gy-muted);
+  padding-right: 0.1rem;
+}
+
 .room-card__inv-input {
-  max-width: 5.5rem;
+  max-width: 7.5rem;
   background: #fff;
 }
 
-.room-card__side {
-  display: grid;
-  gap: 0.4rem;
-  justify-items: end;
-  align-content: start;
+.room-card__inv-input :deep(.q-field__control) {
+  min-height: 34px !important;
+  height: 34px;
 }
 
-.room-card__status-select {
-  min-width: 118px;
-  background: #fff;
-}
-
-.room-card__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.15rem;
-  justify-content: flex-end;
+.room-card__inv-input :deep(.q-field__native),
+.room-card__inv-input :deep(.q-field__append),
+.room-card__inv-input :deep(.q-field__marginal) {
+  min-height: 34px !important;
+  height: 34px;
 }
 
 .room-groups__empty {
@@ -798,21 +833,8 @@ watch([hotelFilter, statusFilter, query], () => {
     grid-template-columns: auto minmax(0, 1fr);
   }
 
-  .room-card__inv,
-  .room-card__side {
+  .room-card__controls {
     grid-column: 1 / -1;
-    justify-items: start;
-  }
-
-  .room-card__side {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem;
-    width: 100%;
-  }
-
-  .room-card__actions {
     justify-content: flex-start;
     width: 100%;
   }

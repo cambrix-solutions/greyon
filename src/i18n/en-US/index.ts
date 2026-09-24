@@ -7,7 +7,7 @@ export default {
     news: "News",
     hotels: "Hotels",
     portfolios: "Portfolios",
-    location: "Location",
+    location: "Destination",
     booking: "Booking",
     contact: "Contact",
     bookNow: "Book Now"
@@ -30,7 +30,7 @@ export default {
     viewHotels: "View Hotels",
     featured: "Featured hotels",
     stayWith: "Stay with Greyon",
-    exploreBy: "Explore by location",
+    exploreBy: "Explore by destination",
     destinationsCount: "0 destinations | 1 destination | {n} destinations",
     storyEyebrow: "The Greyon story",
     storyTitle: "Premium hospitality, locally rooted",

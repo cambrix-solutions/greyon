@@ -87,6 +87,7 @@ export async function createPublicEnquiry(
       name: input.name,
       email: input.email,
       phone: input.phone,
+      locationId: Number(input.locationId),
       subject: input.subject,
       message: input.message,
       consent: input.consent

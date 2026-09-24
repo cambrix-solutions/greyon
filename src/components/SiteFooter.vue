@@ -12,7 +12,7 @@
         <p class="gy-footer__title">Explore</p>
         <nav class="gy-footer__links">
           <router-link to="/hotels">Hotels</router-link>
-          <router-link to="/locations">Locations</router-link>
+          <router-link to="/locations">Destinations</router-link>
           <router-link to="/news">News</router-link>
           <router-link to="/booking">Booking</router-link>
           <router-link to="/contact">Contact</router-link>

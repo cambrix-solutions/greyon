@@ -105,6 +105,8 @@ export interface Hotel {
   description: string;
   address: string;
   coordinates: { lat: number; lng: number };
+  /** Official Google Maps embed URL (iframe src) when pasted — free, no API key. */
+  mapEmbedUrl?: string;
   phone: string;
   email: string;
   heroImage: string;
@@ -183,6 +185,8 @@ export interface NewsArticle {
 
 export interface Enquiry {
   id: string;
+  locationId?: string;
+  locationName?: string;
   name: string;
   email: string;
   phone: string;

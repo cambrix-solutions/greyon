@@ -138,12 +138,13 @@
           </ul>
         </div>
         <div>
-          <h2 class="gy-display">Location</h2>
+          <h2 class="gy-display">Destination</h2>
           <p class="gy-muted">{{ hotel.address }}</p>
           <MapEmbed
             class="q-mt-md"
             :lat="hotel.coordinates.lat"
             :lng="hotel.coordinates.lng"
+            :embed-url="hotel.mapEmbedUrl"
           />
         </div>
       </section>

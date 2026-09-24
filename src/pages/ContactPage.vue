@@ -47,12 +47,16 @@
           <input v-model="form.phone" required />
         </label>
         <label>
-          Subject
-          <select v-model="form.subject" required>
-            <option value="General">General</option>
-            <option value="Booking">Booking</option>
-            <option value="Partnership">Partnership</option>
-            <option value="Press">Press</option>
+          Destination
+          <select v-model="form.locationId" required>
+            <option disabled value="">Select a destination</option>
+            <option
+              v-for="loc in destinations"
+              :key="loc.id"
+              :value="loc.id"
+            >
+              {{ loc.name }}
+            </option>
           </select>
         </label>
         <label>
@@ -74,19 +78,23 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from "vue";
+import { computed, reactive, ref } from "vue";
 import MapEmbed from "@/components/MapEmbed.vue";
 import SeoHead from "@/components/SeoHead.vue";
 import { createEnquiry } from "@/services/bookingService";
+import { useCmsStore } from "@/stores/cms-store";
 
 /** Greyon head office — Phnom Penh */
 const office = { lat: 11.5564, lng: 104.9282 };
+
+const cms = useCmsStore();
+const destinations = computed(() => cms.publishedLocations);
 
 const form = reactive({
   name: "",
   email: "",
   phone: "",
-  subject: "General",
+  locationId: "",
   message: "",
   consent: false
 });
@@ -101,14 +109,32 @@ async function onSubmit() {
     error.value = "Consent is required.";
     return;
   }
+  if (!form.locationId) {
+    error.value = "Please select a destination.";
+    return;
+  }
+  const destination = destinations.value.find(l => l.id === form.locationId);
+  if (!destination) {
+    error.value = "Please select a valid destination.";
+    return;
+  }
   sending.value = true;
   try {
-    await createEnquiry({ ...form });
+    await createEnquiry({
+      name: form.name,
+      email: form.email,
+      phone: form.phone,
+      locationId: form.locationId,
+      subject: destination.name,
+      message: form.message,
+      consent: form.consent
+    });
     success.value =
       "Thank you. Your enquiry was received. Our team will respond by email.";
     form.name = "";
     form.email = "";
     form.phone = "";
+    form.locationId = "";
     form.message = "";
     form.consent = false;
   } catch (e) {

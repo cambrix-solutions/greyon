@@ -3,10 +3,11 @@
     <AdminPageHeader
       eyebrow="Operations"
       title="Bookings"
-      :subtitle="`${filtered.length} bookings shown`"
+      :subtitle="`${filtered.length} booking${filtered.length === 1 ? '' : 's'} shown`"
     >
       <template #actions>
         <q-btn
+          v-if="auth.canAction('bookings', 'create')"
           unelevated
           no-caps
           color="primary"
@@ -188,6 +189,7 @@
             @click="confirmBooking(detailBooking)"
           />
           <q-btn
+            v-if="auth.canAction('bookings', 'delete')"
             flat
             no-caps
             color="negative"
@@ -205,7 +207,7 @@
       icon="book_online"
       eyebrow="Operations"
       title="Create booking"
-      subtitle="Confirm stay details, check inventory, then save the reservation."
+      subtitle="Confirm stay details, check rooms available, then save the reservation."
     >
       <section class="booking-section">
         <div class="booking-section__bar">
@@ -251,7 +253,7 @@
           :hint="
             rateOptions.length
               ? undefined
-              : 'No published rate plan for this room — add one under Rates.'
+              : 'No published price plan for this room — add one under Prices & rooms.'
           "
           @update:model-value="invalidatePreview"
         />
@@ -426,6 +428,7 @@
           @click="checkAvailability"
         />
         <q-btn
+          v-if="auth.canAction('bookings', 'create')"
           unelevated
           no-caps
           color="primary"
@@ -634,7 +637,7 @@ const emailValid = computed(() =>
 const formError = computed(() => {
   if (!form.hotelId) return "Select a hotel.";
   if (!form.roomTypeId) return "Select a room type.";
-  if (!form.ratePlanId) return "Select a published rate plan.";
+  if (!form.ratePlanId) return "Select a published price plan.";
   if (dateError.value) return dateError.value;
   if (occupancyError.value) return occupancyError.value;
   return "";
@@ -652,9 +655,9 @@ const canCreate = computed(
 const availabilityHint = computed(() => {
   if (occupancyError.value) return occupancyError.value;
   if (!rateOptions.value.length) {
-    return "Publish a rate plan for this room under Rates & availability.";
+    return "Publish a price plan for this room under Prices & rooms.";
   }
-  return "Try different dates, fewer rooms, or update inventory for this room.";
+  return "Try different dates, fewer rooms, or update rooms available for this room.";
 });
 
 function hotelName(id: string) {

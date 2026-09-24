@@ -105,7 +105,7 @@
           </article>
         </div>
         <p v-else class="empty-note">
-          No bookable inventory for this search. Try different dates or
+          No rooms available for this search. Try different dates or
           occupancy.
         </p>
       </section>

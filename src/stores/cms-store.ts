@@ -1,5 +1,6 @@
 import { defineStore, acceptHMRUpdate } from "pinia";
 import { computed, ref } from "vue";
+import { ApiError } from "@/helpers/api/createApiClient";
 import {
   createHotel,
   createLocation,
@@ -328,8 +329,14 @@ export const useCmsStore = defineStore("cms", () => {
       return;
     }
     const job = (async () => {
-      await loader();
-      markLoaded(key);
+      try {
+        await loader();
+        markLoaded(key);
+      } catch (e) {
+        // Global 401 handler redirects; don't leave void ensure* callers uncaught.
+        if (e instanceof ApiError && e.status === 401) return;
+        throw e;
+      }
     })().finally(() => {
       loadInflight.delete(key);
     });
@@ -570,6 +577,7 @@ export const useCmsStore = defineStore("cms", () => {
     description?: string;
     address?: string;
     coordinates?: { lat: number; lng: number };
+    mapEmbedUrl?: string | null;
     phone?: string;
     email?: string;
     heroImage?: string;
@@ -591,6 +599,7 @@ export const useCmsStore = defineStore("cms", () => {
       description: input.description,
       address: input.address,
       coordinates: input.coordinates,
+      mapEmbedUrl: input.mapEmbedUrl,
       phone: input.phone,
       email: input.email,
       heroImage: input.heroImage,

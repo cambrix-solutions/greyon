@@ -215,7 +215,7 @@
 
         <template v-if="propertyNav.length">
           <p class="admin-drawer__label">Properties</p>
-          <p class="admin-drawer__hint">Location → Hotel → Rooms</p>
+          <p class="admin-drawer__hint">Destination → Hotel → Rooms</p>
           <q-list padding class="admin-nav">
             <q-item
               v-for="item in propertyNav"
@@ -333,8 +333,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from "vue";
-import { useRouter } from "vue-router";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import type { StaffNotification } from "@/services/engine/notifications";
 import { roleLabels, useAuthStore } from "@/stores/auth-store";
 import { useCmsStore } from "@/stores/cms-store";
@@ -344,15 +344,41 @@ const auth = useAuthStore();
 const cms = useCmsStore();
 const notifications = useNotificationStore();
 const router = useRouter();
+const route = useRoute();
 const leftOpen = ref(true);
 
+function onWindowFocus() {
+  if (document.visibilityState !== "visible") return;
+  if (!auth.isAuthenticated) return;
+  void auth.refreshEngineSession();
+}
+
 onMounted(() => {
-  notifications.startPolling();
+  document.addEventListener("visibilitychange", onWindowFocus);
+  if (auth.isAuthenticated) void auth.refreshEngineSession();
 });
 
 onUnmounted(() => {
   notifications.stopPolling();
+  document.removeEventListener("visibilitychange", onWindowFocus);
 });
+
+watch(
+  () => auth.isAuthenticated,
+  authed => {
+    if (authed) notifications.startPolling();
+    else notifications.clear();
+  },
+  { immediate: true }
+);
+
+/** Re-pull seat permissions when moving between admin pages. */
+watch(
+  () => route.fullPath,
+  () => {
+    if (auth.isAuthenticated) void auth.refreshEngineSession();
+  }
+);
 
 const pendingBookings = computed(
   () => auth.scopedBookings.filter(b => b.status === "pending").length
@@ -374,6 +400,9 @@ const initials = computed(() =>
 );
 
 const roleLabel = computed(() => {
+  const pkgs = auth.userPackages;
+  if (pkgs.length === 1) return pkgs[0]!.name;
+  if (pkgs.length > 1) return pkgs.map(p => p.name).join(" · ");
   const list = auth.roles;
   if (!list.length) return "Admin";
   return list.map(r => roleLabels[r] ?? r.replaceAll("_", " ")).join(" · ");
@@ -381,9 +410,8 @@ const roleLabel = computed(() => {
 
 const packageSummary = computed(() => {
   const pkgs = auth.userPackages;
-  if (!pkgs.length) return "";
-  if (pkgs.length === 1) return pkgs[0]!.name;
-  return `${pkgs[0]!.name} +${pkgs.length - 1}`;
+  if (pkgs.length <= 1) return "";
+  return `${pkgs.length} seats`;
 });
 
 const headerAlerts = computed(() => {
@@ -426,7 +454,7 @@ const nav = computed<NavItem[]>(() => [
     group: "primary"
   },
   {
-    label: "Locations",
+    label: "Destinations",
     to: "/admin/locations",
     icon: "place",
     perm: "locations",
@@ -474,7 +502,7 @@ const nav = computed<NavItem[]>(() => [
     group: "publishing"
   },
   {
-    label: "Rates & Availability",
+    label: "Prices & rooms",
     to: "/admin/rates",
     icon: "event_available",
     perm: "rates",
@@ -571,6 +599,10 @@ async function onOpenNotification(item: StaffNotification) {
     if (!item.readAt) await notifications.markRead(item.id);
   } catch {
     /* ignore */
+  }
+  if (String(item.type || "").startsWith("enquiry.")) {
+    void router.push("/admin/enquiries?status=new");
+    return;
   }
   const ref =
     typeof item.data?.reference === "string" ? item.data.reference : null;

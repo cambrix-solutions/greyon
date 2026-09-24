@@ -9,15 +9,15 @@
         <p class="gy-eyebrow">Portfolio</p>
         <h1 class="gy-display page-title">Hotels</h1>
         <p class="gy-muted intro">
-          MVP portfolio includes hotels only. Filter by location or keyword.
+          MVP portfolio includes hotels only. Filter by destination or keyword.
         </p>
       </div>
 
       <div v-reveal="{ delay: '80ms' }" class="filters">
         <label>
-          Location
+          Destination
           <select v-model="locationFilter">
-            <option value="">All locations</option>
+            <option value="">All destinations</option>
             <option
               v-for="loc in cms.publishedLocations"
               :key="loc.id"

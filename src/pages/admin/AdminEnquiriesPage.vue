@@ -40,7 +40,7 @@
           <tr>
             <th class="text-left">When</th>
             <th class="text-left">Name</th>
-            <th class="text-left">Subject</th>
+            <th class="text-left">Destination</th>
             <th class="text-left">Contact</th>
             <th class="text-left">Status</th>
             <th class="text-left">Notes</th>
@@ -52,7 +52,7 @@
             <td>{{ formatDateTime(item.createdAt) }}</td>
             <td>{{ item.name }}</td>
             <td>
-              <div>{{ item.subject }}</div>
+              <div>{{ item.locationName || item.subject }}</div>
               <div class="text-caption text-grey-7">{{ item.message }}</div>
             </td>
             <td>
@@ -103,6 +103,7 @@
                 @click="setStatus(item.id, 'closed')"
               />
               <q-btn
+                v-if="auth.canAction('enquiries', 'delete')"
                 flat
                 dense
                 color="negative"
@@ -179,7 +180,7 @@ const filtered = computed(() => {
       return false;
     }
     if (!q) return true;
-    return `${item.name} ${item.subject} ${item.email} ${item.message} ${item.phone}`
+    return `${item.name} ${item.subject} ${item.locationName ?? ""} ${item.email} ${item.message} ${item.phone}`
       .toLowerCase()
       .includes(q);
   });

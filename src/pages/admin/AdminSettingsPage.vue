@@ -7,6 +7,7 @@
     >
       <template #actions>
         <q-btn
+          v-if="auth.canAction('settings', 'update')"
           unelevated
           no-caps
           color="primary"
@@ -106,9 +107,11 @@
 import { onMounted, reactive } from "vue";
 import { useQuasar } from "quasar";
 import AdminPageHeader from "@/components/admin/AdminPageHeader.vue";
+import { useAuthStore } from "@/stores/auth-store";
 import { useCmsStore, type SiteSettings } from "@/stores/cms-store";
 
 const cms = useCmsStore();
+const auth = useAuthStore();
 const $q = useQuasar();
 
 function cloneSettings(s: SiteSettings): SiteSettings {

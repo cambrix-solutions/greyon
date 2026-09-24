@@ -2,16 +2,17 @@
   <q-page padding>
     <AdminPageHeader
       eyebrow="Operations"
-      title="Rates & availability"
-      :subtitle="`${filteredPlans.length} of ${cms.ratePlans.length} rate plans`"
+      title="Prices & rooms"
+      :subtitle="`${filteredPlans.length} of ${cms.ratePlans.length} price plans`"
     >
       <template #actions>
         <q-btn
+          v-if="auth.canAction('rates', 'create')"
           unelevated
           no-caps
           color="primary"
           icon="add"
-          label="Add rate plan"
+          label="Add price plan"
           @click="openCreate"
         />
       </template>
@@ -57,11 +58,11 @@
     </AdminPageHeader>
 
     <q-banner v-reveal="{ delay: '100ms' }" class="bg-grey-2 q-mb-md" rounded>
-      Base rate plans below. Hotel check-in / check-out
+      Set the default price for each room below. Hotel check-in / check-out
       <strong>times</strong> come from each hotel (edit under Hotels).
       <template v-if="auth.isDeveloper">
-        Inventory is per night — use List or Calendar below to set units,
-        stop-sell, and prices.
+        How many rooms you can sell each night is set in List or Calendar —
+        open rooms, close a night, and change prices there.
       </template>
     </q-banner>
 
@@ -69,9 +70,9 @@
       <q-markup-table flat bordered class="bg-white">
         <thead>
           <tr>
-            <th class="text-left">Rate plan</th>
+            <th class="text-left">Price plan</th>
             <th class="text-left">Room type</th>
-            <th class="text-right">Base price</th>
+            <th class="text-right">Default price</th>
             <th class="text-left">Tax / fee</th>
             <th class="text-left">Status</th>
             <th class="text-left">Actions</th>
@@ -86,6 +87,7 @@
             <td>{{ plan.status }}</td>
             <td>
               <q-btn
+                v-if="auth.canAction('rates', 'update')"
                 flat
                 dense
                 color="primary"
@@ -97,10 +99,11 @@
                 flat
                 dense
                 color="primary"
-                label="Inventory"
+                label="Daily rooms"
                 @click="jumpToInventory(plan.roomTypeId)"
               />
               <q-btn
+                v-if="auth.canAction('rates', 'delete')"
                 flat
                 dense
                 color="negative"
@@ -111,12 +114,13 @@
           </tr>
           <tr v-if="!filteredPlans.length">
             <td colspan="6" class="text-grey">
-              No rate plans match.
+              No price plans match.
               <q-btn
+                v-if="auth.canAction('rates', 'create')"
                 flat
                 dense
                 color="primary"
-                label="Add rate plan"
+                label="Add price plan"
                 @click="openCreate"
               />
             </td>
@@ -146,7 +150,7 @@
         id="inventory-section"
         class="row items-center justify-between q-mb-md q-mt-lg"
       >
-        <h2 class="text-h6 q-ma-none">Inventory & rates</h2>
+        <h2 class="text-h6 q-ma-none">Daily rooms & prices</h2>
         <q-btn-toggle
           v-model="inventoryView"
           toggle-color="primary"
@@ -175,7 +179,7 @@
           <q-select
             v-model="selectedPlanId"
             :options="planOptionsForRoom"
-            label="Rate plan (for prices)"
+            label="Price plan (for night prices)"
             outlined
             dense
             emit-value
@@ -210,10 +214,10 @@
           <thead>
             <tr>
               <th class="text-left">Date</th>
-              <th class="text-left">Units</th>
-              <th class="text-left">Stop-sell</th>
+              <th class="text-left">Rooms open</th>
+              <th class="text-left">Closed</th>
               <th class="text-left">Booked</th>
-              <th class="text-left">Free</th>
+              <th class="text-left">Still open</th>
               <th class="text-left">Night price</th>
               <th class="text-left">Min / max stay</th>
               <th class="text-left">Actions</th>
@@ -283,7 +287,7 @@
                   flat
                   dense
                   color="grey-8"
-                  label="Clear day"
+                  label="Reset day"
                   @click="clearDay(day)"
                 />
               </td>
@@ -328,8 +332,8 @@
               <span class="cal__meta">
                 {{
                   stopSellValue(cell.date)
-                    ? "Stop"
-                    : `${freeUnits(cell.date)} free`
+                    ? "Closed"
+                    : `${freeUnits(cell.date)} open`
                 }}
               </span>
               <span v-if="selectedPlanId" class="cal__price">
@@ -340,7 +344,8 @@
         </div>
 
         <p class="text-caption text-grey-7 q-mt-sm">
-          Click a day to edit units, stop-sell, price, and stay rules.
+          Click a day to change rooms open, close the night, price, and stay
+          rules.
         </p>
       </div>
     </template>
@@ -350,8 +355,8 @@
       size="xl"
       icon="sell"
       eyebrow="Operations"
-      :title="editing ? 'Edit rate plan' : 'Add rate plan'"
-      subtitle="Base pricing and policies for one room type."
+      :title="editing ? 'Edit price plan' : 'Add price plan'"
+      subtitle="Default price and policies for one room type."
     >
       <AdminFormSection title="Plan" :columns="2">
         <q-select
@@ -387,7 +392,7 @@
         <q-input
           v-model.number="form.basePrice"
           type="number"
-          label="Base price"
+          label="Default price"
           outlined
           dense
           prefix="$"
@@ -427,6 +432,11 @@
       <template #actions>
         <q-btn flat no-caps label="Cancel" v-close-popup />
         <q-btn
+          v-if="
+            editing
+              ? auth.canAction('rates', 'update')
+              : auth.canAction('rates', 'create')
+          "
           color="primary"
           unelevated
           no-caps
@@ -442,32 +452,33 @@
         size="md"
         icon="event"
         :persistent="false"
-        eyebrow="Inventory"
+        eyebrow="Daily rooms"
         :title="editingDay ? `Edit ${formatDate(editingDay)}` : 'Edit day'"
         :subtitle="dayDialogSubtitle"
       >
         <template v-if="editingDay">
           <AdminFormSection
-            title="Availability"
-            hint="Units available for this night after stop-sell and bookings."
+            title="Rooms for this night"
+            hint="How many rooms can still be sold after closing the night and existing bookings."
             :columns="2"
           >
             <q-input
               v-model.number="dayForm.units"
               type="number"
-              label="Available units"
+              label="Open to sell tonight"
+              hint="Overrides the room’s default “sell per night” for this date only."
               outlined
               dense
             />
             <div class="day-toggle">
               <q-toggle
                 v-model="dayForm.stopSell"
-                label="Stop-sell this night"
+                label="Close this night (do not sell)"
               />
             </div>
             <p class="day-preview admin-form-span-2">
-              Booked: {{ cms.bookedOnNight(selectedRoomId, editingDay) }} · Free
-              preview:
+              Already booked:
+              {{ cms.bookedOnNight(selectedRoomId, editingDay) }} · Still open:
               {{
                 dayForm.stopSell
                   ? 0
@@ -488,7 +499,7 @@
               dense
               prefix="$"
               :disable="!selectedPlanId"
-              :hint="selectedPlanId ? undefined : 'Select a rate plan first'"
+              :hint="selectedPlanId ? undefined : 'Select a price plan first'"
             />
             <q-input
               v-model.number="dayForm.minStay"
@@ -515,7 +526,7 @@
             flat
             no-caps
             color="grey-8"
-            label="Clear day"
+            label="Reset day"
             @click="clearEditingDay"
           />
           <q-space />
@@ -1008,7 +1019,7 @@ function save() {
 
 function remove(id: string) {
   $q.dialog({
-    title: "Delete rate plan?",
+    title: "Delete price plan?",
     cancel: true,
     persistent: true
   }).onOk(() => {

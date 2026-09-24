@@ -2,7 +2,7 @@
   <q-page padding>
     <AdminPageHeader
       eyebrow="Properties"
-      title="Locations"
+      title="Destinations"
       :subtitle="`${filtered.length} destinations · hotels nest under each · rooms under hotels`"
     >
       <template #actions>
@@ -15,11 +15,12 @@
           target="_blank"
         />
         <q-btn
+          v-if="auth.canAction('locations', 'create')"
           unelevated
           no-caps
           color="primary"
           icon="add"
-          label="Add location"
+          label="Add destination"
           @click="openCreate"
         />
       </template>
@@ -29,7 +30,7 @@
           dense
           outlined
           clearable
-          placeholder="Search locations…"
+          placeholder="Search destinations…"
           style="min-width: min(100%, 240px); background: #fff"
         >
           <template #prepend><q-icon name="search" /></template>
@@ -48,11 +49,11 @@
     </AdminPageHeader>
 
     <div v-reveal class="tree-legend">
-      <span><strong>1 · Location</strong> destination</span>
+      <span><strong>1 · Destination</strong> city / region</span>
       <span class="tree-legend__arrow">→</span>
       <span><strong>2 · Hotel</strong> property</span>
       <span class="tree-legend__arrow">→</span>
-      <span><strong>3 · Rooms</strong> inventory</span>
+      <span><strong>3 · Rooms</strong> how many you can sell</span>
     </div>
 
     <div v-reveal="{ delay: '80ms' }" class="loc-hub">
@@ -69,12 +70,19 @@
 
           <div class="loc-card__intro">
             <div class="loc-card__topline">
-              <p class="loc-card__level">Location</p>
+              <p class="loc-card__level">Destination</p>
               <span class="loc-card__status" :data-status="loc.status">{{
                 loc.status
               }}</span>
             </div>
-            <h2 class="loc-card__title">{{ loc.name }}</h2>
+            <h2 class="loc-card__title">
+              <router-link
+                v-if="auth.canDestinationDetail()"
+                :to="`/admin/locations/${loc.id}`"
+                >{{ loc.name }}</router-link
+              >
+              <template v-else>{{ loc.name }}</template>
+            </h2>
             <p class="loc-card__slug">/{{ loc.slug }}</p>
             <ul v-if="loc.highlights.length" class="loc-card__chips">
               <li v-for="h in loc.highlights.slice(0, 4)" :key="h">{{ h }}</li>
@@ -82,46 +90,39 @@
           </div>
 
           <div class="loc-card__side">
-            <q-select
-              dense
-              outlined
-              :model-value="loc.status"
-              :options="cms.statusOptions"
-              class="loc-card__status-select"
-              @update:model-value="(v: string) => setStatus(loc.id, v)"
+            <AdminEntityActions
+              :status="loc.status"
+              :status-options="cms.statusOptions"
+              :status-disable="!auth.can('locations_publish')"
+              :primary-label="auth.canDestinationDetail() ? 'Manage' : undefined"
+              :primary-show="auth.canDestinationDetail()"
+              :primary-to="`/admin/locations/${loc.id}`"
+              :actions="[
+                {
+                  key: 'edit',
+                  icon: 'edit',
+                  tip: 'Edit destination',
+                  show: auth.canAction('locations', 'update'),
+                  onClick: () => openEdit(loc)
+                },
+                {
+                  key: 'live',
+                  icon: 'open_in_new',
+                  tip: 'View live',
+                  to: `/locations/${loc.slug}`,
+                  target: '_blank'
+                },
+                {
+                  key: 'delete',
+                  icon: 'delete',
+                  tip: 'Delete',
+                  danger: true,
+                  show: auth.canAction('locations', 'delete'),
+                  onClick: () => remove(loc.id)
+                }
+              ]"
+              @update:status="(v: string) => setStatus(loc.id, v)"
             />
-            <div class="loc-card__actions">
-              <q-btn
-                flat
-                dense
-                round
-                icon="edit"
-                color="primary"
-                @click="openEdit(loc)"
-              >
-                <q-tooltip>Edit location</q-tooltip>
-              </q-btn>
-              <q-btn
-                flat
-                dense
-                round
-                icon="open_in_new"
-                :to="`/locations/${loc.slug}`"
-                target="_blank"
-              >
-                <q-tooltip>View live</q-tooltip>
-              </q-btn>
-              <q-btn
-                flat
-                dense
-                round
-                icon="delete"
-                color="negative"
-                @click="remove(loc.id)"
-              >
-                <q-tooltip>Delete</q-tooltip>
-              </q-btn>
-            </div>
           </div>
         </header>
 
@@ -133,13 +134,16 @@
               <small> / {{ hotelCap }} max</small>
             </h3>
             <q-btn
+              v-if="
+                auth.canAction('hotels', 'create') && auth.canDestinationDetail()
+              "
               flat
               dense
               no-caps
               color="primary"
               icon="add"
               label="Add hotel"
-              :to="`/admin/hotels?locationId=${loc.id}&create=1`"
+              :to="`/admin/locations/${loc.id}`"
             />
           </div>
 
@@ -156,11 +160,13 @@
               <div class="hotel-row__main">
                 <p class="hotel-row__level">Hotel</p>
                 <router-link
+                  v-if="auth.canDestinationDetail()"
                   class="hotel-row__name"
-                  :to="`/admin/hotels?locationId=${loc.id}`"
+                  :to="`/admin/locations/${loc.id}`"
                 >
                   {{ hotel.name }}
                 </router-link>
+                <span v-else class="hotel-row__name">{{ hotel.name }}</span>
                 <p class="hotel-row__meta">
                   <span
                     >{{ roomCount(hotel.id) }} room type{{
@@ -176,27 +182,29 @@
                 </p>
               </div>
               <div class="hotel-row__actions">
-                <q-btn
-                  outline
+                <AdminEntityActions
                   dense
-                  no-caps
-                  color="primary"
-                  label="Rooms"
-                  :to="`/admin/rooms?hotelId=${hotel.id}`"
-                />
-                <q-btn
-                  flat
-                  dense
-                  no-caps
-                  color="primary"
-                  label="Open"
-                  :to="`/admin/hotels?locationId=${loc.id}`"
+                  hide-status
+                  :primary-label="
+                    auth.canDestinationDetail() ? 'Manage' : undefined
+                  "
+                  :primary-show="auth.canDestinationDetail()"
+                  :primary-to="`/admin/locations/${loc.id}`"
+                  primary-outline
                 />
               </div>
             </div>
           </div>
           <p v-else class="loc-card__empty">
-            No hotels yet — add one and it will nest under this destination.
+            No hotels yet
+            <template v-if="auth.canDestinationDetail()">
+              —
+              <router-link :to="`/admin/locations/${loc.id}`"
+                >open destination</router-link
+              >
+              to add hotels and rooms.
+            </template>
+            <template v-else>.</template>
           </p>
         </div>
       </article>
@@ -204,6 +212,7 @@
       <div v-if="!filtered.length" class="loc-hub__empty">
         No locations match.
         <q-btn
+          v-if="auth.canAction('locations', 'create')"
           flat
           dense
           color="primary"
@@ -226,20 +235,30 @@
         “own” rooms directly.
       </template>
       <AdminFormSection title="Essentials" :columns="2">
-        <q-input v-model="form.name" label="Location name" outlined dense />
+        <q-input
+          v-model="form.name"
+          label="Destination name"
+          outlined
+          dense
+          :disable="editing ? !auth.canAction('locations', 'update') : false"
+        />
         <q-select
           v-model="form.status"
           :options="cms.statusOptions"
           label="Status"
           outlined
           dense
+          :disable="!auth.can('locations_publish')"
+          hint="Requires Locations: Publish permission"
         />
-        <q-input
+      </AdminFormSection>
+      <AdminFormSection
+        title="Hero image"
+        hint="Drop, browse, or paste a URL."
+      >
+        <ImageDropField
           v-model="form.heroImage"
-          label="Hero image URL"
-          outlined
-          dense
-          class="admin-form-span-2"
+          title="Drop or browse hero image"
         />
       </AdminFormSection>
       <AdminFormSection
@@ -271,6 +290,11 @@
       <template #actions>
         <q-btn flat no-caps label="Cancel" v-close-popup />
         <q-btn
+          v-if="
+            editing
+              ? auth.canAction('locations', 'update')
+              : auth.canAction('locations', 'create')
+          "
           color="primary"
           unelevated
           no-caps
@@ -286,8 +310,10 @@
 import { computed, onMounted, reactive, ref } from "vue";
 import { useQuasar } from "quasar";
 import AdminDialog from "@/components/admin/AdminDialog.vue";
+import AdminEntityActions from "@/components/admin/AdminEntityActions.vue";
 import AdminFormSection from "@/components/admin/AdminFormSection.vue";
 import AdminPageHeader from "@/components/admin/AdminPageHeader.vue";
+import ImageDropField from "@/components/admin/ImageDropField.vue";
 import { useAuthStore } from "@/stores/auth-store";
 import { useCmsStore } from "@/stores/cms-store";
 import type { ContentStatus, Location } from "@/types/greyon";
@@ -298,6 +324,7 @@ const $q = useQuasar();
 
 onMounted(() => {
   void Promise.all([
+    auth.refreshEngineSession(),
     cms.ensureLocations(),
     cms.ensureHotels(),
     cms.ensureRoomTypes()
@@ -558,6 +585,15 @@ function remove(id: string) {
   overflow-wrap: anywhere;
 }
 
+.loc-card__title a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.loc-card__title a:hover {
+  color: var(--gy-gold-deep);
+}
+
 .loc-card__slug {
   margin: 0.3rem 0 0;
   font-size: 0.8rem;
@@ -584,20 +620,9 @@ function remove(id: string) {
 }
 
 .loc-card__side {
-  display: grid;
-  gap: 0.4rem;
-  justify-items: end;
-  align-content: start;
-}
-
-.loc-card__status-select {
-  min-width: 118px;
-  background: #fff;
-}
-
-.loc-card__actions {
   display: flex;
-  gap: 0.05rem;
+  justify-content: flex-end;
+  align-content: start;
 }
 
 .loc-card__hotels {
@@ -626,8 +651,9 @@ function remove(id: string) {
 }
 
 .loc-card__hotels-bar h3 span {
-  display: inline-grid;
-  place-items: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-width: 1.4rem;
   height: 1.4rem;
   padding: 0 0.35rem;
@@ -636,6 +662,7 @@ function remove(id: string) {
   color: var(--gy-gold-deep);
   font-size: 0.74rem;
   font-weight: 700;
+  line-height: 1;
   letter-spacing: 0;
   text-transform: none;
 }

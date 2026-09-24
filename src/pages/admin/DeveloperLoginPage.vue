@@ -7,9 +7,12 @@
         <div class="admin-login__glow" aria-hidden="true" />
 
         <form v-reveal class="login-card" @submit.prevent="onSubmit">
-          <p class="gy-eyebrow">Greyon CMS</p>
-          <h1 class="gy-display">Admin login</h1>
-          <p class="gy-muted">Sign in with your Greyon admin account.</p>
+          <p class="gy-eyebrow">Greyon platform</p>
+          <h1 class="gy-display">Developer login</h1>
+          <p class="gy-muted">
+            Platform developer access — opens the same CMS dashboard with full
+            seat &amp; catalog controls.
+          </p>
 
           <label>
             Email
@@ -18,7 +21,7 @@
               type="email"
               required
               autocomplete="username"
-              placeholder="you@greyon.com.kh"
+              placeholder="dev@greyon.com.kh"
             />
           </label>
           <label>
@@ -35,7 +38,11 @@
           <button class="gy-btn" type="submit" :disabled="submitting">
             {{ submitting ? "Signing in…" : "Sign in" }}
           </button>
-          <router-link to="/" class="back">← Back to site</router-link>
+          <p class="login-links">
+            <router-link to="/admin/login">Admin login</router-link>
+            <span aria-hidden="true">·</span>
+            <router-link to="/">Back to site</router-link>
+          </p>
         </form>
       </q-page>
     </q-page-container>
@@ -59,7 +66,7 @@ async function onSubmit() {
   submitting.value = true;
   error.value = "";
   try {
-    const result = await auth.loginAdmin(email.value, password.value);
+    const result = await auth.loginDeveloper(email.value, password.value);
     if (!result.ok) {
       error.value = result.message;
       return;
@@ -215,30 +222,22 @@ async function onSubmit() {
   margin: 0 0 0.5rem;
 }
 
-.back {
-  display: inline-block;
-  margin-top: 1rem;
+.login-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  margin: 1rem 0 0;
   font-size: 0.85rem;
   color: var(--gy-muted);
-  text-decoration: none;
 }
 
-.back:hover {
-  color: var(--gy-gold-deep);
-}
-
-.dev-hint {
-  margin: 0.75rem 0 0;
-  font-size: 0.78rem;
-  text-align: center;
-}
-
-.dev-hint a {
+.login-links a {
   color: var(--gy-muted);
   text-decoration: none;
 }
 
-.dev-hint a:hover {
+.login-links a:hover {
   color: var(--gy-gold-deep);
 }
 

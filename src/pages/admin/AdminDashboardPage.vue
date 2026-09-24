@@ -15,7 +15,7 @@
           @click="resetData"
         />
         <q-btn
-          v-if="auth.can('bookings')"
+          v-if="auth.canAction('bookings', 'create')"
           unelevated
           no-caps
           class="dash-btn-primary"
@@ -242,7 +242,7 @@
           <div v-for="e in visibleEnquiries" :key="e.id" class="dash-row">
             <div class="dash-row__main">
               <div class="dash-row__title">{{ e.name }}</div>
-              <div class="dash-row__sub">{{ e.subject }}</div>
+              <div class="dash-row__sub">{{ e.locationName || e.subject }}</div>
               <div class="dash-row__meta">
                 {{ e.email }} · {{ formatDateTime(e.createdAt) }}
               </div>
@@ -441,7 +441,7 @@ const quickActions = computed(() =>
       perm: "hotels"
     },
     {
-      label: "Inventory calendar",
+      label: "Prices & rooms",
       to: "/admin/rates",
       icon: "calendar_month",
       perm: "rates"
@@ -470,7 +470,11 @@ const quickActions = computed(() =>
       icon: "tune",
       perm: "settings"
     }
-  ].filter(a => auth.can(a.perm))
+  ].filter(a =>
+    a.label === "Create booking"
+      ? auth.canAction("bookings", "create")
+      : auth.can(a.perm)
+  )
 );
 
 const q = computed(() => search.value.trim().toLowerCase());
@@ -488,11 +492,12 @@ function matchesBooking(b: Booking) {
 function matchesEnquiry(e: {
   name: string;
   subject: string;
+  locationName?: string;
   email: string;
   message: string;
 }) {
   if (!q.value) return true;
-  return `${e.name} ${e.subject} ${e.email} ${e.message}`
+  return `${e.name} ${e.subject} ${e.locationName ?? ""} ${e.email} ${e.message}`
     .toLowerCase()
     .includes(q.value);
 }

@@ -103,6 +103,7 @@ export interface EngineHotel {
   description?: string | null;
   address?: string | null;
   coordinates?: { lat: number | null; lng: number | null };
+  mapEmbedUrl?: string | null;
   phone?: string | null;
   email?: string | null;
   heroImage?: string | null;
@@ -227,6 +228,7 @@ export function mapEngineHotel(row: EngineHotel): Hotel {
       lat: row.coordinates?.lat ?? 0,
       lng: row.coordinates?.lng ?? 0
     },
+    ...(row.mapEmbedUrl ? { mapEmbedUrl: row.mapEmbedUrl } : {}),
     phone: row.phone ?? "",
     email: row.email ?? "",
     heroImage: row.heroImage ?? "",
@@ -359,6 +361,8 @@ export interface EngineBooking {
 
 export interface EngineEnquiry {
   id: number | string;
+  locationId?: number | string | null;
+  location?: { id: number | string; name: string; slug?: string } | null;
   name: string;
   email: string;
   phone?: string | null;
@@ -545,6 +549,10 @@ export function mapEngineBooking(row: EngineBooking): Booking {
 export function mapEngineEnquiry(row: EngineEnquiry): Enquiry {
   return {
     id: String(row.id),
+    ...(row.locationId != null
+      ? { locationId: String(row.locationId) }
+      : {}),
+    ...(row.location?.name ? { locationName: row.location.name } : {}),
     name: row.name,
     email: row.email,
     phone: row.phone ?? "",

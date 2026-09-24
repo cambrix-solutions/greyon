@@ -94,7 +94,7 @@
             </h2>
           </div>
           <router-link to="/locations" class="gy-link-arrow">
-            All locations
+            All destinations
             <span aria-hidden="true">→</span>
           </router-link>
         </header>

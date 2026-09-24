@@ -424,13 +424,14 @@ import { useQuasar } from "quasar";
 import AdminPageHeader from "@/components/admin/AdminPageHeader.vue";
 import AccessHubBanner from "@/components/admin/AccessHubBanner.vue";
 import { PACKAGE_CLIENT_ROLES } from "@/constants/roles";
-import { roleLabels } from "@/stores/auth-store";
+import { roleLabels, useAuthStore } from "@/stores/auth-store";
 import { useCmsStore } from "@/stores/cms-store";
 import type { AdminRole, ProductFeature, ProductPackage } from "@/types/greyon";
 
 type FeatNode = { parent: ProductFeature; children: ProductFeature[] };
 
 const cms = useCmsStore();
+const auth = useAuthStore();
 const $q = useQuasar();
 const selectedId = ref(cms.activePackageId);
 const isNew = ref(false);
@@ -753,6 +754,9 @@ async function save() {
     isNew.value = false;
     selectedId.value = saved.id;
     loadForm(saved);
+    // Refresh this session so toggles apply immediately for the developer
+    // (assignees pick up changes on next /me refresh or page focus).
+    void auth.refreshEngineSession();
     $q.notify({ type: "positive", message: `Saved “${saved.name}”.` });
   } catch (e) {
     $q.notify({

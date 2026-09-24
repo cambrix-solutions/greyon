@@ -83,6 +83,7 @@ export type HotelInput = {
   description?: string;
   address?: string;
   coordinates?: { lat: number; lng: number };
+  mapEmbedUrl?: string | null;
   phone?: string;
   email?: string;
   heroImage?: string;
