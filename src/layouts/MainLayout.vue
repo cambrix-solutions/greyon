@@ -11,7 +11,19 @@
       :class="{ 'gy-header--solid': solidHeader }"
     >
       <div class="gy-container gy-header__bar">
-        <router-link to="/" class="gy-logo gy-display">Greyon</router-link>
+        <router-link to="/" class="gy-logo" aria-label="Greyon home">
+          <img
+            class="gy-logo__img"
+            :src="
+              solidHeader
+                ? '/logo/Logo V1-04-04.png'
+                : '/logo/Logo white V1-05.png'
+            "
+            alt="Greyon"
+            width="140"
+            height="48"
+          />
+        </router-link>
 
         <nav class="gy-nav gt-sm">
           <router-link to="/" class="gy-nav__link">{{
@@ -321,7 +333,6 @@ onUnmounted(() => {
   box-shadow: none !important;
 }
 
-.gy-header--solid .gy-logo,
 .gy-header--solid .gy-nav__link,
 .gy-header--solid .gy-menu-btn {
   color: var(--gy-ink);
@@ -336,14 +347,21 @@ onUnmounted(() => {
 }
 
 .gy-logo {
-  font-size: 1.85rem;
-  letter-spacing: -0.02em;
+  display: inline-flex;
+  align-items: center;
   color: inherit;
   transition: opacity 0.25s ease;
 }
 
 .gy-logo:hover {
-  opacity: 0.8;
+  opacity: 0.85;
+}
+
+.gy-logo__img {
+  display: block;
+  height: 2.55rem;
+  width: auto;
+  object-fit: contain;
 }
 
 .gy-nav {
@@ -475,7 +493,7 @@ onUnmounted(() => {
 
 .gy-header--solid .gy-account-btn:hover {
   border-color: var(--gy-gold-deep);
-  background: rgba(196, 163, 90, 0.1);
+  background: rgba(111, 128, 103, 0.1);
 }
 
 .gy-account-btn__avatar {

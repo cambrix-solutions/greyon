@@ -147,14 +147,14 @@ export default defineConfig(ctx => {
     framework: {
       config: {
         brand: {
-          primary: "#9a7b3c",
+          primary: "#8f7340",
           secondary: "#c4a35a",
           accent: "#c4a35a",
-          dark: "#1a1814",
-          positive: "#9a7b3c",
+          dark: "#1c1814",
+          positive: "#5f7a55",
           negative: "#8b2e2e",
-          info: "#8a8174",
-          warning: "#c4a35a"
+          info: "#7a736a",
+          warning: "#a89278"
         }
       },
 

@@ -250,7 +250,7 @@ async function onSubmit() {
   gap: 1rem;
   flex-wrap: wrap;
   padding-top: 0.15rem;
-  border-top: 1px solid var(--gy-stone);
+  border-top: 1px solid rgba(84, 88, 89, 0.14);
 }
 
 .gy-search__hint {
@@ -267,9 +267,9 @@ async function onSubmit() {
 .gy-search__error {
   margin: 0;
   padding: 0.55rem 0.7rem;
-  background: #fff4e8;
-  border: 1px solid rgba(176, 141, 87, 0.45);
-  color: #6b4a1e;
+  background: var(--gy-sand);
+  border: 1px solid rgba(84, 88, 89, 0.35);
+  color: var(--gy-ink);
   font-size: 0.86rem;
 }
 
@@ -310,17 +310,17 @@ label {
 }
 
 label.is-invalid input {
-  border-color: #b45309;
-  background: #fffaf3;
+  border-color: #8b2e2e;
+  background: #faf6f4;
 }
 
 input,
 select {
   width: 100%;
   min-height: 2.75rem;
-  border: 1px solid var(--gy-stone);
+  border: 1px solid rgba(84, 88, 89, 0.22);
   border-radius: 6px;
-  background: var(--gy-cream);
+  background: var(--gy-sand);
   padding: 0.5rem 0.7rem;
   font: inherit;
   color: var(--gy-ink);
@@ -333,13 +333,13 @@ select {
 
 input:hover,
 select:hover {
-  border-color: rgba(154, 123, 60, 0.35);
+  border-color: rgba(84, 88, 89, 0.4);
 }
 
 input:focus,
 select:focus {
   outline: none;
-  border-color: var(--gy-gold);
+  border-color: var(--gy-gold-deep);
   background: var(--gy-white);
 }
 

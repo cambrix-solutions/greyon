@@ -7,6 +7,13 @@
         <div class="admin-login__glow" aria-hidden="true" />
 
         <form v-reveal class="login-card" @submit.prevent="onSubmit">
+          <img
+            class="login-card__logo"
+            src="/logo/Logo V1-04-04.png"
+            alt="Greyon"
+            width="160"
+            height="56"
+          />
           <p class="gy-eyebrow">Greyon CMS</p>
           <h1 class="gy-display">Admin login</h1>
           <p class="gy-muted">Sign in with your Greyon admin account.</p>
@@ -142,7 +149,7 @@ async function onSubmit() {
   border-radius: 50%;
   background: radial-gradient(
     circle,
-    rgba(196, 163, 90, 0.26) 0%,
+    rgba(111, 128, 103, 0.26) 0%,
     transparent 70%
   );
   filter: blur(8px);
@@ -161,9 +168,17 @@ async function onSubmit() {
   border-radius: 18px;
   box-shadow:
     0 30px 70px rgba(0, 0, 0, 0.35),
-    0 0 0 1px rgba(196, 163, 90, 0.1);
+    0 0 0 1px rgba(111, 128, 103, 0.1);
   backdrop-filter: blur(10px);
   overflow: hidden;
+}
+
+.login-card__logo {
+  display: block;
+  height: 2.75rem;
+  width: auto;
+  object-fit: contain;
+  margin: 0 0 1rem;
 }
 
 .login-card::before {
@@ -217,7 +232,7 @@ async function onSubmit() {
   outline: none;
   border-color: var(--gy-gold);
   background: #fff;
-  box-shadow: 0 0 0 3px rgba(196, 163, 90, 0.18);
+  box-shadow: 0 0 0 3px rgba(111, 128, 103, 0.18);
 }
 
 .login-card .gy-btn {

@@ -1,6 +1,7 @@
 /**
- * Generate Greyon favicon / PWA / apple icons from public/logo/logo.png
- * (circular brand badge). Run: npm run icons:generate
+ * Generate Greyon favicon / PWA / apple icons from the V1 geometric mark
+ * cropped out of public/logo/Logo V1-04-04.png (brand sage on black).
+ * Run: npm run icons:generate
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -9,9 +10,12 @@ import sharp from "sharp";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
-const src = path.join(root, "public/logo/logo.png");
+const src = path.join(root, "public/logo/Logo V1-04-04.png");
 const markOut = path.join(root, "public/logo/greyon-mark.png");
 const iconsDir = path.join(root, "public/icons");
+
+/** Crop of the geometric monogram only (excludes wordmark / tagline). */
+const MARK_CROP = { left: 1189, top: 21, width: 4397, height: 4397 };
 
 const fullSizes = [
   ["favicon-96x96.png", 96],
@@ -63,9 +67,12 @@ function pngsToIco(pngBuffers) {
   return Buffer.concat(chunks);
 }
 
-/** Square resize of the circular badge. */
-async function resizeLogo(size) {
-  return sharp(src).resize(size, size, { fit: "cover" }).png().toBuffer();
+async function markBuffer(size) {
+  return sharp(src)
+    .extract(MARK_CROP)
+    .resize(size, size, { fit: "cover", kernel: sharp.kernel.lanczos3 })
+    .png()
+    .toBuffer();
 }
 
 async function main() {
@@ -74,20 +81,20 @@ async function main() {
   }
   fs.mkdirSync(iconsDir, { recursive: true });
 
-  const markBuf = await resizeLogo(512);
+  const markBuf = await markBuffer(512);
   fs.writeFileSync(markOut, markBuf);
   console.log("wrote greyon-mark.png");
 
   const favPngs = [];
   for (const [name, size] of favSizes) {
-    const buf = await resizeLogo(size);
+    const buf = await markBuffer(size);
     fs.writeFileSync(path.join(iconsDir, name), buf);
     favPngs.push(buf);
     console.log("wrote", name);
   }
 
   for (const [name, size] of fullSizes) {
-    fs.writeFileSync(path.join(iconsDir, name), await resizeLogo(size));
+    fs.writeFileSync(path.join(iconsDir, name), await markBuffer(size));
     console.log("wrote", name);
   }
 

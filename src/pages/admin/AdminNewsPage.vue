@@ -26,12 +26,13 @@
       </template>
       <template #toolbar>
         <q-input
-          v-model="query"
+          :model-value="query"
           dense
           outlined
           clearable
           placeholder="Search articles…"
           style="min-width: min(100%, 240px); background: #fff"
+          @update:model-value="onQueryUpdate"
         >
           <template #prepend><q-icon name="search" /></template>
         </q-input>
@@ -42,15 +43,29 @@
           outlined
           emit-value
           map-options
+          options-dense
           label="Status"
           style="min-width: 140px; background: #fff"
+          popup-content-class="admin-filter-menu"
+        />
+        <q-select
+          v-model="locationFilter"
+          :options="locationFilterOptions"
+          dense
+          outlined
+          emit-value
+          map-options
+          options-dense
+          label="Destination"
+          style="min-width: 180px; background: #fff"
+          popup-content-class="admin-filter-menu"
         />
       </template>
     </AdminPageHeader>
 
     <p v-reveal class="pub-note">
-      News sits outside the property tree. Locations, hotels, and rooms stay
-      linked by foreign keys; articles publish independently to the public site.
+      Attach a destination when a story is about a city. Leave it blank for
+      site-wide brand news. Managers only see articles for their destinations.
     </p>
 
     <div v-reveal="{ delay: '80ms' }" class="news-grid">
@@ -65,6 +80,9 @@
               item.status
             }}</span>
           </div>
+          <p v-if="destinationLabel(item)" class="news-card__dest">{{
+            destinationLabel(item)
+          }}</p>
           <h2 class="news-card__title">{{ item.title }}</h2>
           <p class="news-card__excerpt">{{ item.excerpt }}</p>
           <p class="news-card__slug">{{ item.slug }}</p>
@@ -132,7 +150,7 @@
       icon="newspaper"
       eyebrow="Publishing"
       :title="editing ? 'Edit article' : 'Add article'"
-      subtitle="Stories for the public news feed — independent of hotels and locations."
+      subtitle="Stories for the public news feed — optionally tied to a destination."
     >
       <AdminFormSection title="Essentials" :columns="2">
         <q-input v-model="form.title" label="Title" outlined dense />
@@ -142,6 +160,18 @@
           label="Status"
           outlined
           dense
+        />
+        <q-select
+          v-model="form.locationId"
+          :options="locationFormOptions"
+          label="Destination"
+          outlined
+          dense
+          emit-value
+          map-options
+          clearable
+          hint="Optional — leave blank for site-wide news"
+          class="admin-form-span-2"
         />
         <q-input
           v-model="form.coverImage"
@@ -218,22 +248,41 @@ const cms = useCmsStore();
 const auth = useAuthStore();
 const $q = useQuasar();
 
-onMounted(() => {
-  void cms.ensureNews();
+onMounted(async () => {
+  await Promise.all([cms.ensureNews(), cms.ensureLocations()]);
 });
 
 const dialog = ref(false);
 const editing = ref<string | null>(null);
 const query = ref("");
 const statusFilter = ref("all");
+const locationFilter = ref("all");
 const statusOptions = [
   { label: "All statuses", value: "all" },
   ...cms.statusOptions.map(s => ({ label: s, value: s }))
 ];
 
+const locationOptions = computed(() =>
+  cms.locations
+    .filter(l => auth.canAccessLocation(l.id))
+    .map(l => ({ label: l.name, value: l.id }))
+);
+
+const locationFilterOptions = computed(() => [
+  { label: "All destinations", value: "all" },
+  { label: "Site-wide (no destination)", value: "none" },
+  ...locationOptions.value
+]);
+
+const locationFormOptions = computed(() => [
+  { label: "Site-wide (no destination)", value: null },
+  ...locationOptions.value
+]);
+
 const form = reactive({
   title: "",
   slug: "",
+  locationId: null as string | null,
   coverImage: "",
   excerpt: "",
   body: "",
@@ -243,13 +292,33 @@ const form = reactive({
   seoDescription: ""
 });
 
+function onQueryUpdate(value: string | number | null) {
+  query.value = value == null ? "" : String(value);
+}
+
+function destinationLabel(item: NewsArticle) {
+  if (item.locationName) return item.locationName;
+  if (item.locationId) {
+    return cms.getLocationById(item.locationId)?.name ?? "Destination";
+  }
+  return "Site-wide";
+}
+
 const filtered = computed(() => {
-  const q = query.value.trim().toLowerCase();
+  const q = (query.value ?? "").trim().toLowerCase();
   return cms.news.filter(item => {
     if (statusFilter.value !== "all" && item.status !== statusFilter.value)
       return false;
+    if (locationFilter.value === "none" && item.locationId) return false;
+    if (
+      locationFilter.value !== "all" &&
+      locationFilter.value !== "none" &&
+      item.locationId !== locationFilter.value
+    ) {
+      return false;
+    }
     if (!q) return true;
-    return `${item.title} ${item.excerpt} ${item.slug}`
+    return `${item.title} ${item.excerpt} ${item.slug} ${item.locationName ?? ""}`
       .toLowerCase()
       .includes(q);
   });
@@ -259,6 +328,10 @@ function openCreate() {
   editing.value = null;
   form.title = "";
   form.slug = "";
+  form.locationId =
+    locationFilter.value !== "all" && locationFilter.value !== "none"
+      ? locationFilter.value
+      : null;
   form.coverImage = "";
   form.excerpt = "";
   form.body = "<p></p>";
@@ -273,6 +346,7 @@ function openEdit(item: NewsArticle) {
   editing.value = item.id;
   form.title = item.title;
   form.slug = item.slug;
+  form.locationId = item.locationId ?? null;
   form.coverImage = item.coverImage;
   form.excerpt = item.excerpt;
   form.body = item.body;
@@ -293,6 +367,7 @@ async function save() {
       ...(editing.value ? { id: editing.value } : {}),
       title: form.title,
       slug: form.slug,
+      locationId: form.locationId,
       coverImage: form.coverImage,
       excerpt: form.excerpt,
       body: form.body,
@@ -347,7 +422,7 @@ function remove(id: string) {
   margin: 0 0 1rem;
   padding: 0.75rem 1rem;
   background: #fff;
-  border: 1px solid rgba(154, 123, 60, 0.16);
+  border: 1px solid rgba(84, 88, 89, 0.16);
   border-radius: 12px;
   font-size: 0.86rem;
   color: var(--gy-muted);
@@ -397,6 +472,15 @@ function remove(id: string) {
   color: var(--gy-muted);
 }
 
+.news-card__dest {
+  margin: 0.4rem 0 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gy-gold-deep);
+  font-weight: 600;
+}
+
 .news-card__status {
   font-size: 0.68rem;
   letter-spacing: 0.08em;
@@ -408,7 +492,7 @@ function remove(id: string) {
 }
 
 .news-card__status[data-status="published"] {
-  background: rgba(154, 123, 60, 0.14);
+  background: rgba(84, 88, 89, 0.14);
   color: var(--gy-gold-deep);
 }
 

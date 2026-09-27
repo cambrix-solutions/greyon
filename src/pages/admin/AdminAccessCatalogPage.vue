@@ -748,9 +748,9 @@ onMounted(() => {
   margin-bottom: 1.1rem;
   padding: 0.85rem 1rem;
   background:
-    linear-gradient(135deg, rgba(196, 163, 90, 0.1), rgba(255, 255, 255, 0.95)),
+    linear-gradient(135deg, rgba(111, 128, 103, 0.1), rgba(255, 255, 255, 0.95)),
     #fff;
-  border: 1px solid rgba(154, 123, 60, 0.2);
+  border: 1px solid rgba(84, 88, 89, 0.2);
   border-radius: 14px;
 }
 

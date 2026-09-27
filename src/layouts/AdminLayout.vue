@@ -14,12 +14,15 @@
             @click="leftOpen = !leftOpen"
           />
 
-          <router-link to="/admin" class="admin-brand">
-            <span class="admin-brand__mark" aria-hidden="true">G</span>
-            <span class="admin-brand__copy">
-              <span class="admin-brand__name gy-display">Greyon</span>
-              <span class="admin-brand__tag">Admin</span>
-            </span>
+          <router-link to="/admin" class="admin-brand" aria-label="Greyon admin">
+            <img
+              class="admin-brand__logo"
+              src="/logo/Logo V1-04-04.png"
+              alt="Greyon"
+              width="120"
+              height="40"
+            />
+            <span class="admin-brand__tag">Admin</span>
           </router-link>
         </div>
 
@@ -614,7 +617,7 @@ async function onOpenNotification(item: StaffNotification) {
 
 <style scoped>
 .admin-layout {
-  background: #f6f5f2;
+  background: var(--gy-cream);
   color: var(--gy-ink);
 }
 
@@ -646,43 +649,24 @@ async function onOpenNotification(item: StaffNotification) {
 .admin-brand {
   display: inline-flex;
   align-items: center;
-  gap: 0.65rem;
+  gap: 0.55rem;
   text-decoration: none;
   color: inherit;
 }
 
-.admin-brand__mark {
-  width: 2rem;
-  height: 2rem;
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  background: var(--gy-forest);
-  color: #fff;
-  font-family: var(--font-display);
-  font-size: 1.05rem;
-  line-height: 1;
-  border-radius: 8px;
-}
-
-.admin-brand__copy {
-  display: flex;
-  align-items: baseline;
-  gap: 0.4rem;
-}
-
-.admin-brand__name {
-  font-size: 1.3rem;
-  line-height: 1;
-  letter-spacing: -0.02em;
-  font-weight: 700;
+.admin-brand__logo {
+  display: block;
+  height: 2.15rem;
+  width: auto;
+  object-fit: contain;
 }
 
 .admin-brand__tag {
   font-size: 0.62rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--gy-gold-deep);
+  color: var(--gy-muted);
+  font-weight: 600;
 }
 
 .admin-alerts {
@@ -708,7 +692,7 @@ async function onOpenNotification(item: StaffNotification) {
 }
 
 .admin-bell:hover {
-  background: #f7f2e8;
+  background: var(--gy-cream);
   border-color: rgba(176, 141, 87, 0.35);
 }
 
@@ -785,7 +769,7 @@ async function onOpenNotification(item: StaffNotification) {
   padding: 0.3rem 0.6rem;
   text-decoration: none;
   color: var(--gy-ink);
-  background: #f7f2e8;
+  background: var(--gy-cream);
   border: 1px solid rgba(176, 141, 87, 0.3);
   border-radius: 999px;
   font-size: 0.74rem;
@@ -794,7 +778,7 @@ async function onOpenNotification(item: StaffNotification) {
 }
 
 .admin-alert:hover {
-  background: #efe6d4;
+  background: var(--gy-sand);
 }
 
 .admin-alert__count {
@@ -825,7 +809,7 @@ async function onOpenNotification(item: StaffNotification) {
 
 .admin-link:hover {
   color: var(--gy-forest);
-  background: rgba(154, 123, 60, 0.08);
+  background: rgba(84, 88, 89, 0.08);
 }
 
 .admin-account {
@@ -849,7 +833,7 @@ async function onOpenNotification(item: StaffNotification) {
 
 .admin-account:hover,
 .admin-account:focus-visible {
-  border-color: rgba(154, 123, 60, 0.4);
+  border-color: rgba(84, 88, 89, 0.4);
   box-shadow: 0 6px 18px rgba(26, 24, 20, 0.06);
   outline: none;
 }
@@ -948,7 +932,7 @@ async function onOpenNotification(item: StaffNotification) {
 }
 
 .admin-drawer {
-  background: #faf9f7 !important;
+  background: var(--gy-sand);
   border-right: 1px solid rgba(18, 17, 16, 0.06) !important;
 }
 
@@ -985,13 +969,13 @@ async function onOpenNotification(item: StaffNotification) {
 .admin-nav :deep(.q-item.admin-nav__depth-1) {
   margin-left: 0.85rem;
   min-height: 38px;
-  border-left: 2px solid rgba(154, 123, 60, 0.28);
+  border-left: 2px solid rgba(84, 88, 89, 0.28);
   border-radius: 0 10px 10px 0;
 }
 
 .admin-nav :deep(.q-item:hover) {
   transform: translateX(2px);
-  background: rgba(154, 123, 60, 0.06);
+  background: rgba(84, 88, 89, 0.06);
 }
 
 .admin-nav :deep(.q-icon) {
@@ -1007,7 +991,7 @@ async function onOpenNotification(item: StaffNotification) {
 }
 
 .admin-nav__active {
-  background: rgba(154, 123, 60, 0.12) !important;
+  background: rgba(84, 88, 89, 0.12) !important;
   color: var(--gy-gold-deep) !important;
   font-weight: 500;
 }
@@ -1017,7 +1001,7 @@ async function onOpenNotification(item: StaffNotification) {
 }
 
 .admin-page-container {
-  background: #f6f5f2;
+  background: var(--gy-cream);
 }
 
 .admin-page-container :deep(.admin-scroll),
@@ -1052,7 +1036,7 @@ async function onOpenNotification(item: StaffNotification) {
 
 .admin-alert:hover {
   transform: translateY(-2px);
-  background: #efe6d4;
+  background: var(--gy-sand);
 }
 
 .admin-brand {

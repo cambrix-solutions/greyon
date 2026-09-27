@@ -42,6 +42,10 @@ export interface SiteSettings {
 
 export interface MediaItem {
   id: string;
+  /** Destination this asset belongs to */
+  locationId?: string;
+  /** Optional hotel pin under that destination */
+  hotelId?: string;
   src: string;
   alt: string;
   createdAt: string;
@@ -310,6 +314,8 @@ export function mapEngineRatePlan(row: EngineRatePlan): RatePlan {
 
 export interface EngineNews {
   id: number | string;
+  locationId?: number | string | null;
+  locationName?: string | null;
   title: string;
   slug: string;
   coverImage?: string | null;
@@ -393,6 +399,8 @@ export interface EngineRateCalendar {
 
 export interface EngineMediaItem {
   id: number | string;
+  locationId?: number | string | null;
+  hotelId?: number | string | null;
   src: string;
   alt?: string | null;
   createdAt?: string | null;
@@ -494,7 +502,7 @@ function asFeatureCategory(value: string | undefined): FeatureCategory {
 }
 
 export function mapEngineNews(row: EngineNews): NewsArticle {
-  return {
+  const article: NewsArticle = {
     id: String(row.id),
     title: row.title,
     slug: row.slug,
@@ -502,10 +510,13 @@ export function mapEngineNews(row: EngineNews): NewsArticle {
     excerpt: row.excerpt ?? "",
     body: row.body ?? "",
     publishedAt: row.publishedAt ?? "",
-    status: asStatus(row.status),
-    ...(row.seoTitle ? { seoTitle: row.seoTitle } : {}),
-    ...(row.seoDescription ? { seoDescription: row.seoDescription } : {})
+    status: asStatus(row.status)
   };
+  if (row.locationId != null) article.locationId = String(row.locationId);
+  if (row.locationName) article.locationName = row.locationName;
+  if (row.seoTitle) article.seoTitle = row.seoTitle;
+  if (row.seoDescription) article.seoDescription = row.seoDescription;
+  return article;
 }
 
 export function mapEngineBooking(row: EngineBooking): Booking {
@@ -586,12 +597,15 @@ export function mapEngineRateCalendar(row: EngineRateCalendar): RateCalendar {
 }
 
 export function mapEngineMedia(row: EngineMediaItem): MediaItem {
-  return {
+  const item: MediaItem = {
     id: String(row.id),
     src: row.src,
     alt: row.alt ?? "",
     createdAt: row.createdAt ?? new Date().toISOString()
   };
+  if (row.locationId != null) item.locationId = String(row.locationId);
+  if (row.hotelId != null) item.hotelId = String(row.hotelId);
+  return item;
 }
 
 export function mapEngineSettings(

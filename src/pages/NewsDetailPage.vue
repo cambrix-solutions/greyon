@@ -37,13 +37,18 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import SeoHead from "@/components/SeoHead.vue";
 import { useCmsStore } from "@/stores/cms-store";
 
 const route = useRoute();
 const cms = useCmsStore();
+
+onMounted(() => {
+  void cms.ensurePublicCatalog();
+});
+
 const article = computed(() => cms.getNewsBySlug(String(route.params.slug)));
 const shareUrl = computed(() =>
   encodeURIComponent(typeof window !== "undefined" ? window.location.href : "")

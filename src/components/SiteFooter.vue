@@ -2,10 +2,18 @@
   <footer class="gy-footer">
     <div class="gy-container gy-footer__grid">
       <div>
-        <p class="gy-footer__brand gy-display">Greyon</p>
+        <router-link to="/" class="gy-footer__brand" aria-label="Greyon home">
+          <img
+            class="gy-footer__logo"
+            src="/logo/Logo white V1-05.png"
+            alt="Greyon"
+            width="160"
+            height="56"
+          />
+        </router-link>
         <p class="gy-muted">
-          Premium hotel stays across Cambodia — discover, stay, and book with
-          confidence.
+          Always on, always home — stays across Cambodia’s cities, coast, and
+          countryside.
         </p>
       </div>
       <div>
@@ -13,13 +21,23 @@
         <nav class="gy-footer__links">
           <router-link to="/hotels">Hotels</router-link>
           <router-link to="/locations">Destinations</router-link>
-          <router-link to="/news">News</router-link>
-          <router-link to="/booking">Booking</router-link>
-          <router-link to="/contact">Contact</router-link>
+          <router-link v-if="auth.featureEnabled('news_public')" to="/news"
+            >News</router-link
+          >
+          <router-link
+            v-if="auth.featureEnabled('booking_public')"
+            to="/booking"
+            >Booking</router-link
+          >
+          <router-link
+            v-if="auth.featureEnabled('contact_public')"
+            to="/contact"
+            >Contact</router-link
+          >
           <router-link to="/sitemap">Sitemap</router-link>
         </nav>
       </div>
-      <div>
+      <div v-if="auth.featureEnabled('portfolios')">
         <p class="gy-footer__title">Portfolios</p>
         <nav class="gy-footer__links">
           <router-link to="/hotels">Hotel</router-link>
@@ -52,12 +70,15 @@
 </template>
 
 <script setup lang="ts">
+import { useAuthStore } from "@/stores/auth-store";
+
+const auth = useAuthStore();
 const year = new Date().getFullYear();
 </script>
 
 <style scoped>
 .gy-footer {
-  background: linear-gradient(180deg, #18201d 0%, var(--gy-ink) 40%);
+  background: linear-gradient(180deg, #3a322c 0%, var(--gy-ink) 42%);
   color: rgba(255, 255, 255, 0.88);
   padding: 4rem 0 1.75rem;
   margin-top: auto;
@@ -70,9 +91,15 @@ const year = new Date().getFullYear();
 }
 
 .gy-footer__brand {
-  font-size: 2.25rem;
+  display: inline-block;
   margin: 0 0 0.85rem;
-  color: var(--gy-white);
+}
+
+.gy-footer__logo {
+  display: block;
+  height: 3.25rem;
+  width: auto;
+  object-fit: contain;
 }
 
 .gy-footer :deep(.gy-muted),

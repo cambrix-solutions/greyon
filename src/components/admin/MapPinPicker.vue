@@ -227,7 +227,7 @@ function onLng(val: string | number | null) {
   padding: 0.9rem 1rem;
   border-radius: 12px;
   background: linear-gradient(180deg, #faf8f4 0%, #f6f3ed 100%);
-  border: 1px solid rgba(154, 123, 60, 0.18);
+  border: 1px solid rgba(84, 88, 89, 0.18);
 }
 
 .map-pin-picker__paste-icon {
@@ -236,7 +236,7 @@ function onLng(val: string | number | null) {
   width: 2.5rem;
   height: 2.5rem;
   border-radius: 10px;
-  background: rgba(154, 123, 60, 0.14);
+  background: rgba(84, 88, 89, 0.14);
   color: var(--gy-gold-deep);
 }
 

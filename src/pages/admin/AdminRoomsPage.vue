@@ -564,7 +564,7 @@ watch([hotelFilter, statusFilter, query], () => {
   margin-bottom: 1rem;
   padding: 0.75rem 1rem;
   background: #fff;
-  border: 1px solid rgba(154, 123, 60, 0.18);
+  border: 1px solid rgba(84, 88, 89, 0.18);
   border-radius: 12px;
   font-size: 0.84rem;
   color: var(--gy-muted);
@@ -651,7 +651,7 @@ watch([hotelFilter, statusFilter, query], () => {
 }
 
 .room-card:hover {
-  border-color: rgba(154, 123, 60, 0.35);
+  border-color: rgba(84, 88, 89, 0.35);
 }
 
 .room-card__media,
@@ -677,7 +677,7 @@ watch([hotelFilter, statusFilter, query], () => {
 .room-card__thumb {
   display: grid;
   place-items: center;
-  background: rgba(154, 123, 60, 0.1);
+  background: rgba(84, 88, 89, 0.1);
   color: var(--gy-gold-deep);
 }
 
@@ -719,7 +719,7 @@ watch([hotelFilter, statusFilter, query], () => {
 }
 
 .room-card__status[data-status="draft"] {
-  background: rgba(154, 123, 60, 0.14);
+  background: rgba(84, 88, 89, 0.14);
   color: var(--gy-gold-deep);
 }
 

@@ -3,8 +3,8 @@
   "short_name": "Greyon",
   "description": "Greyon hotel portfolio and booking",
   "orientation": "portrait",
-  "background_color": "#2b0a0a",
-  "theme_color": "#9a7b3c",
+  "background_color": "#31261d",
+  "theme_color": "#545859",
   "display_override": ["fullscreen", "minimal-ui"],
   "display": "standalone",
   "icons": [

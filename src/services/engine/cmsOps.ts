@@ -47,6 +47,7 @@ export async function fetchPublicNews(): Promise<NewsArticle[]> {
 export type NewsInput = {
   title: string;
   slug: string;
+  locationId?: string | null;
   coverImage?: string;
   excerpt?: string;
   body?: string;
@@ -57,17 +58,25 @@ export type NewsInput = {
 };
 
 export async function createNews(input: NewsInput) {
+  const body: Record<string, unknown> = { ...input };
+  if (input.locationId !== undefined) {
+    body.locationId = input.locationId ? numId(input.locationId) : null;
+  }
   const { news } = await engineAPI.post<{ news: EngineNews }>(
     "/admin/news",
-    input
+    body
   );
   return mapEngineNews(news);
 }
 
 export async function updateNews(id: string, input: Partial<NewsInput>) {
+  const body: Record<string, unknown> = { ...input };
+  if (input.locationId !== undefined) {
+    body.locationId = input.locationId ? numId(input.locationId) : null;
+  }
   const { news } = await engineAPI.patch<{ news: EngineNews }>(
     `/admin/news/${numId(id)}`,
-    input
+    body
   );
   return mapEngineNews(news);
 }
@@ -136,6 +145,10 @@ export async function updateAdminBooking(
   return mapEngineBooking(booking);
 }
 
+export async function destroyAdminBooking(id: string) {
+  await engineAPI.delete(`/admin/bookings/${numId(id)}`);
+}
+
 // —— Enquiries ——
 
 export async function fetchAdminEnquiries(): Promise<Enquiry[]> {
@@ -169,21 +182,42 @@ export async function fetchAdminMedia(): Promise<MediaItem[]> {
   return (media ?? []).map(mapEngineMedia);
 }
 
-export async function createMedia(src: string, alt: string) {
+export async function createMedia(input: {
+  src: string;
+  alt: string;
+  locationId: string;
+  hotelId?: string | null;
+}) {
+  const body: Record<string, unknown> = {
+    src: input.src,
+    alt: input.alt,
+    locationId: numId(input.locationId)
+  };
+  if (input.hotelId) body.hotelId = numId(input.hotelId);
+  else body.hotelId = null;
   const { mediaItem } = await engineAPI.post<{ mediaItem: EngineMediaItem }>(
     "/admin/media",
-    { src, alt }
+    body
   );
   return mapEngineMedia(mediaItem);
 }
 
 export async function updateMediaItem(
   id: string,
-  patch: Partial<Pick<MediaItem, "src" | "alt">>
+  patch: Partial<Pick<MediaItem, "src" | "alt" | "locationId" | "hotelId">>
 ) {
+  const body: Record<string, unknown> = {};
+  if (patch.src !== undefined) body.src = patch.src;
+  if (patch.alt !== undefined) body.alt = patch.alt;
+  if (patch.locationId !== undefined) {
+    body.locationId = patch.locationId ? numId(patch.locationId) : null;
+  }
+  if (patch.hotelId !== undefined) {
+    body.hotelId = patch.hotelId ? numId(patch.hotelId) : null;
+  }
   const { mediaItem } = await engineAPI.patch<{ mediaItem: EngineMediaItem }>(
     `/admin/media/${numId(id)}`,
-    patch
+    body
   );
   return mapEngineMedia(mediaItem);
 }

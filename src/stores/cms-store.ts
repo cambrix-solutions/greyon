@@ -22,6 +22,7 @@ import {
 import {
   createMedia,
   createAdminBooking,
+  destroyAdminBooking,
   destroyAvailability,
   destroyMedia,
   destroyNews,
@@ -499,6 +500,13 @@ export const useCmsStore = defineStore("cms", () => {
         applyCatalog(catalog);
         news.value = catalog.news;
         settings.value = siteSettings;
+        // Neutralize stale Packages-UI enablement left in memory from an
+        // earlier admin/developer visit in this tab (public keys default on).
+        if (features.value.length) {
+          features.value = features.value.map(f =>
+            f.category === "public" ? { ...f, enabled: true } : f
+          );
+        }
         catalogSource.value = "public";
         clearLoaded();
         markLoaded("public");
@@ -768,6 +776,7 @@ export const useCmsStore = defineStore("cms", () => {
     id?: string;
     title: string;
     slug?: string;
+    locationId?: string | null;
     coverImage?: string;
     excerpt?: string;
     body?: string;
@@ -779,6 +788,7 @@ export const useCmsStore = defineStore("cms", () => {
     const payload = omitUndefined({
       title: input.title,
       slug: input.slug || slugify(input.title),
+      locationId: input.locationId,
       coverImage: input.coverImage,
       excerpt: input.excerpt,
       body: input.body,
@@ -787,6 +797,10 @@ export const useCmsStore = defineStore("cms", () => {
       seoTitle: input.seoTitle,
       seoDescription: input.seoDescription
     });
+    // Explicit null clears destination (omitUndefined would drop it).
+    if (input.locationId === null) {
+      (payload as Record<string, unknown>).locationId = null;
+    }
     const saved = input.id
       ? await updateNews(input.id, payload as Parameters<typeof updateNews>[1])
       : await createNews(payload as Parameters<typeof createNews>[0]);
@@ -939,7 +953,8 @@ export const useCmsStore = defineStore("cms", () => {
     return saved;
   }
 
-  function deleteBooking(id: string) {
+  async function deleteBooking(id: string) {
+    await destroyAdminBooking(id);
     bookings.value = bookings.value.filter(b => b.id !== id);
   }
 
@@ -984,13 +999,21 @@ export const useCmsStore = defineStore("cms", () => {
   }
 
   // —— Media ——
-  async function addMedia(src: string, alt: string) {
-    const item = await createMedia(src, alt);
+  async function addMedia(input: {
+    src: string;
+    alt: string;
+    locationId: string;
+    hotelId?: string | null;
+  }) {
+    const item = await createMedia(input);
     media.value.unshift(item);
     return item;
   }
 
-  async function updateMedia(id: string, patch: Partial<MediaItem>) {
+  async function updateMedia(
+    id: string,
+    patch: Partial<Pick<MediaItem, "src" | "alt" | "locationId" | "hotelId">>
+  ) {
     const saved = await updateMediaItem(id, patch);
     const idx = media.value.findIndex(m => m.id === saved.id);
     if (idx >= 0) media.value[idx] = saved;

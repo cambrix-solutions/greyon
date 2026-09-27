@@ -24,16 +24,19 @@
           outlined
           emit-value
           map-options
+          options-dense
           style="min-width: 160px; background: #fff"
           label="Status"
+          popup-content-class="admin-filter-menu"
         />
         <q-input
-          v-model="query"
+          :model-value="query"
           dense
           outlined
           clearable
           label="Search guest / ref"
           style="min-width: 220px; background: #fff"
+          @update:model-value="onQueryUpdate"
         />
       </template>
     </AdminPageHeader>
@@ -105,7 +108,6 @@
       position="right"
       full-height
       maximized
-      :persistent="false"
       size="md"
       icon="receipt_long"
       eyebrow="Booking"
@@ -443,7 +445,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, watch } from "vue";
+import { computed, nextTick, onMounted, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 import AdminDialog from "@/components/admin/AdminDialog.vue";
@@ -479,26 +481,25 @@ const statusFilterOptions = [
     value: status
   }))
 ];
-const createOpen = ref(false);
-const searched = ref(false);
-const submitted = ref(false);
-const preview = ref<AvailabilityResult | null>(null);
-const todayYmd = toLocalYmd(new Date());
-const detailOpen = ref(false);
-const detailBooking = ref<Booking | null>(null);
+let syncingFromRoute = false;
 
-const statusCreateOptions = [
-  { label: "Confirmed", value: "confirmed" },
-  { label: "Pending", value: "pending" }
-];
+function onQueryUpdate(value: string | number | null) {
+  // Quasar clearable emits null — keep a string so filtered/trim never crash.
+  query.value = value == null ? "" : String(value);
+}
 
 function applyRouteQuery() {
   const status = String(route.query.status || "");
+  syncingFromRoute = true;
   if (status && cms.bookingStatusOptions.includes(status as BookingStatus)) {
     statusFilter.value = status;
+  } else if (!status) {
+    statusFilter.value = "all";
   }
-  const q = String(route.query.q || "").trim();
-  if (q) query.value = q;
+  query.value = String(route.query.q || "").trim();
+  void nextTick(() => {
+    syncingFromRoute = false;
+  });
   if (route.query.create === "1") {
     openCreate();
     const nextQuery = { ...route.query };
@@ -516,7 +517,36 @@ onMounted(async () => {
   ]);
   applyRouteQuery();
 });
-watch(() => route.query, applyRouteQuery);
+watch(
+  () => [route.query.status, route.query.q, route.query.create] as const,
+  applyRouteQuery
+);
+watch([statusFilter, query], () => {
+  if (syncingFromRoute) return;
+  const next = { ...route.query } as Record<
+    string,
+    string | string[] | undefined
+  >;
+  if (statusFilter.value === "all") delete next.status;
+  else next.status = statusFilter.value;
+  const q = (query.value ?? "").trim();
+  if (q) next.q = q;
+  else delete next.q;
+  void router.replace({ query: next });
+});
+
+const createOpen = ref(false);
+const searched = ref(false);
+const submitted = ref(false);
+const preview = ref<AvailabilityResult | null>(null);
+const todayYmd = toLocalYmd(new Date());
+const detailOpen = ref(false);
+const detailBooking = ref<Booking | null>(null);
+
+const statusCreateOptions = [
+  { label: "Confirmed", value: "confirmed" },
+  { label: "Pending", value: "pending" }
+];
 
 function defaultCheckIn() {
   return addLocalDays(toLocalYmd(new Date()), 1);
@@ -542,7 +572,7 @@ const form = reactive({
 });
 
 const filtered = computed(() => {
-  const q = query.value.trim().toLowerCase();
+  const q = (query.value ?? "").trim().toLowerCase();
   return cms.bookings.filter(b => {
     if (!auth.canAccessHotel(b.hotelId)) return false;
     if (statusFilter.value !== "all" && b.status !== statusFilter.value)
@@ -872,16 +902,51 @@ function confirmBooking(b: Booking) {
 }
 
 function remove(id: string) {
-  $q.dialog({ title: "Delete booking?", cancel: true, persistent: true }).onOk(
-    () => {
-      cms.deleteBooking(id);
-      if (detailBooking.value?.id === id) {
-        detailOpen.value = false;
-        detailBooking.value = null;
+  const booking =
+    detailBooking.value?.id === id
+      ? detailBooking.value
+      : cms.bookings.find(b => b.id === id);
+  // Close the drawer first — nested $q.dialog over a non-stacked drawer
+  // often dismissed the detail panel with no confirm (Quasar focus/backdrop).
+  detailOpen.value = false;
+  detailBooking.value = null;
+
+  $q.dialog({
+    title: "Delete booking?",
+    message: booking
+      ? `Permanently delete ${booking.reference} for ${booking.guest.fullName}?`
+      : "Permanently delete this booking?",
+    cancel: { flat: true, label: "Cancel", noCaps: true },
+    ok: {
+      unelevated: true,
+      label: "Delete",
+      color: "negative",
+      noCaps: true
+    },
+    persistent: true
+  })
+    .onOk(async () => {
+      try {
+        await cms.deleteBooking(id);
+        $q.notify({ type: "positive", message: "Booking deleted." });
+      } catch (e) {
+        $q.notify({
+          type: "negative",
+          message:
+            e instanceof Error ? e.message : "Could not delete booking."
+        });
+        if (booking) {
+          detailBooking.value = booking;
+          detailOpen.value = true;
+        }
       }
-      $q.notify({ type: "positive", message: "Booking deleted." });
-    }
-  );
+    })
+    .onCancel(() => {
+      if (booking) {
+        detailBooking.value = booking;
+        detailOpen.value = true;
+      }
+    });
 }
 </script>
 
@@ -955,8 +1020,8 @@ function remove(id: string) {
 }
 
 .booking-quote--ok {
-  background: rgba(154, 123, 60, 0.08);
-  border-color: rgba(154, 123, 60, 0.18);
+  background: rgba(84, 88, 89, 0.08);
+  border-color: rgba(84, 88, 89, 0.18);
 }
 
 .booking-quote--warn {
@@ -1063,7 +1128,7 @@ function remove(id: string) {
 }
 
 .bookings-table tbody tr:hover {
-  background: rgba(154, 123, 60, 0.03);
+  background: rgba(84, 88, 89, 0.03);
 }
 
 .bookings-table tbody tr:last-child td {

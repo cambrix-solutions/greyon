@@ -89,9 +89,9 @@ const steps = computed(() => {
   margin-bottom: 1.15rem;
   padding: 1rem 1.1rem;
   background:
-    linear-gradient(135deg, rgba(196, 163, 90, 0.12), rgba(255, 255, 255, 0.9)),
+    linear-gradient(135deg, rgba(111, 128, 103, 0.12), rgba(255, 255, 255, 0.9)),
     #fff;
-  border: 1px solid rgba(154, 123, 60, 0.22);
+  border: 1px solid rgba(84, 88, 89, 0.22);
   border-radius: 14px;
 }
 
@@ -136,13 +136,13 @@ const steps = computed(() => {
 }
 
 .access-hub__step:hover {
-  border-color: rgba(154, 123, 60, 0.45);
+  border-color: rgba(84, 88, 89, 0.45);
   transform: translateY(-1px);
 }
 
 .access-hub__step--on {
   border-color: var(--gy-gold-deep);
-  background: rgba(154, 123, 60, 0.12);
+  background: rgba(84, 88, 89, 0.12);
 }
 
 .access-hub__n {

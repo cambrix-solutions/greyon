@@ -20,7 +20,16 @@
       <div class="home-hero__veil" />
       <div class="gy-container home-hero__content">
         <div v-reveal class="home-hero__intro">
-          <h1 class="home-hero__brand gy-display">Greyon</h1>
+          <h1 class="home-hero__brand">
+            <img
+              class="home-hero__logo"
+              src="/logo/Logo white V1-05.png"
+              alt="Greyon"
+              width="280"
+              height="100"
+            />
+          </h1>
+          <p class="home-hero__tagline">Always on, always home</p>
           <p class="home-hero__lead">{{ $t("home.subhead") }}</p>
           <div class="home-hero__cta">
             <router-link
@@ -351,13 +360,27 @@ const latestNews = computed(() => cms.publishedNews.slice(0, 3));
 
 .home-hero__brand {
   margin: 0;
-  font-size: clamp(2.85rem, 6.5vw, 4.6rem);
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 0.94;
-  color: #fff;
-  text-shadow: 0 18px 48px rgba(0, 0, 0, 0.35);
+  line-height: 0;
   animation: hero-title 1.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.home-hero__logo {
+  display: block;
+  height: clamp(3.75rem, 11vw, 6rem);
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 18px 48px rgba(0, 0, 0, 0.35));
+}
+
+.home-hero__tagline {
+  margin: 0.85rem 0 0;
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.78);
+  animation: hero-title 1.1s 0.08s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .home-hero__lead {
@@ -590,8 +613,12 @@ const latestNews = computed(() => cms.publishedNews.slice(0, 3));
 }
 
 @media (max-height: 780px) and (min-width: 701px) {
-  .home-hero__brand {
-    font-size: clamp(2.5rem, 5.5vw, 3.6rem);
+  .home-hero__logo {
+    height: clamp(3rem, 8vw, 4.25rem);
+  }
+
+  .home-hero__tagline {
+    margin-top: 0.55rem;
   }
 
   .home-hero__lead {
