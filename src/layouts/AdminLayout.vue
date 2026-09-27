@@ -14,7 +14,11 @@
             @click="leftOpen = !leftOpen"
           />
 
-          <router-link to="/admin" class="admin-brand" aria-label="Greyon admin">
+          <router-link
+            to="/admin"
+            class="admin-brand"
+            aria-label="Greyon admin"
+          >
             <img
               class="admin-brand__logo"
               src="/logo/Logo V1-04-04.png"

@@ -89,7 +89,11 @@ const steps = computed(() => {
   margin-bottom: 1.15rem;
   padding: 1rem 1.1rem;
   background:
-    linear-gradient(135deg, rgba(111, 128, 103, 0.12), rgba(255, 255, 255, 0.9)),
+    linear-gradient(
+      135deg,
+      rgba(111, 128, 103, 0.12),
+      rgba(255, 255, 255, 0.9)
+    ),
     #fff;
   border: 1px solid rgba(84, 88, 89, 0.22);
   border-radius: 14px;

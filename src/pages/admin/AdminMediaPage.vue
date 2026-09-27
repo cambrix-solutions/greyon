@@ -91,7 +91,9 @@
               :model-value="item.locationId ?? null"
               :options="locationOptions"
               :disable="!auth.canAction('media', 'update')"
-              @update:model-value="(v: string) => patchScope(item.id, v, item.hotelId)"
+              @update:model-value="
+                (v: string) => patchScope(item.id, v, item.hotelId)
+              "
             />
             <q-select
               dense
@@ -105,8 +107,7 @@
               :options="hotelOptionsForLocation(item.locationId)"
               :disable="!auth.canAction('media', 'update') || !item.locationId"
               @update:model-value="
-                (v: string | null) =>
-                  patchScope(item.id, item.locationId, v)
+                (v: string | null) => patchScope(item.id, item.locationId, v)
               "
             />
             <div class="row q-gutter-sm">
@@ -261,7 +262,10 @@ const hotelOptionsForFilter = computed(() => {
   return cms.hotels
     .filter(h => {
       if (!auth.canAccessHotel(h.id)) return false;
-      if (locationFilter.value !== "all" && h.locationId !== locationFilter.value)
+      if (
+        locationFilter.value !== "all" &&
+        h.locationId !== locationFilter.value
+      )
         return false;
       return true;
     })
@@ -319,8 +323,7 @@ function openAdd() {
     locationFilter.value !== "all"
       ? locationFilter.value
       : (locationOptions.value[0]?.value ?? null);
-  formHotelId.value =
-    hotelFilter.value !== "all" ? hotelFilter.value : null;
+  formHotelId.value = hotelFilter.value !== "all" ? hotelFilter.value : null;
   dialog.value = true;
 }
 
