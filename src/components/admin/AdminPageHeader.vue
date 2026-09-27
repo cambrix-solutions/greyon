@@ -1,5 +1,5 @@
 <template>
-  <header v-reveal class="admin-page-head">
+  <header class="admin-page-head">
     <div class="admin-page-head__copy">
       <p v-if="eyebrow" class="admin-page-head__eyebrow">{{ eyebrow }}</p>
       <h1 class="admin-page-head__title">{{ title }}</h1>
@@ -9,11 +9,12 @@
       <slot name="actions" />
     </div>
   </header>
-  <div
-    v-if="$slots.toolbar"
-    v-reveal="{ delay: '90ms' }"
-    class="admin-page-toolbar"
-  >
+  <!--
+    No v-reveal on head/toolbar: gy-reveal uses opacity+transform and can
+    sit over the filter row (invisible but still receiving clicks), which
+    makes q-selects focus without ever opening their option menus.
+  -->
+  <div v-if="$slots.toolbar" class="admin-page-toolbar">
     <slot name="toolbar" />
   </div>
 </template>
@@ -92,6 +93,11 @@ defineProps<{
   max-width: 100%;
 }
 
+/* Toggles shouldn't grow and cover adjacent filter selects on wrap */
+.admin-page-toolbar :deep(.q-toggle) {
+  flex: 0 0 auto;
+}
+
 .admin-page-toolbar :deep(.q-field--outlined .q-field__control) {
   border-radius: 10px;
 }
@@ -104,5 +110,12 @@ defineProps<{
   .admin-page-head__actions :deep(.q-btn) {
     flex: 1 1 auto;
   }
+}
+</style>
+
+<style>
+/* Teleported q-select menus used by admin list filters */
+.admin-filter-menu {
+  z-index: 6000 !important;
 }
 </style>

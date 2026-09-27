@@ -892,7 +892,7 @@ function remove() {
 
 .pkg-filter--on {
   border-color: var(--gy-gold-deep);
-  background: rgba(154, 123, 60, 0.12);
+  background: rgba(84, 88, 89, 0.12);
   color: var(--gy-gold-deep);
 }
 
@@ -928,18 +928,18 @@ function remove() {
 }
 
 .pkg-card:hover {
-  border-color: rgba(154, 123, 60, 0.35);
+  border-color: rgba(84, 88, 89, 0.35);
 }
 
 .pkg-card--selected {
   border-color: var(--gy-gold-deep);
   border-left-color: var(--gy-gold-deep);
-  background: rgba(154, 123, 60, 0.07);
+  background: rgba(84, 88, 89, 0.07);
   box-shadow: 0 8px 22px rgba(26, 24, 20, 0.05);
 }
 
 .pkg-card--default:not(.pkg-card--selected) {
-  background: rgba(154, 123, 60, 0.03);
+  background: rgba(84, 88, 89, 0.03);
 }
 
 .pkg-card--draft {
@@ -1083,7 +1083,7 @@ function remove() {
   width: 1.25rem;
   height: 1.25rem;
   border-radius: 999px;
-  background: rgba(154, 123, 60, 0.15);
+  background: rgba(84, 88, 89, 0.15);
   color: var(--gy-gold-deep);
   font-size: 0.72rem;
   font-weight: 700;
@@ -1126,7 +1126,7 @@ function remove() {
   height: 1.35rem;
   padding: 0 0.4rem;
   border-radius: 999px;
-  background: rgba(154, 123, 60, 0.15);
+  background: rgba(84, 88, 89, 0.15);
   color: var(--gy-gold-deep);
   font-size: 0.68rem;
   letter-spacing: 0;
@@ -1187,12 +1187,12 @@ function remove() {
 }
 
 .pkg-role:hover {
-  border-color: rgba(154, 123, 60, 0.4);
+  border-color: rgba(84, 88, 89, 0.4);
 }
 
 .pkg-role--on {
   border-color: var(--gy-gold-deep);
-  background: rgba(154, 123, 60, 0.1);
+  background: rgba(84, 88, 89, 0.1);
 }
 
 .pkg-role__check {
@@ -1291,7 +1291,7 @@ function remove() {
 }
 
 .pkg-mod--on {
-  border-color: rgba(154, 123, 60, 0.35);
+  border-color: rgba(84, 88, 89, 0.35);
   background: #fff;
 }
 
@@ -1346,7 +1346,7 @@ function remove() {
 .pkg-mod__subs {
   border-top: 1px solid rgba(28, 36, 33, 0.06);
   padding: 0.55rem 0.75rem 0.75rem;
-  background: rgba(154, 123, 60, 0.04);
+  background: rgba(84, 88, 89, 0.04);
 }
 
 .pkg-mod__subs-bar {
@@ -1393,8 +1393,8 @@ function remove() {
 }
 
 .pkg-sub--on {
-  border-color: rgba(154, 123, 60, 0.4);
-  background: rgba(154, 123, 60, 0.08);
+  border-color: rgba(84, 88, 89, 0.4);
+  background: rgba(84, 88, 89, 0.08);
 }
 
 .pkg-sub strong {

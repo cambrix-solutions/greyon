@@ -141,7 +141,7 @@ function clear() {
   display: grid;
   gap: 0.65rem;
   padding: 0.85rem;
-  border: 1px dashed rgba(154, 123, 60, 0.4);
+  border: 1px dashed rgba(84, 88, 89, 0.4);
   background: var(--gy-sand);
   transition:
     border-color 0.15s ease,
@@ -150,7 +150,7 @@ function clear() {
 
 .image-drop--active {
   border-color: var(--gy-forest);
-  background: rgba(154, 123, 60, 0.08);
+  background: rgba(84, 88, 89, 0.08);
 }
 
 .image-drop__empty {

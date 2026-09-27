@@ -10,7 +10,13 @@
 
     <div class="auth-shell__layout">
       <aside v-reveal class="auth-shell__brand">
-        <p class="auth-shell__mark gy-display">Greyon</p>
+        <img
+          class="auth-shell__logo"
+          src="/logo/Logo white V1-05.png"
+          alt="Greyon"
+          width="200"
+          height="72"
+        />
         <p class="auth-shell__lede">{{ lede }}</p>
         <p class="auth-shell__rule" aria-hidden="true" />
       </aside>
@@ -78,7 +84,7 @@ withDefaults(
   border-radius: 50%;
   background: radial-gradient(
     circle,
-    rgba(196, 163, 90, 0.28) 0%,
+    rgba(111, 128, 103, 0.28) 0%,
     transparent 70%
   );
   filter: blur(8px);
@@ -103,12 +109,12 @@ withDefaults(
   padding: 0.5rem 0;
 }
 
-.auth-shell__mark {
-  margin: 0 0 0.85rem;
-  font-size: clamp(3rem, 8vw, 4.6rem);
-  line-height: 0.92;
-  letter-spacing: -0.03em;
-  color: #fff;
+.auth-shell__logo {
+  display: block;
+  height: clamp(3.5rem, 10vw, 5rem);
+  width: auto;
+  object-fit: contain;
+  margin: 0 0 1rem;
 }
 
 .auth-shell__lede {
@@ -137,7 +143,7 @@ withDefaults(
   border-radius: 16px;
   box-shadow:
     0 30px 70px rgba(0, 0, 0, 0.32),
-    0 0 0 1px rgba(196, 163, 90, 0.12);
+    0 0 0 1px rgba(84, 88, 89, 0.12);
   backdrop-filter: blur(10px);
   padding: clamp(1.85rem, 3.5vw, 2.35rem) clamp(1.5rem, 3vw, 2.1rem)
     clamp(1.65rem, 3vw, 2rem);

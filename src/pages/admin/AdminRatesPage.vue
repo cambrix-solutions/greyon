@@ -1108,7 +1108,7 @@ function remove(id: string) {
 .cal__cell:hover:not(:disabled) {
   background: #f8f4ec;
   transform: translateY(-1px);
-  box-shadow: inset 0 0 0 1px rgba(154, 123, 60, 0.22);
+  box-shadow: inset 0 0 0 1px rgba(84, 88, 89, 0.22);
 }
 
 .cal__cell--outside {

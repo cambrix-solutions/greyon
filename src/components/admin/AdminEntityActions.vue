@@ -256,8 +256,8 @@ function onPrimaryClick() {
 }
 
 .entity-actions__icon:hover {
-  color: var(--gy-gold-deep, #9a7b3c) !important;
-  background: rgba(154, 123, 60, 0.1) !important;
+  color: var(--gy-gold-deep, #8f7340) !important;
+  background: rgba(84, 88, 89, 0.1) !important;
 }
 
 .entity-actions__icon--danger:hover {

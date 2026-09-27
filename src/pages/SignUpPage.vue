@@ -223,7 +223,7 @@ function onGoogle() {
 }
 
 .auth-google:hover:not(:disabled) {
-  border-color: rgba(196, 163, 90, 0.65);
+  border-color: rgba(111, 128, 103, 0.65);
   background: var(--gy-sand);
   transform: translateY(-1px);
 }
@@ -310,7 +310,7 @@ function onGoogle() {
   outline: none;
   border-color: var(--gy-gold);
   background: #fff;
-  box-shadow: 0 0 0 3px rgba(196, 163, 90, 0.18);
+  box-shadow: 0 0 0 3px rgba(111, 128, 103, 0.18);
 }
 
 .auth-error {

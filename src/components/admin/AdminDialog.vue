@@ -147,7 +147,7 @@ function onUpdate(value: boolean) {
   background:
     radial-gradient(
       ellipse 80% 120% at 0% 0%,
-      rgba(196, 163, 90, 0.12),
+      rgba(111, 128, 103, 0.12),
       transparent 55%
     ),
     linear-gradient(180deg, #fbfaf8 0%, #fff 100%);
@@ -161,7 +161,7 @@ function onUpdate(value: boolean) {
   height: 2.65rem;
   flex-shrink: 0;
   border-radius: 12px;
-  background: rgba(154, 123, 60, 0.12);
+  background: rgba(84, 88, 89, 0.12);
   color: var(--gy-gold-deep);
   margin-top: 0.1rem;
 }
@@ -212,8 +212,8 @@ function onUpdate(value: boolean) {
   margin: 0 1.4rem;
   padding: 0.75rem 0.9rem;
   border-radius: 12px;
-  background: rgba(154, 123, 60, 0.08);
-  border: 1px solid rgba(154, 123, 60, 0.16);
+  background: rgba(84, 88, 89, 0.08);
+  border: 1px solid rgba(84, 88, 89, 0.16);
   font-size: 0.84rem;
   line-height: 1.45;
   color: var(--gy-ink);

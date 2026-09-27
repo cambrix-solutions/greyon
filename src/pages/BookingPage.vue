@@ -794,8 +794,8 @@ function showGuestError(field: "fullName" | "email" | "phone") {
 }
 
 .guest-account--in {
-  border-color: rgba(196, 163, 90, 0.45);
-  background: rgba(196, 163, 90, 0.08);
+  border-color: rgba(111, 128, 103, 0.45);
+  background: rgba(111, 128, 103, 0.08);
 }
 
 .guest-account__title {
@@ -994,7 +994,7 @@ textarea:focus {
   display: inline-block;
   margin: 0.15rem 0 0.35rem !important;
   padding: 0.2rem 0.55rem;
-  background: rgba(154, 123, 60, 0.1);
+  background: rgba(84, 88, 89, 0.1);
   color: var(--gy-forest);
   font-size: 0.85rem;
   text-transform: capitalize;

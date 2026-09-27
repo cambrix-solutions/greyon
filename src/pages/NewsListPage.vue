@@ -38,10 +38,15 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted } from "vue";
 import SeoHead from "@/components/SeoHead.vue";
 import { useCmsStore } from "@/stores/cms-store";
 
 const cms = useCmsStore();
+
+onMounted(() => {
+  void cms.ensurePublicCatalog();
+});
 </script>
 
 <style scoped>
@@ -80,7 +85,7 @@ const cms = useCmsStore();
   font-size: 0.72rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--gy-accent, #9a7b3c);
+  color: var(--gy-accent, var(--gy-gold-deep));
 }
 
 .news-item__title {

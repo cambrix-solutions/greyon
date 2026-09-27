@@ -26,12 +26,13 @@
       </template>
       <template #toolbar>
         <q-input
-          v-model="query"
+          :model-value="query"
           dense
           outlined
           clearable
           placeholder="Search hotels…"
           style="min-width: min(100%, 240px); background: #fff"
+          @update:model-value="onQueryUpdate"
         >
           <template #prepend><q-icon name="search" /></template>
         </q-input>
@@ -42,8 +43,10 @@
           outlined
           emit-value
           map-options
+          options-dense
           label="Status"
           style="min-width: 140px; background: #fff"
+          popup-content-class="admin-filter-menu"
         />
         <q-select
           v-model="locationFilter"
@@ -52,8 +55,10 @@
           outlined
           emit-value
           map-options
+          options-dense
           label="Destination"
           style="min-width: 180px; background: #fff"
+          popup-content-class="admin-filter-menu"
         />
         <q-toggle v-model="featuredOnly" label="Featured only" dense />
       </template>
@@ -379,7 +384,9 @@ const featuredOnly = ref(false);
 
 const statusOptions = [
   { label: "All statuses", value: "all" },
-  ...cms.statusOptions.map(s => ({ label: s, value: s }))
+  { label: "draft", value: "draft" },
+  { label: "published", value: "published" },
+  { label: "archived", value: "archived" }
 ];
 
 const locationOptions = computed(() =>
@@ -389,6 +396,11 @@ const locationFilterOptions = computed(() => [
   { label: "All destinations", value: "all" },
   ...locationOptions.value
 ]);
+
+function onQueryUpdate(value: string | number | null) {
+  // Quasar clearable emits null — keep a string so filtered/trim never crash.
+  query.value = value == null ? "" : String(value);
+}
 
 const form = reactive({
   name: "",
@@ -420,7 +432,7 @@ const hasFormMapPin = computed(() => {
 });
 
 const filtered = computed(() => {
-  const q = query.value.trim().toLowerCase();
+  const q = (query.value ?? "").trim().toLowerCase();
   return cms.hotels.filter(h => {
     if (!auth.canAccessHotel(h.id)) return false;
     if (statusFilter.value !== "all" && h.status !== statusFilter.value)
@@ -630,7 +642,8 @@ function syncQuery() {
   if (statusFilter.value !== "all") next.status = statusFilter.value;
   if (locationFilter.value !== "all") next.locationId = locationFilter.value;
   if (featuredOnly.value) next.featured = "1";
-  if (query.value.trim()) next.q = query.value.trim();
+  const q = (query.value ?? "").trim();
+  if (q) next.q = q;
   void router.replace({ query: next });
 }
 
@@ -661,7 +674,7 @@ watch([statusFilter, locationFilter, featuredOnly, query], syncQuery);
   margin-bottom: 1rem;
   padding: 0.75rem 1rem;
   background: #fff;
-  border: 1px solid rgba(154, 123, 60, 0.18);
+  border: 1px solid rgba(84, 88, 89, 0.18);
   border-radius: 12px;
   font-size: 0.84rem;
   color: var(--gy-muted);
@@ -748,7 +761,7 @@ watch([statusFilter, locationFilter, featuredOnly, query], syncQuery);
 }
 
 .hotel-card:hover {
-  border-color: rgba(154, 123, 60, 0.35);
+  border-color: rgba(84, 88, 89, 0.35);
 }
 
 .hotel-card__media,
@@ -774,7 +787,7 @@ watch([statusFilter, locationFilter, featuredOnly, query], syncQuery);
 .hotel-card__thumb {
   display: grid;
   place-items: center;
-  background: rgba(154, 123, 60, 0.1);
+  background: rgba(84, 88, 89, 0.1);
   color: var(--gy-gold-deep);
 }
 
@@ -816,7 +829,7 @@ watch([statusFilter, locationFilter, featuredOnly, query], syncQuery);
 }
 
 .hotel-card__status[data-status="draft"] {
-  background: rgba(154, 123, 60, 0.14);
+  background: rgba(84, 88, 89, 0.14);
   color: var(--gy-gold-deep);
 }
 
@@ -826,7 +839,7 @@ watch([statusFilter, locationFilter, featuredOnly, query], syncQuery);
   border-radius: 999px;
   font-size: 0.68rem;
   font-weight: 650;
-  background: rgba(154, 123, 60, 0.14);
+  background: rgba(84, 88, 89, 0.14);
   color: var(--gy-gold-deep);
 }
 

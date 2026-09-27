@@ -475,7 +475,7 @@ function remove(id: string) {
   margin-bottom: 1rem;
   padding: 0.75rem 1rem;
   background: #fff;
-  border: 1px solid rgba(154, 123, 60, 0.18);
+  border: 1px solid rgba(84, 88, 89, 0.18);
   border-radius: 12px;
   font-size: 0.84rem;
   color: var(--gy-muted);
@@ -570,7 +570,7 @@ function remove(id: string) {
 }
 
 .loc-card__status[data-status="draft"] {
-  background: rgba(154, 123, 60, 0.14);
+  background: rgba(84, 88, 89, 0.14);
   color: var(--gy-gold-deep);
 }
 
@@ -613,7 +613,7 @@ function remove(id: string) {
 .loc-card__chips li {
   padding: 0.2rem 0.55rem;
   border-radius: 999px;
-  background: rgba(154, 123, 60, 0.1);
+  background: rgba(84, 88, 89, 0.1);
   color: var(--gy-ink);
   font-size: 0.74rem;
   font-weight: 500;
@@ -658,7 +658,7 @@ function remove(id: string) {
   height: 1.4rem;
   padding: 0 0.35rem;
   border-radius: 999px;
-  background: rgba(154, 123, 60, 0.16);
+  background: rgba(84, 88, 89, 0.16);
   color: var(--gy-gold-deep);
   font-size: 0.74rem;
   font-weight: 700;
@@ -693,7 +693,7 @@ function remove(id: string) {
 }
 
 .hotel-row:hover {
-  border-color: rgba(154, 123, 60, 0.35);
+  border-color: rgba(84, 88, 89, 0.35);
 }
 
 .hotel-row__thumb {
@@ -704,7 +704,7 @@ function remove(id: string) {
   flex-shrink: 0;
   display: grid;
   place-items: center;
-  background: rgba(154, 123, 60, 0.1);
+  background: rgba(84, 88, 89, 0.1);
   color: var(--gy-gold-deep);
 }
 

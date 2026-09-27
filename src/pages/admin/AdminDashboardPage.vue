@@ -719,7 +719,7 @@ function resetData() {
 
 .dash-chip:hover {
   transform: translateY(-1px);
-  border-color: rgba(154, 123, 60, 0.35);
+  border-color: rgba(84, 88, 89, 0.35);
   color: var(--gy-ink);
 }
 
@@ -776,7 +776,7 @@ function resetData() {
 }
 
 .dash-stat:hover {
-  border-color: rgba(154, 123, 60, 0.28);
+  border-color: rgba(84, 88, 89, 0.28);
   transform: translateY(-3px);
   box-shadow: 0 12px 28px rgba(26, 24, 20, 0.07);
 }
@@ -786,7 +786,7 @@ function resetData() {
   height: 2.2rem;
   display: grid;
   place-items: center;
-  background: rgba(154, 123, 60, 0.1);
+  background: rgba(84, 88, 89, 0.1);
   color: var(--gy-forest);
   border-radius: 10px;
   flex-shrink: 0;
@@ -849,8 +849,8 @@ function resetData() {
 }
 
 .dash-action:hover {
-  border-color: rgba(154, 123, 60, 0.3);
-  background: rgba(154, 123, 60, 0.04);
+  border-color: rgba(84, 88, 89, 0.3);
+  background: rgba(84, 88, 89, 0.04);
   transform: translateY(-2px);
   box-shadow: 0 10px 24px rgba(26, 24, 20, 0.06);
 }
@@ -881,7 +881,7 @@ function resetData() {
 }
 
 .dash-panel:hover {
-  border-color: rgba(154, 123, 60, 0.2);
+  border-color: rgba(84, 88, 89, 0.2);
   box-shadow: 0 12px 28px rgba(26, 24, 20, 0.05);
 }
 
@@ -919,7 +919,7 @@ function resetData() {
 }
 
 .dash-row:hover {
-  background: rgba(154, 123, 60, 0.04);
+  background: rgba(84, 88, 89, 0.04);
 }
 
 .dash-row__title {
@@ -979,7 +979,7 @@ function resetData() {
 
 .dash-status--confirmed,
 .dash-status--closed {
-  background: rgba(154, 123, 60, 0.12);
+  background: rgba(84, 88, 89, 0.12);
   color: var(--gy-forest);
 }
 
@@ -989,7 +989,7 @@ function resetData() {
 }
 
 .dash-status--in_progress {
-  background: rgba(154, 123, 60, 0.08);
+  background: rgba(84, 88, 89, 0.08);
   color: var(--gy-moss);
 }
 

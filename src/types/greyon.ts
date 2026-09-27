@@ -172,6 +172,9 @@ export interface RateCalendar {
 
 export interface NewsArticle {
   id: string;
+  /** Optional destination this story is about */
+  locationId?: string;
+  locationName?: string;
   title: string;
   slug: string;
   coverImage: string;

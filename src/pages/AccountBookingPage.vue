@@ -248,7 +248,7 @@ function rateLabel(ratePlanId: string) {
 .stay-detail__media {
   min-height: 180px;
   background:
-    linear-gradient(145deg, rgba(196, 163, 90, 0.35), rgba(18, 17, 16, 0.25)),
+    linear-gradient(145deg, rgba(111, 128, 103, 0.35), rgba(18, 17, 16, 0.25)),
     var(--gy-stone) center / cover no-repeat;
 }
 

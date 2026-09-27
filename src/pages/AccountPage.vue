@@ -524,7 +524,7 @@ async function onLogout() {
 }
 
 .account-stay__link:hover {
-  background: rgba(196, 163, 90, 0.08);
+  background: rgba(111, 128, 103, 0.08);
 }
 
 .account-stay__link:hover .account-stay__open {
@@ -533,7 +533,7 @@ async function onLogout() {
 
 .account-stay__media {
   background:
-    linear-gradient(145deg, rgba(196, 163, 90, 0.35), rgba(18, 17, 16, 0.2)),
+    linear-gradient(145deg, rgba(111, 128, 103, 0.35), rgba(18, 17, 16, 0.2)),
     var(--gy-stone) center / cover no-repeat;
   min-height: 88px;
 }
@@ -601,7 +601,7 @@ async function onLogout() {
 
 .account-explore__item:hover {
   border-color: var(--gy-gold);
-  background: rgba(196, 163, 90, 0.06);
+  background: rgba(111, 128, 103, 0.06);
 }
 
 .account-explore__label {
@@ -635,7 +635,7 @@ async function onLogout() {
 }
 
 .account-hotel:hover {
-  background: rgba(196, 163, 90, 0.05);
+  background: rgba(111, 128, 103, 0.05);
 }
 
 .account-hotel__img {

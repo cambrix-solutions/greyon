@@ -1,20 +1,22 @@
 :root {
-  /* Brand: white + gold + ink */
+  /* Brand: hospitality — champagne brass + espresso */
   --gy-white: #ffffff;
-  --gy-gold: #c4a35a;
-  --gy-gold-deep: #9a7b3c;
-  --gy-ink: #121110;
-  --gy-muted: #7a736a;
-  --gy-cream: #ffffff;
-  --gy-sand: #f7f6f3;
-  --gy-stone: #e8e4dc;
-  --gy-forest: var(--gy-gold-deep);
-  --gy-moss: var(--gy-gold);
-  --gy-shadow: 0 20px 50px rgba(18, 17, 16, 0.08);
+  --gy-gold: #c4a35a; /* Champagne brass accent */
+  --gy-gold-deep: #8f7340; /* Deep brass CTA / emphasis */
+  --gy-ink: #1c1814; /* Espresso */
+  --gy-muted: #7a736a; /* Warm stone text */
+  --gy-cream: #f8f5f0; /* Soft linen */
+  --gy-sand: #efe9e0; /* Warm sand surface */
+  --gy-stone: #d9d0c3; /* Limestone */
+  --gy-forest: #8f7340; /* Align with deep brass */
+  --gy-moss: #c4a35a; /* Align with champagne */
+  --gy-taupe: #a89278; /* Soft warm support */
+  --gy-beige: #e4d5c0; /* Light sand */
+  --gy-shadow: 0 20px 50px rgba(28, 24, 20, 0.09);
   --gy-radius-card: 16px;
   --gy-radius-media: 12px;
-  --font-display: "Syne", "Poppins", system-ui, sans-serif;
-  --font-body: "Poppins", system-ui, sans-serif;
+  --font-display: "Montserrat", system-ui, sans-serif;
+  --font-body: "Lora", Georgia, "Times New Roman", serif;
 }
 
 html,
@@ -71,9 +73,9 @@ a {
   border-radius: 8px;
   background: var(--gy-gold-deep);
   color: var(--gy-white);
-  font-family: var(--font-body);
+  font-family: var(--font-display);
   font-size: 0.82rem;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   cursor: pointer;
@@ -116,22 +118,22 @@ a {
 }
 
 .gy-btn--light {
-  background: var(--gy-gold);
-  color: var(--gy-ink);
-  border-color: var(--gy-gold);
+  background: var(--gy-gold-deep);
+  color: var(--gy-white);
+  border-color: var(--gy-gold-deep);
 }
 
 .gy-btn--light:hover {
-  background: var(--gy-gold-deep);
-  border-color: var(--gy-gold-deep);
+  background: var(--gy-ink);
+  border-color: var(--gy-ink);
   color: var(--gy-white);
-  box-shadow: 0 12px 28px rgba(154, 123, 60, 0.28);
+  box-shadow: 0 12px 28px rgba(28, 24, 20, 0.28);
 }
 
 .gy-btn--outline {
   background: transparent;
   color: var(--gy-gold-deep);
-  border-color: rgba(154, 123, 60, 0.45);
+  border-color: rgba(143, 115, 64, 0.45);
 }
 
 .gy-btn--outline:hover {
@@ -210,7 +212,7 @@ a {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   margin-bottom: 1rem;
-  border: 1px solid rgba(154, 123, 60, 0.14);
+  border: 1px solid rgba(143, 115, 64, 0.16);
   border-radius: 14px;
   background: #fff;
 }
@@ -265,7 +267,7 @@ a {
 }
 
 .admin-layout .q-markup-table thead tr {
-  background: #faf9f7;
+  background: var(--gy-sand);
 }
 
 .admin-layout .q-markup-table th {
@@ -309,9 +311,17 @@ a {
   transition-delay: var(--reveal-delay, 0ms);
 }
 
+/* Invisible reveal targets must not steal clicks from content below
+   (e.g. admin filter q-selects under a still-animating page head). */
+.gy-reveal:not(.gy-reveal--in) {
+  pointer-events: none;
+}
+
 .gy-reveal--in {
   opacity: 1;
-  transform: translateY(0);
+  /* none — not translateY(0) — so we don't leave a containing block
+     that can break teleported/fixed UI (e.g. q-select menus). */
+  transform: none;
 }
 
 .gy-reveal-stagger > .gy-reveal:nth-child(1) {
@@ -389,7 +399,7 @@ a {
 
 .admin-layout .admin-scroll tbody tr:hover,
 .admin-layout .q-markup-table tbody tr:hover {
-  background: rgba(154, 123, 60, 0.05);
+  background: rgba(196, 163, 90, 0.08);
 }
 
 @media (prefers-reduced-motion: reduce) {

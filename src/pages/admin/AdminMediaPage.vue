@@ -3,7 +3,7 @@
     <AdminPageHeader
       eyebrow="Content"
       title="Media library"
-      :subtitle="`${filtered.length} of ${cms.media.length} assets · drop files or paste URLs`"
+      :subtitle="`${filtered.length} of ${cms.media.length} assets · scoped to destinations`"
     >
       <template #actions>
         <q-btn
@@ -18,15 +18,41 @@
       </template>
       <template #toolbar>
         <q-input
-          v-model="query"
+          :model-value="query"
           dense
           outlined
           clearable
           placeholder="Search by alt or URL…"
-          style="min-width: min(100%, 280px); background: #fff"
+          style="min-width: min(100%, 220px); background: #fff"
+          @update:model-value="onQueryUpdate"
         >
           <template #prepend><q-icon name="search" /></template>
         </q-input>
+        <q-select
+          v-model="locationFilter"
+          :options="locationFilterOptions"
+          dense
+          outlined
+          emit-value
+          map-options
+          options-dense
+          label="Destination"
+          style="min-width: 180px; background: #fff"
+          popup-content-class="admin-filter-menu"
+          @update:model-value="onLocationFilterChange"
+        />
+        <q-select
+          v-model="hotelFilter"
+          :options="hotelFilterOptions"
+          dense
+          outlined
+          emit-value
+          map-options
+          options-dense
+          label="Hotel"
+          style="min-width: 180px; background: #fff"
+          popup-content-class="admin-filter-menu"
+        />
       </template>
     </AdminPageHeader>
 
@@ -44,6 +70,7 @@
         <q-card flat bordered class="bg-white media-card gy-interactive">
           <q-img :src="item.src" :ratio="4 / 3" :alt="item.alt" />
           <q-card-section class="q-gutter-sm">
+            <p class="media-card__scope">{{ scopeLabel(item) }}</p>
             <q-input
               dense
               outlined
@@ -52,6 +79,34 @@
               :disable="!auth.canAction('media', 'update')"
               @update:model-value="
                 v => cms.updateMedia(item.id, { alt: String(v ?? '') })
+              "
+            />
+            <q-select
+              dense
+              outlined
+              emit-value
+              map-options
+              options-dense
+              label="Destination"
+              :model-value="item.locationId ?? null"
+              :options="locationOptions"
+              :disable="!auth.canAction('media', 'update')"
+              @update:model-value="(v: string) => patchScope(item.id, v, item.hotelId)"
+            />
+            <q-select
+              dense
+              outlined
+              emit-value
+              map-options
+              options-dense
+              clearable
+              label="Hotel (optional)"
+              :model-value="item.hotelId ?? null"
+              :options="hotelOptionsForLocation(item.locationId)"
+              :disable="!auth.canAction('media', 'update') || !item.locationId"
+              @update:model-value="
+                (v: string | null) =>
+                  patchScope(item.id, item.locationId, v)
               "
             />
             <div class="row q-gutter-sm">
@@ -76,7 +131,7 @@
       </div>
     </div>
     <q-banner v-else class="bg-white" rounded>
-      No media yet. Drop images or paste a URL to get started.
+      No media match. Attach assets to a destination (and optionally a hotel).
       <template #action>
         <q-btn
           v-if="auth.canAction('media', 'create')"
@@ -94,8 +149,35 @@
       icon="photo_library"
       eyebrow="Publishing"
       title="Add media"
-      subtitle="Drop an image or paste a hosted URL for hotels, rooms, and news."
+      subtitle="Attach to a destination first — optionally pin to a hotel for filtering."
     >
+      <AdminFormSection
+        title="Scope"
+        hint="Destination is required. Hotel narrows the library filter under that city."
+        :columns="2"
+      >
+        <q-select
+          v-model="formLocationId"
+          :options="locationOptions"
+          label="Destination *"
+          outlined
+          dense
+          emit-value
+          map-options
+          @update:model-value="formHotelId = null"
+        />
+        <q-select
+          v-model="formHotelId"
+          :options="hotelOptionsForLocation(formLocationId)"
+          label="Hotel (optional)"
+          outlined
+          dense
+          emit-value
+          map-options
+          clearable
+          :disable="!formLocationId"
+        />
+      </AdminFormSection>
       <AdminFormSection
         title="Image"
         hint="Prefer hosted URLs in production; local uploads stay in this browser."
@@ -116,7 +198,7 @@
           unelevated
           no-caps
           label="Add to library"
-          :disable="!src"
+          :disable="!src || !formLocationId"
           @click="add"
         />
       </template>
@@ -125,7 +207,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useQuasar } from "quasar";
 import AdminDialog from "@/components/admin/AdminDialog.vue";
 import AdminFormSection from "@/components/admin/AdminFormSection.vue";
@@ -133,29 +215,112 @@ import AdminPageHeader from "@/components/admin/AdminPageHeader.vue";
 import ImageDropField from "@/components/admin/ImageDropField.vue";
 import { useAuthStore } from "@/stores/auth-store";
 import { useCmsStore } from "@/stores/cms-store";
+import type { MediaItem } from "@/stores/cms-store";
 
 const cms = useCmsStore();
 const auth = useAuthStore();
 const $q = useQuasar();
 
-onMounted(() => {
-  void cms.ensureMedia();
+onMounted(async () => {
+  await Promise.all([
+    cms.ensureMedia(),
+    cms.ensureLocations(),
+    cms.ensureHotels()
+  ]);
 });
 
 const dialog = ref(false);
 const src = ref("");
 const alt = ref("");
+const formLocationId = ref<string | null>(null);
+const formHotelId = ref<string | null>(null);
 const query = ref("");
+const locationFilter = ref("all");
+const hotelFilter = ref("all");
+
+function onQueryUpdate(value: string | number | null) {
+  query.value = value == null ? "" : String(value);
+}
+
+function onLocationFilterChange() {
+  hotelFilter.value = "all";
+}
+
+const locationOptions = computed(() =>
+  cms.locations
+    .filter(l => auth.canAccessLocation(l.id))
+    .map(l => ({ label: l.name, value: l.id }))
+);
+
+const locationFilterOptions = computed(() => [
+  { label: "All destinations", value: "all" },
+  ...locationOptions.value
+]);
+
+const hotelOptionsForFilter = computed(() => {
+  return cms.hotels
+    .filter(h => {
+      if (!auth.canAccessHotel(h.id)) return false;
+      if (locationFilter.value !== "all" && h.locationId !== locationFilter.value)
+        return false;
+      return true;
+    })
+    .map(h => ({ label: h.name, value: h.id }));
+});
+
+const hotelFilterOptions = computed(() => [
+  { label: "All hotels", value: "all" },
+  ...hotelOptionsForFilter.value
+]);
+
+function hotelOptionsForLocation(locationId?: string | null) {
+  if (!locationId) return [];
+  return cms.hotels
+    .filter(h => h.locationId === locationId && auth.canAccessHotel(h.id))
+    .map(h => ({ label: h.name, value: h.id }));
+}
 
 const filtered = computed(() => {
-  const q = query.value.trim().toLowerCase();
-  if (!q) return cms.media;
-  return cms.media.filter(m => `${m.alt} ${m.src}`.toLowerCase().includes(q));
+  const q = (query.value ?? "").trim().toLowerCase();
+  return cms.media.filter(m => {
+    if (locationFilter.value !== "all" && m.locationId !== locationFilter.value)
+      return false;
+    if (hotelFilter.value !== "all" && m.hotelId !== hotelFilter.value)
+      return false;
+    if (!q) return true;
+    return `${m.alt} ${m.src}`.toLowerCase().includes(q);
+  });
 });
+
+watch(locationFilter, () => {
+  if (
+    hotelFilter.value !== "all" &&
+    !hotelOptionsForFilter.value.some(h => h.value === hotelFilter.value)
+  ) {
+    hotelFilter.value = "all";
+  }
+});
+
+function scopeLabel(item: MediaItem) {
+  const loc = item.locationId
+    ? cms.getLocationById(item.locationId)?.name
+    : null;
+  const hotel = item.hotelId ? cms.getHotelById(item.hotelId)?.name : null;
+  if (loc && hotel) return `${loc} · ${hotel}`;
+  if (loc) return loc;
+  if (hotel) return hotel;
+  return "Unscoped";
+}
 
 function openAdd() {
   src.value = "";
   alt.value = "";
+  formLocationId.value =
+    locationFilter.value !== "all"
+      ? locationFilter.value
+      : (locationOptions.value[0]?.value ?? null);
+  formHotelId.value =
+    hotelFilter.value !== "all" ? hotelFilter.value : null;
   dialog.value = true;
 }
 
@@ -164,16 +329,54 @@ async function add() {
     $q.notify({ type: "negative", message: "Image is required." });
     return;
   }
+  if (!formLocationId.value) {
+    $q.notify({ type: "negative", message: "Destination is required." });
+    return;
+  }
   try {
-    await cms.addMedia(src.value, alt.value || "Greyon media");
+    await cms.addMedia({
+      src: src.value,
+      alt: alt.value || "Greyon media",
+      locationId: formLocationId.value,
+      hotelId: formHotelId.value
+    });
     src.value = "";
     alt.value = "";
+    formHotelId.value = null;
     dialog.value = false;
     $q.notify({ type: "positive", message: "Media added." });
   } catch (e) {
     $q.notify({
       type: "negative",
       message: e instanceof Error ? e.message : "Add failed."
+    });
+  }
+}
+
+async function patchScope(
+  id: string,
+  locationId?: string | null,
+  hotelId?: string | null
+) {
+  if (!locationId) {
+    $q.notify({ type: "negative", message: "Destination is required." });
+    return;
+  }
+  // Clear hotel if it no longer belongs to the destination.
+  let nextHotel = hotelId ?? null;
+  if (nextHotel) {
+    const hotel = cms.getHotelById(nextHotel);
+    if (!hotel || hotel.locationId !== locationId) nextHotel = null;
+  }
+  try {
+    await cms.updateMedia(id, {
+      locationId,
+      hotelId: nextHotel
+    });
+  } catch (e) {
+    $q.notify({
+      type: "negative",
+      message: e instanceof Error ? e.message : "Update failed."
     });
   }
 }
@@ -202,5 +405,14 @@ function remove(id: string) {
 <style scoped>
 .media-card {
   overflow: hidden;
+}
+
+.media-card__scope {
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--gy-gold-deep);
+  font-weight: 600;
 }
 </style>

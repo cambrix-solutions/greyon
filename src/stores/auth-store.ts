@@ -326,6 +326,22 @@ export const useAuthStore = defineStore("auth", () => {
   function featureEnabled(key: string) {
     if (isDeveloper.value) return true;
     const cms = useCmsStore();
+    const feat = cms.features.find(f => f.key === key);
+    // Guest-facing surfaces (news / booking / contact / portfolios).
+    // Greyon MVP ships these as live marketing routes (/booking-terms,
+    // hotel "Book now" CTAs, footer links). Package-builder `enabled`
+    // bits are seat grants — after Round 12 omitted public keys from
+    // the Admin package, applyActivePackage left them enabled:false and
+    // every guest BOOK / News / Contact CTA 404'd. Default these ON;
+    // do not let stale package catalog state disable the public site.
+    const isPublicProduct =
+      feat?.category === "public" ||
+      key.endsWith("_public") ||
+      key === "portfolios";
+
+    if (isPublicProduct) {
+      return true;
+    }
 
     if (user.value) {
       // Exact key only — unchecking a package permission must take effect
@@ -333,7 +349,6 @@ export const useAuthStore = defineStore("auth", () => {
       return featureKeys.value.includes(key);
     }
 
-    const feat = cms.features.find(f => f.key === key);
     if (!feat) return true;
     return feat.enabled;
   }

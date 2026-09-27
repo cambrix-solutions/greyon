@@ -1035,7 +1035,7 @@ function removeRoom(id: string) {
 .dest-overview__tags li {
   padding: 0.2rem 0.6rem;
   border-radius: 999px;
-  background: rgba(154, 123, 60, 0.12);
+  background: rgba(84, 88, 89, 0.12);
   color: var(--gy-gold-deep);
   font-size: 0.74rem;
   font-weight: 550;
@@ -1089,7 +1089,7 @@ function removeRoom(id: string) {
 }
 
 .status-pill[data-status="draft"] {
-  background: rgba(154, 123, 60, 0.16);
+  background: rgba(84, 88, 89, 0.16);
   color: var(--gy-gold-deep);
 }
 
@@ -1106,7 +1106,7 @@ function removeRoom(id: string) {
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  background: rgba(154, 123, 60, 0.14);
+  background: rgba(84, 88, 89, 0.14);
   color: var(--gy-gold-deep);
 }
 
@@ -1183,7 +1183,7 @@ function removeRoom(id: string) {
 }
 
 .prop-hotel__summary:hover {
-  background: rgba(154, 123, 60, 0.04);
+  background: rgba(84, 88, 89, 0.04);
 }
 
 .prop-hotel__thumb {
@@ -1331,7 +1331,7 @@ function removeRoom(id: string) {
   border-radius: 14px;
   display: grid;
   place-items: center;
-  background: rgba(154, 123, 60, 0.12);
+  background: rgba(84, 88, 89, 0.12);
   color: var(--gy-gold-deep);
   margin-bottom: 0.35rem;
 }

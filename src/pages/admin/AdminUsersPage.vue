@@ -484,7 +484,7 @@ function remove(id: string) {
 }
 .role-pill {
   color: var(--gy-gold-deep);
-  background: rgba(154, 123, 60, 0.12);
+  background: rgba(84, 88, 89, 0.12);
 }
 .pkg-chip {
   color: var(--gy-ink);
