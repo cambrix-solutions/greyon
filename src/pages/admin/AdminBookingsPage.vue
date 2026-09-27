@@ -932,8 +932,7 @@ function remove(id: string) {
       } catch (e) {
         $q.notify({
           type: "negative",
-          message:
-            e instanceof Error ? e.message : "Could not delete booking."
+          message: e instanceof Error ? e.message : "Could not delete booking."
         });
         if (booking) {
           detailBooking.value = booking;

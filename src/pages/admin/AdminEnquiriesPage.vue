@@ -146,13 +146,12 @@ const router = useRouter();
 const query = ref("");
 const statusFilter = ref<"all" | EnquiryStatus>("all");
 /** Static options — avoid depending on store identity at setup time. */
-const statusFilterOptions: { label: string; value: "all" | EnquiryStatus }[] =
-  [
-    { label: "All statuses", value: "all" },
-    { label: "new", value: "new" },
-    { label: "in progress", value: "in_progress" },
-    { label: "closed", value: "closed" }
-  ];
+const statusFilterOptions: { label: string; value: "all" | EnquiryStatus }[] = [
+  { label: "All statuses", value: "all" },
+  { label: "new", value: "new" },
+  { label: "in progress", value: "in_progress" },
+  { label: "closed", value: "closed" }
+];
 let syncingFromRoute = false;
 
 function onQueryUpdate(value: string | number | null) {
@@ -178,10 +177,7 @@ onMounted(async () => {
   await cms.ensureEnquiries();
   applyRouteQuery();
 });
-watch(
-  () => [route.query.status, route.query.q] as const,
-  applyRouteQuery
-);
+watch(() => [route.query.status, route.query.q] as const, applyRouteQuery);
 watch([statusFilter, query], () => {
   if (syncingFromRoute) return;
   const next = { ...route.query } as Record<
