@@ -166,9 +166,7 @@ export const useBookingStore = defineStore("booking", () => {
     if (!customer.isAuthenticated || !customer.user) return;
 
     let phone =
-      guest.value.phone.trim() ||
-      (customer.user.phone ?? "").trim() ||
-      "";
+      guest.value.phone.trim() || (customer.user.phone ?? "").trim() || "";
 
     // Profile may still lack phone (e.g. Google signup) even after prior stays.
     if (!phone) {

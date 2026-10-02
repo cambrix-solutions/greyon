@@ -43,9 +43,7 @@ const props = withDefaults(
 
 function hasValidCoords(lat: number, lng: number) {
   return (
-    Number.isFinite(lat) &&
-    Number.isFinite(lng) &&
-    !(lat === 0 && lng === 0)
+    Number.isFinite(lat) && Number.isFinite(lng) && !(lat === 0 && lng === 0)
   );
 }
 
@@ -104,7 +102,8 @@ const externalHref = computed(() => {
 });
 
 const linkLabel = computed(() => {
-  if (googleShareOrMaps.value || googleEmbed.value) return "Open in Google Maps";
+  if (googleShareOrMaps.value || googleEmbed.value)
+    return "Open in Google Maps";
   if (coordsOk.value) return "Open in OpenStreetMap";
   return "Open map";
 });

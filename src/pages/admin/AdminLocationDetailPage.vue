@@ -91,10 +91,7 @@
             <em>{{ hotels.length }}/{{ hotelCap }}</em>
           </h2>
         </div>
-        <span
-          v-if="auth.canAction('hotels', 'create')"
-          class="prop-board__add"
-        >
+        <span v-if="auth.canAction('hotels', 'create')" class="prop-board__add">
           <q-btn
             unelevated
             no-caps
@@ -260,10 +257,7 @@
           Add the first hotel for {{ location.name }}, then create room types
           under it.
         </p>
-        <span
-          v-if="auth.canAction('hotels', 'create')"
-          class="prop-board__add"
-        >
+        <span v-if="auth.canAction('hotels', 'create')" class="prop-board__add">
           <q-btn
             unelevated
             no-caps

@@ -3,12 +3,12 @@
     <SeoHead
       :title="`${hotel.name} | Greyon`"
       :description="hotel.shortDescription"
-      :image="hotel.heroImage"
+      :image="coverImage"
       :json-ld="jsonLd"
     />
 
     <section class="detail-hero gy-card-media">
-      <img :src="hotel.heroImage" :alt="hotel.name" />
+      <img v-if="coverImage" :src="coverImage" :alt="hotel.name" />
       <div class="detail-hero__veil" />
       <div class="gy-container detail-hero__content">
         <p v-reveal class="gy-eyebrow">{{ locationName }}</p>
@@ -23,9 +23,9 @@
           <span v-if="hotel.propertyType" class="hero-badge">{{
             hotel.propertyType
           }}</span>
-          <span v-if="starLabel" class="hero-badge hero-badge--stars"
-            >{{ starLabel }}</span
-          >
+          <span v-if="starLabel" class="hero-badge hero-badge--stars">{{
+            starLabel
+          }}</span>
         </div>
         <p v-reveal="{ delay: '140ms' }" class="detail-hero__lead">{{
           hotel.shortDescription
@@ -77,11 +77,7 @@
         <p class="feature-line">{{ hotel.amenities.join(" · ") }}</p>
       </section>
 
-      <section
-        v-if="landmarks.length"
-        v-reveal
-        class="block"
-      >
+      <section v-if="landmarks.length" v-reveal class="block">
         <div class="block-head">
           <h2 class="gy-display">Nearby landmarks</h2>
           <p class="gy-muted">
@@ -96,7 +92,7 @@
         </ul>
       </section>
 
-      <section v-reveal class="block">
+      <section v-if="gallery.length" v-reveal class="block">
         <div class="block-head">
           <h2 class="gy-display">Gallery</h2>
         </div>
@@ -127,7 +123,12 @@
         <div class="room-list">
           <article v-for="room in rooms" :key="room.id" class="room-card">
             <div class="gy-card-media room-card__media">
-              <img :src="room.images[0]" :alt="room.name" loading="lazy" />
+              <img
+                v-if="room.images?.[0]"
+                :src="room.images[0]"
+                :alt="room.name"
+                loading="lazy"
+              />
               <span v-if="rateFor(room.id)" class="room-card__badge">
                 From ${{ rateFor(room.id)?.basePrice }}/night
               </span>
@@ -220,9 +221,19 @@ const locationName = computed(
 const rooms = computed(() =>
   hotel.value ? cms.getRoomTypesByHotelId(hotel.value.id) : []
 );
-const gallery = computed(() =>
-  hotel.value ? [hotel.value.heroImage, ...hotel.value.gallery] : []
+const coverImage = computed(
+  () =>
+    hotel.value?.heroImage?.trim() ||
+    hotel.value?.gallery.find(src => src.trim()) ||
+    ""
 );
+const gallery = computed(() => {
+  if (!hotel.value) return [];
+  const urls = [hotel.value.heroImage, ...hotel.value.gallery]
+    .map(src => src.trim())
+    .filter(Boolean);
+  return [...new Set(urls)];
+});
 const landmarks = computed(() => hotel.value?.nearbyLandmarks ?? []);
 const starLabel = computed(() => {
   const n = hotel.value?.starRating;
@@ -256,7 +267,7 @@ const jsonLd = computed(() =>
         description: hotel.value.shortDescription,
         address: hotel.value.address,
         telephone: hotel.value.phone,
-        image: hotel.value.heroImage
+        image: coverImage.value
       }
     : null
 );

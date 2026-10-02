@@ -4,7 +4,7 @@
       :to="`/hotels/${hotel.slug}`"
       class="gy-card-media hotel-card__media"
     >
-      <img :src="hotel.heroImage" :alt="hotel.name" loading="lazy" />
+      <img v-if="coverImage" :src="coverImage" :alt="hotel.name" loading="lazy" />
       <span class="hotel-card__loc">{{ locationName }}</span>
     </router-link>
 
@@ -47,6 +47,12 @@ const router = useRouter();
 
 const locationName = computed(
   () => cms.getLocationById(props.hotel.locationId)?.name ?? ""
+);
+const coverImage = computed(
+  () =>
+    props.hotel.heroImage?.trim() ||
+    props.hotel.gallery.find(src => src.trim()) ||
+    ""
 );
 
 const fromPrice = computed(() => {

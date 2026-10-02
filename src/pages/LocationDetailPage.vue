@@ -100,8 +100,8 @@ const hotelsHere = computed(() =>
     ? cms.publishedHotels.filter(h => h.locationId === location.value?.id)
     : []
 );
-const hasContact = computed(
-  () => Boolean(location.value?.phone?.trim() || location.value?.email?.trim())
+const hasContact = computed(() =>
+  Boolean(location.value?.phone?.trim() || location.value?.email?.trim())
 );
 const mapPoint = computed(() => {
   const c = hotelsHere.value[0]?.coordinates;
