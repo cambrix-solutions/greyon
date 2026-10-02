@@ -15,6 +15,18 @@
         <h1 v-reveal="{ delay: '80ms' }" class="gy-display">{{
           hotel.name
         }}</h1>
+        <div
+          v-if="hotel.propertyType || starLabel"
+          v-reveal="{ delay: '110ms' }"
+          class="detail-hero__badges"
+        >
+          <span v-if="hotel.propertyType" class="hero-badge">{{
+            hotel.propertyType
+          }}</span>
+          <span v-if="starLabel" class="hero-badge hero-badge--stars"
+            >{{ starLabel }}</span
+          >
+        </div>
         <p v-reveal="{ delay: '140ms' }" class="detail-hero__lead">{{
           hotel.shortDescription
         }}</p>
@@ -28,17 +40,18 @@
           <div class="meta-grid">
             <div>
               <span class="meta-label">Address</span>
+              <p v-if="hotel.area" class="meta-area">{{ hotel.area }}</p>
               <p>{{ hotel.address }}</p>
             </div>
             <div>
               <span class="meta-label">Contact</span>
-              <p>{{ hotel.phone }}</p>
-              <p>{{ hotel.email }}</p>
+              <p>{{ hotel.phone || "—" }}</p>
+              <p>{{ hotel.email || "—" }}</p>
             </div>
             <div>
               <span class="meta-label">Stay times</span>
-              <p>Check-in {{ hotel.checkInTime }}</p>
-              <p>Check-out {{ hotel.checkOutTime }}</p>
+              <p>Check-in {{ hotel.checkInTime || "—" }}</p>
+              <p>Check-out {{ hotel.checkOutTime || "—" }}</p>
             </div>
             <div v-if="fromPrice !== null">
               <span class="meta-label">Rates from</span>
@@ -62,6 +75,25 @@
           <p class="gy-muted">Amenities guests can expect during their stay.</p>
         </div>
         <p class="feature-line">{{ hotel.amenities.join(" · ") }}</p>
+      </section>
+
+      <section
+        v-if="landmarks.length"
+        v-reveal
+        class="block"
+      >
+        <div class="block-head">
+          <h2 class="gy-display">Nearby landmarks</h2>
+          <p class="gy-muted">
+            Distances from the property to places guests ask about most.
+          </p>
+        </div>
+        <ul class="landmark-list">
+          <li v-for="item in landmarks" :key="`${item.place}-${item.distance}`">
+            <span class="landmark-list__place">{{ item.place }}</span>
+            <span class="landmark-list__distance">{{ item.distance }}</span>
+          </li>
+        </ul>
       </section>
 
       <section v-reveal class="block">
@@ -139,6 +171,7 @@
         </div>
         <div>
           <h2 class="gy-display">Destination</h2>
+          <p v-if="hotel.area" class="meta-area">{{ hotel.area }}</p>
           <p class="gy-muted">{{ hotel.address }}</p>
           <MapEmbed
             class="q-mt-md"
@@ -190,6 +223,13 @@ const rooms = computed(() =>
 const gallery = computed(() =>
   hotel.value ? [hotel.value.heroImage, ...hotel.value.gallery] : []
 );
+const landmarks = computed(() => hotel.value?.nearbyLandmarks ?? []);
+const starLabel = computed(() => {
+  const n = hotel.value?.starRating;
+  if (typeof n !== "number" || !Number.isFinite(n) || n <= 0) return "";
+  const stars = Math.min(5, Math.max(1, Math.round(n)));
+  return `${"★".repeat(stars)}${"☆".repeat(5 - stars)} ${stars}-star`;
+});
 const related = computed(() => {
   if (!hotel.value) return [];
   return cms.publishedHotels
@@ -281,6 +321,38 @@ async function bookRoom(roomTypeId: string) {
   font-size: 1.08rem;
   line-height: 1.55;
   color: rgba(255, 255, 255, 0.9);
+}
+
+.detail-hero__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin: 0 0 0.85rem;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.28rem 0.65rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--gy-ink);
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 4px;
+}
+
+.hero-badge--stars {
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: var(--gy-gold-deep);
+}
+
+.meta-area {
+  margin: 0 0 0.2rem !important;
+  font-weight: 600;
+  color: var(--gy-gold-deep);
 }
 
 .detail-top {
@@ -456,6 +528,38 @@ async function bookRoom(roomTypeId: string) {
   background: var(--gy-sand);
   border-left: 2px solid var(--gy-gold);
   line-height: 1.5;
+}
+
+.landmark-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.landmark-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: baseline;
+  padding: 0.75rem 0.9rem;
+  background: var(--gy-sand);
+  border-left: 2px solid var(--gy-gold);
+}
+
+.landmark-list__place {
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.landmark-list__distance {
+  flex-shrink: 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--gy-gold-deep);
+  white-space: nowrap;
 }
 
 @media (max-width: 960px) {

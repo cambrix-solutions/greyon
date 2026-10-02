@@ -584,6 +584,10 @@ export const useCmsStore = defineStore("cms", () => {
     shortDescription?: string;
     description?: string;
     address?: string;
+    area?: string;
+    propertyType?: string;
+    starRating?: number | null;
+    nearbyLandmarks?: { place: string; distance: string }[];
     coordinates?: { lat: number; lng: number };
     mapEmbedUrl?: string | null;
     phone?: string;
@@ -606,6 +610,10 @@ export const useCmsStore = defineStore("cms", () => {
       shortDescription: input.shortDescription,
       description: input.description,
       address: input.address,
+      area: input.area,
+      propertyType: input.propertyType,
+      starRating: input.starRating,
+      nearbyLandmarks: input.nearbyLandmarks,
       coordinates: input.coordinates,
       mapEmbedUrl: input.mapEmbedUrl,
       phone: input.phone,
@@ -742,6 +750,8 @@ export const useCmsStore = defineStore("cms", () => {
     heroImage?: string;
     gallery?: string[];
     highlights?: string[];
+    phone?: string;
+    email?: string;
     status?: ContentStatus;
     seoTitle?: string;
     seoDescription?: string;
@@ -753,6 +763,8 @@ export const useCmsStore = defineStore("cms", () => {
       heroImage: input.heroImage,
       gallery: input.gallery,
       highlights: input.highlights,
+      phone: input.phone,
+      email: input.email,
       status: input.status,
       seoTitle: input.seoTitle,
       seoDescription: input.seoDescription

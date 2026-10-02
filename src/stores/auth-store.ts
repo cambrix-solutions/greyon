@@ -375,17 +375,22 @@ export const useAuthStore = defineStore("auth", () => {
     if (isDeveloper.value) return true;
     const crudKey = `${module}_${action}`;
     const keys = featureKeys.value;
+
+    // Explicit CRUD permission always wins (engine PermissionSeeder).
+    if (keys.includes(crudKey)) return true;
+
     // If this seat has any fine-grained `{module}_*` permissions (e.g.
-    // locations_create), require the specific action key — do NOT fall back
-    // to the parent module. Admin sessions often lack the developer feature
-    // catalog, so we key off the session keys themselves.
-    const usesFineGrained = keys.some(k => k.startsWith(`${module}_`));
-    if (usesFineGrained) return keys.includes(crudKey);
-    const catalogHasCrud = useCmsStore().features.some(
-      f => f.key === crudKey && f.parentKey === module
-    );
-    if (catalogHasCrud) return keys.includes(crudKey);
-    return featureEnabled(module);
+    // locations_list without locations_create), require the specific key —
+    // do NOT fall back to the parent module.
+    if (keys.some(k => k.startsWith(`${module}_`))) return false;
+
+    // list may use the parent module feature alone.
+    if (action === "list") return featureEnabled(module);
+
+    // create / update / delete: packages can grant the parent feature while
+    // denying `{module}_create` (seeded Admin + Manager seats). Never treat
+    // the parent feature as permission to mutate.
+    return false;
   }
 
   /**

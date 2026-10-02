@@ -70,6 +70,8 @@ export type LocationInput = {
   heroImage?: string;
   gallery?: string[];
   highlights?: string[];
+  phone?: string;
+  email?: string;
   status?: ContentStatus;
   seoTitle?: string;
   seoDescription?: string;
@@ -82,6 +84,10 @@ export type HotelInput = {
   shortDescription?: string;
   description?: string;
   address?: string;
+  area?: string;
+  propertyType?: string;
+  starRating?: number | null;
+  nearbyLandmarks?: { place: string; distance: string }[];
   coordinates?: { lat: number; lng: number };
   mapEmbedUrl?: string | null;
   phone?: string;

@@ -462,14 +462,14 @@ onMounted(() => {
   // After sign-in return: restore draft (if any) and fill account details.
   booking.restoreDraft();
   if (customer.isAuthenticated && booking.step >= 4) {
-    booking.applyCustomerToGuest();
+    void booking.applyCustomerToGuest();
   }
 });
 
 watch(
   () => customer.isAuthenticated,
   ok => {
-    if (ok && booking.step >= 4) booking.applyCustomerToGuest();
+    if (ok && booking.step >= 4) void booking.applyCustomerToGuest();
   }
 );
 

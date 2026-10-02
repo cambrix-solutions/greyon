@@ -8,6 +8,7 @@ import type {
   BookingSearchParams
 } from "@/types/greyon";
 import { createBooking, searchAvailability } from "@/services/bookingService";
+import { fetchMyBookings } from "@/services/engine/frontAuth";
 import { useCustomerStore } from "@/stores/customer-store";
 import { addLocalDays, nightsBetweenLocal, toLocalYmd } from "@/utils/datetime";
 
@@ -151,7 +152,7 @@ export const useBookingStore = defineStore("booking", () => {
       if (nextStep >= 2 && !results.value.length && !selected.value)
         nextStep = 1;
       step.value = nextStep;
-      applyCustomerToGuest();
+      void applyCustomerToGuest();
       return true;
     } catch {
       clearDraft();
@@ -159,15 +160,34 @@ export const useBookingStore = defineStore("booking", () => {
     }
   }
 
-  function applyCustomerToGuest() {
+  async function applyCustomerToGuest() {
     const customer = useCustomerStore();
     customer.hydrate();
     if (!customer.isAuthenticated || !customer.user) return;
+
+    let phone =
+      guest.value.phone.trim() ||
+      (customer.user.phone ?? "").trim() ||
+      "";
+
+    // Profile may still lack phone (e.g. Google signup) even after prior stays.
+    if (!phone) {
+      try {
+        const bookings = await fetchMyBookings();
+        const fromStay = bookings.find(b => b.guest?.phone?.trim())?.guest
+          ?.phone;
+        phone = (fromStay ?? "").trim();
+        if (phone) customer.patchUser({ phone });
+      } catch {
+        // Prefill is best-effort; guest can still type the number.
+      }
+    }
+
     guest.value = {
       ...guest.value,
       fullName: guest.value.fullName || customer.user.name || "",
       email: guest.value.email || customer.user.email || "",
-      phone: guest.value.phone || customer.user.phone || ""
+      phone: guest.value.phone || phone
     };
   }
 
@@ -210,10 +230,10 @@ export const useBookingStore = defineStore("booking", () => {
     persistDraft();
   }
 
-  function goToGuestDetails() {
+  async function goToGuestDetails() {
     if (!selected.value) return;
     guestAttempted.value = false;
-    applyCustomerToGuest();
+    await applyCustomerToGuest();
     step.value = 4;
     persistDraft();
   }
@@ -271,6 +291,11 @@ export const useBookingStore = defineStore("booking", () => {
       return;
     }
     confirmedBooking.value = result.booking;
+    const customer = useCustomerStore();
+    const bookedPhone = guest.value.phone.trim();
+    if (customer.isAuthenticated && bookedPhone) {
+      customer.patchUser({ phone: bookedPhone });
+    }
     step.value = 6;
     clearDraft();
   }

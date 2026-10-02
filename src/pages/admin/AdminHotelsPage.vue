@@ -100,16 +100,34 @@
               label="Open destination"
               :to="`/admin/locations/${group.locationId}`"
             />
-            <q-btn
+            <span
               v-if="auth.canAction('hotels', 'create')"
-              outline
-              dense
-              no-caps
-              color="primary"
-              icon="add"
-              label="Hotel here"
-              @click="openCreateIn(group.locationId)"
-            />
+              class="hotel-group__add"
+            >
+              <q-btn
+                outline
+                dense
+                no-caps
+                color="primary"
+                icon="add"
+                label="Hotel here"
+                :disable="
+                  group.locationId === 'orphan' ||
+                  group.hotels.length >= hotelCap
+                "
+                @click="openCreateIn(group.locationId)"
+              />
+              <q-tooltip
+                v-if="
+                  group.locationId !== 'orphan' &&
+                  group.hotels.length >= hotelCap
+                "
+                anchor="top middle"
+                self="bottom middle"
+              >
+                Hotel limit reached for this destination ({{ hotelCap }} max)
+              </q-tooltip>
+            </span>
           </div>
         </header>
 
@@ -367,6 +385,8 @@ import type { ContentStatus, Hotel } from "@/types/greyon";
 
 const cms = useCmsStore();
 const auth = useAuthStore();
+/** Soft cap matching package limit hotels_per_location (seeded at 3). */
+const hotelCap = 3;
 const $q = useQuasar();
 const route = useRoute();
 const router = useRouter();
@@ -505,6 +525,15 @@ function openCreate() {
 }
 
 function openCreateIn(locationId: string) {
+  if (locationId === "orphan") return;
+  const used = cms.hotels.filter(h => h.locationId === locationId).length;
+  if (used >= hotelCap) {
+    $q.notify({
+      type: "warning",
+      message: `Hotel limit reached for this destination (${hotelCap} max).`
+    });
+    return;
+  }
   editing.value = null;
   blank(locationId);
   dialog.value = true;
@@ -738,6 +767,10 @@ watch([statusFilter, locationFilter, featuredOnly, query], syncQuery);
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
+}
+
+.hotel-group__add {
+  display: inline-flex;
 }
 
 .hotel-cards {

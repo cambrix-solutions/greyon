@@ -92,10 +92,17 @@ export interface EngineLocation {
   heroImage?: string | null;
   gallery?: string[];
   highlights?: string[];
+  phone?: string | null;
+  email?: string | null;
   status: string;
   seoTitle?: string | null;
   seoDescription?: string | null;
   hotelCount?: number;
+}
+
+export interface EngineNearbyLandmark {
+  place?: string | null;
+  distance?: string | null;
 }
 
 export interface EngineHotel {
@@ -106,6 +113,10 @@ export interface EngineHotel {
   shortDescription?: string | null;
   description?: string | null;
   address?: string | null;
+  area?: string | null;
+  propertyType?: string | null;
+  starRating?: number | null;
+  nearbyLandmarks?: EngineNearbyLandmark[] | null;
   coordinates?: { lat: number | null; lng: number | null };
   mapEmbedUrl?: string | null;
   phone?: string | null;
@@ -214,12 +225,26 @@ export function mapEngineLocation(row: EngineLocation): Location {
     gallery: row.gallery ?? [],
     highlights: row.highlights ?? [],
     status: asStatus(row.status),
+    ...(row.phone ? { phone: row.phone } : {}),
+    ...(row.email ? { email: row.email } : {}),
     ...(row.seoTitle ? { seoTitle: row.seoTitle } : {}),
     ...(row.seoDescription ? { seoDescription: row.seoDescription } : {})
   };
 }
 
 export function mapEngineHotel(row: EngineHotel): Hotel {
+  const landmarks = (row.nearbyLandmarks ?? [])
+    .map(item => ({
+      place: String(item.place ?? "").trim(),
+      distance: String(item.distance ?? "").trim()
+    }))
+    .filter(item => item.place.length > 0);
+
+  const star =
+    typeof row.starRating === "number" && Number.isFinite(row.starRating)
+      ? row.starRating
+      : null;
+
   return {
     id: String(row.id),
     name: row.name,
@@ -228,6 +253,10 @@ export function mapEngineHotel(row: EngineHotel): Hotel {
     shortDescription: row.shortDescription ?? "",
     description: row.description ?? "",
     address: row.address ?? "",
+    ...(row.area ? { area: row.area } : {}),
+    ...(row.propertyType ? { propertyType: row.propertyType } : {}),
+    ...(star !== null ? { starRating: star } : {}),
+    ...(landmarks.length ? { nearbyLandmarks: landmarks } : {}),
     coordinates: {
       lat: row.coordinates?.lat ?? 0,
       lng: row.coordinates?.lng ?? 0

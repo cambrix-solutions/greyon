@@ -19,16 +19,42 @@
       <ul v-reveal="{ delay: '80ms' }" class="highlights">
         <li v-for="item in location.highlights" :key="item">{{ item }}</li>
       </ul>
+
+      <section
+        v-if="hasContact"
+        v-reveal="{ delay: '100ms' }"
+        class="contact-block"
+      >
+        <h2 class="gy-display">Contact</h2>
+        <p class="gy-muted contact-block__hint">
+          Reach the Greyon team for this destination.
+        </p>
+        <div class="contact-grid">
+          <div v-if="location.phone">
+            <span class="meta-label">Phone</span>
+            <a class="contact-link" :href="`tel:${location.phone}`">{{
+              location.phone
+            }}</a>
+          </div>
+          <div v-if="location.email">
+            <span class="meta-label">Email</span>
+            <a class="contact-link" :href="`mailto:${location.email}`">{{
+              location.email
+            }}</a>
+          </div>
+        </div>
+      </section>
+
       <div v-reveal class="actions">
         <button class="gy-btn" type="button" @click="bookHere">
           Book in {{ location.name }}
         </button>
       </div>
-      <section v-if="mapPoint" v-reveal class="map-block">
+      <section v-if="mapPoint || mapEmbedUrl" v-reveal class="map-block">
         <h2 class="gy-display">Map</h2>
         <MapEmbed
-          :lat="mapPoint.lat"
-          :lng="mapPoint.lng"
+          :lat="mapPoint?.lat ?? 0"
+          :lng="mapPoint?.lng ?? 0"
           :embed-url="mapEmbedUrl"
         />
       </section>
@@ -73,6 +99,9 @@ const hotelsHere = computed(() =>
   location.value
     ? cms.publishedHotels.filter(h => h.locationId === location.value?.id)
     : []
+);
+const hasContact = computed(
+  () => Boolean(location.value?.phone?.trim() || location.value?.email?.trim())
 );
 const mapPoint = computed(() => {
   const c = hotelsHere.value[0]?.coordinates;
@@ -142,7 +171,52 @@ function bookHere() {
   padding: 0.35rem 0.7rem;
 }
 
+.contact-block {
+  margin: 1.75rem 0 2rem;
+  padding: 1.25rem 1.35rem;
+  background: var(--gy-sand);
+  border-left: 2px solid var(--gy-gold);
+}
+
+.contact-block h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1.45rem;
+}
+
+.contact-block__hint {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+}
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem 1.5rem;
+}
+
+.meta-label {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gy-muted);
+}
+
+.contact-link {
+  font-size: 1rem;
+  color: var(--gy-ink);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
 .actions {
   margin-bottom: 2rem;
+}
+
+@media (max-width: 700px) {
+  .contact-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

@@ -23,6 +23,19 @@
           label="Add destination"
           @click="openCreate"
         />
+        <span v-else-if="auth.can('locations')" class="loc-card__add-hotel">
+          <q-btn
+            unelevated
+            no-caps
+            color="primary"
+            icon="add"
+            label="Add destination"
+            disable
+          />
+          <q-tooltip anchor="top middle" self="bottom middle">
+            You don't have permission to add a destination
+          </q-tooltip>
+        </span>
       </template>
       <template #toolbar>
         <q-input
@@ -135,19 +148,35 @@
               <span>{{ hotelsFor(loc.id).length }}</span>
               <small> / {{ hotelCap }} max</small>
             </h3>
-            <q-btn
+            <span
               v-if="
                 auth.canAction('hotels', 'create') &&
                 auth.canDestinationDetail()
               "
-              flat
-              dense
-              no-caps
-              color="primary"
-              icon="add"
-              label="Add hotel"
-              :to="`/admin/locations/${loc.id}`"
-            />
+              class="loc-card__add-hotel"
+            >
+              <q-btn
+                flat
+                dense
+                no-caps
+                color="primary"
+                icon="add"
+                label="Add hotel"
+                :disable="hotelsFor(loc.id).length >= hotelCap"
+                :to="
+                  hotelsFor(loc.id).length >= hotelCap
+                    ? undefined
+                    : `/admin/locations/${loc.id}`
+                "
+              />
+              <q-tooltip
+                v-if="hotelsFor(loc.id).length >= hotelCap"
+                anchor="top middle"
+                self="bottom middle"
+              >
+                Hotel limit reached for this destination ({{ hotelCap }} max)
+              </q-tooltip>
+            </span>
           </div>
 
           <div v-if="hotelsFor(loc.id).length" class="hotel-rows">
@@ -376,6 +405,13 @@ function roomCount(hotelId: string) {
 }
 
 function openCreate() {
+  if (!auth.canAction("locations", "create")) {
+    $q.notify({
+      type: "warning",
+      message: "You don't have permission to add a destination."
+    });
+    return;
+  }
   editing.value = null;
   form.name = "";
   form.slug = "";
@@ -636,6 +672,10 @@ function remove(id: string) {
   align-items: center;
   gap: 0.75rem;
   margin-bottom: 0.7rem;
+}
+
+.loc-card__add-hotel {
+  display: inline-flex;
 }
 
 .loc-card__hotels-bar h3 {

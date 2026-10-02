@@ -27,6 +27,12 @@ export const useCustomerStore = defineStore("customer", () => {
     else localStorage.removeItem(USER_KEY);
   }
 
+  /** Merge fields into the cached profile (e.g. phone after booking). */
+  function patchUser(partial: Partial<FrontUser>) {
+    if (!user.value) return;
+    persist({ ...user.value, ...partial });
+  }
+
   function hydrate() {
     if (hydrated.value) return;
     hydrated.value = true;
@@ -122,6 +128,7 @@ export const useCustomerStore = defineStore("customer", () => {
     displayName,
     hydrate,
     refreshSession,
+    patchUser,
     login,
     register,
     completeGoogle,

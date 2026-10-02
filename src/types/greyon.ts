@@ -92,8 +92,16 @@ export interface Location {
   gallery: string[];
   highlights: string[];
   status: ContentStatus;
+  /** Destination contact (optional; from API when present) */
+  phone?: string;
+  email?: string;
   seoTitle?: string;
   seoDescription?: string;
+}
+
+export interface NearbyLandmark {
+  place: string;
+  distance: string;
 }
 
 export interface Hotel {
@@ -104,8 +112,15 @@ export interface Hotel {
   shortDescription: string;
   description: string;
   address: string;
+  /** Neighbourhood / area label, e.g. "Central / Ekareach Street" */
+  area?: string;
+  /** e.g. "Hotel & Serviced Apartment" */
+  propertyType?: string;
+  /** Star rating 1–5 when set */
+  starRating?: number | null;
+  nearbyLandmarks?: NearbyLandmark[];
   coordinates: { lat: number; lng: number };
-  /** Official Google Maps embed URL (iframe src) when pasted — free, no API key. */
+  /** Official Google Maps embed or share URL when pasted. */
   mapEmbedUrl?: string;
   phone: string;
   email: string;

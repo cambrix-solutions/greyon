@@ -91,16 +91,27 @@
             <em>{{ hotels.length }}/{{ hotelCap }}</em>
           </h2>
         </div>
-        <q-btn
+        <span
           v-if="auth.canAction('hotels', 'create')"
-          unelevated
-          no-caps
-          color="primary"
-          icon="add"
-          label="Add hotel"
-          :disable="hotels.length >= hotelCap"
-          @click="openCreateHotel"
-        />
+          class="prop-board__add"
+        >
+          <q-btn
+            unelevated
+            no-caps
+            color="primary"
+            icon="add"
+            label="Add hotel"
+            :disable="hotels.length >= hotelCap"
+            @click="openCreateHotel"
+          />
+          <q-tooltip
+            v-if="hotels.length >= hotelCap"
+            anchor="top middle"
+            self="bottom middle"
+          >
+            Hotel limit reached for this destination ({{ hotelCap }} max)
+          </q-tooltip>
+        </span>
       </header>
 
       <div v-if="hotels.length" class="prop-list">
@@ -249,15 +260,27 @@
           Add the first hotel for {{ location.name }}, then create room types
           under it.
         </p>
-        <q-btn
+        <span
           v-if="auth.canAction('hotels', 'create')"
-          unelevated
-          no-caps
-          color="primary"
-          icon="add"
-          label="Add hotel"
-          @click="openCreateHotel"
-        />
+          class="prop-board__add"
+        >
+          <q-btn
+            unelevated
+            no-caps
+            color="primary"
+            icon="add"
+            label="Add hotel"
+            :disable="hotels.length >= hotelCap"
+            @click="openCreateHotel"
+          />
+          <q-tooltip
+            v-if="hotels.length >= hotelCap"
+            anchor="top middle"
+            self="bottom middle"
+          >
+            Hotel limit reached for this destination ({{ hotelCap }} max)
+          </q-tooltip>
+        </span>
       </div>
     </section>
 
@@ -736,6 +759,13 @@ function blankHotel() {
 }
 
 function openCreateHotel() {
+  if (hotels.value.length >= hotelCap) {
+    $q.notify({
+      type: "warning",
+      message: `Hotel limit reached for this destination (${hotelCap} max).`
+    });
+    return;
+  }
   hotelEditing.value = null;
   blankHotel();
   hotelDialog.value = true;
@@ -1128,6 +1158,10 @@ function removeRoom(id: string) {
   padding: 1rem 1.15rem;
   border-bottom: 1px solid rgba(28, 36, 33, 0.07);
   background: linear-gradient(180deg, #fbfaf7 0%, #fff 100%);
+}
+
+.prop-board__add {
+  display: inline-flex;
 }
 
 .prop-board__eyebrow {
