@@ -4,7 +4,12 @@
       :to="`/hotels/${hotel.slug}`"
       class="gy-card-media hotel-card__media"
     >
-      <img v-if="coverImage" :src="coverImage" :alt="hotel.name" loading="lazy" />
+      <img
+        v-if="coverImage"
+        :src="coverImage"
+        :alt="hotel.name"
+        loading="lazy"
+      />
       <span class="hotel-card__loc">{{ locationName }}</span>
     </router-link>
 
