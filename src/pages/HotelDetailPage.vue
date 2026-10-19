@@ -147,11 +147,15 @@
               <h3 class="gy-display">{{ room.name }}</h3>
               <p class="room-card__desc">{{ room.description }}</p>
               <p class="room-card__facts">
-                {{ room.bedType }}
-                <span>·</span>
-                {{ room.roomSize }}
-                <span>·</span>
-                Up to {{ room.maxGuests }} guests
+                {{
+                  [
+                    room.bedType?.trim(),
+                    room.roomSize?.trim(),
+                    room.maxGuests ? `Up to ${room.maxGuests} guests` : ""
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")
+                }}
               </p>
               <FeatureChips :items="room.amenities" size="sm" />
               <p

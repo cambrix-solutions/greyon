@@ -59,6 +59,33 @@ const reveal: Directive<HTMLElement, RevealValue | undefined> = {
   }
 };
 
+/**
+ * Missing CMS photos (404) otherwise show the browser's broken-image icon plus
+ * alt text over the card. Hide the failed <img> so the media block's neutral
+ * placeholder background shows instead. `error` does not bubble, so listen in
+ * the capture phase once for the whole app.
+ */
+function bindImageFallback() {
+  if (typeof document === "undefined") return;
+  document.addEventListener(
+    "error",
+    event => {
+      const el = event.target;
+      if (el instanceof HTMLImageElement) el.classList.add("gy-img--broken");
+    },
+    true
+  );
+  document.addEventListener(
+    "load",
+    event => {
+      const el = event.target;
+      if (el instanceof HTMLImageElement) el.classList.remove("gy-img--broken");
+    },
+    true
+  );
+}
+
 export default defineBoot(({ app }) => {
   app.directive("reveal", reveal);
+  bindImageFallback();
 });

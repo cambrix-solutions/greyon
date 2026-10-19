@@ -26,7 +26,7 @@
         </router-link>
 
         <div v-if="showCompactSearch" class="gy-header__search gt-md">
-          <BookingSearchWidget compact :navigate="true" />
+          <BookingSearchWidget compact :navigate="true" submit-label="Search" />
         </div>
 
         <nav v-else class="gy-nav gt-sm">

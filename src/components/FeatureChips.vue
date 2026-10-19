@@ -32,7 +32,10 @@ withDefaults(
 
 function iconFor(label: string) {
   const key = label.toLowerCase();
-  if (key.includes("wifi") || key.includes("wi-fi")) return "wifi";
+  // Whole-word checks: "Parking Space" must not match "spa", "Balcony" not "ac".
+  const word = (re: RegExp) => re.test(key);
+  if (key.includes("wifi") || key.includes("wi-fi") || key.includes("wi‑fi"))
+    return "wifi";
   if (key.includes("pool")) return "pool";
   if (
     key.includes("restaurant") ||
@@ -40,9 +43,19 @@ function iconFor(label: string) {
     key.includes("breakfast")
   )
     return "restaurant";
-  if (key.includes("spa")) return "spa";
+  if (word(/\bspa\b/)) return "spa";
   if (key.includes("park")) return "local_parking";
   if (key.includes("gym") || key.includes("fitness")) return "fitness_center";
+  if (key.includes("playground") || word(/\bkids?\b|\bkid's\b|children/))
+    return "toys";
+  if (key.includes("tennis")) return "sports_tennis";
+  if (key.includes("billiard") || key.includes("game")) return "sports";
+  if (key.includes("bbq") || key.includes("barbecue") || key.includes("grill"))
+    return "outdoor_grill";
+  if (key.includes("kitchen")) return "kitchen";
+  if (key.includes("security") || key.includes("24/7")) return "security";
+  if (key.includes("laundry")) return "local_laundry_service";
+  if (key.includes("rooftop") || key.includes("roof")) return "roofing";
   if (
     key.includes("view") ||
     key.includes("ocean") ||
@@ -52,12 +65,18 @@ function iconFor(label: string) {
     return "visibility";
   if (key.includes("terrace") || key.includes("balcony")) return "deck";
   if (key.includes("bath") || key.includes("shower")) return "bathtub";
+  if (key.includes("water heater") || key.includes("hot water"))
+    return "hot_tub";
   if (key.includes("safe")) return "lock";
-  if (key.includes("bar") || key.includes("mini")) return "local_bar";
+  if (word(/\bbar\b/) || key.includes("mini")) return "local_bar";
   if (key.includes("bike") || key.includes("bicycle")) return "pedal_bike";
   if (key.includes("tour") || key.includes("desk")) return "map";
-  if (key.includes("ac") || key.includes("fan") || key.includes("air"))
+  if (word(/\bac\b|\ba\/c\b/) || key.includes("fan") || key.includes("air"))
     return "ac_unit";
+  if (word(/\btv\b|television/)) return "tv";
+  if (key.includes("linen") || key.includes("towel") || key.includes("bed"))
+    return "bed";
+  if (key.includes("toiletr")) return "soap";
   if (key.includes("living") || key.includes("lounge") || key.includes("suite"))
     return "weekend";
   return "check";
