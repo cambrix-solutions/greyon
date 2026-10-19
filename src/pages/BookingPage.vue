@@ -135,9 +135,11 @@
             {{ booking.selected.ratePlan.description }}
           </p>
           <div class="summary-card__total">
-            <span>Total for {{ booking.selected.nights }} night{{
-              booking.selected.nights === 1 ? "" : "s"
-            }}</span>
+            <span
+              >Total for {{ booking.selected.nights }} night{{
+                booking.selected.nights === 1 ? "" : "s"
+              }}</span
+            >
             <strong>${{ booking.selected.total.toFixed(2) }}</strong>
           </div>
           <p class="breakdown">

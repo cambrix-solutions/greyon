@@ -219,8 +219,7 @@ export const useBookingStore = defineStore("booking", () => {
     const lastFromAccount = restName.join(" ");
     guest.value = {
       ...guest.value,
-      firstName:
-        (guest.value.firstName ?? "").trim() || firstFromAccount || "",
+      firstName: (guest.value.firstName ?? "").trim() || firstFromAccount || "",
       lastName: (guest.value.lastName ?? "").trim() || lastFromAccount || "",
       fullName: guest.value.fullName || accountName,
       email: guest.value.email || customer.user.email || "",

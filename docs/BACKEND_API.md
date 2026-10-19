@@ -94,7 +94,7 @@ can(user, perm) =
 | `bookings`                    |     ✓     |   ✓   |     ✓     |      ✓      |          |
 | `news`                        |     ✓     |   ✓   |     ✓     |             |          |
 | `enquiries`                   |     ✓     |   ✓   |     *     |      *      |          |
-| `media`                       |     ✓     |   ✓   |     ✓†    |             |          |
+| `media`                       |     ✓     |   ✓   |    ✓†     |             |          |
 | `settings`                    |     ✓     |   ✓   |           |             |          |
 | `users`                       |     ✓     |   ✓   | self read |  self read  |          |
 | `features` (packages UI)      |     ✓     |       |           |             |          |

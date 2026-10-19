@@ -2,13 +2,7 @@
   <div class="landmarks-editor">
     <div class="row items-center justify-between q-mb-sm">
       <div class="text-subtitle2">{{ label }}</div>
-      <q-btn
-        dense
-        flat
-        color="primary"
-        label="Add landmark"
-        @click="addRow"
-      />
+      <q-btn dense flat color="primary" label="Add landmark" @click="addRow" />
     </div>
     <div v-if="!modelValue.length" class="text-caption text-grey-7 q-mb-sm">
       No nearby landmarks yet.

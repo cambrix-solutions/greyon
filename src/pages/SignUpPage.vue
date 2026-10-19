@@ -201,8 +201,7 @@ async function onSubmit() {
   touchedPassword.value = true;
   touchedConfirm.value = true;
   if (!passwordStrong.value) {
-    error.value =
-      "Use 8+ characters with upper, lower, number, and symbol.";
+    error.value = "Use 8+ characters with upper, lower, number, and symbol.";
     return;
   }
   if (password.value !== passwordConfirmation.value) {

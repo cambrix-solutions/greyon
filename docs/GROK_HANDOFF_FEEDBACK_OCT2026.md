@@ -11,12 +11,12 @@ This doc lists **what Composer already implemented**, **where**, and **how to te
 
 ## Status legend
 
-| Tag | Meaning |
-|-----|---------|
-| `DONE` | Implemented in SPA (may still need visual polish) |
-| `PARTIAL` | Works functionally; style / copy / edge cases may be weak |
+| Tag           | Meaning                                                   |
+| ------------- | --------------------------------------------------------- |
+| `DONE`        | Implemented in SPA (may still need visual polish)         |
+| `PARTIAL`     | Works functionally; style / copy / edge cases may be weak |
 | `BACKEND-GAP` | UI collects data but API does not store dedicated columns |
-| `FOLLOW-UP` | Intentionally left for design/product or next pass |
+| `FOLLOW-UP`   | Intentionally left for design/product or next pass        |
 
 ---
 
@@ -27,10 +27,12 @@ This doc lists **what Composer already implemented**, **where**, and **how to te
 **Intent:** Stop pushing users straight into booking from listing cards. Discovery first.
 
 **Changes:**
+
 - `src/components/HotelCard.vue` — removed “From $X / night” + Book; CTA is `View Hotel` → `/hotels/:slug`
 - Used on home featured grid, hotels list, location detail, related hotels
 
 **Test steps:**
+
 1. Open `/` and `/hotels` (and a destination with hotels).
 2. Confirm each hotel card has **View Hotel**, not **Book**.
 3. Confirm no “From $xx / night” on the card footer.
@@ -46,11 +48,13 @@ This doc lists **what Composer already implemented**, **where**, and **how to te
 **Intent:** Keep step-by-step flow; remove numbered Search → Results → Room → Guest → Review → Confirm bar.
 
 **Changes:**
+
 - `src/pages/BookingPage.vue` — deleted `<ol class="steps">` and related CSS
 - Store steps 1–6 in `src/stores/booking-store.ts` **unchanged**
 - Page title / lead still reflect current step (`stepTitle` / `stepLead`)
 
 **Test steps:**
+
 1. Go `/booking` (feature `booking_public` must be on).
 2. Walk Search → Results → Room → Guest → Review → Confirm.
 3. Confirm **no** numbered 6-step indicator anywhere.
@@ -66,6 +70,7 @@ This doc lists **what Composer already implemented**, **where**, and **how to te
 **Intent:** Photos on room cards; prices only after dates; explicit room-detail step before guest form.
 
 **Changes:**
+
 - Booking step 2 (`BookingPage.vue`): room image (or placeholder), **View room details**, price = search total for selected dates
 - Booking step 3: photo + amenities chips + total for nights; then Continue → guest
 - Hotel detail (`HotelDetailPage.vue`):
@@ -76,6 +81,7 @@ This doc lists **what Composer already implemented**, **where**, and **how to te
   - Room CTA: **View room details** (if priced) or **Check availability**
 
 **Test steps:**
+
 1. Open a hotel with room images in CMS; open one without images (placeholder OK).
 2. On hotel detail **before** searching: no misleading “From $X” badge on rooms; hint visible.
 3. Set dates → **Check availability** → badge/total appears only for available rooms.
@@ -85,6 +91,7 @@ This doc lists **what Composer already implemented**, **where**, and **how to te
 7. **Style check:** result-card grid (image | info | price) on desktop; stacks on mobile; placeholder grey block acceptable but may need brand polish; sticky aside on guest step.
 
 **Known gaps for you:**
+
 - If `room.images` empty, placeholder is a gradient only — may want a proper asset.
 - Hotel detail “hasSearchedDates” requires `booking.results` for **this** hotel; switching hotels mid-session can look confusing — verify UX.
 
@@ -95,11 +102,13 @@ This doc lists **what Composer already implemented**, **where**, and **how to te
 **Status:** `DONE` / `PARTIAL`
 
 **Changes:**
+
 - Amenities → `FeatureChips` (icon + label)
 - Policies → chips (icons off)
 - Booking deferred until dates + room detail path above
 
 **Test steps:**
+
 1. Hotel detail: features look like icon chips, not `A · B · C` text.
 2. Policies section uses chips / clear list (not one dense string).
 3. User can understand property before booking.
@@ -112,9 +121,11 @@ This doc lists **what Composer already implemented**, **where**, and **how to te
 **Status:** `DONE` (final file from design still `FOLLOW-UP`)
 
 **Changes:**
+
 - `src/layouts/MainLayout.vue` — logo height ~`3.35rem`, width/height attrs 180×62
 
 **Test steps:**
+
 1. Home (transparent header) + scrolled/solid header + inner pages.
 2. Logo swaps dark/white assets correctly; not clipped; header bar taller OK.
 3. **Style check:** mobile hamburger row; logo vs compact search crowding.
@@ -128,10 +139,12 @@ This doc lists **what Composer already implemented**, **where**, and **how to te
 **Status:** `DONE` / `PARTIAL`
 
 **Changes:**
+
 - `MainLayout.vue` — when `booking_public` and route is `hotel-detail` | `booking` | `hotels` **or** home past hero scroll: primary nav replaced by compact `BookingSearchWidget`
 - Uses existing `compact` prop on `BookingSearchWidget.vue`
 
 **Test steps:**
+
 1. `/hotels`, `/hotels/:slug`, `/booking` — compact bar in header (desktop `gt-md`).
 2. Home: after scrolling past ~1 viewport, compact bar appears; at top, normal nav.
 3. Submit search from header → booking results.
@@ -147,12 +160,14 @@ This doc lists **what Composer already implemented**, **where**, and **how to te
 **Status:** `DONE`
 
 **Changes:**
+
 - Public: `FeatureChips.vue` used on hotel detail, booking results/summary
 - Catalog: `src/data/standardAmenities.ts`
 - Admin: `src/components/admin/AmenitiesEditor.vue` (multi-select + custom Enter)
 - Wired in: `AdminHotelsPage.vue`, `AdminRoomsPage.vue`, `AdminLocationDetailPage.vue` (hotel + room dialogs)
 
 **Test steps:**
+
 1. Admin → Hotels (or destination hub) → edit amenities: pick chips, add custom, save, reload.
 2. Same for room amenities + stay policies (policies reuse same editor).
 3. Public hotel page shows matching chips with sensible icons (Wi‑Fi, pool, etc.).
@@ -165,6 +180,7 @@ This doc lists **what Composer already implemented**, **where**, and **how to te
 **Status:** `DONE` + `BACKEND-GAP`
 
 **UI fields (booking step 4):**
+
 - First name, Last name (required)
 - Nationality (required)
 - Email, Phone (required)
@@ -178,6 +194,7 @@ This doc lists **what Composer already implemented**, **where**, and **how to te
 **SPA workaround:** `src/services/engine/ops.ts` → `composeGuestNotes()` appends nationality / address / city into `specialRequests` text so ops staff still see them.
 
 **Test steps:**
+
 1. Reach guest step with a selected room.
 2. Leave fields blank → Continue → inline errors; do not advance.
 3. Fill all required → Review shows name + contact + nationality + address/city.
@@ -196,6 +213,7 @@ This doc lists **what Composer already implemented**, **where**, and **how to te
 **Changes:** `src/pages/SignUpPage.vue` — live strength meter; rules: 8+, upper, lower, number, symbol; confirm mismatch message.
 
 **Test steps:**
+
 1. `/sign-up` — type weak password → meter Weak/Fair; submit blocked with clear message.
 2. Strong password + mismatch confirm → “Passwords do not match.”
 3. Strong + match → account creates (or API error if server stricter/looser — note mismatch).
@@ -211,20 +229,21 @@ This doc lists **what Composer already implemented**, **where**, and **how to te
 
 **Tokens updated in `src/css/app.css`:**
 
-| Token | Value | Role |
-|-------|-------|------|
-| `--gy-cream` | `#FAF8F6` | Page / card wash |
-| `--gy-sand` | `#F1F1F1` | Section contrast |
-| `--gy-forest` | `#627063` | Primary CTA / active |
-| `--gy-ink` | `#454C4B` | Text / dark UI |
+| Token            | Value     | Role                      |
+| ---------------- | --------- | ------------------------- |
+| `--gy-cream`     | `#FAF8F6` | Page / card wash          |
+| `--gy-sand`      | `#F1F1F1` | Section contrast          |
+| `--gy-forest`    | `#627063` | Primary CTA / active      |
+| `--gy-ink`       | `#454C4B` | Text / dark UI            |
 | `--gy-gold-deep` | `#8F7340` | Accent on dark / eyebrows |
-| `--gy-white` | `#FFFFFF` | Cards / inputs |
+| `--gy-white`     | `#FFFFFF` | Cards / inputs            |
 
 - Primary buttons / `--light` / outline lean on `--gy-forest`
 - Quasar `primary` in `quasar.config.ts` → `#627063`
 - Page background uses cream
 
 **Test steps:**
+
 1. Spot-check home, hotel detail, booking, admin: buttons green-grey not old brass-only.
 2. Eyebrows / gold accents still readable.
 3. **Style audit (your job):** hunt leftover `#8f7340` as primary fill, old cream `#f8f5f0`, purple/AI defaults, low-contrast text on `#454C4B` vs true black headings if design wants darker display type.
@@ -238,11 +257,13 @@ This doc lists **what Composer already implemented**, **where**, and **how to te
 **Problem:** Paste/upload produced data-URL base64 → API `"The src field must not be greater than 2048 characters."`
 
 **Changes:**
+
 - `ImageDropField.vue` — warn that local files cannot be saved; URL field with length error
 - `AdminMediaPage.vue` — `add()` blocks `data:` and `length > 2048` before POST
 - Engine still validates `src` max 2048 (`MediaItemController`)
 
 **Test steps:**
+
 1. Admin → Media → Add media → choose local image → preview may show; **Add to library** → clear toast, no 422 spam.
 2. Paste short https image URL → saves.
 3. Paste huge base64 into URL field → blocked client-side.
@@ -252,26 +273,27 @@ This doc lists **what Composer already implemented**, **where**, and **how to te
 
 ## Related work in same stretch (not in PDF, still live)
 
-| Item | Notes |
-|------|--------|
-| SEO Settings site name required | `AdminSettingsPage.vue` + engine `filled` on `siteName` |
+| Item                               | Notes                                                                                                 |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| SEO Settings site name required    | `AdminSettingsPage.vue` + engine `filled` on `siteName`                                               |
 | Sitemap excludes disabled surfaces | `src/utils/sitemap.ts`, `SitemapPage.vue`, conservative `public/sitemap.xml`; portfolios never listed |
-| Portfolios feature default **off** | `auth-store` `featureEnabled('portfolios')` requires explicit `enabled` |
+| Portfolios feature default **off** | `auth-store` `featureEnabled('portfolios')` requires explicit `enabled`                               |
 
 ---
 
 ## Booking process map (current)
 
-| Step | UI | How user advances |
-|------|----|-------------------|
-| 1 | Search widget | Run search |
-| 2 | Results + photos + date totals | **View room details** |
-| 3 | Room summary | **Continue** |
-| 4 | Guest form + aside summary | **Continue** → review |
-| 5 | Review + policy checkbox | **Confirm reservation** |
-| 6 | Confirmation + reference | New search / account |
+| Step | UI                             | How user advances       |
+| ---- | ------------------------------ | ----------------------- |
+| 1    | Search widget                  | Run search              |
+| 2    | Results + photos + date totals | **View room details**   |
+| 3    | Room summary                   | **Continue**            |
+| 4    | Guest form + aside summary     | **Continue** → review   |
+| 5    | Review + policy checkbox       | **Confirm reservation** |
+| 6    | Confirmation + reference       | New search / account    |
 
 **Recommended happy-path test script for Grok:**
+
 1. Home → hotel card **View Hotel**.
 2. Read amenities chips → scroll rooms → set dates → Check availability.
 3. View room details → Continue → fill guest → Continue → accept policy → Confirm.

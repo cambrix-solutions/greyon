@@ -29,7 +29,9 @@
               outlined
               dense
               :error="siteNameInvalid"
-              :error-message="siteNameInvalid ? 'Site name is required.' : undefined"
+              :error-message="
+                siteNameInvalid ? 'Site name is required.' : undefined
+              "
               hint="Used in public titles and branding"
             />
             <q-input

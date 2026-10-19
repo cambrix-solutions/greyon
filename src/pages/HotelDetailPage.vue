@@ -120,7 +120,10 @@
             booking.
           </p>
         </div>
-        <BookingSearchWidget :navigate="false" submit-label="Check availability" />
+        <BookingSearchWidget
+          :navigate="false"
+          submit-label="Check availability"
+        />
         <p v-if="!hasSearchedDates" class="gy-muted room-price-hint">
           Prices appear after you choose check-in and check-out dates.
         </p>

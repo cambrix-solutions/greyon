@@ -53,13 +53,14 @@ function onFilter(val: string, update: (fn: () => void) => void) {
 }
 
 function onUpdate(value: string[] | null) {
-  const next = (value ?? [])
-    .map(v => String(v).trim())
-    .filter(Boolean);
+  const next = (value ?? []).map(v => String(v).trim()).filter(Boolean);
   emit("update:modelValue", [...new Set(next)]);
 }
 
-function onNewValue(val: string, done: (val?: string, mode?: "add-unique") => void) {
+function onNewValue(
+  val: string,
+  done: (val?: string, mode?: "add-unique") => void
+) {
   const trimmed = val.trim();
   if (!trimmed) {
     done();
