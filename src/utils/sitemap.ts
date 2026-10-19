@@ -5,22 +5,66 @@ export type SitemapEntry = {
   priority?: string;
 };
 
+/** Which gated public surfaces are live and safe to advertise to crawlers. */
+export type SitemapPublicFlags = {
+  booking?: boolean;
+  contact?: boolean;
+  news?: boolean;
+  /** Portfolio stubs are coming-soon; omit from sitemap even when the nav gate is on. */
+  portfolios?: boolean;
+};
+
+const PORTFOLIO_PATHS = [
+  "/portfolios/service-apartment",
+  "/portfolios/boutique",
+  "/portfolios/resort"
+] as const;
+
 export function buildCmsSitemapEntries(input: {
   hotels: Array<{ slug: string }>;
   locations: Array<{ slug: string }>;
   news: Array<{ slug: string; publishedAt?: string }>;
+  /** Defaults: all gated surfaces off so disabled routes never leak into the XML. */
+  enabled?: SitemapPublicFlags;
 }): SitemapEntry[] {
+  const enabled = input.enabled ?? {};
   const list: SitemapEntry[] = [
     { loc: "/", changefreq: "weekly", priority: "1.0" },
     { loc: "/hotels", changefreq: "weekly", priority: "0.9" },
     { loc: "/locations", changefreq: "weekly", priority: "0.8" },
-    { loc: "/news", changefreq: "weekly", priority: "0.7" },
-    { loc: "/booking", changefreq: "monthly", priority: "0.8" },
-    { loc: "/contact", changefreq: "monthly", priority: "0.6" },
     { loc: "/privacy", changefreq: "yearly", priority: "0.3" },
-    { loc: "/terms", changefreq: "yearly", priority: "0.3" },
-    { loc: "/booking-terms", changefreq: "yearly", priority: "0.3" }
+    { loc: "/terms", changefreq: "yearly", priority: "0.3" }
   ];
+
+  if (enabled.news) {
+    list.push({ loc: "/news", changefreq: "weekly", priority: "0.7" });
+    for (const article of input.news) {
+      list.push({
+        loc: `/news/${article.slug}`,
+        ...(article.publishedAt ? { lastmod: article.publishedAt } : {}),
+        changefreq: "monthly",
+        priority: "0.6"
+      });
+    }
+  }
+
+  if (enabled.booking) {
+    list.push(
+      { loc: "/booking", changefreq: "monthly", priority: "0.8" },
+      { loc: "/booking-terms", changefreq: "yearly", priority: "0.3" }
+    );
+  }
+
+  if (enabled.contact) {
+    list.push({ loc: "/contact", changefreq: "monthly", priority: "0.6" });
+  }
+
+  if (enabled.portfolios) {
+    for (const loc of PORTFOLIO_PATHS) {
+      list.push({ loc, changefreq: "monthly", priority: "0.5" });
+    }
+  }
+
   for (const hotel of input.hotels) {
     list.push({
       loc: `/hotels/${hotel.slug}`,
@@ -33,14 +77,6 @@ export function buildCmsSitemapEntries(input: {
       loc: `/locations/${loc.slug}`,
       changefreq: "monthly",
       priority: "0.7"
-    });
-  }
-  for (const article of input.news) {
-    list.push({
-      loc: `/news/${article.slug}`,
-      ...(article.publishedAt ? { lastmod: article.publishedAt } : {}),
-      changefreq: "monthly",
-      priority: "0.6"
     });
   }
   return list;

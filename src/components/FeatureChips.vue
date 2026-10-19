@@ -82,8 +82,8 @@ function iconFor(label: string) {
   font-size: 0.78rem;
   letter-spacing: 0.02em;
   color: var(--gy-forest);
-  background: rgba(111, 128, 103, 0.1);
-  border: 1px solid rgba(84, 88, 89, 0.22);
+  background: rgba(98, 112, 99, 0.1);
+  border: 1px solid rgba(98, 112, 99, 0.28);
 }
 
 .feature-chips--sm li {

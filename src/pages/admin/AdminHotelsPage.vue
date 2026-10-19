@@ -280,6 +280,32 @@
           hint="Leave blank to auto-generate"
         />
         <q-input
+          v-model="form.propertyType"
+          label="Property type"
+          outlined
+          dense
+          hint='e.g. "Hotel & Serviced Apartment"'
+        />
+        <q-select
+          v-model="form.starRating"
+          :options="starRatingOptions"
+          label="Star rating"
+          outlined
+          dense
+          emit-value
+          map-options
+          clearable
+          hint="Optional 1–5"
+        />
+        <q-input
+          v-model="form.area"
+          label="Area"
+          outlined
+          dense
+          class="admin-form-span-2"
+          hint='Neighbourhood, e.g. "Central / Ekareach Street"'
+        />
+        <q-input
           v-model="form.shortDescription"
           label="Short description"
           outlined
@@ -307,13 +333,14 @@
           outlined
           autogrow
         />
-        <q-input
-          v-model="amenitiesText"
-          label="Amenities"
-          outlined
-          dense
-          hint="Comma-separated, e.g. Pool, Breakfast, Free Wi‑Fi"
-        />
+        <AmenitiesEditor v-model="amenities" label="Amenities" />
+        <AmenitiesEditor v-model="policies" label="Stay policies" />
+      </AdminFormSection>
+      <AdminFormSection
+        title="Nearby landmarks"
+        hint="Shown on the public hotel page (place + walking distance)."
+      >
+        <LandmarksEditor v-model="landmarks" label="Landmarks" />
       </AdminFormSection>
       <AdminFormSection title="Contact & hours" :columns="2">
         <q-input
@@ -340,7 +367,10 @@
           dense
         />
       </AdminFormSection>
-      <AdminFormSection title="Map pin">
+      <AdminFormSection
+        title="Map pin"
+        hint="Apply saves lat/lng and keeps the Google Maps embed/share URL (mapEmbedUrl) for the public map."
+      >
         <MapPinPicker
           v-if="dialog"
           v-model:lat="form.lat"
@@ -376,12 +406,14 @@ import AdminDialog from "@/components/admin/AdminDialog.vue";
 import AdminEntityActions from "@/components/admin/AdminEntityActions.vue";
 import AdminFormSection from "@/components/admin/AdminFormSection.vue";
 import AdminPageHeader from "@/components/admin/AdminPageHeader.vue";
+import AmenitiesEditor from "@/components/admin/AmenitiesEditor.vue";
 import GalleryEditor from "@/components/admin/GalleryEditor.vue";
 import ImageDropField from "@/components/admin/ImageDropField.vue";
+import LandmarksEditor from "@/components/admin/LandmarksEditor.vue";
 import MapPinPicker from "@/components/admin/MapPinPicker.vue";
 import { useAuthStore } from "@/stores/auth-store";
 import { useCmsStore } from "@/stores/cms-store";
-import type { ContentStatus, Hotel } from "@/types/greyon";
+import type { ContentStatus, Hotel, NearbyLandmark } from "@/types/greyon";
 
 const cms = useCmsStore();
 const auth = useAuthStore();
@@ -392,8 +424,17 @@ const route = useRoute();
 const router = useRouter();
 const dialog = ref(false);
 const editing = ref<string | null>(null);
-const amenitiesText = ref("");
+const amenities = ref<string[]>([]);
+const policies = ref<string[]>([]);
 const gallery = ref<string[]>([]);
+const landmarks = ref<NearbyLandmark[]>([]);
+const starRatingOptions = [
+  { label: "1 star", value: 1 },
+  { label: "2 stars", value: 2 },
+  { label: "3 stars", value: 3 },
+  { label: "4 stars", value: 4 },
+  { label: "5 stars", value: 5 }
+];
 const query = ref("");
 const statusFilter = ref("all");
 const locationFilter = ref("all");
@@ -426,6 +467,9 @@ const form = reactive({
   shortDescription: "",
   description: "",
   address: "",
+  area: "",
+  propertyType: "",
+  starRating: null as number | null,
   lat: null as number | null,
   lng: null as number | null,
   mapEmbedUrl: null as string | null,
@@ -504,6 +548,9 @@ function blank(locationId?: string) {
   form.shortDescription = "";
   form.description = "";
   form.address = "";
+  form.area = "";
+  form.propertyType = "";
+  form.starRating = null;
   form.lat = null;
   form.lng = null;
   form.mapEmbedUrl = null;
@@ -514,8 +561,10 @@ function blank(locationId?: string) {
   form.heroImage = "";
   form.status = "draft";
   form.featured = false;
-  amenitiesText.value = "";
+  amenities.value = [];
+  policies.value = [];
   gallery.value = [];
+  landmarks.value = [];
 }
 
 function openCreate() {
@@ -547,6 +596,9 @@ function openEdit(hotel: Hotel) {
   form.shortDescription = hotel.shortDescription;
   form.description = hotel.description;
   form.address = hotel.address;
+  form.area = hotel.area ?? "";
+  form.propertyType = hotel.propertyType ?? "";
+  form.starRating = hotel.starRating ?? null;
   form.lat =
     hotel.coordinates &&
     Number.isFinite(hotel.coordinates.lat) &&
@@ -567,8 +619,10 @@ function openEdit(hotel: Hotel) {
   form.heroImage = hotel.heroImage;
   form.status = hotel.status;
   form.featured = Boolean(hotel.featured);
-  amenitiesText.value = hotel.amenities.join(", ");
+  amenities.value = [...hotel.amenities];
+  policies.value = [...(hotel.policies ?? [])];
   gallery.value = [...hotel.gallery];
+  landmarks.value = (hotel.nearbyLandmarks ?? []).map(l => ({ ...l }));
   dialog.value = true;
 }
 
@@ -590,6 +644,15 @@ function save() {
         shortDescription: form.shortDescription,
         description: form.description,
         address: form.address,
+        area: form.area.trim() || undefined,
+        propertyType: form.propertyType.trim() || undefined,
+        starRating: form.starRating,
+        nearbyLandmarks: landmarks.value
+          .map(l => ({
+            place: l.place.trim(),
+            distance: l.distance.trim()
+          }))
+          .filter(l => l.place),
         ...(hasFormMapPin.value
           ? {
               coordinates: {
@@ -605,10 +668,8 @@ function save() {
         checkOutTime: form.checkOutTime || "12:00",
         ...(form.heroImage ? { heroImage: form.heroImage } : {}),
         gallery: gallery.value.filter(Boolean),
-        amenities: amenitiesText.value
-          .split(",")
-          .map(s => s.trim())
-          .filter(Boolean),
+        amenities: amenities.value,
+        policies: policies.value,
         status: form.status,
         featured: form.featured
       });

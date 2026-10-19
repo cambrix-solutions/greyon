@@ -12,6 +12,7 @@
           no-caps
           color="primary"
           label="Save settings"
+          :disable="!siteNameValid"
           @click="save"
         />
       </template>
@@ -22,7 +23,15 @@
         <q-card-section>
           <div class="text-subtitle1 q-mb-md">Site & SEO</div>
           <q-form class="q-gutter-md" @submit.prevent="save">
-            <q-input v-model="form.siteName" label="Site name" outlined dense />
+            <q-input
+              v-model="form.siteName"
+              label="Site name"
+              outlined
+              dense
+              :error="siteNameInvalid"
+              :error-message="siteNameInvalid ? 'Site name is required.' : undefined"
+              hint="Used in public titles and branding"
+            />
             <q-input
               v-model="form.siteUrl"
               label="Public site URL"
@@ -104,7 +113,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive } from "vue";
+import { computed, onMounted, reactive } from "vue";
 import { useQuasar } from "quasar";
 import AdminPageHeader from "@/components/admin/AdminPageHeader.vue";
 import { useAuthStore } from "@/stores/auth-store";
@@ -123,15 +132,25 @@ function cloneSettings(s: SiteSettings): SiteSettings {
 
 const form = reactive(cloneSettings(cms.settings));
 
+const siteNameValid = computed(() => form.siteName.trim().length > 0);
+const siteNameInvalid = computed(() => !siteNameValid.value);
+
 onMounted(async () => {
   await cms.ensureSettings();
   Object.assign(form, cloneSettings(cms.settings));
 });
 
 async function save() {
+  if (!siteNameValid.value) {
+    $q.notify({
+      type: "negative",
+      message: "Site name is required."
+    });
+    return;
+  }
   try {
     await cms.saveSettings({
-      siteName: form.siteName,
+      siteName: form.siteName.trim(),
       siteUrl: form.siteUrl,
       defaultTitle: form.defaultTitle,
       defaultDescription: form.defaultDescription,

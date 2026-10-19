@@ -94,12 +94,14 @@ can(user, perm) =
 | `bookings`                    |     ✓     |   ✓   |     ✓     |      ✓      |          |
 | `news`                        |     ✓     |   ✓   |     ✓     |             |          |
 | `enquiries`                   |     ✓     |   ✓   |     *     |      *      |          |
-| `media`                       |     ✓     |   ✓   |           |             |          |
+| `media`                       |     ✓     |   ✓   |     ✓†    |             |          |
 | `settings`                    |     ✓     |   ✓   |           |             |          |
 | `users`                       |     ✓     |   ✓   | self read |  self read  |          |
 | `features` (packages UI)      |     ✓     |       |           |             |          |
 
 \* Contact enquiries have **no hotelId** today. Until you add optional `hotelId` / `locationId` on enquiries, only **global** seats (`developer`, `admin`) should list them. Managers / hotel admins get an empty list.
+
+† **Media — product decision (Seth, 2026-09-22):** Managers **must** keep `media` when the library is fully built (object storage / uploads), scoped to their assigned locations/hotels — same pattern as Locations / Hotels / Rooms / Bookings. Do not ship a “real” Media library as Admin-only.
 
 ---
 
@@ -474,6 +476,8 @@ Global seats only until enquiry is location/hotel scoped.
 ### Media — perm `media`
 
 List / upload / delete assets (storage detail up to you: S3, local, etc.).
+
+**Access:** Developer + Admin (global) + **Manager (location/hotel scoped)**. Confirmed with product (Seth, 2026-09-22): when Media graduates from URL/data-URL MVP to a real library, Managers retain scoped access — do not gate Media to Admin-only.
 
 ### Settings — perm `settings`
 

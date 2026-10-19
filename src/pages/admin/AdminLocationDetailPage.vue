@@ -335,6 +335,20 @@
           hint="Comma-separated"
         />
       </AdminFormSection>
+      <AdminFormSection
+        title="Contact"
+        hint="Optional destination-level phone and email (shown on the public location page)."
+        :columns="2"
+      >
+        <q-input v-model="locForm.phone" label="Phone" outlined dense />
+        <q-input
+          v-model="locForm.email"
+          type="email"
+          label="Email"
+          outlined
+          dense
+        />
+      </AdminFormSection>
       <template #actions>
         <q-btn flat no-caps label="Cancel" v-close-popup />
         <q-btn
@@ -386,6 +400,33 @@
       <AdminFormSection title="Gallery" hint="Extra photos for the hotel page.">
         <GalleryEditor v-model="hotelGallery" label="Hotel gallery" />
       </AdminFormSection>
+      <AdminFormSection title="Property profile" :columns="2">
+        <q-input
+          v-model="hotelForm.propertyType"
+          label="Property type"
+          outlined
+          dense
+          hint='e.g. "Hotel & Serviced Apartment"'
+        />
+        <q-select
+          v-model="hotelForm.starRating"
+          :options="starRatingOptions"
+          label="Star rating"
+          outlined
+          dense
+          emit-value
+          map-options
+          clearable
+        />
+        <q-input
+          v-model="hotelForm.area"
+          label="Area"
+          outlined
+          dense
+          class="admin-form-span-2"
+          hint='e.g. "Central / Ekareach Street"'
+        />
+      </AdminFormSection>
       <AdminFormSection title="About">
         <q-input
           v-model="hotelForm.shortDescription"
@@ -400,13 +441,14 @@
           outlined
           autogrow
         />
-        <q-input
-          v-model="hotelAmenities"
-          label="Amenities"
-          outlined
-          dense
-          hint="Comma-separated"
-        />
+        <AmenitiesEditor v-model="hotelAmenities" label="Amenities" />
+        <AmenitiesEditor v-model="hotelPolicies" label="Stay policies" />
+      </AdminFormSection>
+      <AdminFormSection
+        title="Nearby landmarks"
+        hint="Place + distance for the public hotel page."
+      >
+        <LandmarksEditor v-model="hotelLandmarks" label="Landmarks" />
       </AdminFormSection>
       <AdminFormSection title="Contact & hours" :columns="2">
         <q-input
@@ -433,7 +475,10 @@
           dense
         />
       </AdminFormSection>
-      <AdminFormSection title="Map pin">
+      <AdminFormSection
+        title="Map pin"
+        hint="Apply saves lat/lng and keeps the Google Maps embed/share URL (mapEmbedUrl)."
+      >
         <MapPinPicker
           v-if="hotelDialog"
           v-model:lat="hotelForm.lat"
@@ -498,13 +543,7 @@
           outlined
           autogrow
         />
-        <q-input
-          v-model="roomAmenities"
-          label="Amenities"
-          outlined
-          dense
-          hint="Comma-separated"
-        />
+        <AmenitiesEditor v-model="roomAmenities" label="Amenities" />
       </AdminFormSection>
       <AdminFormSection title="Layout & capacity" :columns="3">
         <q-input v-model="roomForm.bedType" label="Bed type" outlined dense />
@@ -571,12 +610,19 @@ import AdminDialog from "@/components/admin/AdminDialog.vue";
 import AdminEntityActions from "@/components/admin/AdminEntityActions.vue";
 import AdminFormSection from "@/components/admin/AdminFormSection.vue";
 import AdminPageHeader from "@/components/admin/AdminPageHeader.vue";
+import AmenitiesEditor from "@/components/admin/AmenitiesEditor.vue";
 import GalleryEditor from "@/components/admin/GalleryEditor.vue";
 import ImageDropField from "@/components/admin/ImageDropField.vue";
+import LandmarksEditor from "@/components/admin/LandmarksEditor.vue";
 import MapPinPicker from "@/components/admin/MapPinPicker.vue";
 import { useAuthStore } from "@/stores/auth-store";
 import { useCmsStore } from "@/stores/cms-store";
-import type { ContentStatus, Hotel, RoomType } from "@/types/greyon";
+import type {
+  ContentStatus,
+  Hotel,
+  NearbyLandmark,
+  RoomType
+} from "@/types/greyon";
 
 const cms = useCmsStore();
 const auth = useAuthStore();
@@ -668,6 +714,8 @@ const locForm = reactive({
   slug: "",
   description: "",
   heroImage: "",
+  phone: "",
+  email: "",
   status: "draft" as ContentStatus
 });
 
@@ -678,6 +726,8 @@ function openEditLocation() {
   locForm.slug = loc.slug;
   locForm.description = loc.description;
   locForm.heroImage = loc.heroImage;
+  locForm.phone = loc.phone ?? "";
+  locForm.email = loc.email ?? "";
   locForm.status = loc.status;
   highlightsText.value = loc.highlights.join(", ");
   locDialog.value = true;
@@ -713,13 +763,25 @@ function saveLocation() {
 const hotelDialog = ref(false);
 const hotelEditing = ref<string | null>(null);
 const hotelGallery = ref<string[]>([]);
-const hotelAmenities = ref("");
+const hotelAmenities = ref<string[]>([]);
+const hotelPolicies = ref<string[]>([]);
+const hotelLandmarks = ref<NearbyLandmark[]>([]);
+const starRatingOptions = [
+  { label: "1 star", value: 1 },
+  { label: "2 stars", value: 2 },
+  { label: "3 stars", value: 3 },
+  { label: "4 stars", value: 4 },
+  { label: "5 stars", value: 5 }
+];
 const hotelForm = reactive({
   name: "",
   slug: "",
   shortDescription: "",
   description: "",
   address: "",
+  area: "",
+  propertyType: "",
+  starRating: null as number | null,
   lat: null as number | null,
   lng: null as number | null,
   mapEmbedUrl: null as string | null,
@@ -738,6 +800,9 @@ function blankHotel() {
   hotelForm.shortDescription = "";
   hotelForm.description = "";
   hotelForm.address = "";
+  hotelForm.area = "";
+  hotelForm.propertyType = "";
+  hotelForm.starRating = null;
   hotelForm.lat = null;
   hotelForm.lng = null;
   hotelForm.mapEmbedUrl = null;
@@ -749,7 +814,9 @@ function blankHotel() {
   hotelForm.status = "draft";
   hotelForm.featured = false;
   hotelGallery.value = [];
-  hotelAmenities.value = "";
+  hotelAmenities.value = [];
+  hotelPolicies.value = [];
+  hotelLandmarks.value = [];
 }
 
 function openCreateHotel() {
@@ -772,6 +839,9 @@ function openEditHotel(hotel: Hotel) {
   hotelForm.shortDescription = hotel.shortDescription;
   hotelForm.description = hotel.description;
   hotelForm.address = hotel.address;
+  hotelForm.area = hotel.area ?? "";
+  hotelForm.propertyType = hotel.propertyType ?? "";
+  hotelForm.starRating = hotel.starRating ?? null;
   hotelForm.lat =
     hotel.coordinates &&
     Number.isFinite(hotel.coordinates.lat) &&
@@ -793,7 +863,9 @@ function openEditHotel(hotel: Hotel) {
   hotelForm.status = hotel.status;
   hotelForm.featured = Boolean(hotel.featured);
   hotelGallery.value = [...hotel.gallery];
-  hotelAmenities.value = hotel.amenities.join(", ");
+  hotelAmenities.value = [...hotel.amenities];
+  hotelPolicies.value = [...(hotel.policies ?? [])];
+  hotelLandmarks.value = (hotel.nearbyLandmarks ?? []).map(l => ({ ...l }));
   hotelDialog.value = true;
 }
 
@@ -820,6 +892,15 @@ function saveHotel() {
         shortDescription: hotelForm.shortDescription,
         description: hotelForm.description,
         address: hotelForm.address,
+        area: hotelForm.area.trim() || undefined,
+        propertyType: hotelForm.propertyType.trim() || undefined,
+        starRating: hotelForm.starRating,
+        nearbyLandmarks: hotelLandmarks.value
+          .map(l => ({
+            place: l.place.trim(),
+            distance: l.distance.trim()
+          }))
+          .filter(l => l.place),
         ...(hasHotelMapPin.value
           ? {
               coordinates: {
@@ -835,10 +916,8 @@ function saveHotel() {
         checkOutTime: hotelForm.checkOutTime || "12:00",
         ...(hotelForm.heroImage ? { heroImage: hotelForm.heroImage } : {}),
         gallery: hotelGallery.value.filter(Boolean),
-        amenities: hotelAmenities.value
-          .split(",")
-          .map(s => s.trim())
-          .filter(Boolean),
+        amenities: hotelAmenities.value,
+        policies: hotelPolicies.value,
         status: hotelForm.status,
         featured: hotelForm.featured
       });
@@ -876,7 +955,7 @@ function removeHotel(id: string) {
 const roomDialog = ref(false);
 const roomEditing = ref<string | null>(null);
 const roomImages = ref<string[]>([]);
-const roomAmenities = ref("");
+const roomAmenities = ref<string[]>([]);
 const roomForm = reactive({
   hotelId: "",
   name: "",
@@ -904,7 +983,7 @@ function openCreateRoom(hotelId: string) {
   roomForm.baseInventory = 5;
   roomForm.status = "draft";
   roomImages.value = [];
-  roomAmenities.value = "";
+  roomAmenities.value = [];
   roomDialog.value = true;
 }
 
@@ -921,7 +1000,7 @@ function openEditRoom(room: RoomType) {
   roomForm.baseInventory = room.baseInventory;
   roomForm.status = room.status;
   roomImages.value = [...room.images];
-  roomAmenities.value = room.amenities.join(", ");
+  roomAmenities.value = [...room.amenities];
   roomDialog.value = true;
 }
 
@@ -937,9 +1016,6 @@ function saveRoom() {
         ...roomForm,
         images: roomImages.value.filter(Boolean),
         amenities: roomAmenities.value
-          .split(",")
-          .map(s => s.trim())
-          .filter(Boolean)
       });
       roomDialog.value = false;
       $q.notify({ type: "positive", message: "Room saved." });

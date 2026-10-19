@@ -329,19 +329,24 @@ export const useAuthStore = defineStore("auth", () => {
     if (isDeveloper.value) return true;
     const cms = useCmsStore();
     const feat = cms.features.find(f => f.key === key);
-    // Guest-facing surfaces (news / booking / contact / portfolios).
+
+    // Portfolio stubs are coming-soon — stay off until explicitly enabled
+    // in the site feature catalog (do not treat as live marketing routes).
+    if (key === "portfolios") {
+      return feat?.enabled === true;
+    }
+
+    // Guest-facing surfaces (news / booking / contact).
     // Greyon MVP ships these as live marketing routes (/booking-terms,
     // hotel "Book now" CTAs, footer links). Package-builder `enabled`
     // bits are seat grants — after Round 12 omitted public keys from
     // the Admin package, applyActivePackage left them enabled:false and
     // every guest BOOK / News / Contact CTA 404'd. Default these ON;
     // do not let stale package catalog state disable the public site.
-    const isPublicProduct =
-      feat?.category === "public" ||
-      key.endsWith("_public") ||
-      key === "portfolios";
+    const isLivePublicProduct =
+      feat?.category === "public" || key.endsWith("_public");
 
-    if (isPublicProduct) {
+    if (isLivePublicProduct) {
       return true;
     }
 

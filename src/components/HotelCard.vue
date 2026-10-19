@@ -22,17 +22,12 @@
       <p class="hotel-card__desc">{{ hotel.shortDescription }}</p>
 
       <div class="hotel-card__foot">
-        <p v-if="fromPrice !== null" class="hotel-card__price">
-          From <strong>${{ fromPrice }}</strong>
-          <span>/ night</span>
-        </p>
-        <button
+        <router-link
           class="gy-btn gy-btn--light gy-btn--sm"
-          type="button"
-          @click="book"
+          :to="`/hotels/${hotel.slug}`"
         >
-          Book
-        </button>
+          View Hotel
+        </router-link>
       </div>
     </div>
   </article>
@@ -40,15 +35,11 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { useRouter } from "vue-router";
-import { useBookingStore } from "@/stores/booking-store";
 import { useCmsStore } from "@/stores/cms-store";
 import type { Hotel } from "@/types/greyon";
 
 const props = defineProps<{ hotel: Hotel }>();
-const booking = useBookingStore();
 const cms = useCmsStore();
-const router = useRouter();
 
 const locationName = computed(
   () => cms.getLocationById(props.hotel.locationId)?.name ?? ""
@@ -59,21 +50,6 @@ const coverImage = computed(
     props.hotel.gallery.find(src => src.trim()) ||
     ""
 );
-
-const fromPrice = computed(() => {
-  const prices = cms
-    .getRoomTypesByHotelId(props.hotel.id)
-    .map(r => cms.getRatePlanByRoomTypeId(r.id)?.basePrice)
-    .filter((n): n is number => typeof n === "number");
-  if (!prices.length) return null;
-  return Math.min(...prices);
-});
-
-function book() {
-  const loc = cms.getLocationById(props.hotel.locationId);
-  booking.startFromHotel(props.hotel.slug, loc?.slug ?? "");
-  void router.push({ name: "booking" });
-}
 </script>
 
 <style scoped>
@@ -151,22 +127,8 @@ function book() {
 .hotel-card__foot {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 0.75rem;
   margin-top: 0.35rem;
-}
-
-.hotel-card__price {
-  margin: 0;
-  font-size: 0.85rem;
-  color: var(--gy-muted);
-}
-
-.hotel-card__price strong {
-  font-family: var(--font-display);
-  font-size: 1.45rem;
-  font-weight: 700;
-  color: var(--gy-ink);
-  margin-right: 0.2rem;
 }
 </style>

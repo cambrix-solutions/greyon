@@ -8,6 +8,7 @@
 - [ ] Coolify CI/CD — see [COOLIFY.md](./COOLIFY.md) (SPA) and engine `docs/COOLIFY.md`
 - [ ] SMTP / mail configured on greyon-engine (booking & enquiry notify)
 - [ ] Media/object storage bucket configured (when leaving URL/data-URL media)
+- [ ] Media library upgrade: Managers keep scoped `media` access (locations/hotels) — product decision 2026-09-22; see BACKEND_API.md
 - [ ] Production secrets rotated (`APP_KEY`, DB credentials, SMTP)
 
 ## Content entry (business approved)

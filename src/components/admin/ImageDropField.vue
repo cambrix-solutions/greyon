@@ -26,6 +26,11 @@
       <q-icon name="cloud_upload" size="28px" color="primary" />
       <p class="image-drop__title">{{ title }}</p>
       <p class="image-drop__hint">
+        Prefer a hosted image URL below. Local browse is for preview only and
+        cannot be saved to the library (
+        {{ SRC_MAX_CHARS }}-character limit).
+      </p>
+      <p class="image-drop__hint">
         Drop an image here, or
         <label class="image-drop__browse">
           browse
@@ -47,7 +52,13 @@
       outlined
       clearable
       class="image-drop__url"
-      label="Or paste image URL"
+      label="Image URL (required to save)"
+      :error="urlTooLong"
+      :error-message="
+        urlTooLong
+          ? `URL must be ${SRC_MAX_CHARS} characters or fewer.`
+          : undefined
+      "
       @update:model-value="onUrl"
     />
   </div>
@@ -57,6 +68,9 @@
 import { computed, ref } from "vue";
 import { useQuasar } from "quasar";
 
+/** Engine `src` column / validation max length (URL or path — not base64). */
+const SRC_MAX_CHARS = 2048;
+
 const props = withDefaults(
   defineProps<{
     modelValue?: string;
@@ -64,13 +78,16 @@ const props = withDefaults(
     altHint?: string;
     allowUrl?: boolean;
     maxBytes?: number;
+    /** When true (default), reject local base64 that exceeds API src max. */
+    urlOnlyForApi?: boolean;
   }>(),
   {
     modelValue: "",
     title: "Upload image",
     altHint: "",
     allowUrl: true,
-    maxBytes: 2_500_000
+    maxBytes: 2_500_000,
+    urlOnlyForApi: true
   }
 );
 
@@ -85,6 +102,9 @@ const fileInput = ref<HTMLInputElement | null>(null);
 const previewSrc = computed(() => props.modelValue || "");
 const urlValue = computed(() =>
   props.modelValue?.startsWith("data:") ? "" : props.modelValue || ""
+);
+const urlTooLong = computed(
+  () => urlValue.value.length > 0 && urlValue.value.length > SRC_MAX_CHARS
 );
 
 function onDragLeave(e: DragEvent) {
@@ -124,11 +144,28 @@ async function readFile(file: File) {
     reader.onerror = () => reject(reader.error);
     reader.readAsDataURL(file);
   });
+  if (props.urlOnlyForApi && dataUrl.length > SRC_MAX_CHARS) {
+    $q.notify({
+      type: "negative",
+      message:
+        "Local uploads are too large to save to the media library. Host the image and paste its URL instead."
+    });
+    // Still preview locally so the admin can see what they picked.
+    emit("update:modelValue", dataUrl);
+    return;
+  }
   emit("update:modelValue", dataUrl);
 }
 
 function onUrl(value: string | number | null) {
-  emit("update:modelValue", String(value ?? "").trim());
+  const next = String(value ?? "").trim();
+  if (next.length > SRC_MAX_CHARS) {
+    $q.notify({
+      type: "negative",
+      message: `Image URL must be ${SRC_MAX_CHARS} characters or fewer.`
+    });
+  }
+  emit("update:modelValue", next);
 }
 
 function clear() {

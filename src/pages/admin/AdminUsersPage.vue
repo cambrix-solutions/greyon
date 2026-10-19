@@ -211,7 +211,14 @@
         />
       </AdminFormSection>
       <template #actions>
-        <q-btn flat no-caps label="Cancel" v-close-popup />
+        <q-btn
+          flat
+          no-caps
+          type="button"
+          label="Cancel"
+          v-close-popup
+          @click="closeDialog"
+        />
         <q-btn
           v-if="
             editing
@@ -220,6 +227,7 @@
           "
           unelevated
           no-caps
+          type="button"
           color="primary"
           label="Save"
           @click="save"
@@ -395,14 +403,15 @@ function openCreate() {
   editing.value = null;
   form.name = "";
   form.email = "";
-  const hotelPkg =
-    assignablePackages.value.find(
-      p => p.roles.includes("hotel_admin") && !p.roles.includes("admin")
-    ) ?? assignablePackages.value[0];
-  form.packageIds = hotelPkg ? [hotelPkg.id] : [];
+  // Start empty — do not pre-pick Manager · <city> (easy to miss / wrong scope).
+  form.packageIds = [];
   form.locationIds = [];
   form.hotelIds = [];
   dialog.value = true;
+}
+
+function closeDialog() {
+  dialog.value = false;
 }
 
 function openEdit(user: AdminUser) {
@@ -416,6 +425,8 @@ function openEdit(user: AdminUser) {
 }
 
 async function save() {
+  // Only validate on an intentional Save click — Cancel must stay silent.
+  if (!dialog.value) return;
   if (!form.packageIds.length) {
     $q.notify({ type: "negative", message: "Assign at least one seat." });
     return;
@@ -443,7 +454,7 @@ async function save() {
       locationIds: form.locationIds,
       hotelIds: form.hotelIds
     });
-    dialog.value = false;
+    closeDialog();
     $q.notify({ type: "positive", message: "Person saved." });
   } catch (e) {
     $q.notify({

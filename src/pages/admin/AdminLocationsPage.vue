@@ -316,6 +316,20 @@
           hint="Comma-separated, e.g. Riverside, Royal Palace, Central Market"
         />
       </AdminFormSection>
+      <AdminFormSection
+        title="Contact"
+        hint="Optional destination-level phone and email (public location page)."
+        :columns="2"
+      >
+        <q-input v-model="form.phone" label="Phone" outlined dense />
+        <q-input
+          v-model="form.email"
+          type="email"
+          label="Email"
+          outlined
+          dense
+        />
+      </AdminFormSection>
       <template #actions>
         <q-btn flat no-caps label="Cancel" v-close-popup />
         <q-btn
@@ -378,6 +392,8 @@ const form = reactive({
   slug: "",
   description: "",
   heroImage: "",
+  phone: "",
+  email: "",
   status: "draft" as ContentStatus
 });
 
@@ -417,6 +433,8 @@ function openCreate() {
   form.slug = "";
   form.description = "";
   form.heroImage = "";
+  form.phone = "";
+  form.email = "";
   form.status = "draft";
   highlightsText.value = "";
   dialog.value = true;
@@ -428,6 +446,8 @@ function openEdit(loc: Location) {
   form.slug = loc.slug;
   form.description = loc.description;
   form.heroImage = loc.heroImage;
+  form.phone = loc.phone ?? "";
+  form.email = loc.email ?? "";
   form.status = loc.status;
   highlightsText.value = loc.highlights.join(", ");
   dialog.value = true;

@@ -197,6 +197,7 @@
     <q-drawer
       v-model="leftOpen"
       show-if-above
+      :breakpoint="1023"
       bordered
       :width="248"
       class="admin-drawer"
@@ -341,18 +342,30 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
+import { useQuasar } from "quasar";
 import { useRoute, useRouter } from "vue-router";
 import type { StaffNotification } from "@/services/engine/notifications";
 import { roleLabels, useAuthStore } from "@/stores/auth-store";
 import { useCmsStore } from "@/stores/cms-store";
 import { useNotificationStore } from "@/stores/notification-store";
 
+const $q = useQuasar();
 const auth = useAuthStore();
 const cms = useCmsStore();
 const notifications = useNotificationStore();
 const router = useRouter();
 const route = useRoute();
-const leftOpen = ref(true);
+/** Overlay mode only when width ≤ 1023; keep closed so direct loads aren't covered. */
+const leftOpen = ref(false);
+
+const drawerOverlayMode = computed(() => $q.screen.width <= 1023);
+
+watch(
+  () => route.fullPath,
+  () => {
+    if (drawerOverlayMode.value) leftOpen.value = false;
+  }
+);
 
 function onWindowFocus() {
   if (document.visibilityState !== "visible") return;

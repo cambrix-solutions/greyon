@@ -8,7 +8,9 @@
       <p class="gy-eyebrow">SEO</p>
       <h1 class="gy-display page-title">Sitemap</h1>
       <p class="gy-muted">
-        Generated from published hotels, locations, and news in the CMS.
+        Live routes only — published CMS content plus public surfaces that are
+        enabled on this site (disabled booking, contact, news, and portfolio
+        stubs are omitted).
       </p>
       <div class="actions">
         <button class="gy-btn" type="button" @click="download">
@@ -29,6 +31,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import SeoHead from "@/components/SeoHead.vue";
+import { useAuthStore } from "@/stores/auth-store";
 import { useCmsStore } from "@/stores/cms-store";
 import {
   buildCmsSitemapEntries,
@@ -37,6 +40,7 @@ import {
 } from "@/utils/sitemap";
 
 const cms = useCmsStore();
+const auth = useAuthStore();
 
 const baseUrl = computed(
   () => cms.settings.siteUrl || "https://www.greyon.com.kh"
@@ -46,7 +50,15 @@ const entries = computed(() =>
   buildCmsSitemapEntries({
     hotels: cms.publishedHotels,
     locations: cms.publishedLocations,
-    news: cms.publishedNews
+    news: cms.publishedNews,
+    // Match router public gates — never advertise routes that 404 as "not enabled".
+    // Portfolio stubs stay out even when the nav gate is on (coming-soon pages).
+    enabled: {
+      booking: auth.featureEnabled("booking_public"),
+      contact: auth.featureEnabled("contact_public"),
+      news: auth.featureEnabled("news_public"),
+      portfolios: false
+    }
   })
 );
 

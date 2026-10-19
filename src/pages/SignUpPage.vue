@@ -70,30 +70,49 @@
           placeholder="+855 …"
         />
       </label>
-      <div class="auth-card__row">
-        <label class="auth-field">
-          Password
-          <input
-            v-model="password"
-            type="password"
-            required
-            minlength="8"
-            autocomplete="new-password"
-            placeholder="At least 8 characters"
-          />
-        </label>
-        <label class="auth-field">
-          Confirm
-          <input
-            v-model="passwordConfirmation"
-            type="password"
-            required
-            minlength="8"
-            autocomplete="new-password"
-            placeholder="Repeat password"
-          />
-        </label>
+      <label class="auth-field">
+        Password
+        <input
+          v-model="password"
+          type="password"
+          required
+          minlength="8"
+          autocomplete="new-password"
+          placeholder="8+ chars, upper, lower, number, symbol"
+          @input="touchedPassword = true"
+        />
+      </label>
+      <div v-if="password.length" class="pw-meter" aria-live="polite">
+        <div class="pw-meter__bar">
+          <span :style="{ width: `${passwordStrength.pct}%` }" />
+        </div>
+        <p class="pw-meter__label">{{ passwordStrength.label }}</p>
+        <ul class="pw-meter__rules">
+          <li :class="{ ok: passwordChecks.length }">At least 8 characters</li>
+          <li :class="{ ok: passwordChecks.upper }">Uppercase letter</li>
+          <li :class="{ ok: passwordChecks.lower }">Lowercase letter</li>
+          <li :class="{ ok: passwordChecks.number }">Number</li>
+          <li :class="{ ok: passwordChecks.symbol }">Symbol</li>
+        </ul>
       </div>
+      <label
+        class="auth-field"
+        :class="{ 'auth-field--invalid': confirmMismatch }"
+      >
+        Confirm password
+        <input
+          v-model="passwordConfirmation"
+          type="password"
+          required
+          minlength="8"
+          autocomplete="new-password"
+          placeholder="Repeat password"
+          @input="touchedConfirm = true"
+        />
+        <span v-if="confirmMismatch" class="auth-field__error">
+          Passwords do not match.
+        </span>
+      </label>
 
       <p v-if="error" class="auth-error">{{ error }}</p>
 
@@ -116,7 +135,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import AuthShell from "@/components/AuthShell.vue";
 import { consumeAuthRedirect, setAuthRedirect } from "@/helpers/authRedirect";
@@ -133,6 +152,40 @@ const password = ref("");
 const passwordConfirmation = ref("");
 const error = ref("");
 const submitting = ref(false);
+const touchedPassword = ref(false);
+const touchedConfirm = ref(false);
+
+const passwordChecks = computed(() => {
+  const value = password.value;
+  return {
+    length: value.length >= 8,
+    upper: /[A-Z]/.test(value),
+    lower: /[a-z]/.test(value),
+    number: /\d/.test(value),
+    symbol: /[^A-Za-z0-9]/.test(value)
+  };
+});
+
+const passwordStrength = computed(() => {
+  const c = passwordChecks.value;
+  const score = [c.length, c.upper, c.lower, c.number, c.symbol].filter(
+    Boolean
+  ).length;
+  if (score <= 2) return { pct: 28, label: "Weak" };
+  if (score <= 4) return { pct: 64, label: "Fair" };
+  return { pct: 100, label: "Strong" };
+});
+
+const passwordStrong = computed(() =>
+  Object.values(passwordChecks.value).every(Boolean)
+);
+
+const confirmMismatch = computed(
+  () =>
+    touchedConfirm.value &&
+    passwordConfirmation.value.length > 0 &&
+    passwordConfirmation.value !== password.value
+);
 
 onMounted(() => {
   customer.hydrate();
@@ -145,6 +198,13 @@ onMounted(() => {
 });
 
 async function onSubmit() {
+  touchedPassword.value = true;
+  touchedConfirm.value = true;
+  if (!passwordStrong.value) {
+    error.value =
+      "Use 8+ characters with upper, lower, number, and symbol.";
+    return;
+  }
   if (password.value !== passwordConfirmation.value) {
     error.value = "Passwords do not match.";
     return;
@@ -199,6 +259,56 @@ function onGoogle() {
   color: var(--gy-muted);
   font-size: 0.95rem;
   line-height: 1.5;
+}
+
+.pw-meter {
+  margin: -0.35rem 0 0.85rem;
+}
+
+.pw-meter__bar {
+  height: 0.35rem;
+  background: var(--gy-sand);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.pw-meter__bar span {
+  display: block;
+  height: 100%;
+  background: var(--gy-forest);
+  transition: width 0.25s ease;
+}
+
+.pw-meter__label {
+  margin: 0.35rem 0 0.25rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--gy-ink);
+}
+
+.pw-meter__rules {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.15rem;
+  font-size: 0.75rem;
+  color: var(--gy-muted);
+}
+
+.pw-meter__rules li.ok {
+  color: var(--gy-forest);
+}
+
+.auth-field--invalid input {
+  border-color: #b42318;
+}
+
+.auth-field__error {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.78rem;
+  color: #b42318;
 }
 
 .auth-google {

@@ -53,15 +53,15 @@
               <p>Check-in {{ hotel.checkInTime || "—" }}</p>
               <p>Check-out {{ hotel.checkOutTime || "—" }}</p>
             </div>
-            <div v-if="fromPrice !== null">
-              <span class="meta-label">Rates from</span>
-              <p class="meta-price">${{ fromPrice }} / night</p>
-            </div>
           </div>
         </div>
         <div class="actions">
-          <button class="gy-btn gy-btn--light" type="button" @click="bookHotel">
-            Book now
+          <button
+            class="gy-btn gy-btn--light"
+            type="button"
+            @click="scrollToRooms"
+          >
+            View rooms
           </button>
           <router-link to="/hotels" class="gy-btn gy-btn--outline"
             >All hotels</router-link
@@ -74,7 +74,7 @@
           <h2 class="gy-display">Hotel features</h2>
           <p class="gy-muted">Amenities guests can expect during their stay.</p>
         </div>
-        <p class="feature-line">{{ hotel.amenities.join(" · ") }}</p>
+        <FeatureChips :items="hotel.amenities" />
       </section>
 
       <section v-if="landmarks.length" v-reveal class="block">
@@ -112,14 +112,18 @@
         </div>
       </section>
 
-      <section v-reveal class="block">
+      <section id="rooms" v-reveal class="block">
         <div class="block-head">
           <h2 class="gy-display">Rooms & features</h2>
           <p class="gy-muted">
-            Compare room size, occupancy, and in-room features before you book.
+            Select dates to see live rates, then open room details before
+            booking.
           </p>
         </div>
-        <BookingSearchWidget :navigate="false" submit-label="Update search" />
+        <BookingSearchWidget :navigate="false" submit-label="Check availability" />
+        <p v-if="!hasSearchedDates" class="gy-muted room-price-hint">
+          Prices appear after you choose check-in and check-out dates.
+        </p>
         <div class="room-list">
           <article v-for="room in rooms" :key="room.id" class="room-card">
             <div class="gy-card-media room-card__media">
@@ -129,8 +133,11 @@
                 :alt="room.name"
                 loading="lazy"
               />
-              <span v-if="rateFor(room.id)" class="room-card__badge">
-                From ${{ rateFor(room.id)?.basePrice }}/night
+              <span
+                v-if="hasSearchedDates && pricedRoom(room.id)"
+                class="room-card__badge"
+              >
+                ${{ pricedRoom(room.id)?.total.toFixed(0) }} total
               </span>
             </div>
             <div class="room-card__body">
@@ -143,19 +150,29 @@
                 <span>·</span>
                 Up to {{ room.maxGuests }} guests
               </p>
-              <p class="room-card__tags">
-                {{ room.amenities.join(" · ") }}
-              </p>
-              <p v-if="rateFor(room.id)" class="room-card__meal">
-                {{ rateFor(room.id)?.mealBenefit }}
+              <FeatureChips :items="room.amenities" size="sm" />
+              <p
+                v-if="hasSearchedDates && pricedRoom(room.id)"
+                class="room-card__meal"
+              >
+                {{ pricedRoom(room.id)?.ratePlan.mealBenefit }}
               </p>
               <div class="room-card__actions">
                 <button
+                  v-if="hasSearchedDates && pricedRoom(room.id)"
                   class="gy-btn gy-btn--light"
                   type="button"
-                  @click="bookRoom(room.id)"
+                  @click="openRoom(room.id)"
                 >
-                  Book this room
+                  View room details
+                </button>
+                <button
+                  v-else
+                  class="gy-btn gy-btn--outline"
+                  type="button"
+                  @click="focusSearch"
+                >
+                  Check availability
                 </button>
               </div>
             </div>
@@ -166,9 +183,12 @@
       <section class="block policies-block">
         <div>
           <h2 class="gy-display">Stay policies</h2>
-          <ul class="policy-list">
-            <li v-for="item in hotel.policies" :key="item">{{ item }}</li>
-          </ul>
+          <FeatureChips
+            v-if="hotel.policies.length"
+            :items="hotel.policies"
+            :show-icons="false"
+          />
+          <p v-else class="gy-muted">Policies will appear here when set.</p>
         </div>
         <div>
           <h2 class="gy-display">Destination</h2>
@@ -200,9 +220,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import BookingSearchWidget from "@/components/BookingSearchWidget.vue";
+import FeatureChips from "@/components/FeatureChips.vue";
 import HotelCard from "@/components/HotelCard.vue";
 import MapEmbed from "@/components/MapEmbed.vue";
 import SeoHead from "@/components/SeoHead.vue";
@@ -215,6 +236,21 @@ const booking = useBookingStore();
 const cms = useCmsStore();
 
 const hotel = computed(() => cms.getHotelBySlug(String(route.params.slug)));
+
+watch(
+  hotel,
+  h => {
+    if (!h) return;
+    const loc = cms.getLocationById(h.locationId);
+    if (booking.search.hotelSlug !== h.slug) {
+      booking.setSearch({
+        hotelSlug: h.slug,
+        locationSlug: loc?.slug ?? ""
+      });
+    }
+  },
+  { immediate: true }
+);
 const locationName = computed(
   () => cms.getLocationById(hotel.value?.locationId ?? "")?.name ?? "Cambodia"
 );
@@ -250,13 +286,12 @@ const related = computed(() => {
     .slice(0, 3);
 });
 
-const fromPrice = computed(() => {
-  const prices = rooms.value
-    .map(r => cms.getRatePlanByRoomTypeId(r.id)?.basePrice)
-    .filter((n): n is number => typeof n === "number");
-  if (!prices.length) return null;
-  return Math.min(...prices);
-});
+const hasSearchedDates = computed(
+  () =>
+    Boolean(booking.search.checkIn && booking.search.checkOut) &&
+    booking.results.length > 0 &&
+    booking.results.some(r => r.hotel.id === hotel.value?.id)
+);
 
 const jsonLd = computed(() =>
   hotel.value
@@ -272,22 +307,40 @@ const jsonLd = computed(() =>
     : null
 );
 
-function rateFor(roomTypeId: string) {
-  return cms.getRatePlanByRoomTypeId(roomTypeId);
+function pricedRoom(roomTypeId: string) {
+  if (!hotel.value) return null;
+  return (
+    booking.results.find(
+      r => r.hotel.id === hotel.value?.id && r.roomType.id === roomTypeId
+    ) ?? null
+  );
 }
 
-function bookHotel() {
+function scrollToRooms() {
+  document.getElementById("rooms")?.scrollIntoView({ behavior: "smooth" });
+}
+
+function focusSearch() {
+  scrollToRooms();
+  document
+    .querySelector<HTMLElement>("#rooms .gy-search, #rooms form")
+    ?.focus();
+}
+
+async function openRoom(roomTypeId: string) {
   if (!hotel.value) return;
   const loc = cms.getLocationById(hotel.value.locationId);
   booking.startFromHotel(hotel.value.slug, loc?.slug ?? "");
-  void router.push({ name: "booking" });
-}
-
-async function bookRoom(roomTypeId: string) {
-  bookHotel();
+  const match = pricedRoom(roomTypeId);
+  if (match) {
+    booking.selectResult(match);
+    void router.push({ name: "booking" });
+    return;
+  }
   await booking.runSearch();
-  const match = booking.results.find(r => r.roomType.id === roomTypeId);
-  if (match) booking.selectResult(match);
+  const found = booking.results.find(r => r.roomType.id === roomTypeId);
+  if (found) booking.selectResult(found);
+  void router.push({ name: "booking" });
 }
 </script>
 
@@ -494,6 +547,11 @@ async function bookRoom(roomTypeId: string) {
 }
 
 .room-card__facts,
+.room-price-hint {
+  margin: 0.75rem 0 0;
+  font-size: 0.9rem;
+}
+
 .room-card__tags,
 .feature-line {
   margin: 0;

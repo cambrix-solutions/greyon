@@ -13,20 +13,6 @@
         </div>
       </header>
 
-      <ol v-reveal="{ delay: '60ms' }" class="steps" aria-label="Booking steps">
-        <li
-          v-for="item in stepItems"
-          :key="item.n"
-          :class="{
-            done: booking.step > item.n,
-            current: booking.step === item.n
-          }"
-        >
-          <span class="steps__num">{{ item.n }}</span>
-          <span class="steps__label">{{ item.label }}</span>
-        </li>
-      </ol>
-
       <p
         v-if="!cms.settings.paymentEnabled && booking.step < 6"
         class="payment-note"
@@ -68,6 +54,15 @@
             :key="idx"
             class="result-card"
           >
+            <div class="result-card__media gy-card-media">
+              <img
+                v-if="roomCover(result.roomType)"
+                :src="roomCover(result.roomType)"
+                :alt="result.roomType.name"
+                loading="lazy"
+              />
+              <div v-else class="result-card__media-ph" aria-hidden="true" />
+            </div>
             <div class="result-card__info">
               <h3 class="gy-display">{{ result.hotel.name }}</h3>
               <p class="result-card__room">
@@ -80,9 +75,10 @@
                 <span>·</span>
                 Up to {{ result.roomType.maxGuests }} guests
               </p>
-              <p class="result-card__tags">
-                {{ result.roomType.amenities.slice(0, 4).join(" · ") }}
-              </p>
+              <FeatureChips
+                :items="result.roomType.amenities.slice(0, 4)"
+                size="sm"
+              />
               <p class="result-card__meta">
                 {{ result.ratePlan.mealBenefit }}
                 <span>·</span>
@@ -93,13 +89,13 @@
             </div>
             <div class="result-card__price">
               <strong>${{ result.total.toFixed(2) }}</strong>
-              <span>incl. taxes/fees</span>
+              <span>incl. taxes/fees for your dates</span>
               <button
                 class="gy-btn gy-btn--light gy-btn--sm"
                 type="button"
                 @click="booking.selectResult(result)"
               >
-                Select
+                View room details
               </button>
             </div>
           </article>
@@ -112,6 +108,15 @@
       <!-- 3 Room -->
       <section v-else-if="booking.step === 3 && booking.selected" class="panel">
         <div class="summary-card">
+          <div
+            v-if="roomCover(booking.selected.roomType)"
+            class="summary-card__media gy-card-media"
+          >
+            <img
+              :src="roomCover(booking.selected.roomType)"
+              :alt="booking.selected.roomType.name"
+            />
+          </div>
           <h2 class="gy-display panel-title">Selected room</h2>
           <p class="summary-card__hotel">{{ booking.selected.hotel.name }}</p>
           <p class="summary-card__room">
@@ -125,14 +130,14 @@
             <span>·</span>
             Up to {{ booking.selected.roomType.maxGuests }} guests
           </p>
-          <p class="result-card__tags">
-            {{ booking.selected.roomType.amenities.join(" · ") }}
-          </p>
+          <FeatureChips :items="booking.selected.roomType.amenities" />
           <p class="gy-muted summary-card__desc">
             {{ booking.selected.ratePlan.description }}
           </p>
           <div class="summary-card__total">
-            <span>Total</span>
+            <span>Total for {{ booking.selected.nights }} night{{
+              booking.selected.nights === 1 ? "" : "s"
+            }}</span>
             <strong>${{ booking.selected.total.toFixed(2) }}</strong>
           </div>
           <p class="breakdown">
@@ -162,124 +167,187 @@
       </section>
 
       <!-- 4 Guest -->
-      <section v-else-if="booking.step === 4" class="panel">
-        <h2 class="gy-display panel-title">Who’s staying</h2>
-        <p class="panel-sub gy-muted">
-          Lead guest contact for this reservation — an account is optional.
-        </p>
+      <section v-else-if="booking.step === 4" class="panel guest-step">
+        <div class="guest-step__form">
+          <h2 class="gy-display panel-title">Who’s staying</h2>
+          <p class="panel-sub gy-muted">
+            Lead guest details for this reservation — an account is optional.
+          </p>
 
-        <div
-          v-if="customer.isAuthenticated"
-          class="guest-account guest-account--in"
+          <div
+            v-if="customer.isAuthenticated"
+            class="guest-account guest-account--in"
+          >
+            <p class="guest-account__title">Booking with your Greyon account</p>
+            <p class="guest-account__copy">
+              {{ customer.displayName }} · {{ customer.user?.email }}
+            </p>
+            <p class="guest-account__hint gy-muted">
+              This stay will appear under My account. Confirm or edit the
+              contact details below if someone else is the lead guest.
+            </p>
+          </div>
+          <div v-else class="guest-account guest-account--out">
+            <p class="guest-account__title">Save this stay to an account?</p>
+            <p class="guest-account__copy gy-muted">
+              Sign in so confirmation and details sync to My account. Or
+              continue as a guest with the form below — no account required.
+            </p>
+            <div class="guest-account__actions">
+              <router-link
+                class="gy-btn gy-btn--outline"
+                :to="{
+                  name: 'sign-in',
+                  query: { redirect: '/booking' }
+                }"
+                @click="booking.prepareAuthReturn()"
+              >
+                Sign in
+              </router-link>
+              <router-link
+                class="guest-account__link"
+                :to="{
+                  name: 'sign-up',
+                  query: { redirect: '/booking' }
+                }"
+                @click="booking.prepareAuthReturn()"
+              >
+                Create account
+              </router-link>
+            </div>
+          </div>
+
+          <form class="form-grid" @submit.prevent="booking.goToReview()">
+            <div class="form-row">
+              <label :class="{ 'is-invalid': showGuestError('firstName') }">
+                First name *
+                <input
+                  v-model="booking.guest.firstName"
+                  required
+                  autocomplete="given-name"
+                />
+                <span v-if="showGuestError('firstName')" class="field-error">
+                  {{ booking.guestErrors.firstName }}
+                </span>
+              </label>
+              <label :class="{ 'is-invalid': showGuestError('lastName') }">
+                Last name *
+                <input
+                  v-model="booking.guest.lastName"
+                  required
+                  autocomplete="family-name"
+                />
+                <span v-if="showGuestError('lastName')" class="field-error">
+                  {{ booking.guestErrors.lastName }}
+                </span>
+              </label>
+            </div>
+            <label :class="{ 'is-invalid': showGuestError('nationality') }">
+              Nationality *
+              <input
+                v-model="booking.guest.nationality"
+                required
+                autocomplete="country-name"
+              />
+              <span v-if="showGuestError('nationality')" class="field-error">
+                {{ booking.guestErrors.nationality }}
+              </span>
+            </label>
+            <div class="form-row">
+              <label :class="{ 'is-invalid': showGuestError('email') }">
+                Email *
+                <input
+                  v-model="booking.guest.email"
+                  type="email"
+                  required
+                  autocomplete="email"
+                />
+                <span v-if="showGuestError('email')" class="field-error">
+                  {{ booking.guestErrors.email }}
+                </span>
+              </label>
+              <label :class="{ 'is-invalid': showGuestError('phone') }">
+                Phone *
+                <input
+                  v-model="booking.guest.phone"
+                  required
+                  autocomplete="tel"
+                />
+                <span v-if="showGuestError('phone')" class="field-error">
+                  {{ booking.guestErrors.phone }}
+                </span>
+              </label>
+            </div>
+            <label :class="{ 'is-invalid': showGuestError('address') }">
+              Address *
+              <input
+                v-model="booking.guest.address"
+                required
+                autocomplete="street-address"
+              />
+              <span v-if="showGuestError('address')" class="field-error">
+                {{ booking.guestErrors.address }}
+              </span>
+            </label>
+            <label :class="{ 'is-invalid': showGuestError('city') }">
+              City of residence *
+              <input
+                v-model="booking.guest.city"
+                required
+                autocomplete="address-level2"
+              />
+              <span v-if="showGuestError('city')" class="field-error">
+                {{ booking.guestErrors.city }}
+              </span>
+            </label>
+            <label>
+              Special requests
+              <textarea
+                v-model="booking.guest.specialRequests"
+                rows="3"
+                placeholder="Optional — arrival time, bed preference, etc."
+              />
+            </label>
+            <div class="panel-actions">
+              <button
+                class="gy-btn gy-btn--outline"
+                type="button"
+                @click="booking.step = 3"
+              >
+                Back
+              </button>
+              <button class="gy-btn gy-btn--light" type="submit">
+                Continue
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <aside
+          v-if="booking.selected"
+          class="guest-step__summary summary-card summary-card--aside"
         >
-          <p class="guest-account__title"> Booking with your Greyon account </p>
-          <p class="guest-account__copy">
-            {{ customer.displayName }} · {{ customer.user?.email }}
-          </p>
-          <p class="guest-account__hint gy-muted">
-            This stay will appear under My account. Confirm or edit the contact
-            details below if someone else is the lead guest.
-          </p>
-        </div>
-        <div v-else class="guest-account guest-account--out">
-          <p class="guest-account__title">Save this stay to an account?</p>
-          <p class="guest-account__copy gy-muted">
-            Sign in so confirmation and details sync to My account. Or continue
-            as a guest with the form below — no account required.
-          </p>
-          <div class="guest-account__actions">
-            <router-link
-              class="gy-btn gy-btn--outline"
-              :to="{
-                name: 'sign-in',
-                query: { redirect: '/booking' }
-              }"
-              @click="booking.prepareAuthReturn()"
-            >
-              Sign in
-            </router-link>
-            <router-link
-              class="guest-account__link"
-              :to="{
-                name: 'sign-up',
-                query: { redirect: '/booking' }
-              }"
-              @click="booking.prepareAuthReturn()"
-            >
-              Create account
-            </router-link>
-          </div>
-        </div>
-
-        <form class="form-grid" @submit.prevent="booking.goToReview()">
-          <label :class="{ 'is-invalid': showGuestError('fullName') }">
-            Full name *
-            <input
-              v-model="booking.guest.fullName"
-              required
-              autocomplete="name"
-              aria-describedby="guest-name-error"
+          <div
+            v-if="roomCover(booking.selected.roomType)"
+            class="summary-card__media gy-card-media"
+          >
+            <img
+              :src="roomCover(booking.selected.roomType)"
+              :alt="booking.selected.roomType.name"
             />
-            <span
-              v-if="showGuestError('fullName')"
-              id="guest-name-error"
-              class="field-error"
-            >
-              {{ booking.guestErrors.fullName }}
-            </span>
-          </label>
-          <div class="form-row">
-            <label :class="{ 'is-invalid': showGuestError('email') }">
-              Email *
-              <input
-                v-model="booking.guest.email"
-                type="email"
-                required
-                autocomplete="email"
-                aria-describedby="guest-email-error"
-              />
-              <span
-                v-if="showGuestError('email')"
-                id="guest-email-error"
-                class="field-error"
-              >
-                {{ booking.guestErrors.email }}
-              </span>
-            </label>
-            <label :class="{ 'is-invalid': showGuestError('phone') }">
-              Phone *
-              <input
-                v-model="booking.guest.phone"
-                required
-                autocomplete="tel"
-                aria-describedby="guest-phone-error"
-              />
-              <span
-                v-if="showGuestError('phone')"
-                id="guest-phone-error"
-                class="field-error"
-              >
-                {{ booking.guestErrors.phone }}
-              </span>
-            </label>
           </div>
-          <label>
-            Special requests
-            <textarea v-model="booking.guest.specialRequests" rows="3" />
-          </label>
-          <div class="panel-actions">
-            <button
-              class="gy-btn gy-btn--outline"
-              type="button"
-              @click="booking.step = 3"
-            >
-              Back
-            </button>
-            <button class="gy-btn gy-btn--light" type="submit">
-              Review booking
-            </button>
+          <p class="review-label">Selected room</p>
+          <p class="summary-card__hotel">{{ booking.selected.hotel.name }}</p>
+          <p class="summary-card__room">
+            {{ booking.selected.roomType.name }} ·
+            {{ booking.selected.ratePlan.name }}
+          </p>
+          <p class="gy-muted">{{ staySummary }}</p>
+          <div class="summary-card__total">
+            <span>Total</span>
+            <strong>${{ booking.selected.total.toFixed(2) }}</strong>
           </div>
-        </form>
+        </aside>
       </section>
 
       <!-- 5 Review -->
@@ -308,6 +376,19 @@
             <p>{{ booking.guest.fullName }}</p>
             <p class="gy-muted">
               {{ booking.guest.email }} · {{ booking.guest.phone }}
+            </p>
+            <p v-if="booking.guest.nationality" class="gy-muted">
+              {{ booking.guest.nationality }}
+            </p>
+            <p
+              v-if="booking.guest.address || booking.guest.city"
+              class="gy-muted"
+            >
+              {{
+                [booking.guest.address, booking.guest.city]
+                  .filter(Boolean)
+                  .join(", ")
+              }}
             </p>
           </div>
           <div class="review-block review-block--total">
@@ -443,10 +524,12 @@
 <script setup lang="ts">
 import { computed, onMounted, watch } from "vue";
 import BookingSearchWidget from "@/components/BookingSearchWidget.vue";
+import FeatureChips from "@/components/FeatureChips.vue";
 import SeoHead from "@/components/SeoHead.vue";
 import { useBookingStore } from "@/stores/booking-store";
 import { useCmsStore } from "@/stores/cms-store";
 import { useCustomerStore } from "@/stores/customer-store";
+import type { RoomType } from "@/types/greyon";
 import {
   formatStayRange,
   hotelCheckInTime,
@@ -473,14 +556,9 @@ watch(
   }
 );
 
-const stepItems = [
-  { n: 1, label: "Search" },
-  { n: 2, label: "Results" },
-  { n: 3, label: "Room" },
-  { n: 4, label: "Guest" },
-  { n: 5, label: "Review" },
-  { n: 6, label: "Confirm" }
-];
+function roomCover(room: RoomType) {
+  return room.images?.find(src => src?.trim())?.trim() || "";
+}
 
 const stepTitle = computed(() => {
   switch (booking.step) {
@@ -535,7 +613,16 @@ const confirmHotel = computed(() =>
     : null
 );
 
-function showGuestError(field: "fullName" | "email" | "phone") {
+function showGuestError(
+  field:
+    | "firstName"
+    | "lastName"
+    | "email"
+    | "phone"
+    | "nationality"
+    | "address"
+    | "city"
+) {
   return booking.guestAttempted && Boolean(booking.guestErrors[field]);
 }
 </script>
@@ -559,63 +646,6 @@ function showGuestError(field: "fullName" | "email" | "phone") {
 
 .booking-head {
   margin-bottom: 1.25rem;
-}
-
-.steps {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 0.45rem;
-  list-style: none;
-  padding: 0;
-  margin: 0 0 1.35rem;
-}
-
-.steps li {
-  display: grid;
-  gap: 0.3rem;
-  justify-items: center;
-  padding: 0.55rem 0.35rem;
-  background: transparent;
-  border-bottom: 2px solid var(--gy-stone);
-  color: var(--gy-muted);
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  opacity: 0.7;
-}
-
-.steps__num {
-  width: 1.45rem;
-  height: 1.45rem;
-  display: grid;
-  place-items: center;
-  border-radius: 999px;
-  border: 1px solid currentColor;
-  font-size: 0.7rem;
-}
-
-.steps li.done {
-  opacity: 1;
-  color: var(--gy-forest);
-  border-bottom-color: var(--gy-forest);
-}
-
-.steps li.done .steps__num {
-  background: var(--gy-forest);
-  border-color: var(--gy-forest);
-  color: white;
-}
-
-.steps li.current {
-  opacity: 1;
-  color: var(--gy-ink);
-  border-bottom-color: var(--gy-gold);
-}
-
-.steps li.current .steps__num {
-  background: var(--gy-gold);
-  border-color: var(--gy-gold);
-  color: var(--gy-ink);
 }
 
 .payment-note {
@@ -669,20 +699,68 @@ function showGuestError(field: "fullName" | "email" | "phone") {
 }
 
 .result-card {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr) auto;
   align-items: stretch;
-  gap: 1.5rem;
+  gap: 1.15rem;
   background: var(--gy-cream);
   padding: 1.15rem 1.25rem;
   border: 1px solid rgba(28, 36, 33, 0.06);
 }
 
+.result-card__media {
+  aspect-ratio: 4 / 3;
+  min-height: 100px;
+  background: var(--gy-sand);
+}
+
+.result-card__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.result-card__media-ph {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--gy-sand), var(--gy-stone));
+}
+
 .result-card__info {
   display: grid;
-  gap: 0.3rem;
+  gap: 0.35rem;
   min-width: 0;
-  flex: 1;
+  align-content: start;
+}
+
+.summary-card__media {
+  aspect-ratio: 16 / 9;
+  margin-bottom: 0.85rem;
+  background: var(--gy-sand);
+}
+
+.summary-card__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.guest-step {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 280px);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.guest-step__summary {
+  position: sticky;
+  top: 5.5rem;
+}
+
+.summary-card--aside {
+  padding: 1rem;
+  background: var(--gy-cream);
+  border: 1px solid rgba(28, 36, 33, 0.08);
 }
 
 .result-card h3 {
@@ -999,18 +1077,29 @@ textarea:focus {
   text-transform: capitalize;
 }
 
-@media (max-width: 800px) {
-  .steps {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+@media (max-width: 900px) {
+  .guest-step {
+    grid-template-columns: 1fr;
   }
 
+  .guest-step__summary {
+    position: static;
+    order: -1;
+  }
+}
+
+@media (max-width: 800px) {
   .review-grid,
   .form-row {
     grid-template-columns: 1fr;
   }
 
   .result-card {
-    flex-direction: column;
+    grid-template-columns: 1fr;
+  }
+
+  .result-card__media {
+    aspect-ratio: 16 / 9;
   }
 
   .result-card__price {
@@ -1018,12 +1107,6 @@ textarea:focus {
     align-content: start;
     padding-top: 0.5rem;
     border-top: 1px solid var(--gy-stone);
-  }
-}
-
-@media (max-width: 520px) {
-  .steps__label {
-    font-size: 0.65rem;
   }
 }
 </style>

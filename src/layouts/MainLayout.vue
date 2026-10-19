@@ -20,12 +20,19 @@
                 : '/logo/Logo white V1-05.png'
             "
             alt="Greyon"
-            width="140"
-            height="48"
+            width="180"
+            height="62"
           />
         </router-link>
 
-        <nav class="gy-nav gt-sm">
+        <div
+          v-if="showCompactSearch"
+          class="gy-header__search gt-md"
+        >
+          <BookingSearchWidget compact :navigate="true" />
+        </div>
+
+        <nav v-else class="gy-nav gt-sm">
           <router-link to="/" class="gy-nav__link">{{
             $t("nav.home")
           }}</router-link>
@@ -188,6 +195,7 @@
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
+import BookingSearchWidget from "@/components/BookingSearchWidget.vue";
 import CookieNotice from "@/components/CookieNotice.vue";
 import SiteFooter from "@/components/SiteFooter.vue";
 import { useAuthStore } from "@/stores/auth-store";
@@ -215,6 +223,16 @@ let heroScrollBound = false;
 const isHome = computed(() => route.path === "/");
 const solidHeader = computed(
   () => route.meta.solidHeader === true || !isHome.value || homePastHero.value
+);
+
+/** Compact booking bar replaces primary nav on hotel/booking discovery. */
+const showCompactSearch = computed(
+  () =>
+    auth.featureEnabled("booking_public") &&
+    (route.name === "hotel-detail" ||
+      route.name === "booking" ||
+      route.name === "hotels" ||
+      (isHome.value && homePastHero.value))
 );
 
 const drawerItems = computed(() => {
@@ -343,7 +361,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  min-height: 4.25rem;
+  min-height: 4.75rem;
 }
 
 .gy-logo {
@@ -359,9 +377,16 @@ onUnmounted(() => {
 
 .gy-logo__img {
   display: block;
-  height: 2.55rem;
+  height: 3.35rem;
   width: auto;
   object-fit: contain;
+}
+
+.gy-header__search {
+  flex: 1;
+  min-width: 0;
+  max-width: 52rem;
+  margin-inline: 0.75rem;
 }
 
 .gy-nav {

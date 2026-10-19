@@ -336,6 +336,14 @@ async function add() {
     $q.notify({ type: "negative", message: "Destination is required." });
     return;
   }
+  if (src.value.startsWith("data:") || src.value.length > 2048) {
+    $q.notify({
+      type: "negative",
+      message:
+        "Paste a hosted image URL (max 2048 characters). Local file uploads cannot be saved to the library yet."
+    });
+    return;
+  }
   try {
     await cms.addMedia({
       src: src.value,

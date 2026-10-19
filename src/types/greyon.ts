@@ -218,9 +218,13 @@ export interface Enquiry {
 
 export interface BookingGuest {
   fullName: string;
+  firstName?: string;
+  lastName?: string;
   email: string;
   phone: string;
   nationality?: string;
+  address?: string;
+  city?: string;
   specialRequests?: string;
 }
 

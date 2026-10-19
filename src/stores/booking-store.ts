@@ -38,10 +38,23 @@ function isEmail(value: string) {
 function emptyGuest(): BookingGuest {
   return {
     fullName: "",
+    firstName: "",
+    lastName: "",
     email: "",
     phone: "",
+    nationality: "",
+    address: "",
+    city: "",
     specialRequests: ""
   };
+}
+
+function composeFullName(guest: BookingGuest) {
+  const fromParts = [guest.firstName, guest.lastName]
+    .map(p => (p ?? "").trim())
+    .filter(Boolean)
+    .join(" ");
+  return fromParts || guest.fullName.trim();
 }
 
 export const useBookingStore = defineStore("booking", () => {
@@ -86,12 +99,32 @@ export const useBookingStore = defineStore("booking", () => {
   });
 
   const guestErrors = computed(() => {
-    const errors: Partial<Record<"fullName" | "email" | "phone", string>> = {};
-    if (!guest.value.fullName.trim())
-      errors.fullName = "Full name is required.";
+    const errors: Partial<
+      Record<
+        | "firstName"
+        | "lastName"
+        | "fullName"
+        | "email"
+        | "phone"
+        | "nationality"
+        | "address"
+        | "city",
+        string
+      >
+    > = {};
+    if (!(guest.value.firstName ?? "").trim())
+      errors.firstName = "First name is required.";
+    if (!(guest.value.lastName ?? "").trim())
+      errors.lastName = "Last name is required.";
     if (!guest.value.email.trim()) errors.email = "Email is required.";
     else if (!isEmail(guest.value.email)) errors.email = "Enter a valid email.";
     if (!guest.value.phone.trim()) errors.phone = "Phone is required.";
+    if (!(guest.value.nationality ?? "").trim())
+      errors.nationality = "Nationality is required.";
+    if (!(guest.value.address ?? "").trim())
+      errors.address = "Address is required.";
+    if (!(guest.value.city ?? "").trim())
+      errors.city = "City of residence is required.";
     return errors;
   });
 
@@ -181,9 +214,15 @@ export const useBookingStore = defineStore("booking", () => {
       }
     }
 
+    const accountName = (customer.user.name || "").trim();
+    const [firstFromAccount, ...restName] = accountName.split(/\s+/);
+    const lastFromAccount = restName.join(" ");
     guest.value = {
       ...guest.value,
-      fullName: guest.value.fullName || customer.user.name || "",
+      firstName:
+        (guest.value.firstName ?? "").trim() || firstFromAccount || "",
+      lastName: (guest.value.lastName ?? "").trim() || lastFromAccount || "",
+      fullName: guest.value.fullName || accountName,
       email: guest.value.email || customer.user.email || "",
       phone: guest.value.phone || phone
     };
@@ -245,9 +284,14 @@ export const useBookingStore = defineStore("booking", () => {
     }
     guest.value = {
       ...guest.value,
-      fullName: guest.value.fullName.trim(),
+      firstName: (guest.value.firstName ?? "").trim(),
+      lastName: (guest.value.lastName ?? "").trim(),
+      fullName: composeFullName(guest.value),
       email: guest.value.email.trim(),
       phone: guest.value.phone.trim(),
+      nationality: (guest.value.nationality ?? "").trim(),
+      address: (guest.value.address ?? "").trim(),
+      city: (guest.value.city ?? "").trim(),
       specialRequests: guest.value.specialRequests?.trim() || ""
     };
     step.value = 5;

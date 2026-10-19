@@ -22,7 +22,7 @@
           dense
           outlined
           clearable
-          label="Search plans / rooms"
+          label="Search plans / rooms / hotels"
           style="min-width: 220px; background: #fff"
         />
         <q-select
@@ -32,6 +32,17 @@
           outlined
           style="min-width: 140px; background: #fff"
           label="Status"
+        />
+        <q-select
+          v-model="planHotelFilter"
+          :options="planHotelFilterOptions"
+          dense
+          outlined
+          emit-value
+          map-options
+          clearable
+          label="Hotel"
+          style="min-width: 180px; background: #fff"
         />
         <q-select
           v-model="planRoomFilter"
@@ -70,6 +81,7 @@
       <q-markup-table flat bordered class="bg-white">
         <thead>
           <tr>
+            <th class="text-left">Hotel</th>
             <th class="text-left">Price plan</th>
             <th class="text-left">Room type</th>
             <th class="text-right">Default price</th>
@@ -80,6 +92,7 @@
         </thead>
         <tbody>
           <tr v-for="plan in pagedPlans" :key="plan.id">
+            <td>{{ hotelNameForPlan(plan.roomTypeId) }}</td>
             <td>{{ plan.name }}</td>
             <td>{{ roomName(plan.roomTypeId) }}</td>
             <td class="text-right">${{ plan.basePrice }}</td>
@@ -113,7 +126,7 @@
             </td>
           </tr>
           <tr v-if="!filteredPlans.length">
-            <td colspan="6" class="text-grey">
+            <td colspan="7" class="text-grey">
               No price plans match.
               <q-btn
                 v-if="auth.canAction('rates', 'create')"
@@ -576,6 +589,7 @@ const calendarStart = ref(new Date().toISOString().slice(0, 10));
 const monthCursor = ref(monthStart(new Date()));
 const planQuery = ref("");
 const planStatusFilter = ref("all");
+const planHotelFilter = ref<string | null>(null);
 const planRoomFilter = ref<string | null>(null);
 const planStatusOptions = ["all", ...cms.statusOptions];
 const planPage = ref(1);
@@ -652,28 +666,57 @@ const roomOptions = computed(() =>
   }))
 );
 
-const planRoomFilterOptions = computed(() => roomOptions.value);
+const planHotelFilterOptions = computed(() =>
+  cms.hotels
+    .filter(h => auth.canAccessHotel(h.id))
+    .map(h => ({ label: h.name, value: h.id }))
+    .sort((a, b) => a.label.localeCompare(b.label))
+);
+
+const planRoomFilterOptions = computed(() => {
+  const hotelId = planHotelFilter.value;
+  return roomOptions.value.filter(opt => {
+    if (!hotelId) return true;
+    return cms.getRoomTypeById(opt.value)?.hotelId === hotelId;
+  });
+});
 
 const filteredPlans = computed(() => {
   const q = planQuery.value.trim().toLowerCase();
   const allowed = new Set(auth.scopedRatePlans.map(p => p.id));
-  return cms.ratePlans.filter(plan => {
-    if (!allowed.has(plan.id)) return false;
-    if (
-      planStatusFilter.value !== "all" &&
-      plan.status !== planStatusFilter.value
-    ) {
-      return false;
-    }
-    if (planRoomFilter.value && plan.roomTypeId !== planRoomFilter.value) {
-      return false;
-    }
-    if (!q) return true;
-    const room = roomName(plan.roomTypeId);
-    return `${plan.name} ${room} ${plan.description ?? ""}`
-      .toLowerCase()
-      .includes(q);
-  });
+  return cms.ratePlans
+    .filter(plan => {
+      if (!allowed.has(plan.id)) return false;
+      if (
+        planStatusFilter.value !== "all" &&
+        plan.status !== planStatusFilter.value
+      ) {
+        return false;
+      }
+      const room = cms.getRoomTypeById(plan.roomTypeId);
+      if (planHotelFilter.value && room?.hotelId !== planHotelFilter.value) {
+        return false;
+      }
+      if (planRoomFilter.value && plan.roomTypeId !== planRoomFilter.value) {
+        return false;
+      }
+      if (!q) return true;
+      const hotel = room ? cms.getHotelById(room.hotelId)?.name : "";
+      return `${plan.name} ${room?.name ?? ""} ${hotel} ${plan.description ?? ""}`
+        .toLowerCase()
+        .includes(q);
+    })
+    .sort((a, b) => {
+      const hotelCmp = hotelNameForPlan(a.roomTypeId).localeCompare(
+        hotelNameForPlan(b.roomTypeId)
+      );
+      if (hotelCmp !== 0) return hotelCmp;
+      const roomCmp = roomName(a.roomTypeId).localeCompare(
+        roomName(b.roomTypeId)
+      );
+      if (roomCmp !== 0) return roomCmp;
+      return a.name.localeCompare(b.name);
+    });
 });
 
 const planPageCount = computed(() =>
@@ -693,8 +736,19 @@ const planRangeEnd = computed(() =>
   Math.min(planPage.value * planPageSize.value, filteredPlans.value.length)
 );
 
-watch([planQuery, planStatusFilter, planRoomFilter, planPageSize], () => {
-  planPage.value = 1;
+watch(
+  [planQuery, planStatusFilter, planHotelFilter, planRoomFilter, planPageSize],
+  () => {
+    planPage.value = 1;
+  }
+);
+
+watch(planHotelFilter, () => {
+  if (!planRoomFilter.value) return;
+  const room = cms.getRoomTypeById(planRoomFilter.value);
+  if (planHotelFilter.value && room?.hotelId !== planHotelFilter.value) {
+    planRoomFilter.value = null;
+  }
 });
 
 watch(planPageCount, count => {
@@ -815,6 +869,12 @@ function goToday() {
 
 function roomName(id: string) {
   return cms.getRoomTypeById(id)?.name ?? id;
+}
+
+function hotelNameForPlan(roomTypeId: string) {
+  const room = cms.getRoomTypeById(roomTypeId);
+  if (!room) return "—";
+  return cms.getHotelById(room.hotelId)?.name ?? "—";
 }
 
 function roomBase() {

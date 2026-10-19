@@ -3,7 +3,7 @@
     <AdminPageHeader
       eyebrow="Operations"
       title="Enquiries"
-      :subtitle="`${filtered.length} enquiries shown`"
+      :subtitle="`${filtered.length} ${filtered.length === 1 ? 'enquiry' : 'enquiries'} shown`"
     >
       <template #actions>
         <q-btn

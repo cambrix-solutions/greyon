@@ -63,10 +63,20 @@ export async function createPublicBooking(input: {
       guestFullName: input.guest.fullName,
       guestEmail: input.guest.email,
       guestPhone: input.guest.phone,
-      specialRequests: input.guest.specialRequests
+      specialRequests: composeGuestNotes(input.guest)
     }
   );
   return mapEngineBooking(booking);
+}
+
+function composeGuestNotes(guest: BookingGuest) {
+  const bits = [
+    guest.nationality ? `Nationality: ${guest.nationality}` : "",
+    guest.address ? `Address: ${guest.address}` : "",
+    guest.city ? `City: ${guest.city}` : "",
+    guest.specialRequests?.trim() || ""
+  ].filter(Boolean);
+  return bits.join("\n") || undefined;
 }
 
 export async function getBookingByReference(

@@ -130,7 +130,17 @@ function addSlide() {
 }
 
 function removeSlide(index: number) {
-  slides.value.splice(index, 1);
+  const slide = slides.value[index];
+  if (!slide) return;
+  const label = slide.alt.trim() || slide.src.trim() || `slide ${index + 1}`;
+  $q.dialog({
+    title: "Delete hero slide?",
+    message: `Remove “${label}” from the homepage banner? This cannot be undone after you save.`,
+    cancel: true,
+    persistent: true
+  }).onOk(() => {
+    slides.value.splice(index, 1);
+  });
 }
 
 function moveSlide(index: number, delta: number) {

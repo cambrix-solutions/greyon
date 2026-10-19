@@ -1,18 +1,18 @@
 :root {
-  /* Brand: hospitality — champagne brass + espresso */
+  /* Brand sheet (Website Feedback 5 Oct 2026) */
   --gy-white: #ffffff;
-  --gy-gold: #c4a35a; /* Champagne brass accent */
-  --gy-gold-deep: #8f7340; /* Deep brass CTA / emphasis */
-  --gy-ink: #1c1814; /* Espresso */
-  --gy-muted: #7a736a; /* Warm stone text */
-  --gy-cream: #f8f5f0; /* Soft linen */
-  --gy-sand: #efe9e0; /* Warm sand surface */
-  --gy-stone: #d9d0c3; /* Limestone */
-  --gy-forest: #8f7340; /* Align with deep brass */
-  --gy-moss: #c4a35a; /* Align with champagne */
-  --gy-taupe: #a89278; /* Soft warm support */
-  --gy-beige: #e4d5c0; /* Light sand */
-  --gy-shadow: 0 20px 50px rgba(28, 24, 20, 0.09);
+  --gy-gold: #c4a35a; /* Champagne brass support */
+  --gy-gold-deep: #8f7340; /* Accent / gold — highlights on dark */
+  --gy-ink: #454c4b; /* Dark / text — headings, icons, dark bars */
+  --gy-muted: #7a736a; /* Secondary text */
+  --gy-cream: #faf8f6; /* Background — page & card backgrounds */
+  --gy-sand: #f1f1f1; /* Section — subtle section contrast */
+  --gy-stone: #d9d0c3; /* Borders / dividers */
+  --gy-forest: #627063; /* CTA / primary — buttons & active states */
+  --gy-moss: #627063;
+  --gy-taupe: #a89278;
+  --gy-beige: #e4d5c0;
+  --gy-shadow: 0 20px 50px rgba(69, 76, 75, 0.09);
   --gy-radius-card: 16px;
   --gy-radius-media: 12px;
   --font-display: "Montserrat", system-ui, sans-serif;
@@ -25,7 +25,7 @@ body,
   min-height: 100%;
   font-family: var(--font-body);
   color: var(--gy-ink);
-  background: var(--gy-white);
+  background: var(--gy-cream);
 }
 
 h1,
@@ -71,7 +71,7 @@ a {
   padding: 0.85rem 1.65rem;
   border: 1px solid transparent;
   border-radius: 8px;
-  background: var(--gy-gold-deep);
+  background: var(--gy-forest);
   color: var(--gy-white);
   font-family: var(--font-display);
   font-size: 0.82rem;
@@ -90,7 +90,7 @@ a {
 .gy-btn:hover {
   background: var(--gy-ink);
   transform: translateY(-2px);
-  box-shadow: 0 12px 28px rgba(26, 24, 20, 0.18);
+  box-shadow: 0 12px 28px rgba(69, 76, 75, 0.18);
 }
 
 .gy-btn:active {
@@ -118,27 +118,27 @@ a {
 }
 
 .gy-btn--light {
-  background: var(--gy-gold-deep);
+  background: var(--gy-forest);
   color: var(--gy-white);
-  border-color: var(--gy-gold-deep);
+  border-color: var(--gy-forest);
 }
 
 .gy-btn--light:hover {
   background: var(--gy-ink);
   border-color: var(--gy-ink);
   color: var(--gy-white);
-  box-shadow: 0 12px 28px rgba(28, 24, 20, 0.28);
+  box-shadow: 0 12px 28px rgba(69, 76, 75, 0.28);
 }
 
 .gy-btn--outline {
   background: transparent;
-  color: var(--gy-gold-deep);
-  border-color: rgba(143, 115, 64, 0.45);
+  color: var(--gy-forest);
+  border-color: rgba(98, 112, 99, 0.45);
 }
 
 .gy-btn--outline:hover {
-  background: var(--gy-gold-deep);
-  border-color: var(--gy-gold-deep);
+  background: var(--gy-forest);
+  border-color: var(--gy-forest);
   color: var(--gy-white);
 }
 

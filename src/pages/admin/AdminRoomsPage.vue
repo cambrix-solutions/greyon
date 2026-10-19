@@ -251,13 +251,7 @@
           outlined
           autogrow
         />
-        <q-input
-          v-model="amenitiesText"
-          label="Amenities"
-          outlined
-          dense
-          hint="Comma-separated"
-        />
+        <AmenitiesEditor v-model="amenities" label="Amenities" />
       </AdminFormSection>
       <AdminFormSection title="Layout & capacity" :columns="3">
         <q-input v-model="form.bedType" label="Bed type" outlined dense />
@@ -325,6 +319,7 @@ import AdminDialog from "@/components/admin/AdminDialog.vue";
 import AdminEntityActions from "@/components/admin/AdminEntityActions.vue";
 import AdminFormSection from "@/components/admin/AdminFormSection.vue";
 import AdminPageHeader from "@/components/admin/AdminPageHeader.vue";
+import AmenitiesEditor from "@/components/admin/AmenitiesEditor.vue";
 import GalleryEditor from "@/components/admin/GalleryEditor.vue";
 import { useAuthStore } from "@/stores/auth-store";
 import { useCmsStore } from "@/stores/cms-store";
@@ -338,7 +333,7 @@ const router = useRouter();
 const dialog = ref(false);
 const editing = ref<string | null>(null);
 const images = ref<string[]>([]);
-const amenitiesText = ref("");
+const amenities = ref<string[]>([]);
 const query = ref("");
 const hotelFilter = ref("all");
 const statusFilter = ref("all");
@@ -446,7 +441,7 @@ function resetForm(hotelId?: string) {
   form.baseInventory = 5;
   form.status = "draft";
   images.value = [];
-  amenitiesText.value = "";
+  amenities.value = [];
 }
 
 function openEdit(room: RoomType) {
@@ -462,7 +457,7 @@ function openEdit(room: RoomType) {
   form.baseInventory = room.baseInventory;
   form.status = room.status;
   images.value = [...room.images];
-  amenitiesText.value = room.amenities.join(", ");
+  amenities.value = [...room.amenities];
   dialog.value = true;
 }
 
@@ -477,10 +472,7 @@ function save() {
         ...(editing.value ? { id: editing.value } : {}),
         ...form,
         images: images.value.filter(Boolean),
-        amenities: amenitiesText.value
-          .split(",")
-          .map(s => s.trim())
-          .filter(Boolean)
+        amenities: amenities.value
       });
       dialog.value = false;
       $q.notify({ type: "positive", message: "Room saved." });
