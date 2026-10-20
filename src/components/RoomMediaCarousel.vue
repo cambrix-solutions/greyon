@@ -177,15 +177,20 @@ function openGallery(idx: number) {
 .room-media {
   position: relative;
   overflow: hidden;
+  isolation: isolate;
+  width: 100%;
+  max-width: 100%;
   background: var(--gy-sand);
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 16 / 10;
   border-radius: 12px;
 }
 
+/* Parent card owns sizing; fill only stretches inside a bounded media cell. */
 .room-media--fill {
   aspect-ratio: auto;
   height: 100%;
-  min-height: 200px;
+  min-height: 0;
+  max-width: 100%;
   border-radius: 0;
 }
 
@@ -251,7 +256,10 @@ function openGallery(idx: number) {
   gap: 0.45rem;
   width: 100%;
   height: 100%;
-  min-height: inherit;
+  max-width: 100%;
+  max-height: 100%;
+  overflow: hidden;
+  pointer-events: none;
   color: var(--gy-forest);
   background:
     radial-gradient(

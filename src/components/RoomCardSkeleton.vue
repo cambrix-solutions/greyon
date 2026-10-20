@@ -44,8 +44,9 @@ withDefaults(
 }
 
 .room-skel__media {
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 16 / 10;
   background: var(--gy-sand);
+  border-radius: 16px 16px 0 0;
 }
 
 .room-skel__body {
@@ -124,18 +125,31 @@ withDefaults(
   }
 }
 
-@media (min-width: 600px) {
+@media (min-width: 900px) {
   .room-skel--detail,
   .room-skel--result {
-    grid-template-columns: minmax(280px, min(40%, 420px)) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 42%) minmax(0, 1fr);
+    align-items: stretch;
+  }
+
+  .room-skel--detail {
+    grid-template-columns: minmax(0, 40%) minmax(0, 1fr);
+  }
+
+  .room-skel__media {
+    aspect-ratio: auto;
+    height: 100%;
+    min-height: 280px;
+    max-height: 420px;
+    border-radius: 16px 0 0 16px;
   }
 
   .room-skel--result .room-skel__media {
-    border-radius: 16px 0 0 16px;
-    height: 100%;
-    min-height: 220px;
+    max-width: 420px;
   }
+}
 
+@media (min-width: 1100px) {
   .room-skel__body {
     grid-template-columns: minmax(0, 1fr) 150px;
     align-items: center;

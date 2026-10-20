@@ -110,8 +110,15 @@ const amenities = computed(() => props.amenities ?? []);
 </script>
 
 <style scoped>
+/*
+  Stacked by default (phones + tablets): photo → content → price/CTA.
+  Side-by-side only from the wide breakpoint so mid widths never squeeze
+  a min-width media column over the copy.
+*/
 .room-offer {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto;
   gap: 0;
   overflow: hidden;
   background: var(--gy-white);
@@ -139,22 +146,36 @@ const amenities = computed(() => props.amenities ?? []);
 }
 
 .room-offer__media {
+  position: relative;
+  z-index: 0;
   min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  isolation: isolate;
 }
 
-/* Stacked (mobile): keep a 4:3 photo plane even with fill mode. */
-.room-offer__media :deep(.room-media) {
-  aspect-ratio: 4 / 3;
+/* Stacked: fixed 16:10 plane — never stretch/fill the whole card. */
+.room-offer__media :deep(.room-media),
+.room-offer__media :deep(.room-media.room-media--fill) {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 16 / 10;
   height: auto;
   min-height: 0;
+  max-height: none;
   border-radius: 16px 16px 0 0;
 }
 
 .room-offer__body {
+  position: relative;
+  z-index: 1;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 1rem;
   padding: 1rem 1.05rem 1.1rem;
   min-width: 0;
+  background: var(--gy-white);
 }
 
 .room-offer__copy {
@@ -169,6 +190,7 @@ const amenities = computed(() => props.amenities ?? []);
   font-size: clamp(1.2rem, 2.4vw, 1.45rem);
   line-height: 1.2;
   color: var(--gy-ink);
+  overflow-wrap: anywhere;
 }
 
 .room-offer__subtitle {
@@ -193,6 +215,7 @@ const amenities = computed(() => props.amenities ?? []);
   display: grid;
   gap: 0.65rem;
   align-content: end;
+  min-width: 0;
 }
 
 .room-offer__price {
@@ -224,93 +247,105 @@ const amenities = computed(() => props.amenities ?? []);
   width: 100%;
 }
 
-/* Hotel detail: stack on phones; side-by-side media + body on wider. */
-.room-offer--detail {
-  grid-template-columns: 1fr;
-}
-
-@media (min-width: 600px) {
-  .room-offer--detail {
-    grid-template-columns: minmax(280px, 40%) minmax(0, 1fr);
-    align-items: stretch;
-  }
-
-  .room-offer--detail .room-offer__media {
-    align-self: stretch;
-  }
-
-  .room-offer--detail .room-offer__media :deep(.room-media) {
-    height: 100%;
-    min-height: 240px;
-    aspect-ratio: 4 / 3;
-    border-radius: 16px 0 0 16px;
-  }
-
-  .room-offer--detail .room-offer__body {
-    grid-template-columns: minmax(0, 1fr) minmax(140px, 180px);
-    gap: 1rem 1.15rem;
-    padding: 1.15rem 1.25rem;
-    align-items: stretch;
-  }
-
-  .room-offer--detail .room-offer__aside {
-    justify-items: end;
-    text-align: right;
-    border-left: 1px solid rgba(69, 76, 75, 0.08);
-    padding-left: 1rem;
-  }
-
-  .room-offer--detail .room-offer__cta {
-    width: auto;
-    min-width: 100%;
-  }
-}
-
-/* Booking results: large media column from 600px up. */
-.room-offer--result {
-  grid-template-columns: 1fr;
-}
-
-@media (min-width: 600px) {
+/* Wide: media ~40–42% | body. No aspect-ratio on fill height (overflow risk). */
+@media (min-width: 900px) {
+  .room-offer--detail,
   .room-offer--result {
-    grid-template-columns: minmax(280px, 42%) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 42%) minmax(0, 1fr);
+    grid-template-rows: minmax(280px, auto);
     align-items: stretch;
+  }
+
+  .room-offer--detail {
+    grid-template-columns: minmax(0, 40%) minmax(0, 1fr);
+  }
+
+  .room-offer__media {
+    align-self: stretch;
+    max-width: none;
+    min-height: 280px;
+    max-height: 420px;
   }
 
   .room-offer--result .room-offer__media {
-    align-self: stretch;
     max-width: 420px;
   }
 
-  .room-offer--result .room-offer__media :deep(.room-media) {
+  .room-offer__media :deep(.room-media),
+  .room-offer__media :deep(.room-media.room-media--fill) {
+    aspect-ratio: auto;
+    width: 100%;
+    max-width: 100%;
     height: 100%;
-    min-height: 240px;
-    aspect-ratio: 4 / 3;
-    max-height: none;
+    min-height: 280px;
+    max-height: 420px;
     border-radius: 16px 0 0 16px;
   }
 
-  .room-offer--result .room-offer__body {
-    grid-template-columns: minmax(0, 1fr) minmax(128px, 156px);
-    gap: 0.75rem 0.85rem;
-    padding: 0.95rem 1rem;
-    align-items: center;
+  .room-offer__body {
+    /* Tablet-wide: keep price under copy so media+content don't squeeze. */
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+    padding: 1.15rem 1.25rem;
+    align-content: space-between;
   }
 
-  .room-offer--result .room-offer__aside {
-    justify-items: end;
-    text-align: right;
-    align-content: center;
-    gap: 0.45rem;
+  .room-offer__aside {
+    justify-items: stretch;
+    text-align: left;
+    border-left: 0;
+    padding-left: 0;
+  }
+
+  .room-offer__cta {
+    width: 100%;
+    max-width: 16rem;
+  }
+
+  .room-offer--result .room-offer__body {
+    padding: 0.95rem 1rem;
   }
 
   .room-offer--result .room-offer__price strong {
     font-size: 1.35rem;
   }
+}
 
-  .room-offer--result .room-offer__cta {
+/* Comfortable desktop: price column beside copy. */
+@media (min-width: 1100px) {
+  .room-offer--detail .room-offer__body,
+  .room-offer--result .room-offer__body {
+    grid-template-columns: minmax(0, 1fr) minmax(140px, 180px);
+    gap: 1rem 1.15rem;
+    align-items: stretch;
+  }
+
+  .room-offer--result .room-offer__body {
+    grid-template-columns: minmax(0, 1fr) minmax(128px, 156px);
+    gap: 0.75rem 0.85rem;
+    align-items: center;
+  }
+
+  .room-offer__aside {
+    justify-items: end;
+    text-align: right;
+    border-left: 1px solid rgba(69, 76, 75, 0.08);
+    padding-left: 1rem;
+    align-content: end;
+  }
+
+  .room-offer--result .room-offer__aside {
+    align-content: center;
+    gap: 0.45rem;
+  }
+
+  .room-offer__cta {
     width: auto;
     min-width: 100%;
+    max-width: none;
+  }
+
+  .room-offer--result .room-offer__cta {
     padding-inline: 0.75rem;
     font-size: 0.7rem;
   }
