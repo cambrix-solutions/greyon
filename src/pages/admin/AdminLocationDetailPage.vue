@@ -309,6 +309,7 @@
       >
         <ImageDropField
           v-model="locForm.heroImage"
+          :folder="locationUploadFolder"
           title="Drop or browse hero image"
         />
       </AdminFormSection>
@@ -394,11 +395,16 @@
       <AdminFormSection title="Hero image" hint="Drop, browse, or paste a URL.">
         <ImageDropField
           v-model="hotelForm.heroImage"
+          :folder="hotelUploadFolder"
           title="Drop or browse hero image"
         />
       </AdminFormSection>
       <AdminFormSection title="Gallery" hint="Extra photos for the hotel page.">
-        <GalleryEditor v-model="hotelGallery" label="Hotel gallery" />
+        <GalleryEditor
+          v-model="hotelGallery"
+          label="Hotel gallery"
+          :folder="hotelUploadFolder"
+        />
       </AdminFormSection>
       <AdminFormSection title="Property profile" :columns="2">
         <q-input
@@ -533,7 +539,11 @@
         />
       </AdminFormSection>
       <AdminFormSection title="Gallery" hint="Photos for this room type.">
-        <GalleryEditor v-model="roomImages" label="Room gallery" />
+        <GalleryEditor
+          v-model="roomImages"
+          label="Room gallery"
+          :folder="roomUploadFolder"
+        />
       </AdminFormSection>
       <AdminFormSection title="Details">
         <q-input
@@ -623,6 +633,7 @@ import type {
   NearbyLandmark,
   RoomType
 } from "@/types/greyon";
+import { uploadFolder } from "@/utils/uploadFolder";
 
 const cms = useCmsStore();
 const auth = useAuthStore();
@@ -719,6 +730,13 @@ const locForm = reactive({
   status: "draft" as ContentStatus
 });
 
+const locationUploadFolder = computed(() =>
+  uploadFolder(
+    "locations",
+    locForm.slug || location.value?.slug || locationId.value
+  )
+);
+
 function openEditLocation() {
   if (!location.value) return;
   const loc = location.value;
@@ -793,6 +811,10 @@ const hotelForm = reactive({
   status: "draft" as ContentStatus,
   featured: false
 });
+
+const hotelUploadFolder = computed(() =>
+  uploadFolder("hotels", hotelForm.slug || hotelEditing.value)
+);
 
 function blankHotel() {
   hotelForm.name = "";
@@ -968,6 +990,10 @@ const roomForm = reactive({
   baseInventory: 5,
   status: "draft" as ContentStatus
 });
+
+const roomUploadFolder = computed(() =>
+  uploadFolder("rooms", roomEditing.value)
+);
 
 function openCreateRoom(hotelId: string) {
   expandedHotelId.value = hotelId;

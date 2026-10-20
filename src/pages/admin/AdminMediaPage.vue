@@ -181,9 +181,14 @@
       </AdminFormSection>
       <AdminFormSection
         title="Image"
-        hint="Prefer hosted URLs in production; local uploads stay in this browser."
+        hint="Upload a file or paste a hosted URL — Save stores the returned URL."
       >
-        <ImageDropField v-model="src" title="Drop hotel / room image" />
+        <ImageDropField
+          v-model="src"
+          :folder="mediaUploadFolder"
+          title="Drop hotel / room image"
+          @update:busy="uploadBusy = $event"
+        />
         <q-input
           v-model="alt"
           label="Alt text"
@@ -199,7 +204,8 @@
           unelevated
           no-caps
           label="Add to library"
-          :disable="!src || !formLocationId"
+          :disable="!src || !formLocationId || uploadBusy"
+          :loading="uploadBusy"
           @click="add"
         />
       </template>
@@ -217,6 +223,7 @@ import ImageDropField from "@/components/admin/ImageDropField.vue";
 import { useAuthStore } from "@/stores/auth-store";
 import { useCmsStore } from "@/stores/cms-store";
 import type { MediaItem } from "@/stores/cms-store";
+import { uploadFolder } from "@/utils/uploadFolder";
 
 const cms = useCmsStore();
 const auth = useAuthStore();
@@ -233,6 +240,8 @@ onMounted(async () => {
 const dialog = ref(false);
 const src = ref("");
 const alt = ref("");
+const uploadBusy = ref(false);
+const mediaUploadFolder = uploadFolder("media");
 const formLocationId = ref<string | null>(null);
 const formHotelId = ref<string | null>(null);
 const query = ref("");
@@ -319,6 +328,7 @@ function scopeLabel(item: MediaItem) {
 function openAdd() {
   src.value = "";
   alt.value = "";
+  uploadBusy.value = false;
   formLocationId.value =
     locationFilter.value !== "all"
       ? locationFilter.value
@@ -336,11 +346,10 @@ async function add() {
     $q.notify({ type: "negative", message: "Destination is required." });
     return;
   }
-  if (src.value.startsWith("data:") || src.value.length > 2048) {
+  if (src.value.startsWith("data:")) {
     $q.notify({
       type: "negative",
-      message:
-        "Paste a hosted image URL (max 2048 characters). Local file uploads cannot be saved to the library yet."
+      message: "Wait for the upload to finish, or paste an image URL."
     });
     return;
   }

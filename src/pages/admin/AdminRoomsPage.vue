@@ -290,7 +290,11 @@
         title="Gallery"
         hint="Photos for the room type on hotel detail."
       >
-        <GalleryEditor v-model="images" label="Room gallery" />
+        <GalleryEditor
+          v-model="images"
+          label="Room gallery"
+          :folder="roomUploadFolder"
+        />
       </AdminFormSection>
       <template #actions>
         <q-btn flat no-caps label="Cancel" v-close-popup />
@@ -324,6 +328,7 @@ import GalleryEditor from "@/components/admin/GalleryEditor.vue";
 import { useAuthStore } from "@/stores/auth-store";
 import { useCmsStore } from "@/stores/cms-store";
 import type { ContentStatus, RoomType } from "@/types/greyon";
+import { uploadFolder } from "@/utils/uploadFolder";
 
 const cms = useCmsStore();
 const auth = useAuthStore();
@@ -364,6 +369,8 @@ const form = reactive({
   baseInventory: 5,
   status: "draft" as ContentStatus
 });
+
+const roomUploadFolder = computed(() => uploadFolder("rooms", editing.value));
 
 const filtered = computed(() => {
   const q = query.value.trim().toLowerCase();

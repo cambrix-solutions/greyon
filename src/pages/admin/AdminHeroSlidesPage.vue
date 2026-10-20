@@ -21,6 +21,7 @@
           no-caps
           color="primary"
           label="Save slides"
+          :disable="anyBusy"
           @click="save"
         />
       </template>
@@ -30,10 +31,11 @@
       <q-card flat bordered class="bg-white">
         <q-card-section>
           <div v-if="!slides.length" class="text-body2 text-grey-8 q-mb-md">
-            No slides yet — add at least one image URL for the home hero.
+            No slides yet — upload or paste at least one image for the home
+            hero.
           </div>
 
-          <div class="q-gutter-sm">
+          <div class="q-gutter-md">
             <q-card
               v-for="(slide, index) in slides"
               :key="`slide-${index}`"
@@ -41,31 +43,21 @@
               bordered
               class="slide-row"
             >
-              <div class="row items-center q-col-gutter-sm q-pa-sm">
-                <div class="col-auto">
-                  <q-img
-                    :src="slide.src || undefined"
-                    style="width: 112px; height: 72px; border-radius: 8px"
-                    fit="cover"
-                  >
-                    <template #error>
-                      <div class="slide-row__ph flex flex-center">No image</div>
-                    </template>
-                  </q-img>
-                </div>
-                <div class="col">
-                  <q-input
+              <div class="row items-start q-col-gutter-sm q-pa-sm">
+                <div class="col-12 col-sm">
+                  <ImageDropField
                     v-model="slide.src"
-                    dense
-                    outlined
-                    label="Image URL"
-                    class="q-mb-sm"
+                    folder="media/hero-slides"
+                    title="Drop or browse hero slide"
+                    :alt-hint="slide.alt || `Hero slide ${index + 1}`"
+                    @update:busy="setBusy(index, $event)"
                   />
                   <q-input
                     v-model="slide.alt"
                     dense
                     outlined
                     label="Alt text"
+                    class="q-mt-sm"
                   />
                 </div>
                 <div class="col-auto column q-gutter-xs">
@@ -107,9 +99,10 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { computed, onMounted, reactive, ref } from "vue";
 import { useQuasar } from "quasar";
 import AdminPageHeader from "@/components/admin/AdminPageHeader.vue";
+import ImageDropField from "@/components/admin/ImageDropField.vue";
 import { useAuthStore } from "@/stores/auth-store";
 import { useCmsStore } from "@/stores/cms-store";
 import type { HeroSlide } from "@/services/engine/mappers";
@@ -118,11 +111,18 @@ const cms = useCmsStore();
 const auth = useAuthStore();
 const $q = useQuasar();
 const slides = ref<HeroSlide[]>([]);
+const busyMap = reactive<Record<number, boolean>>({});
+
+const anyBusy = computed(() => Object.values(busyMap).some(Boolean));
 
 onMounted(async () => {
   await cms.ensureSettings();
   slides.value = cms.settings.heroSlides.map(s => ({ ...s }));
 });
+
+function setBusy(index: number, busy: boolean) {
+  busyMap[index] = busy;
+}
 
 function addSlide() {
   if (slides.value.length >= 12) return;
@@ -140,6 +140,7 @@ function removeSlide(index: number) {
     persistent: true
   }).onOk(() => {
     slides.value.splice(index, 1);
+    delete busyMap[index];
   });
 }
 
@@ -155,7 +156,7 @@ async function save() {
   try {
     const heroSlides = slides.value
       .map(s => ({ src: s.src.trim(), alt: s.alt.trim() }))
-      .filter(s => s.src);
+      .filter(s => s.src && !s.src.startsWith("data:"));
     await cms.saveSettings({ heroSlides });
     slides.value = cms.settings.heroSlides.map(s => ({ ...s }));
     $q.notify({ type: "positive", message: "Hero slides saved." });
@@ -169,11 +170,7 @@ async function save() {
 </script>
 
 <style scoped>
-.slide-row__ph {
-  width: 100%;
-  height: 100%;
-  background: #f0eeea;
-  color: #8a847a;
-  font-size: 0.7rem;
+.slide-row {
+  background: #fff;
 }
 </style>
