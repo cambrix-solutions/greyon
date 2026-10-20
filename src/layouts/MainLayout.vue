@@ -375,7 +375,7 @@
         </transition>
       </router-view>
       <SiteFooter />
-      <CookieNotice />
+      <CookieNotice :hidden="drawerOpen" />
     </q-page-container>
   </q-layout>
 </template>
@@ -902,10 +902,13 @@ onUnmounted(() => {
 
 /* ---- Mobile drawer sheet ---- */
 .gy-drawer {
-  /* Sit above the fixed cookie banner (z-index 5000) so Contact / Sign in /
-     Book now stay reachable on phones. */
-  z-index: 5100 !important;
+  /* Above Quasar defaults; cookie banner is also hidden while open. */
+  z-index: 6000 !important;
   background: var(--gy-cream) !important;
+}
+
+.gy-layout :deep(.q-drawer__backdrop) {
+  z-index: 5990 !important;
 }
 
 .gy-drawer :deep(.q-drawer__content) {
