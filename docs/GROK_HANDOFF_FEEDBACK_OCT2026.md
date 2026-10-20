@@ -377,15 +377,15 @@ greyon-engine/.../SiteSettingController.php      (siteName filled)
 
 **Changes:**
 
-- `MainLayout.vue` — logo `clamp(3.1rem … 4.6rem)`, attrs 240×84; single **Services** dropdown — desktop **opens on hover** (tap toggle on touch) with a short close delay to avoid flicker; rows **Hotels** (links to `/hotels`) and **Apartments** open a side flyout of properties from `publishedHotels` via `propertyKind.ts` (extensible `serviceSections`); empty Apartments → **Coming soon**; mobile drawer: Services → Hotels / Apartments → properties; `gy-navswap` transition; Map link; keeps Home / News / Destination / Booking / Contact
-- `usePageSearchVisibility.ts` — IntersectionObserver hides navbar compact search while any in-page `BookingSearchWidget` (`pageAnchor`) is in view; shared booking-store state
+- `MainLayout.vue` + `ServicesMegaMenu.vue` — logo larger; **Services** desktop mega-menu (2 columns: Hotels / Apartments with thumbnails, city, View all); hover-open + close delay; mobile full-height sheet with safe-area header (logo + close), accordion Services cards, property rows (thumb / name / city), skeletons while catalog loads, Coming soon only when truly empty; pinned Sign in / Book now; fetches catalog when drawer/Services opens
+- `usePageSearchVisibility.ts` — IntersectionObserver dual-search fix
 
 **Test steps:**
 
 1. Transparent home header + solid header: logo larger, not clipped on phone.
-2. Hover **Services** → menu stays open into Hotels/Apartments flyouts; Hotels → `/hotels` + property submenu; Apartments → Coming soon when empty.
-3. Scroll home past hero: nav fades/slides into compact search (not an abrupt cut).
-4. Mobile drawer: Services expands to Hotels and Apartments, which expand to properties.
+2. Hover **Services** → two-column mega-menu; Hotels lists real properties with thumbs; Apartments → Coming soon when empty.
+3. Phone drawer: logo clear of status bar; Hotels expanded lists properties (not false Coming soon); consistent sentence-case nesting.
+4. Scroll home past hero: nav ↔ compact search transition.
 
 ---
 
