@@ -137,11 +137,22 @@ const allBroken = computed(
     loaded.value.size + broken.value.size >= images.value.length
 );
 
-watch(images, () => {
-  slide.value = 0;
-  broken.value = new Set();
-  loaded.value = new Set();
-});
+watch(
+  images,
+  list => {
+    slide.value = 0;
+    broken.value = new Set();
+    loaded.value = new Set();
+    // Probe every URL up front so lazy slides can't leave a dotted empty carousel.
+    list.forEach(src => {
+      const img = new Image();
+      img.onload = () => markLoaded(src);
+      img.onerror = () => markBroken(src);
+      img.src = src;
+    });
+  },
+  { immediate: true }
+);
 
 function markBroken(src: string) {
   const next = new Set(broken.value);
