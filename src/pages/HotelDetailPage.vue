@@ -127,65 +127,78 @@
         <p v-if="!hasSearchedDates" class="gy-muted room-price-hint">
           Prices appear after you choose check-in and check-out dates.
         </p>
-        <div class="room-list">
-          <article v-for="room in rooms" :key="room.id" class="room-card">
-            <div class="gy-card-media room-card__media">
-              <img
-                v-if="room.images?.[0]"
-                :src="room.images[0]"
-                :alt="room.name"
-                loading="lazy"
-              />
-              <span
-                v-if="hasSearchedDates && pricedRoom(room.id)"
-                class="room-card__badge"
-              >
-                ${{ pricedRoom(room.id)?.total.toFixed(0) }} total
-              </span>
-            </div>
-            <div class="room-card__body">
-              <h3 class="gy-display">{{ room.name }}</h3>
-              <p class="room-card__desc">{{ room.description }}</p>
-              <p class="room-card__facts">
-                {{
-                  [
-                    room.bedType?.trim(),
-                    room.roomSize?.trim(),
-                    room.maxGuests ? `Up to ${room.maxGuests} guests` : ""
-                  ]
-                    .filter(Boolean)
-                    .join(" · ")
-                }}
-              </p>
-              <FeatureChips :items="room.amenities" size="sm" />
-              <p
-                v-if="hasSearchedDates && pricedRoom(room.id)"
-                class="room-card__meal"
-              >
-                {{ pricedRoom(room.id)?.ratePlan.mealBenefit }}
-              </p>
-              <div class="room-card__actions">
-                <button
-                  v-if="hasSearchedDates && pricedRoom(room.id)"
-                  class="gy-btn gy-btn--light"
-                  type="button"
-                  @click="openRoom(room.id)"
-                >
-                  View room details
-                </button>
-                <button
-                  v-else
-                  class="gy-btn gy-btn--outline"
-                  type="button"
-                  @click="focusSearch"
-                >
-                  Check availability
-                </button>
-              </div>
-            </div>
-          </article>
+        <div v-if="roomsLoading" class="room-list">
+          <RoomCardSkeleton
+            v-for="n in 2"
+            :key="`skel-${n}`"
+            variant="detail"
+          />
+        </div>
+        <div v-else class="room-list">
+          <RoomOfferCard
+            v-for="room in rooms"
+            :key="room.id"
+            variant="detail"
+            :title="room.name"
+            :subtitle="roomSubtitle(room)"
+            :images="room.images"
+            :bed-type="room.bedType"
+            :room-size="room.roomSize"
+            :max-guests="room.maxGuests"
+            :amenities="room.amenities"
+            :amenity-limit="5"
+            :badge="roomBadge(room.id, room)"
+            :meta="pricedRoom(room.id)?.ratePlan.mealBenefit || ''"
+            :price-text="roomPriceText(room.id)"
+            :price-per-night="roomPricePerNight(room.id)"
+            :price-hint="
+              pricedRoom(room.id) ? 'incl. taxes & fees for your dates' : ''
+            "
+            :cta-label="
+              hasSearchedDates && pricedRoom(room.id)
+                ? 'View room details'
+                : 'Check availability'
+            "
+            :cta-outline="!(hasSearchedDates && pricedRoom(room.id))"
+            @cta="
+              hasSearchedDates && pricedRoom(room.id)
+                ? openRoom(room.id)
+                : focusSearch()
+            "
+          />
         </div>
       </section>
+
+      <div
+        v-if="stickyBarVisible"
+        class="room-sticky"
+        role="region"
+        aria-label="Room booking summary"
+      >
+        <div class="room-sticky__price">
+          <template v-if="stickyPriced">
+            <strong>${{ stickyPriced.total.toFixed(0) }}</strong>
+            <span
+              >incl. taxes · {{ stickyPriced.nights }} night{{
+                stickyPriced.nights === 1 ? "" : "s"
+              }}</span
+            >
+          </template>
+          <template v-else>
+            <strong>Check dates</strong>
+            <span>See live rates for this stay</span>
+          </template>
+        </div>
+        <button
+          class="gy-btn gy-btn--light room-sticky__cta"
+          type="button"
+          @click="
+            stickyPriced ? openRoom(stickyPriced.roomType.id) : focusSearch()
+          "
+        >
+          {{ stickyPriced ? "View room details" : "Check availability" }}
+        </button>
+      </div>
 
       <section class="block policies-block">
         <div>
@@ -228,17 +241,22 @@
 
 <script setup lang="ts">
 import { computed, watch } from "vue";
+import { useQuasar } from "quasar";
 import { useRoute, useRouter } from "vue-router";
 import BookingSearchWidget from "@/components/BookingSearchWidget.vue";
 import FeatureChips from "@/components/FeatureChips.vue";
 import HotelCard from "@/components/HotelCard.vue";
 import MapEmbed from "@/components/MapEmbed.vue";
+import RoomCardSkeleton from "@/components/RoomCardSkeleton.vue";
+import RoomOfferCard from "@/components/RoomOfferCard.vue";
 import SeoHead from "@/components/SeoHead.vue";
 import { useBookingStore } from "@/stores/booking-store";
 import { useCmsStore } from "@/stores/cms-store";
+import type { RoomType } from "@/types/greyon";
 
 const route = useRoute();
 const router = useRouter();
+const $q = useQuasar();
 const booking = useBookingStore();
 const cms = useCmsStore();
 
@@ -300,6 +318,21 @@ const hasSearchedDates = computed(
     booking.results.some(r => r.hotel.id === hotel.value?.id)
 );
 
+const roomsLoading = computed(() => booking.searching);
+
+const hotelResults = computed(() =>
+  hotel.value ? booking.results.filter(r => r.hotel.id === hotel.value?.id) : []
+);
+
+const stickyPriced = computed(() => {
+  if (!hotelResults.value.length) return null;
+  return [...hotelResults.value].sort((a, b) => a.total - b.total)[0] ?? null;
+});
+
+const stickyBarVisible = computed(
+  () => $q.screen.lt.sm && Boolean(hotel.value) && rooms.value.length > 0
+);
+
 const jsonLd = computed(() =>
   hotel.value
     ? {
@@ -321,6 +354,38 @@ function pricedRoom(roomTypeId: string) {
       r => r.hotel.id === hotel.value?.id && r.roomType.id === roomTypeId
     ) ?? null
   );
+}
+
+/** Avoid repeating the room name when CMS description matches the title. */
+function roomSubtitle(room: RoomType) {
+  const desc = room.description?.trim() || "";
+  const name = room.name?.trim() || "";
+  if (desc && desc.toLowerCase() !== name.toLowerCase()) return desc;
+  const bits = [room.bedType?.trim(), room.roomSize?.trim()].filter(Boolean);
+  if (bits.length) return bits.join(" · ");
+  return "Comfortable Greyon stay";
+}
+
+function roomBadge(roomTypeId: string, room: RoomType) {
+  const priced = pricedRoom(roomTypeId);
+  if (priced && priced.availableUnits > 0 && priced.availableUnits <= 8) {
+    return `${priced.availableUnits} left`;
+  }
+  if (room.bedType?.trim()) return room.bedType.trim();
+  return "Room";
+}
+
+function roomPriceText(roomTypeId: string) {
+  const priced = pricedRoom(roomTypeId);
+  if (!priced) return "";
+  return `$${priced.total.toFixed(2)}`;
+}
+
+function roomPricePerNight(roomTypeId: string) {
+  const priced = pricedRoom(roomTypeId);
+  if (!priced || !priced.nights) return "";
+  const per = priced.total / priced.nights;
+  return `$${per.toFixed(0)} per night`;
 }
 
 function scrollToRooms() {
@@ -500,89 +565,63 @@ async function openRoom(roomTypeId: string) {
   gap: 0.85rem;
 }
 
-.room-card {
-  display: grid;
-  grid-template-columns: minmax(240px, 320px) 1fr;
-  gap: 1.35rem;
-  padding: 1.1rem;
-  background: var(--gy-white);
-  border: 1px solid rgba(28, 36, 33, 0.08);
-  border-radius: var(--gy-radius-card);
-}
-
-.room-card__media {
-  position: relative;
-  aspect-ratio: 4 / 3;
-  align-self: start;
-  border-radius: var(--gy-radius-media);
-}
-
 .gallery__item {
   aspect-ratio: 4 / 3;
   border-radius: var(--gy-radius-media);
 }
 
-.room-card__badge {
-  position: absolute;
-  left: 0.75rem;
-  bottom: 0.75rem;
-  z-index: 1;
-  padding: 0.35rem 0.55rem;
-  font-size: 0.72rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  background: rgba(255, 255, 255, 0.94);
-  color: var(--gy-ink);
-}
-
-.room-card__body {
+.room-list {
   display: grid;
-  gap: 0.75rem;
-  align-content: start;
+  gap: 1rem;
+  margin-top: 1rem;
 }
 
-.room-card h3 {
-  margin: 0;
-  font-size: clamp(1.55rem, 2.4vw, 1.9rem);
-  line-height: 1.15;
-}
-
-.room-card__desc {
-  margin: 0;
-  color: var(--gy-muted);
-  line-height: 1.6;
-}
-
-.room-card__facts,
 .room-price-hint {
   margin: 0.75rem 0 0;
   font-size: 0.9rem;
 }
 
-.room-card__tags,
-.feature-line {
-  margin: 0;
-  font-size: 0.92rem;
-  color: var(--gy-muted);
-  line-height: 1.5;
-}
-
-.room-card__facts span {
-  margin: 0 0.2rem;
-  opacity: 0.7;
-}
-
-.room-card__meal {
-  margin: 0;
-  font-size: 0.9rem;
-  color: var(--gy-forest);
-}
-
-.room-card__actions {
+.room-sticky {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.65rem;
-  margin-top: 0.15rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+  padding: 0.85rem 1rem calc(0.85rem + env(safe-area-inset-bottom));
+  background: rgba(255, 255, 255, 0.96);
+  border-top: 1px solid rgba(69, 76, 75, 0.1);
+  box-shadow: 0 -12px 28px rgba(69, 76, 75, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.room-sticky__price {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.room-sticky__price strong {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--gy-ink);
+}
+
+.room-sticky__price span {
+  font-size: 0.72rem;
+  color: var(--gy-muted);
+}
+
+.room-sticky__cta {
+  flex-shrink: 0;
+  min-height: 2.65rem;
+  padding-inline: 1rem;
+  font-size: 0.72rem;
 }
 
 .policies-block {
@@ -653,15 +692,15 @@ async function openRoom(roomTypeId: string) {
   .gallery {
     grid-template-columns: 1fr 1fr;
   }
-
-  .room-card {
-    grid-template-columns: 1fr;
-  }
 }
 
 @media (max-width: 600px) {
   .gallery {
     grid-template-columns: 1fr;
+  }
+
+  .detail-wrap {
+    padding-bottom: 5.5rem;
   }
 }
 </style>

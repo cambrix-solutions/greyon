@@ -48,57 +48,34 @@
           </button>
         </div>
 
-        <div v-if="booking.results.length" class="results">
-          <article
+        <div v-if="booking.searching" class="results">
+          <RoomCardSkeleton
+            v-for="n in 3"
+            :key="`result-skel-${n}`"
+            variant="result"
+          />
+        </div>
+        <div v-else-if="booking.results.length" class="results">
+          <RoomOfferCard
             v-for="(result, idx) in booking.results"
             :key="idx"
-            class="result-card"
-          >
-            <div class="result-card__media gy-card-media">
-              <img
-                v-if="roomCover(result.roomType)"
-                :src="roomCover(result.roomType)"
-                :alt="result.roomType.name"
-                loading="lazy"
-              />
-              <div v-else class="result-card__media-ph" aria-hidden="true" />
-            </div>
-            <div class="result-card__info">
-              <h3 class="gy-display">{{ result.hotel.name }}</h3>
-              <p class="result-card__room">
-                {{ result.roomType.name }} · {{ result.ratePlan.name }}
-              </p>
-              <p class="result-card__facts">
-                {{ roomFactsLine(result.roomType) }}
-              </p>
-              <FeatureChips
-                :items="result.roomType.amenities.slice(0, 4)"
-                size="sm"
-              />
-              <p class="result-card__meta">
-                {{
-                  [
-                    result.ratePlan.mealBenefit,
-                    `${result.availableUnits} left`,
-                    `${result.nights} night${result.nights === 1 ? "" : "s"}`
-                  ]
-                    .filter(Boolean)
-                    .join(" · ")
-                }}
-              </p>
-            </div>
-            <div class="result-card__price">
-              <strong>${{ result.total.toFixed(2) }}</strong>
-              <span>incl. taxes/fees for your dates</span>
-              <button
-                class="gy-btn gy-btn--light gy-btn--sm"
-                type="button"
-                @click="booking.selectResult(result)"
-              >
-                View room details
-              </button>
-            </div>
-          </article>
+            variant="result"
+            :title="result.hotel.name"
+            :subtitle="resultRoomSubtitle(result)"
+            :images="result.roomType.images"
+            :bed-type="result.roomType.bedType"
+            :room-size="result.roomType.roomSize"
+            :max-guests="result.roomType.maxGuests"
+            :amenities="result.roomType.amenities"
+            :amenity-limit="4"
+            :badge="resultUrgencyBadge(result)"
+            :meta="resultMeta(result)"
+            :price-text="`$${result.total.toFixed(2)}`"
+            :price-per-night="resultPerNight(result)"
+            price-hint="incl. taxes & fees for your dates"
+            cta-label="View room details"
+            @cta="booking.selectResult(result)"
+          />
         </div>
         <p v-else-if="!booking.errorMessage" class="empty-note">
           No rooms available for this search. Try different dates or occupancy.
@@ -528,11 +505,13 @@ import { computed, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import BookingSearchWidget from "@/components/BookingSearchWidget.vue";
 import FeatureChips from "@/components/FeatureChips.vue";
+import RoomCardSkeleton from "@/components/RoomCardSkeleton.vue";
+import RoomOfferCard from "@/components/RoomOfferCard.vue";
 import SeoHead from "@/components/SeoHead.vue";
 import { useBookingStore } from "@/stores/booking-store";
 import { useCmsStore } from "@/stores/cms-store";
 import { useCustomerStore } from "@/stores/customer-store";
-import type { RoomType } from "@/types/greyon";
+import type { AvailabilityResult, RoomType } from "@/types/greyon";
 import {
   queryHasSearchFields,
   searchParamsFromQuery,
@@ -598,6 +577,34 @@ function roomFactsLine(room: RoomType) {
   ]
     .filter(Boolean)
     .join(" · ");
+}
+
+function resultRoomSubtitle(result: AvailabilityResult) {
+  const name = result.roomType.name?.trim() || "";
+  const rate = result.ratePlan.name?.trim() || "";
+  if (name && rate) return `${name} · ${rate}`;
+  return name || rate || "Available room";
+}
+
+function resultUrgencyBadge(result: AvailabilityResult) {
+  if (result.availableUnits > 0 && result.availableUnits <= 8) {
+    return `${result.availableUnits} left`;
+  }
+  return result.roomType.bedType?.trim() || "Available";
+}
+
+function resultMeta(result: AvailabilityResult) {
+  return [
+    result.ratePlan.mealBenefit,
+    `${result.nights} night${result.nights === 1 ? "" : "s"}`
+  ]
+    .filter(Boolean)
+    .join(" · ");
+}
+
+function resultPerNight(result: AvailabilityResult) {
+  if (!result.nights) return "per night";
+  return `$${(result.total / result.nights).toFixed(0)} per night`;
 }
 
 // Each step swaps the whole panel — start the new step at the top so mobile
@@ -756,46 +763,7 @@ function showGuestError(
 
 .results {
   display: grid;
-  gap: 0.85rem;
-}
-
-.result-card {
-  display: grid;
-  grid-template-columns: 140px minmax(0, 1fr) auto;
-  align-items: stretch;
-  gap: 1.15rem;
-  background: var(--gy-cream);
-  padding: 1.15rem 1.25rem;
-  border: 1px solid rgba(28, 36, 33, 0.06);
-}
-
-.result-card__media {
-  /* Explicit width keeps the 4:3 box inside its 140px column (stretched
-     height + aspect-ratio otherwise widened it over the room title). */
-  width: 100%;
-  align-self: start;
-  aspect-ratio: 4 / 3;
-  min-height: 100px;
-  background: var(--gy-sand);
-}
-
-.result-card__media img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.result-card__media-ph {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, var(--gy-sand), var(--gy-stone));
-}
-
-.result-card__info {
-  display: grid;
-  gap: 0.35rem;
-  min-width: 0;
-  align-content: start;
+  gap: 1rem;
 }
 
 .summary-card__media {
@@ -828,54 +796,11 @@ function showGuestError(
   border: 1px solid rgba(28, 36, 33, 0.08);
 }
 
-.result-card h3 {
-  margin: 0;
-  font-size: 1.45rem;
-  line-height: 1.15;
-}
-
-.result-card__room {
-  margin: 0;
-  font-size: 0.95rem;
-}
-
-.result-card__facts,
-.result-card__tags,
-.result-card__meta {
+.result-card__facts {
   margin: 0;
   font-size: 0.88rem;
   color: var(--gy-muted);
   line-height: 1.45;
-}
-
-.result-card__facts span,
-.result-card__meta span {
-  margin: 0 0.2rem;
-  opacity: 0.7;
-}
-
-.result-card__price {
-  display: grid;
-  gap: 0.3rem;
-  justify-items: end;
-  align-content: center;
-  flex-shrink: 0;
-}
-
-.result-card__price strong {
-  font-family: var(--font-display);
-  font-size: 1.7rem;
-  font-weight: 500;
-  line-height: 1;
-}
-
-.result-card__price span {
-  font-size: 0.78rem;
-  color: var(--gy-muted);
-}
-
-.result-card__price .gy-btn {
-  margin-top: 0.35rem;
 }
 
 .empty-note {
@@ -1157,21 +1082,6 @@ textarea:focus {
   .review-grid,
   .form-row {
     grid-template-columns: 1fr;
-  }
-
-  .result-card {
-    grid-template-columns: 1fr;
-  }
-
-  .result-card__media {
-    aspect-ratio: 16 / 9;
-  }
-
-  .result-card__price {
-    justify-items: start;
-    align-content: start;
-    padding-top: 0.5rem;
-    border-top: 1px solid var(--gy-stone);
   }
 }
 </style>
