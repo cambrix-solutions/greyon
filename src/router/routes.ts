@@ -74,6 +74,12 @@ const routes: RouteRecordRaw[] = [
         meta: { title: "Destinations | Greyon", solidHeader: true }
       },
       {
+        path: "map",
+        name: "map",
+        component: () => import("@/pages/MapPage.vue"),
+        meta: { title: "Map | Greyon", solidHeader: true }
+      },
+      {
         path: "locations/:slug",
         name: "location-detail",
         component: () => import("@/pages/LocationDetailPage.vue"),

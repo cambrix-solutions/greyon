@@ -30,7 +30,12 @@ export async function searchAvailability(
     adults: String(params.adults),
     children: String(params.children),
     ...(params.locationSlug ? { locationSlug: params.locationSlug } : {}),
-    ...(params.hotelSlug ? { hotelSlug: params.hotelSlug } : {})
+    ...(params.hotelSlug ? { hotelSlug: params.hotelSlug } : {}),
+    // Special rates: forwarded for future engine support; ignored safely today.
+    ...(params.specialRate && params.specialRate !== "none"
+      ? { specialRate: params.specialRate }
+      : {}),
+    ...(params.promoCode?.trim() ? { promoCode: params.promoCode.trim() } : {})
   });
   const payload = await engineAPI.get<{ results: EngineAvailabilityResult[] }>(
     `/availability?${qs.toString()}`

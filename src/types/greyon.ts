@@ -274,4 +274,11 @@ export interface BookingSearchParams {
   rooms: number;
   adults: number;
   children: number;
+  /**
+   * Courtyard-style special rate code (none | aaa | senior | government | corporate).
+   * Passed through availability / booking query params; engine may ignore until supported.
+   */
+  specialRate: string;
+  /** Corporate / promo code when specialRate is corporate. */
+  promoCode: string;
 }

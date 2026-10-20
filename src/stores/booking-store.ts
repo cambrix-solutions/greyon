@@ -66,7 +66,9 @@ export const useBookingStore = defineStore("booking", () => {
     checkOut: defaultCheckOut(),
     rooms: 1,
     adults: 2,
-    children: 0
+    children: 0,
+    specialRate: "none",
+    promoCode: ""
   });
   const results = ref<AvailabilityResult[]>([]);
   const selected = ref<AvailabilityResult | null>(null);
@@ -170,7 +172,12 @@ export const useBookingStore = defineStore("booking", () => {
     try {
       const draft = JSON.parse(raw) as BookingDraft;
       if (!draft || typeof draft.step !== "number") return false;
-      search.value = { ...search.value, ...draft.search };
+      search.value = {
+        ...search.value,
+        ...draft.search,
+        specialRate: draft.search?.specialRate || "none",
+        promoCode: draft.search?.promoCode || ""
+      };
       results.value = Array.isArray(draft.results) ? draft.results : [];
       selected.value = draft.selected ?? null;
       guest.value = { ...emptyGuest(), ...draft.guest };
@@ -249,8 +256,11 @@ export const useBookingStore = defineStore("booking", () => {
         search.value
       )) as AvailabilityResult[];
     } catch (e) {
+      const raw = e instanceof Error ? e.message : "";
       errorMessage.value =
-        e instanceof Error ? e.message : "Search failed. Try again.";
+        raw && raw.length < 180 && !raw.includes("<")
+          ? raw
+          : "We couldn’t find availability just now. Please try again.";
       results.value = [];
     }
     selected.value = null;

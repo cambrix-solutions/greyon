@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@quasar/extras": "^2.0.4",
+    "leaflet": "^1.9.4",
     "pinia": "^4.0.2",
     "quasar": "^2.30.0",
     "vue": "^3.5.22",
@@ -31,6 +32,7 @@
   "devDependencies": {
     "@intlify/unplugin-vue-i18n": "^11.0.0",
     "@quasar/app-vite": "^3.8.1",
+    "@types/leaflet": "^1.9.22",
     "@types/node": "^22.19.11",
     "autoprefixer": "^10.4.27",
     "oxfmt": "^0.x",
