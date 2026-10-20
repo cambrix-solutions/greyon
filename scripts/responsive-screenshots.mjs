@@ -52,7 +52,10 @@ for (const width of widths) {
       if (route.name === "home" && width === 390) {
         const menu = page.locator(".gy-menu-btn");
         if (await menu.count()) {
-          await menu.first().click({ force: true }).catch(() => {});
+          await menu
+            .first()
+            .click({ force: true })
+            .catch(() => {});
           await page.waitForTimeout(500);
           await page.screenshot({
             path: join(outDir, `home-drawer-${width}.png`),
