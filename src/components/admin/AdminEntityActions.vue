@@ -97,6 +97,10 @@ function onPrimaryClick() {
     <div
       v-if="showPrimary || visibleActions.length"
       class="entity-actions__cluster"
+      :class="{
+        'entity-actions__cluster--icons-only':
+          !showPrimary && visibleActions.length
+      }"
     >
       <q-btn
         v-if="showPrimary"
@@ -216,6 +220,22 @@ function onPrimaryClick() {
   background: #fff;
   box-shadow: 0 1px 0 rgba(28, 25, 23, 0.03);
   overflow: hidden;
+  max-width: 100%;
+}
+
+/* Icons-only bars: drop the empty chrome so the foot isn't a blank box */
+.entity-actions__cluster--icons-only {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+  gap: 0.15rem;
+}
+
+.entity-actions__cluster--icons-only .entity-actions__icons {
+  padding: 0;
+  background: transparent;
+  gap: 0.1rem;
 }
 
 .entity-actions__primary {
@@ -293,16 +313,45 @@ function onPrimaryClick() {
     justify-content: stretch;
   }
 
+  .entity-actions:not(.entity-actions--stack) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.45rem;
+  }
+
+  .entity-actions:not(.entity-actions--stack) .entity-actions__meta {
+    grid-column: 1 / -1;
+  }
+
   .entity-actions__status {
     flex: 1 1 auto;
+    min-width: 0;
   }
 
   .entity-actions__cluster {
-    flex: 1 1 100%;
+    flex: 1 1 auto;
+    justify-self: end;
+  }
+
+  .entity-actions__cluster:not(.entity-actions__cluster--icons-only) {
+    width: 100%;
+  }
+
+  .entity-actions__cluster:not(.entity-actions__cluster--icons-only)
+    .entity-actions__primary {
+    flex: 1 1 auto;
   }
 
   .entity-actions__icons {
     margin-left: auto;
+  }
+
+  .entity-actions--stack {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .entity-actions--stack .entity-actions__cluster {
+    width: 100%;
   }
 }
 </style>

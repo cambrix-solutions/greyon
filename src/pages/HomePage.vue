@@ -307,6 +307,7 @@ const latestNews = computed(() => cms.publishedNews.slice(0, 3));
 }
 
 .home-hero__dot {
+  position: relative;
   width: 0.55rem;
   height: 0.55rem;
   padding: 0;
@@ -318,6 +319,16 @@ const latestNews = computed(() => cms.publishedNews.slice(0, 3));
     background 0.2s ease,
     transform 0.2s ease,
     width 0.2s ease;
+}
+
+.home-hero__dot::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 44px;
+  height: 44px;
+  transform: translate(-50%, -50%);
 }
 
 .home-hero__dot.is-active {

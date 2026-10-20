@@ -709,6 +709,7 @@ async function onSubmit() {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1.25;
 }
 
 .gy-seg.is-invalid .gy-seg__btn {
@@ -814,39 +815,113 @@ async function onSubmit() {
   justify-self: start;
 }
 
-/* Medium bars (header, booking panel): round icon button so the segments
-   keep room for their values. */
-@container gy-search (min-width: 721px) and (max-width: 900px) {
-  .gy-search__submit,
-  .gy-search--compact .gy-search__submit {
-    width: 3.1rem;
-    min-height: 3.1rem;
-    padding: 0;
+/* Tablet / mid-width bars: 2-row layout so values stay readable and the
+   submit label is never clipped. Covers ~768–1100px containers (home,
+   hotel pages, booking). */
+@container gy-search (min-width: 561px) and (max-width: 1100px) {
+  .gy-search__bar,
+  .gy-search--compact .gy-search__bar {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
+    grid-template-areas:
+      "dest dates action"
+      "guests rates action";
+    border-radius: 22px;
+    gap: 0.15rem 0.2rem;
+    padding: 0.45rem;
   }
 
+  .gy-seg--dest {
+    grid-area: dest;
+  }
+
+  .gy-seg--dates {
+    grid-area: dates;
+  }
+
+  .gy-seg--guests {
+    grid-area: guests;
+  }
+
+  .gy-seg--rates {
+    grid-area: rates;
+  }
+
+  .gy-search__action {
+    grid-area: action;
+    align-self: stretch;
+    display: flex;
+    padding: 0.15rem 0.15rem 0.15rem 0.25rem;
+  }
+
+  .gy-seg + .gy-seg::before {
+    display: none;
+  }
+
+  .gy-seg__btn,
+  .gy-search--compact .gy-seg__btn {
+    min-height: 3.1rem;
+    padding: 0.4rem 0.85rem;
+    border-radius: 14px;
+    gap: 0.55rem;
+  }
+
+  .gy-seg__label,
+  .gy-search--compact .gy-seg__label {
+    font-size: 0.58rem;
+  }
+
+  .gy-seg__value,
+  .gy-search--compact .gy-seg__value {
+    font-size: 0.84rem;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  .gy-search__submit,
   .gy-search--compact .gy-search__submit {
-    width: 2.6rem;
-    min-height: 2.6rem;
+    width: auto;
+    min-width: 5.5rem;
+    height: 100%;
+    min-height: 100%;
+    padding: 0 1rem;
+    border-radius: 16px;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.2;
   }
 
   .gy-search__submit-text {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+    white-space: normal;
+    font-size: 0.68rem;
   }
 }
 
-/* ---- Stacked card (narrow containers: phones, tablet portrait) ---- */
-@container gy-search (max-width: 720px) {
+/* ---- Stacked card (phones / narrow containers) ---- */
+@container gy-search (max-width: 560px) {
   .gy-search__bar,
   .gy-search--compact .gy-search__bar {
     grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: none;
     padding: 0.5rem;
     border-radius: 18px;
     gap: 0.15rem;
+  }
+
+  .gy-seg--dest,
+  .gy-seg--dates,
+  .gy-seg--guests,
+  .gy-seg--rates,
+  .gy-search__action {
+    grid-area: auto;
   }
 
   .gy-seg + .gy-seg::before {
@@ -856,6 +931,7 @@ async function onSubmit() {
     bottom: auto;
     width: auto;
     height: 1px;
+    display: block;
   }
 
   .gy-seg__btn,
@@ -869,12 +945,17 @@ async function onSubmit() {
     font-size: 0.62rem;
   }
 
+  .gy-seg__value,
   .gy-search--compact .gy-seg__value {
     font-size: 0.95rem;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
   }
 
   .gy-search__action {
     padding: 0.4rem 0 0;
+    display: block;
   }
 
   .gy-search__submit,

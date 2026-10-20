@@ -41,66 +41,124 @@
       </template>
     </AdminPageHeader>
 
-    <div v-reveal="{ delay: '120ms' }" class="admin-scroll bookings-scroll">
-      <table class="bookings-table">
-        <thead>
-          <tr>
-            <th>Reference</th>
-            <th>Guest</th>
-            <th>Stay</th>
-            <th>Status</th>
-            <th class="text-right">Total</th>
-            <th class="text-right">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="b in filtered" :key="b.id">
-            <td>
+    <div v-reveal="{ delay: '120ms' }" class="admin-data">
+      <div class="admin-data__table bookings-scroll">
+        <table class="bookings-table">
+          <thead>
+            <tr>
+              <th>Reference</th>
+              <th>Guest</th>
+              <th>Stay</th>
+              <th>Status</th>
+              <th class="text-right">Total</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="b in filtered" :key="b.id">
+              <td>
+                <button type="button" class="ref-link" @click="openDetail(b)">
+                  {{ b.reference }}
+                </button>
+              </td>
+              <td>
+                <div class="cell-primary">{{ b.guest.fullName }}</div>
+              </td>
+              <td>
+                <div class="cell-primary">{{ hotelName(b.hotelId) }}</div>
+                <div class="cell-secondary">{{ roomName(b.roomTypeId) }}</div>
+                <div class="cell-secondary">{{ shortStayLabel(b) }}</div>
+              </td>
+              <td>
+                <span class="status-pill" :data-status="b.status">
+                  {{ b.status }}
+                </span>
+              </td>
+              <td class="text-right cell-total">${{ b.total.toFixed(2) }}</td>
+              <td class="text-right">
+                <div class="actions-row">
+                  <q-btn
+                    outline
+                    dense
+                    no-caps
+                    color="primary"
+                    label="View"
+                    @click="openDetail(b)"
+                  />
+                  <q-btn
+                    v-if="b.status === 'pending'"
+                    unelevated
+                    dense
+                    no-caps
+                    color="primary"
+                    label="Confirm"
+                    @click="confirmBooking(b)"
+                  />
+                </div>
+              </td>
+            </tr>
+            <tr v-if="!filtered.length">
+              <td colspan="6" class="empty-row">No bookings match.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="admin-data__cards" aria-label="Bookings">
+        <article
+          v-for="b in filtered"
+          :key="`card-${b.id}`"
+          class="admin-data-card"
+        >
+          <div class="admin-data-card__head">
+            <div>
               <button type="button" class="ref-link" @click="openDetail(b)">
                 {{ b.reference }}
               </button>
-            </td>
-            <td>
-              <div class="cell-primary">{{ b.guest.fullName }}</div>
-            </td>
-            <td>
-              <div class="cell-primary">{{ hotelName(b.hotelId) }}</div>
-              <div class="cell-secondary">{{ roomName(b.roomTypeId) }}</div>
-              <div class="cell-secondary">{{ shortStayLabel(b) }}</div>
-            </td>
-            <td>
-              <span class="status-pill" :data-status="b.status">
-                {{ b.status }}
-              </span>
-            </td>
-            <td class="text-right cell-total">${{ b.total.toFixed(2) }}</td>
-            <td class="text-right">
-              <div class="actions-row">
-                <q-btn
-                  outline
-                  dense
-                  no-caps
-                  color="primary"
-                  label="View"
-                  @click="openDetail(b)"
-                />
-                <q-btn
-                  v-if="b.status === 'pending'"
-                  unelevated
-                  dense
-                  no-caps
-                  color="primary"
-                  label="Confirm"
-                  @click="confirmBooking(b)"
-                />
-              </div>
-            </td>
-          </tr>
-          <tr v-if="!filtered.length">
-            <td colspan="6" class="empty-row">No bookings match.</td>
-          </tr>
-        </tbody>
-      </table>
+              <p class="admin-data-card__sub">{{ b.guest.fullName }}</p>
+            </div>
+            <span class="status-pill" :data-status="b.status">{{
+              b.status
+            }}</span>
+          </div>
+          <dl class="admin-data-card__rows">
+            <div class="admin-data-card__row">
+              <dt>Stay</dt>
+              <dd>
+                <div class="cell-primary">{{ hotelName(b.hotelId) }}</div>
+                <div class="cell-secondary">{{ roomName(b.roomTypeId) }}</div>
+                <div class="cell-secondary">{{ shortStayLabel(b) }}</div>
+              </dd>
+            </div>
+            <div class="admin-data-card__row">
+              <dt>Total</dt>
+              <dd class="cell-total">${{ b.total.toFixed(2) }}</dd>
+            </div>
+          </dl>
+          <div class="admin-data-card__actions">
+            <q-btn
+              outline
+              dense
+              no-caps
+              color="primary"
+              label="View"
+              @click="openDetail(b)"
+            />
+            <q-btn
+              v-if="b.status === 'pending'"
+              unelevated
+              dense
+              no-caps
+              color="primary"
+              label="Confirm"
+              @click="confirmBooking(b)"
+            />
+          </div>
+        </article>
+        <p v-if="!filtered.length" class="admin-data-card__empty">
+          No bookings match.
+        </p>
+      </div>
     </div>
 
     <AdminDialog
@@ -1095,16 +1153,12 @@ function remove(id: string) {
 
 .bookings-scroll {
   border-radius: 10px;
-  overflow: hidden;
-}
-
-.bookings-scroll.admin-scroll {
   border: 1px solid rgba(28, 36, 33, 0.1);
 }
 
 .bookings-table {
   width: 100%;
-  min-width: 0 !important;
+  min-width: 640px;
   border-collapse: collapse;
   background: #fff;
 }

@@ -74,14 +74,10 @@
             :status="item.status"
             :status-options="cms.statusOptions"
             :status-disable="!auth.canAction('services', 'update')"
+            primary-label="Edit"
+            :primary-show="auth.canAction('services', 'update')"
+            @primary="openEdit(item)"
             :actions="[
-              {
-                key: 'edit',
-                icon: 'edit',
-                tip: 'Edit service',
-                show: auth.canAction('services', 'update'),
-                onClick: () => openEdit(item)
-              },
               {
                 key: 'delete',
                 icon: 'delete',

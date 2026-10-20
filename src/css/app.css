@@ -216,7 +216,7 @@ img.gy-img--broken {
   padding-top: 0 !important;
 }
 
-/* Admin tables: horizontal scroll on small screens */
+/* Admin tables: desktop keeps a single horizontal scroll; phones use cards */
 .admin-scroll {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
@@ -224,12 +224,151 @@ img.gy-img--broken {
   border: 1px solid rgba(143, 115, 64, 0.16);
   border-radius: 14px;
   background: #fff;
+  /* Avoid nested scrollbars: this is the only overflow-x owner */
+  overscroll-behavior-x: contain;
 }
 
 .admin-scroll .q-markup-table,
 .admin-scroll table {
-  min-width: 720px;
   margin-bottom: 0;
+}
+
+/* Only force a wide table on desktop — mobile uses .admin-data cards */
+@media (min-width: 900px) {
+  .admin-scroll .q-markup-table,
+  .admin-scroll table {
+    min-width: 720px;
+  }
+}
+
+@media (max-width: 899px) {
+  .admin-scroll .q-markup-table,
+  .admin-scroll table {
+    min-width: 0;
+  }
+}
+
+/* Shared responsive list: table on desktop, stacked cards below ~900px */
+.admin-data {
+  margin-bottom: 1rem;
+  min-width: 0;
+}
+
+.admin-data__table {
+  border: 1px solid rgba(143, 115, 64, 0.16);
+  border-radius: 14px;
+  background: #fff;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+
+.admin-data__table .q-markup-table,
+.admin-data__table table {
+  width: 100%;
+  margin-bottom: 0;
+  min-width: 720px;
+}
+
+.admin-data__cards {
+  display: none;
+  gap: 0.75rem;
+}
+
+.admin-data-card {
+  display: grid;
+  gap: 0.65rem;
+  padding: 0.95rem 1rem;
+  background: #fff;
+  border: 1px solid rgba(28, 36, 33, 0.1);
+  border-radius: 14px;
+  min-width: 0;
+}
+
+.admin-data-card__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.45rem 0.75rem;
+}
+
+.admin-data-card__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.02rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  color: var(--gy-ink);
+  word-break: break-word;
+}
+
+.admin-data-card__sub {
+  margin: 0.2rem 0 0;
+  font-size: 0.82rem;
+  color: var(--gy-muted);
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.admin-data-card__rows {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+}
+
+.admin-data-card__row {
+  display: grid;
+  grid-template-columns: minmax(5.5rem, 32%) minmax(0, 1fr);
+  gap: 0.35rem 0.65rem;
+  align-items: start;
+  font-size: 0.86rem;
+  line-height: 1.4;
+}
+
+.admin-data-card__row dt {
+  margin: 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gy-muted);
+  font-weight: 600;
+  padding-top: 0.15rem;
+}
+
+.admin-data-card__row dd {
+  margin: 0;
+  min-width: 0;
+  word-break: break-word;
+  color: var(--gy-ink);
+}
+
+.admin-data-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding-top: 0.15rem;
+  border-top: 1px solid rgba(28, 36, 33, 0.07);
+}
+
+.admin-data-card__empty {
+  padding: 1.5rem 1rem;
+  text-align: center;
+  color: var(--gy-muted);
+  background: #fff;
+  border: 1px dashed rgba(28, 36, 33, 0.15);
+  border-radius: 14px;
+}
+
+@media (max-width: 899px) {
+  .admin-data__table {
+    display: none;
+  }
+
+  .admin-data__cards {
+    display: grid;
+  }
 }
 
 .admin-layout .q-page {
@@ -364,9 +503,12 @@ img.gy-img--broken {
 }
 
 .gy-link-arrow {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
+  min-height: 44px;
+  padding-block: 0.55rem;
   transition:
     gap 0.25s ease,
     color 0.25s ease;
@@ -375,6 +517,21 @@ img.gy-img--broken {
 .gy-link-arrow:hover {
   gap: 0.65rem;
   color: var(--gy-gold-deep);
+}
+
+/* Expand hit area without changing visual size of small controls */
+.gy-hit-44 {
+  position: relative;
+}
+
+.gy-hit-44::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: max(100%, 44px);
+  height: max(100%, 44px);
+  transform: translate(-50%, -50%);
 }
 
 .gy-btn {

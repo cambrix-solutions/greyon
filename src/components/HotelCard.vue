@@ -109,6 +109,13 @@ const coverImage = computed(
   font-weight: 700;
 }
 
+.hotel-card__body h3 a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding-block: 0.2rem;
+}
+
 .hotel-card__body h3 a:hover {
   color: var(--gy-gold-deep);
 }

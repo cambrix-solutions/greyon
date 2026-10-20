@@ -11,7 +11,9 @@ export default defineBoot(async () => {
 
   const cms = useCmsStore();
   try {
-    await cms.syncCatalogFromEngine("public");
+    // Use ensure* so hotel-detail hydrate can await the same in-flight load
+    // instead of racing a second /catalog fetch that would wipe services.
+    await cms.ensurePublicCatalog();
   } catch (e) {
     console.warn("[greyon] public catalog sync failed — empty catalog", e);
   }

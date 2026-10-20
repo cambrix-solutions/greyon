@@ -38,6 +38,18 @@ const routes: RouteRecordRaw[] = [
         meta: { title: "Hotel | Greyon", solidHeader: true }
       },
       {
+        path: "apartments",
+        name: "apartments",
+        component: () => import("@/pages/ApartmentsListPage.vue"),
+        meta: { title: "Apartments | Greyon", solidHeader: true }
+      },
+      {
+        path: "about",
+        name: "about",
+        component: () => import("@/pages/AboutPage.vue"),
+        meta: { title: "About | Greyon", solidHeader: true }
+      },
+      {
         path: "portfolios/service-apartment",
         name: "portfolio-service-apartment",
         component: () => import("@/pages/PortfolioComingSoonPage.vue"),

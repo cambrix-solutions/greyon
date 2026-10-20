@@ -40,6 +40,8 @@ function accept() {
   box-shadow: var(--gy-shadow);
 }
 
+/* While the mobile drawer is open it sits above this banner (see MainLayout). */
+
 .cookie-notice a {
   color: var(--gy-gold);
   text-decoration: underline;

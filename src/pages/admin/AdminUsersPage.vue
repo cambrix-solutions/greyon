@@ -41,58 +41,117 @@
 
       <AccessHubBanner focus="people" />
 
-      <div class="admin-scroll">
-        <q-markup-table flat bordered class="bg-white">
-          <thead>
-            <tr>
-              <th class="text-left">Name</th>
-              <th class="text-left">Email</th>
-              <th class="text-left">Seat (role)</th>
-              <th class="text-left">Scope</th>
-              <th class="text-left">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="user in filtered" :key="user.id">
-              <td>{{ user.name }}</td>
-              <td>{{ user.email }}</td>
-              <td>
-                <div class="pkg-chips">
-                  <span
-                    v-for="seat in seatsFor(user)"
-                    :key="seat.id"
-                    class="pkg-chip"
-                    >{{ seat.label }}</span
-                  >
-                  <span v-if="!seatsFor(user).length" class="text-grey-6"
-                    >None</span
-                  >
-                </div>
-              </td>
-              <td class="text-caption">{{ scopeLabel(user) }}</td>
-              <td>
-                <q-btn
-                  v-if="auth.canAction('users', 'update')"
-                  flat
-                  dense
-                  color="primary"
-                  label="Edit"
-                  :disable="!canEditRow(user)"
-                  @click="openEdit(user)"
-                />
-                <q-btn
-                  v-if="auth.canAction('users', 'delete')"
-                  flat
-                  dense
-                  color="negative"
-                  label="Delete"
-                  :disable="!canDeleteRow(user)"
-                  @click="remove(user.id)"
-                />
-              </td>
-            </tr>
-          </tbody>
-        </q-markup-table>
+      <div class="admin-data">
+        <div class="admin-data__table">
+          <q-markup-table flat bordered class="bg-white">
+            <thead>
+              <tr>
+                <th class="text-left">Name</th>
+                <th class="text-left">Email</th>
+                <th class="text-left">Seat (role)</th>
+                <th class="text-left">Scope</th>
+                <th class="text-left">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="user in filtered" :key="user.id">
+                <td>{{ user.name }}</td>
+                <td>{{ user.email }}</td>
+                <td>
+                  <div class="pkg-chips">
+                    <span
+                      v-for="seat in seatsFor(user)"
+                      :key="seat.id"
+                      class="pkg-chip"
+                      >{{ seat.label }}</span
+                    >
+                    <span v-if="!seatsFor(user).length" class="text-grey-6"
+                      >None</span
+                    >
+                  </div>
+                </td>
+                <td class="text-caption">{{ scopeLabel(user) }}</td>
+                <td>
+                  <q-btn
+                    v-if="auth.canAction('users', 'update')"
+                    flat
+                    dense
+                    color="primary"
+                    label="Edit"
+                    :disable="!canEditRow(user)"
+                    @click="openEdit(user)"
+                  />
+                  <q-btn
+                    v-if="auth.canAction('users', 'delete')"
+                    flat
+                    dense
+                    color="negative"
+                    label="Delete"
+                    :disable="!canDeleteRow(user)"
+                    @click="remove(user.id)"
+                  />
+                </td>
+              </tr>
+            </tbody>
+          </q-markup-table>
+        </div>
+
+        <div class="admin-data__cards" aria-label="People">
+          <article
+            v-for="user in filtered"
+            :key="`card-${user.id}`"
+            class="admin-data-card"
+          >
+            <div class="admin-data-card__head">
+              <div>
+                <h3 class="admin-data-card__title">{{ user.name }}</h3>
+                <p class="admin-data-card__sub">{{ user.email }}</p>
+              </div>
+            </div>
+            <dl class="admin-data-card__rows">
+              <div class="admin-data-card__row">
+                <dt>Seat</dt>
+                <dd>
+                  <div class="pkg-chips">
+                    <span
+                      v-for="seat in seatsFor(user)"
+                      :key="seat.id"
+                      class="pkg-chip"
+                      >{{ seat.label }}</span
+                    >
+                    <span v-if="!seatsFor(user).length" class="text-grey-6"
+                      >None</span
+                    >
+                  </div>
+                </dd>
+              </div>
+              <div class="admin-data-card__row">
+                <dt>Scope</dt>
+                <dd class="text-caption">{{ scopeLabel(user) }}</dd>
+              </div>
+            </dl>
+            <div class="admin-data-card__actions">
+              <q-btn
+                v-if="auth.canAction('users', 'update')"
+                flat
+                dense
+                color="primary"
+                label="Edit"
+                :disable="!canEditRow(user)"
+                @click="openEdit(user)"
+              />
+              <q-btn
+                v-if="auth.canAction('users', 'delete')"
+                flat
+                dense
+                color="negative"
+                label="Delete"
+                :disable="!canDeleteRow(user)"
+                @click="remove(user.id)"
+              />
+            </div>
+          </article>
+        </div>
       </div>
     </template>
 

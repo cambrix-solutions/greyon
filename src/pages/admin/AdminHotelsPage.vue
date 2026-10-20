@@ -172,6 +172,7 @@
 
             <div class="hotel-card__side">
               <AdminEntityActions
+                stack
                 :status="hotel.status"
                 :status-options="cms.statusOptions"
                 :status-disable="!auth.canAction('hotels', 'update')"
