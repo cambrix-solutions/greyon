@@ -51,70 +51,76 @@
               >
 
               <div
-                class="gy-nav__dropdown"
-                :class="{ 'is-open': openMenu === 'hotel' }"
-                @mouseenter="openNavMenu('hotel')"
-                @mouseleave="closeNavMenu('hotel')"
+                class="gy-nav__dropdown gy-nav__services"
+                :class="{ 'is-open': servicesOpen }"
+                @mouseenter="onServicesEnter"
+                @mouseleave="onServicesLeave"
               >
                 <button
                   type="button"
                   class="gy-nav__link gy-nav__dropbtn"
                   aria-haspopup="true"
-                  :aria-expanded="openMenu === 'hotel'"
-                  @click="toggleNavMenu('hotel')"
+                  :aria-expanded="servicesOpen"
+                  @click="toggleServices"
                 >
-                  Hotel
+                  Services
                 </button>
-                <div class="gy-nav__menu" role="menu" aria-label="Hotels">
-                  <router-link
-                    v-for="hotel in hotelProperties"
-                    :key="hotel.id"
-                    role="menuitem"
-                    :to="`/hotels/${hotel.slug}`"
-                    @click="closeAllNavMenus"
-                  >
-                    {{ hotel.name }}
-                  </router-link>
-                  <span
-                    v-if="!hotelProperties.length"
-                    class="gy-nav__soon"
-                    role="menuitem"
-                    >Coming soon</span
-                  >
-                </div>
-              </div>
-
-              <div
-                class="gy-nav__dropdown"
-                :class="{ 'is-open': openMenu === 'apartment' }"
-                @mouseenter="openNavMenu('apartment')"
-                @mouseleave="closeNavMenu('apartment')"
-              >
-                <button
-                  type="button"
-                  class="gy-nav__link gy-nav__dropbtn"
-                  aria-haspopup="true"
-                  :aria-expanded="openMenu === 'apartment'"
-                  @click="toggleNavMenu('apartment')"
+                <div
+                  v-show="servicesOpen"
+                  class="gy-nav__menu"
+                  role="menu"
+                  aria-label="Services"
                 >
-                  Apartment
-                </button>
-                <div class="gy-nav__menu" role="menu" aria-label="Apartments">
-                  <router-link
-                    v-for="hotel in apartmentProperties"
-                    :key="hotel.id"
-                    role="menuitem"
-                    :to="`/hotels/${hotel.slug}`"
-                    @click="closeAllNavMenus"
+                  <div
+                    v-for="section in serviceSections"
+                    :key="section.id"
+                    class="gy-nav__svc"
+                    :class="{ 'is-open': openFlyout === section.id }"
+                    @mouseenter="openServiceFlyout(section.id)"
                   >
-                    {{ hotel.name }}
-                  </router-link>
-                  <span
-                    v-if="!apartmentProperties.length"
-                    class="gy-nav__soon"
-                    role="menuitem"
-                    >Coming soon</span
-                  >
+                    <router-link
+                      v-if="section.to"
+                      :to="section.to"
+                      class="gy-nav__svc-link"
+                      role="menuitem"
+                      @click="closeAllNavMenus"
+                    >
+                      {{ section.label }}
+                    </router-link>
+                    <span v-else class="gy-nav__svc-link" role="menuitem">{{
+                      section.label
+                    }}</span>
+                    <button
+                      type="button"
+                      class="gy-nav__svc-more"
+                      :aria-label="`${section.label} list`"
+                      :aria-expanded="openFlyout === section.id"
+                      @click.stop="toggleServiceFlyout(section.id)"
+                    >
+                      <q-icon name="chevron_right" size="18px" />
+                    </button>
+                    <div
+                      class="gy-nav__submenu"
+                      role="menu"
+                      :aria-label="section.label"
+                    >
+                      <router-link
+                        v-for="hotel in section.items"
+                        :key="hotel.id"
+                        role="menuitem"
+                        :to="`/hotels/${hotel.slug}`"
+                        @click="closeAllNavMenus"
+                      >
+                        {{ hotel.name }}
+                      </router-link>
+                      <span
+                        v-if="!section.items.length"
+                        class="gy-nav__soon"
+                        role="menuitem"
+                        >Coming soon</span
+                      >
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -202,43 +208,58 @@
           <q-expansion-item
             dense
             expand-separator
-            label="Hotel"
+            label="Services"
             header-class="gy-drawer__expand"
+            default-opened
           >
-            <q-item
-              v-for="hotel in hotelProperties"
-              :key="`d-h-${hotel.id}`"
-              clickable
-              v-ripple
-              :to="`/hotels/${hotel.slug}`"
-              @click="drawerOpen = false"
+            <q-expansion-item
+              dense
+              expand-separator
+              label="Hotels"
+              header-class="gy-drawer__expand-nested"
             >
-              <q-item-section>{{ hotel.name }}</q-item-section>
-            </q-item>
-            <q-item v-if="!hotelProperties.length">
-              <q-item-section class="gy-muted">Coming soon</q-item-section>
-            </q-item>
-          </q-expansion-item>
-
-          <q-expansion-item
-            dense
-            expand-separator
-            label="Apartment"
-            header-class="gy-drawer__expand"
-          >
-            <q-item
-              v-for="hotel in apartmentProperties"
-              :key="`d-a-${hotel.id}`"
-              clickable
-              v-ripple
-              :to="`/hotels/${hotel.slug}`"
-              @click="drawerOpen = false"
+              <q-item
+                clickable
+                v-ripple
+                to="/hotels"
+                @click="drawerOpen = false"
+              >
+                <q-item-section>All hotels</q-item-section>
+              </q-item>
+              <q-item
+                v-for="hotel in hotelProperties"
+                :key="`d-h-${hotel.id}`"
+                clickable
+                v-ripple
+                :to="`/hotels/${hotel.slug}`"
+                @click="drawerOpen = false"
+              >
+                <q-item-section>{{ hotel.name }}</q-item-section>
+              </q-item>
+              <q-item v-if="!hotelProperties.length">
+                <q-item-section class="gy-muted">Coming soon</q-item-section>
+              </q-item>
+            </q-expansion-item>
+            <q-expansion-item
+              dense
+              expand-separator
+              label="Apartments"
+              header-class="gy-drawer__expand-nested"
             >
-              <q-item-section>{{ hotel.name }}</q-item-section>
-            </q-item>
-            <q-item v-if="!apartmentProperties.length">
-              <q-item-section class="gy-muted">Coming soon</q-item-section>
-            </q-item>
+              <q-item
+                v-for="hotel in apartmentProperties"
+                :key="`d-a-${hotel.id}`"
+                clickable
+                v-ripple
+                :to="`/hotels/${hotel.slug}`"
+                @click="drawerOpen = false"
+              >
+                <q-item-section>{{ hotel.name }}</q-item-section>
+              </q-item>
+              <q-item v-if="!apartmentProperties.length">
+                <q-item-section class="gy-muted">Coming soon</q-item-section>
+              </q-item>
+            </q-expansion-item>
           </q-expansion-item>
 
           <q-item
@@ -335,31 +356,66 @@ customer.hydrate();
 const drawerOpen = ref(false);
 const route = useRoute();
 const homePastHero = ref(false);
-const openMenu = ref<"hotel" | "apartment" | null>(null);
+/** Services mega-menu open state (hover on desktop, tap on touch). */
+const servicesOpen = ref(false);
+/** Which Services row flyout is open (hotels | apartments | …). */
+const openFlyout = ref<string | null>(null);
 const { pageSearchInView } = usePageSearchVisibility();
 
-type NavMenu = "hotel" | "apartment";
+const CLOSE_DELAY_MS = 220;
+let closeServicesTimer: ReturnType<typeof setTimeout> | null = null;
 
-function openNavMenu(menu: NavMenu) {
-  openMenu.value = menu;
+function clearCloseServicesTimer() {
+  if (closeServicesTimer) {
+    clearTimeout(closeServicesTimer);
+    closeServicesTimer = null;
+  }
 }
 
-function closeNavMenu(menu: NavMenu) {
-  if (openMenu.value === menu) openMenu.value = null;
+function onServicesEnter() {
+  clearCloseServicesTimer();
+  servicesOpen.value = true;
+  if (!openFlyout.value) openFlyout.value = "hotels";
 }
 
-function toggleNavMenu(menu: NavMenu) {
-  openMenu.value = openMenu.value === menu ? null : menu;
+function onServicesLeave() {
+  clearCloseServicesTimer();
+  closeServicesTimer = setTimeout(() => {
+    servicesOpen.value = false;
+    openFlyout.value = null;
+    closeServicesTimer = null;
+  }, CLOSE_DELAY_MS);
+}
+
+function toggleServices() {
+  clearCloseServicesTimer();
+  servicesOpen.value = !servicesOpen.value;
+  if (servicesOpen.value && !openFlyout.value) openFlyout.value = "hotels";
+  if (!servicesOpen.value) openFlyout.value = null;
+}
+
+function openServiceFlyout(id: string) {
+  clearCloseServicesTimer();
+  servicesOpen.value = true;
+  openFlyout.value = id;
+}
+
+function toggleServiceFlyout(id: string) {
+  clearCloseServicesTimer();
+  servicesOpen.value = true;
+  openFlyout.value = openFlyout.value === id ? null : id;
 }
 
 function closeAllNavMenus() {
-  openMenu.value = null;
+  clearCloseServicesTimer();
+  servicesOpen.value = false;
+  openFlyout.value = null;
 }
 
 function onDocumentPointerDown(event: Event) {
-  if (!openMenu.value) return;
+  if (!servicesOpen.value) return;
   const target = event.target as Node | null;
-  const root = document.querySelector(".gy-nav");
+  const root = document.querySelector(".gy-nav__services");
   if (root && target && !root.contains(target)) closeAllNavMenus();
 }
 
@@ -383,6 +439,22 @@ const apartmentProperties = computed(() =>
     .slice()
     .sort((a, b) => a.name.localeCompare(b.name))
 );
+
+/** Extensible Services sections — add more entries here later. */
+const serviceSections = computed(() => [
+  {
+    id: "hotels",
+    label: "Hotels",
+    to: "/hotels" as string | null,
+    items: hotelProperties.value
+  },
+  {
+    id: "apartments",
+    label: "Apartments",
+    to: null as string | null,
+    items: apartmentProperties.value
+  }
+]);
 
 let heroScrollBound = false;
 
@@ -648,23 +720,76 @@ onUnmounted(() => {
 }
 
 .gy-nav__menu {
-  display: none;
   position: absolute;
   top: calc(100% + 0.35rem);
   left: 50%;
   transform: translateX(-50%);
-  min-width: 220px;
-  max-height: min(70vh, 22rem);
-  overflow-y: auto;
-  padding: 0.55rem 0;
+  min-width: 13.5rem;
+  padding: 0.45rem 0;
   background: var(--gy-cream);
   color: var(--gy-ink);
   box-shadow: var(--gy-shadow);
   border: 1px solid rgba(69, 76, 75, 0.08);
-  z-index: 20;
+  z-index: 30;
 }
 
-.gy-nav__menu a,
+.gy-nav__svc {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.gy-nav__svc-link {
+  flex: 1;
+  min-width: 0;
+  padding: 0.55rem 0.35rem 0.55rem 1rem;
+  color: var(--gy-ink);
+  font-size: 0.92rem;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+  text-decoration: none;
+}
+
+.gy-nav__svc-more {
+  display: inline-grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  margin-right: 0.25rem;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--gy-ink);
+  cursor: pointer;
+}
+
+.gy-nav__svc:hover,
+.gy-nav__svc.is-open {
+  background: var(--gy-sand);
+}
+
+.gy-nav__submenu {
+  display: none;
+  position: absolute;
+  top: -0.45rem;
+  left: calc(100% - 0.15rem);
+  min-width: 14rem;
+  max-height: min(70vh, 22rem);
+  overflow-y: auto;
+  padding: 0.45rem 0;
+  background: var(--gy-cream);
+  color: var(--gy-ink);
+  box-shadow: var(--gy-shadow);
+  border: 1px solid rgba(69, 76, 75, 0.08);
+  z-index: 31;
+}
+
+.gy-nav__svc.is-open .gy-nav__submenu {
+  display: block;
+}
+
+.gy-nav__submenu a,
 .gy-nav__soon {
   display: block;
   padding: 0.5rem 1rem;
@@ -673,9 +798,10 @@ onUnmounted(() => {
   text-transform: none;
   letter-spacing: 0;
   font-weight: 500;
+  text-decoration: none;
 }
 
-.gy-nav__menu a:hover {
+.gy-nav__submenu a:hover {
   background: var(--gy-sand);
 }
 
@@ -683,12 +809,6 @@ onUnmounted(() => {
   color: var(--gy-muted);
   font-style: italic;
   cursor: default;
-}
-
-.gy-nav__dropdown.is-open .gy-nav__menu,
-.gy-nav__dropdown:hover .gy-nav__menu,
-.gy-nav__dropdown:focus-within .gy-nav__menu {
-  display: block;
 }
 
 .gy-header__actions {
@@ -781,6 +901,14 @@ onUnmounted(() => {
   letter-spacing: 0.04em;
   text-transform: uppercase;
   font-size: 0.85rem;
+}
+
+.gy-drawer__list :deep(.gy-drawer__expand-nested) {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  font-size: 0.9rem;
+  padding-left: 0.35rem;
 }
 
 @media (max-width: 599px) {

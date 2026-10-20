@@ -5,7 +5,7 @@
 **SPA:** `D:\cambrix\greyon` · **API:** `D:\cambrix\greyon-engine`  
 **Public site:** https://greyon.site · **Admin:** https://greyon.site/admin
 
-**Latest pass (Oct 2026 feedback A/B/C):** branch `feat/feedback-oct-abc` — Marriott-style Special Rates, larger logo + Hotel/Apartment nav menus + nav↔compact-search transition, `/map` destination picker. See sections **12–14** below.
+**Latest pass (Oct 2026 feedback A/B/C):** branch `feat/feedback-oct-abc` — Marriott-style Special Rates, larger logo + **Services** nav (Hotels / Apartments flyouts; product-owner decision) + nav↔compact-search transition, `/map` destination picker. See sections **12–14** below.
 
 This doc lists **what Composer already implemented**, **where**, and **how to test** so you can find leftover style debt and booking-flow gaps. Do **not** re-do completed items unless tests fail.
 
@@ -370,21 +370,22 @@ greyon-engine/.../SiteSettingController.php      (siteName filled)
 
 ---
 
-## 13. P1 — Bigger logo, Hotel/Apartment menus, nav transition
+## 13. P1 — Bigger logo, Services menu, nav transition
 
-**Status:** `DONE`
+**Status:** `DONE`  
+**Owner decision:** Product owner chose **one `Services` nav item** (Hotels / Apartments nested) over separate Hotel + Apartment top-level items.
 
 **Changes:**
 
-- `MainLayout.vue` — logo `clamp(3.1rem … 4.6rem)`, attrs 240×84; **separate** Hotel + Apartment nav buttons (not links, not merged/“Services”) — hover/click opens a dropdown of property detail links from `publishedHotels` via `propertyKind.ts`; empty list shows a **Coming soon** entry; mobile drawer expansion items; `gy-navswap` transition when compact search replaces primary nav; Map link; keeps Home / News / Destination / Booking / Contact
-- `usePageSearchVisibility.ts` — IntersectionObserver hides navbar compact search while any in-page `BookingSearchWidget` (`pageAnchor`) is in view; shared booking-store state; pages without an in-page bar keep the compact navbar search
+- `MainLayout.vue` — logo `clamp(3.1rem … 4.6rem)`, attrs 240×84; single **Services** dropdown — desktop **opens on hover** (tap toggle on touch) with a short close delay to avoid flicker; rows **Hotels** (links to `/hotels`) and **Apartments** open a side flyout of properties from `publishedHotels` via `propertyKind.ts` (extensible `serviceSections`); empty Apartments → **Coming soon**; mobile drawer: Services → Hotels / Apartments → properties; `gy-navswap` transition; Map link; keeps Home / News / Destination / Booking / Contact
+- `usePageSearchVisibility.ts` — IntersectionObserver hides navbar compact search while any in-page `BookingSearchWidget` (`pageAnchor`) is in view; shared booking-store state
 
 **Test steps:**
 
 1. Transparent home header + solid header: logo larger, not clipped on phone.
-2. Hover Hotel → property links to `/hotels/:slug`; Apartment lists only apartment-like `propertyType`s.
+2. Hover **Services** → menu stays open into Hotels/Apartments flyouts; Hotels → `/hotels` + property submenu; Apartments → Coming soon when empty.
 3. Scroll home past hero: nav fades/slides into compact search (not an abrupt cut).
-4. Mobile drawer: Hotel/Apartment expanders mirror desktop.
+4. Mobile drawer: Services expands to Hotels and Apartments, which expand to properties.
 
 ---
 
