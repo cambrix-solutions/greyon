@@ -273,26 +273,27 @@ const amenities = computed(() => props.amenities ?? []);
 
 @media (min-width: 600px) {
   .room-offer--result {
-    grid-template-columns: minmax(280px, min(40%, 420px)) minmax(0, 1fr);
+    grid-template-columns: minmax(280px, 42%) minmax(0, 1fr);
     align-items: stretch;
   }
 
   .room-offer--result .room-offer__media {
     align-self: stretch;
+    max-width: 420px;
   }
 
   .room-offer--result .room-offer__media :deep(.room-media) {
     height: 100%;
-    min-height: 220px;
+    min-height: 240px;
     aspect-ratio: 4 / 3;
     max-height: none;
     border-radius: 16px 0 0 16px;
   }
 
   .room-offer--result .room-offer__body {
-    grid-template-columns: minmax(0, 1fr) minmax(132px, 168px);
-    gap: 0.85rem 1rem;
-    padding: 1rem 1.1rem;
+    grid-template-columns: minmax(0, 1fr) minmax(128px, 156px);
+    gap: 0.75rem 0.85rem;
+    padding: 0.95rem 1rem;
     align-items: center;
   }
 
@@ -300,18 +301,18 @@ const amenities = computed(() => props.amenities ?? []);
     justify-items: end;
     text-align: right;
     align-content: center;
-    gap: 0.55rem;
+    gap: 0.45rem;
   }
 
   .room-offer--result .room-offer__price strong {
-    font-size: 1.45rem;
+    font-size: 1.35rem;
   }
 
   .room-offer--result .room-offer__cta {
     width: auto;
     min-width: 100%;
-    padding-inline: 0.85rem;
-    font-size: 0.72rem;
+    padding-inline: 0.75rem;
+    font-size: 0.7rem;
   }
 }
 

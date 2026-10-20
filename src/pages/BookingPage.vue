@@ -691,7 +691,7 @@ function showGuestError(
 
 <style scoped>
 .booking-shell {
-  max-width: 920px;
+  max-width: 1080px;
 }
 
 .page-title {

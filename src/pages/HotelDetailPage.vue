@@ -356,13 +356,26 @@ function pricedRoom(roomTypeId: string) {
   );
 }
 
-/** Avoid repeating the room name when CMS description matches the title. */
+/** Avoid repeating the room name / bed type already shown in facts. */
 function roomSubtitle(room: RoomType) {
   const desc = room.description?.trim() || "";
   const name = room.name?.trim() || "";
-  if (desc && desc.toLowerCase() !== name.toLowerCase()) return desc;
-  const bits = [room.bedType?.trim(), room.roomSize?.trim()].filter(Boolean);
-  if (bits.length) return bits.join(" · ");
+  const bed = room.bedType?.trim() || "";
+  const size = room.roomSize?.trim() || "";
+  const lower = desc.toLowerCase();
+  if (
+    desc &&
+    lower !== name.toLowerCase() &&
+    lower !== bed.toLowerCase() &&
+    !lower.startsWith(name.toLowerCase())
+  ) {
+    return desc;
+  }
+  if (size && bed && size.toLowerCase() !== bed.toLowerCase()) {
+    return `${bed} · ${size}`;
+  }
+  if (size) return size;
+  if (room.maxGuests) return `Sleeps up to ${room.maxGuests}`;
   return "Comfortable Greyon stay";
 }
 

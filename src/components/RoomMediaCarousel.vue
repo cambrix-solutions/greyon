@@ -2,55 +2,58 @@
   <div
     class="room-media"
     :class="{
-      'room-media--empty': !hasImages,
+      'room-media--empty': !hasImages || allBroken,
       'room-media--fill': fill
     }"
   >
-    <template v-if="hasImages">
-      <q-carousel
-        v-model="slide"
-        class="room-media__carousel"
-        animated
-        swipeable
-        infinite
-        :navigation="images.length > 1"
-        navigation-position="bottom"
-        transition-prev="slide-right"
-        transition-next="slide-left"
-        control-color="white"
-        height="100%"
-      >
-        <q-carousel-slide
-          v-for="(src, idx) in images"
-          :key="`${src}-${idx}`"
-          :name="idx"
-          class="room-media__slide"
-        >
-          <button
-            type="button"
-            class="room-media__tap"
-            :aria-label="`View photo ${Number(idx) + 1} of ${images.length}`"
-            @click="openGallery(Number(idx))"
-          >
-            <img
-              :src="src"
-              :alt="`${alt} photo ${Number(idx) + 1}`"
-              :loading="idx === 0 ? 'eager' : 'lazy'"
-              decoding="async"
-            />
-          </button>
-        </q-carousel-slide>
-      </q-carousel>
-    </template>
-
-    <div v-else class="room-media__placeholder" aria-hidden="true">
+    <!-- Always under the carousel so broken CMS urls still feel intentional. -->
+    <div class="room-media__placeholder" aria-hidden="true">
       <q-icon name="apartment" size="42px" />
       <span>Photos coming soon</span>
     </div>
 
+    <q-carousel
+      v-if="hasImages && !allBroken"
+      v-model="slide"
+      class="room-media__carousel"
+      animated
+      swipeable
+      infinite
+      :navigation="images.length > 1"
+      navigation-position="bottom"
+      transition-prev="slide-right"
+      transition-next="slide-left"
+      control-color="white"
+      height="100%"
+    >
+      <q-carousel-slide
+        v-for="(src, idx) in images"
+        :key="`${src}-${idx}`"
+        :name="idx"
+        class="room-media__slide"
+      >
+        <button
+          type="button"
+          class="room-media__tap"
+          :aria-label="`View photo ${Number(idx) + 1} of ${images.length}`"
+          @click="openGallery(Number(idx))"
+        >
+          <img
+            :src="src"
+            :alt="`${alt} photo ${Number(idx) + 1}`"
+            :loading="idx === 0 ? 'eager' : 'lazy'"
+            decoding="async"
+            @error="markBroken(src)"
+            @load="markLoaded(src)"
+          />
+        </button>
+      </q-carousel-slide>
+    </q-carousel>
+
     <div v-if="badge" class="room-media__badge">{{ badge }}</div>
 
     <q-dialog
+      v-if="hasImages && !allBroken"
       v-model="galleryOpen"
       maximized
       transition-show="fade"
@@ -120,18 +123,40 @@ const props = withDefaults(
 const slide = ref(0);
 const galleryOpen = ref(false);
 const gallerySlide = ref(0);
+const broken = ref<Set<string>>(new Set());
+const loaded = ref<Set<string>>(new Set());
 
-const images = computed(() =>
-  (props.images ?? []).map(src => src?.trim()).filter(Boolean)
+const images = computed(
+  () => (props.images ?? []).map(src => src?.trim()).filter(Boolean) as string[]
 );
 const hasImages = computed(() => images.value.length > 0);
+const allBroken = computed(
+  () =>
+    hasImages.value &&
+    images.value.every(src => broken.value.has(src)) &&
+    loaded.value.size + broken.value.size >= images.value.length
+);
 
 watch(images, () => {
   slide.value = 0;
+  broken.value = new Set();
+  loaded.value = new Set();
 });
 
+function markBroken(src: string) {
+  const next = new Set(broken.value);
+  next.add(src);
+  broken.value = next;
+}
+
+function markLoaded(src: string) {
+  const next = new Set(loaded.value);
+  next.add(src);
+  loaded.value = next;
+}
+
 function openGallery(idx: number) {
-  if (!hasImages.value) return;
+  if (!hasImages.value || allBroken.value) return;
   gallerySlide.value = idx;
   galleryOpen.value = true;
 }
@@ -154,6 +179,8 @@ function openGallery(idx: number) {
 }
 
 .room-media__carousel {
+  position: relative;
+  z-index: 1;
   height: 100%;
   background: transparent;
 }
@@ -204,6 +231,9 @@ function openGallery(idx: number) {
 }
 
 .room-media__placeholder {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
   display: grid;
   place-content: center;
   justify-items: center;
@@ -215,7 +245,7 @@ function openGallery(idx: number) {
   background:
     radial-gradient(
       circle at 30% 25%,
-      rgba(98, 112, 99, 0.12),
+      rgba(98, 112, 99, 0.14),
       transparent 55%
     ),
     linear-gradient(145deg, var(--gy-sand), #e6e8e5 55%, var(--gy-stone));

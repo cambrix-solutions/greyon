@@ -125,7 +125,8 @@ const hiddenCount = computed(() => {
 });
 
 function onMoreClick() {
-  if (props.sheetOnMobile && $q.screen.lt.sm) {
+  // Prefer bottom sheet on narrow viewports (phones / narrow windows).
+  if (props.sheetOnMobile && ($q.screen.lt.sm || $q.screen.width < 600)) {
     sheetOpen.value = true;
     return;
   }
