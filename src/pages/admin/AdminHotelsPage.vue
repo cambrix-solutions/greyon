@@ -259,6 +259,7 @@
       <AdminFormSection title="Hero image" hint="Drop, browse, or paste a URL.">
         <ImageDropField
           v-model="form.heroImage"
+          :folder="hotelUploadFolder"
           title="Drop or browse hero image"
         />
       </AdminFormSection>
@@ -320,7 +321,11 @@
         title="Gallery"
         hint="Extra photos for the hotel detail page."
       >
-        <GalleryEditor v-model="gallery" label="Hotel gallery" />
+        <GalleryEditor
+          v-model="gallery"
+          label="Hotel gallery"
+          :folder="hotelUploadFolder"
+        />
       </AdminFormSection>
       <AdminFormSection
         title="About the stay"
@@ -414,6 +419,7 @@ import MapPinPicker from "@/components/admin/MapPinPicker.vue";
 import { useAuthStore } from "@/stores/auth-store";
 import { useCmsStore } from "@/stores/cms-store";
 import type { ContentStatus, Hotel, NearbyLandmark } from "@/types/greyon";
+import { uploadFolder } from "@/utils/uploadFolder";
 
 const cms = useCmsStore();
 const auth = useAuthStore();
@@ -481,6 +487,10 @@ const form = reactive({
   status: "draft" as ContentStatus,
   featured: false
 });
+
+const hotelUploadFolder = computed(() =>
+  uploadFolder("hotels", form.slug || editing.value)
+);
 
 const hasFormMapPin = computed(() => {
   const lat = Number(form.lat);

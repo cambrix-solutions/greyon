@@ -287,6 +287,7 @@
       <AdminFormSection title="Hero image" hint="Drop, browse, or paste a URL.">
         <ImageDropField
           v-model="form.heroImage"
+          :folder="locationUploadFolder"
           title="Drop or browse hero image"
         />
       </AdminFormSection>
@@ -360,6 +361,7 @@ import ImageDropField from "@/components/admin/ImageDropField.vue";
 import { useAuthStore } from "@/stores/auth-store";
 import { useCmsStore } from "@/stores/cms-store";
 import type { ContentStatus, Location } from "@/types/greyon";
+import { uploadFolder } from "@/utils/uploadFolder";
 
 const cms = useCmsStore();
 const auth = useAuthStore();
@@ -396,6 +398,10 @@ const form = reactive({
   email: "",
   status: "draft" as ContentStatus
 });
+
+const locationUploadFolder = computed(() =>
+  uploadFolder("locations", form.slug || editing.value)
+);
 
 const filtered = computed(() => {
   const q = query.value.trim().toLowerCase();

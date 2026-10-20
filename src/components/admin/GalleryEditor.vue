@@ -29,11 +29,8 @@
             <q-input
               dense
               outlined
-              :model-value="
-                isDataUrl(src) ? 'Local upload (stored in browser)' : src
-              "
-              :readonly="isDataUrl(src)"
-              label="Image"
+              :model-value="src"
+              label="Image URL"
               @update:model-value="v => update(index, String(v ?? ''))"
             />
           </div>
@@ -70,10 +67,17 @@
       icon="add_photo_alternate"
       eyebrow="Gallery"
       title="Add gallery image"
-      subtitle="Paste an image URL for this gallery (file drops are preview-only)."
+      subtitle="Upload files or paste image URLs — uploads fill the URL automatically."
     >
       <AdminFormSection title="Image">
-        <ImageDropField v-model="pendingSrc" title="Drop or browse image" />
+        <ImageDropField
+          v-model="pendingSrc"
+          multiple
+          :folder="folder"
+          title="Drop or browse images"
+          @uploaded="onUploaded"
+          @update:busy="busy = $event"
+        />
       </AdminFormSection>
       <template #actions>
         <q-btn flat no-caps label="Cancel" v-close-popup />
@@ -81,8 +85,13 @@
           unelevated
           no-caps
           color="primary"
-          label="Add image"
-          :disable="!pendingSrc"
+          :label="
+            pendingUrls.length > 1
+              ? `Add ${pendingUrls.length} images`
+              : 'Add image'
+          "
+          :disable="!pendingUrls.length || busy"
+          :loading="busy"
           @click="confirmAdd"
         />
       </template>
@@ -92,7 +101,6 @@
 
 <script setup lang="ts">
 import { ref, watch } from "vue";
-import { useQuasar } from "quasar";
 import AdminDialog from "@/components/admin/AdminDialog.vue";
 import AdminFormSection from "@/components/admin/AdminFormSection.vue";
 import ImageDropField from "@/components/admin/ImageDropField.vue";
@@ -101,43 +109,48 @@ const props = withDefaults(
   defineProps<{
     modelValue: string[];
     label?: string;
+    /** Engine upload folder, e.g. hotels/my-slug or rooms/12 */
+    folder?: string;
   }>(),
-  { label: "Gallery images" }
+  { label: "Gallery images", folder: undefined }
 );
 
 const emit = defineEmits<{
   "update:modelValue": [value: string[]];
 }>();
 
-const $q = useQuasar();
 const showAdd = ref(false);
 const pendingSrc = ref("");
+const pendingUrls = ref<string[]>([]);
+const busy = ref(false);
 
 watch(showAdd, open => {
-  if (open) pendingSrc.value = "";
+  if (open) {
+    pendingSrc.value = "";
+    pendingUrls.value = [];
+    busy.value = false;
+  }
 });
 
-function isDataUrl(src: string) {
-  return src.startsWith("data:");
+function onUploaded(urls: string[]) {
+  pendingUrls.value = urls.filter(Boolean);
+  pendingSrc.value = urls[urls.length - 1] ?? "";
 }
 
 function confirmAdd() {
-  if (!pendingSrc.value) return;
-  if (isDataUrl(pendingSrc.value)) {
-    $q.notify({
-      type: "negative",
-      message:
-        "Paste an image URL — local file drops are not saved to the server."
-    });
-    return;
-  }
-  emit("update:modelValue", [...props.modelValue, pendingSrc.value]);
+  const urls = pendingUrls.value.length
+    ? pendingUrls.value
+    : pendingSrc.value
+      ? [pendingSrc.value]
+      : [];
+  if (!urls.length) return;
+  emit("update:modelValue", [...props.modelValue, ...urls]);
   showAdd.value = false;
   pendingSrc.value = "";
+  pendingUrls.value = [];
 }
 
 function update(index: number, value: string) {
-  if (isDataUrl(props.modelValue[index] ?? "")) return;
   const next = [...props.modelValue];
   next[index] = value;
   emit("update:modelValue", next);
