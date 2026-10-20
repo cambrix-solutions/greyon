@@ -1,106 +1,241 @@
 <template>
   <form
     class="gy-search"
-    :class="{ 'gy-search--compact': compact }"
+    :class="{
+      'gy-search--compact': compact,
+      'gy-search--active': Boolean(openPanel)
+    }"
     novalidate
+    role="search"
+    aria-label="Search hotel availability"
     @submit.prevent="onSubmit"
   >
-    <div class="gy-search__fields">
-      <label>
-        <span>Destination</span>
-        <select v-model="local.locationSlug">
-          <option value="">All destinations</option>
-          <option v-for="loc in locations" :key="loc.id" :value="loc.slug">
-            {{ loc.name }}
-          </option>
-        </select>
-      </label>
-      <label :class="{ 'is-invalid': Boolean(fieldError.checkIn) }">
-        <span>Check-in</span>
-        <input
-          v-model="local.checkIn"
-          type="date"
-          required
-          :min="today"
-          :aria-invalid="Boolean(fieldError.checkIn)"
-          :aria-describedby="
-            showSummaryError ? 'booking-search-error' : undefined
-          "
-          @change="onCheckInChange"
-        />
-      </label>
-      <label :class="{ 'is-invalid': Boolean(fieldError.checkOut) }">
-        <span>Check-out</span>
-        <input
-          v-model="local.checkOut"
-          type="date"
-          required
-          :min="minCheckOut"
-          :aria-invalid="Boolean(fieldError.checkOut)"
-          :aria-describedby="
-            fieldError.checkOut && dateRangeInvalid
-              ? 'booking-checkout-error'
-              : showSummaryError
-                ? 'booking-search-error'
-                : undefined
-          "
-        />
-        <span
-          v-if="fieldError.checkOut && dateRangeInvalid"
-          id="booking-checkout-error"
-          class="gy-search__field-error"
+    <div class="gy-search__bar">
+      <!-- Destination -->
+      <div
+        class="gy-seg gy-seg--dest"
+        :class="{ 'is-open': openPanel === 'dest' }"
+      >
+        <button
+          type="button"
+          class="gy-seg__btn"
+          aria-haspopup="dialog"
+          :aria-expanded="openPanel === 'dest'"
+          @click="toggle('dest')"
         >
-          Check-out must be after check-in.
-        </span>
-      </label>
-      <label>
-        <span>Rooms</span>
-        <input v-model.number="local.rooms" type="number" min="1" max="5" />
-      </label>
-      <label>
-        <span>Adults</span>
-        <input v-model.number="local.adults" type="number" min="1" max="8" />
-      </label>
-      <label>
-        <span>Children</span>
-        <input v-model.number="local.children" type="number" min="0" max="6" />
-      </label>
+          <q-icon name="place" class="gy-seg__icon" size="20px" />
+          <span class="gy-seg__text">
+            <span class="gy-seg__label">Destination</span>
+            <span class="gy-seg__value">{{ destinationLabel }}</span>
+          </span>
+        </button>
+        <SearchPopover
+          :model-value="openPanel === 'dest'"
+          :sheet="sheet"
+          title="Where to?"
+          content-class="gy-pop--dest"
+          @update:model-value="setOpen('dest', $event)"
+        >
+          <ul class="gy-dest" role="listbox" aria-label="Destination">
+            <li v-for="opt in destinationOptions" :key="opt.slug || 'all'">
+              <button
+                type="button"
+                role="option"
+                class="gy-dest__opt"
+                :class="{ 'is-selected': local.locationSlug === opt.slug }"
+                :aria-selected="local.locationSlug === opt.slug"
+                @click="chooseDestination(opt.slug)"
+              >
+                <q-icon
+                  :name="opt.slug ? 'place' : 'travel_explore'"
+                  size="20px"
+                  class="gy-dest__icon"
+                />
+                <span>{{ opt.name }}</span>
+                <q-icon
+                  v-if="local.locationSlug === opt.slug"
+                  name="check"
+                  size="18px"
+                  class="gy-dest__check"
+                />
+              </button>
+            </li>
+          </ul>
+        </SearchPopover>
+      </div>
+
+      <!-- Dates -->
+      <div
+        class="gy-seg gy-seg--dates"
+        :class="{
+          'is-open': openPanel === 'dates',
+          'is-invalid': fieldError.checkIn || fieldError.checkOut
+        }"
+      >
+        <button
+          type="button"
+          class="gy-seg__btn"
+          aria-haspopup="dialog"
+          :aria-expanded="openPanel === 'dates'"
+          :aria-invalid="fieldError.checkIn || fieldError.checkOut || undefined"
+          :aria-describedby="showError ? errorId : undefined"
+          @click="toggle('dates')"
+        >
+          <q-icon name="calendar_month" class="gy-seg__icon" size="20px" />
+          <span class="gy-seg__text">
+            <span class="gy-seg__label">Check-in – Check-out</span>
+            <span class="gy-seg__value">
+              {{ datesShort }}
+              <span v-if="nightCount > 0" class="gy-seg__nights">{{
+                nightsLabel
+              }}</span>
+            </span>
+          </span>
+        </button>
+        <SearchPopover
+          :model-value="openPanel === 'dates'"
+          :sheet="sheet"
+          title="Select dates"
+          content-class="gy-pop--dates"
+          @update:model-value="setOpen('dates', $event)"
+          @show="calendar?.focusActive()"
+          @hide="onDatesClosed"
+        >
+          <DateRangeCalendar
+            ref="calendar"
+            :start="local.checkIn"
+            :end="local.checkOut"
+            :min="today"
+            :months="sheet ? 1 : twoMonths ? 2 : 1"
+            :scroll="sheet"
+            :horizon="sheet ? 12 : 18"
+            @update:start="local.checkIn = $event"
+            @update:end="local.checkOut = $event"
+          />
+          <template #footer>
+            <p class="gy-pop-summary" aria-live="polite">
+              <strong>{{ pickerStatus.title }}</strong>
+              <span>{{ pickerStatus.sub }}</span>
+            </p>
+            <div class="gy-pop-actions">
+              <button
+                type="button"
+                class="gy-pop-link"
+                :disabled="!local.checkIn && !local.checkOut"
+                @click="clearDates"
+              >
+                Clear
+              </button>
+              <button
+                type="button"
+                class="gy-btn gy-btn--light gy-btn--sm gy-pop-apply"
+                :disabled="!local.checkIn"
+                @click="openPanel = null"
+              >
+                Apply
+              </button>
+            </div>
+          </template>
+        </SearchPopover>
+      </div>
+
+      <!-- Guests & rooms -->
+      <div
+        class="gy-seg gy-seg--guests"
+        :class="{ 'is-open': openPanel === 'guests' }"
+      >
+        <button
+          type="button"
+          class="gy-seg__btn"
+          aria-haspopup="dialog"
+          :aria-expanded="openPanel === 'guests'"
+          @click="toggle('guests')"
+        >
+          <q-icon name="group" class="gy-seg__icon" size="20px" />
+          <span class="gy-seg__text">
+            <span class="gy-seg__label">Guests &amp; rooms</span>
+            <span class="gy-seg__value">{{ guestsShort }}</span>
+          </span>
+        </button>
+        <SearchPopover
+          :model-value="openPanel === 'guests'"
+          :sheet="sheet"
+          title="Guests & rooms"
+          content-class="gy-pop--guests"
+          @update:model-value="setOpen('guests', $event)"
+        >
+          <GuestCounter
+            v-model="local.adults"
+            label="Adults"
+            :min="LIMITS.adults[0]"
+            :max="LIMITS.adults[1]"
+          />
+          <GuestCounter
+            v-model="local.children"
+            label="Children"
+            :min="LIMITS.children[0]"
+            :max="LIMITS.children[1]"
+          />
+          <GuestCounter
+            v-model="local.rooms"
+            label="Rooms"
+            :min="LIMITS.rooms[0]"
+            :max="LIMITS.rooms[1]"
+          />
+          <template #footer>
+            <p class="gy-pop-summary">
+              <strong>{{ guestsLabel }}</strong>
+            </p>
+            <button
+              type="button"
+              class="gy-btn gy-btn--light gy-btn--sm gy-pop-apply"
+              @click="openPanel = null"
+            >
+              Done
+            </button>
+          </template>
+        </SearchPopover>
+      </div>
+
+      <div class="gy-search__action">
+        <button
+          class="gy-search__submit"
+          type="submit"
+          :aria-label="submitLabel"
+        >
+          <q-icon name="search" size="20px" />
+          <span class="gy-search__submit-text">{{ submitLabel }}</span>
+        </button>
+      </div>
     </div>
 
-    <p
-      v-if="showSummaryError"
-      id="booking-search-error"
-      class="gy-search__error"
-      role="alert"
-    >
+    <p v-if="showError" :id="errorId" class="gy-search__error" role="alert">
+      <q-icon name="info" size="16px" />
       {{ localError }}
     </p>
-    <p v-else-if="nightCount > 0 && !compact" class="gy-search__nights">
-      {{ nightCount }} night{{ nightCount === 1 ? "" : "s" }} selected
+    <p v-else-if="!compact" class="gy-search__hint">
+      Stay dates only — hotel check-in / out times apply (typically 14:00 /
+      12:00).
     </p>
-
-    <div class="gy-search__footer">
-      <p v-if="!compact" class="gy-search__hint">
-        Stay dates only — hotel check-in / out times apply (typically 14:00 /
-        12:00).
-      </p>
-      <p v-else-if="nightCount > 0" class="gy-search__nights">
-        {{ nightCount }} night{{ nightCount === 1 ? "" : "s" }}
-      </p>
-      <button class="gy-btn gy-btn--light gy-search__submit" type="submit">
-        {{ submitLabel }}
-      </button>
-    </div>
   </form>
 </template>
 
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from "vue";
+import { useQuasar } from "quasar";
 import { useRouter } from "vue-router";
+import DateRangeCalendar from "@/components/booking/DateRangeCalendar.vue";
+import GuestCounter from "@/components/booking/GuestCounter.vue";
+import SearchPopover from "@/components/booking/SearchPopover.vue";
 import { useBookingStore } from "@/stores/booking-store";
 import { useCmsStore } from "@/stores/cms-store";
 import type { BookingSearchParams } from "@/types/greyon";
-import { addLocalDays, nightsBetweenLocal, toLocalYmd } from "@/utils/datetime";
+import {
+  addLocalDays,
+  nightsBetweenLocal,
+  parseYmd,
+  toLocalYmd
+} from "@/utils/datetime";
 
 const props = withDefaults(
   defineProps<{
@@ -115,12 +250,29 @@ const props = withDefaults(
   }
 );
 
+/** Same bounds the old number inputs used (min / max attributes). */
+const LIMITS = {
+  rooms: [1, 5],
+  adults: [1, 8],
+  children: [0, 6]
+} as const;
+
+type Panel = "dest" | "dates" | "guests";
+
+const $q = useQuasar();
 const booking = useBookingStore();
 const cms = useCmsStore();
 const router = useRouter();
-const locations = cms.publishedLocations;
+const locations = computed(() => cms.publishedLocations);
 const attempted = ref(false);
 const today = toLocalYmd(new Date());
+const openPanel = ref<Panel | null>(null);
+const calendar = ref<InstanceType<typeof DateRangeCalendar> | null>(null);
+const errorId = `gy-search-error-${Math.random().toString(36).slice(2, 8)}`;
+
+/** Phones get bottom sheets; tablets/desktop get anchored popovers. */
+const sheet = computed(() => $q.screen.lt.sm);
+const twoMonths = computed(() => $q.screen.gt.sm);
 
 const local = reactive<BookingSearchParams>({ ...booking.search });
 
@@ -130,10 +282,12 @@ watch(
   { deep: true }
 );
 
-const minCheckOut = computed(() => addLocalDays(local.checkIn || today, 1));
-
 const nightCount = computed(() =>
   nightsBetweenLocal(local.checkIn, local.checkOut)
+);
+
+const nightsLabel = computed(
+  () => `${nightCount.value} night${nightCount.value === 1 ? "" : "s"}`
 );
 
 const dateRangeInvalid = computed(
@@ -164,21 +318,14 @@ const localError = computed(() => {
   return "";
 });
 
-/** Date issues surface immediately; other rules wait until submit. */
+/** Date issues surface immediately; other rules wait until submit. One message. */
 const showError = computed(
   () =>
+    openPanel.value !== "dates" &&
     Boolean(localError.value) &&
     (attempted.value ||
       dateRangeInvalid.value ||
       Boolean(local.checkIn && local.checkIn < today))
-);
-
-/**
- * The date-range message already sits under Check-out — don't repeat it.
- * The compact header bar hides field messages, so it keeps the summary.
- */
-const showSummaryError = computed(
-  () => showError.value && (props.compact || !dateRangeInvalid.value)
 );
 
 const fieldError = computed(() => {
@@ -190,14 +337,117 @@ const fieldError = computed(() => {
   };
 });
 
-function onCheckInChange() {
-  if (local.checkOut && local.checkOut <= local.checkIn) {
+const destinationOptions = computed(() => [
+  { slug: "", name: "All destinations" },
+  ...locations.value.map(l => ({ slug: l.slug, name: l.name }))
+]);
+
+const destinationLabel = computed(
+  () =>
+    destinationOptions.value.find(o => o.slug === local.locationSlug)?.name ??
+    "All destinations"
+);
+
+function shortDate(ymd: string) {
+  const d = parseYmd(ymd);
+  return d
+    ? d.toLocaleDateString("en-GB", {
+        weekday: "short",
+        day: "numeric",
+        month: "short"
+      })
+    : "";
+}
+
+const datesLabel = computed(() => {
+  if (!local.checkIn) return "Add dates";
+  if (!local.checkOut) return `${shortDate(local.checkIn)} → Add check-out`;
+  return `${shortDate(local.checkIn)} → ${shortDate(local.checkOut)}`;
+});
+
+function dayMonth(ymd: string) {
+  const d = parseYmd(ymd);
+  return d
+    ? d.toLocaleDateString("en-GB", { day: "numeric", month: "short" })
+    : "";
+}
+
+/** Bar value: "16–19 Nov", "30 Nov – 2 Dec" (full dates live in the popover). */
+const datesShort = computed(() => {
+  if (!local.checkIn) return "Add dates";
+  if (!local.checkOut) return `${dayMonth(local.checkIn)} – add check-out`;
+  const a = parseYmd(local.checkIn);
+  const b = parseYmd(local.checkOut);
+  if (
+    a &&
+    b &&
+    a.getMonth() === b.getMonth() &&
+    a.getFullYear() === b.getFullYear()
+  ) {
+    return `${a.getDate()}–${dayMonth(local.checkOut)}`;
+  }
+  return `${dayMonth(local.checkIn)} – ${dayMonth(local.checkOut)}`;
+});
+
+const pickerStatus = computed(() => {
+  if (!local.checkIn) {
+    return { title: "Select check-in date", sub: "Then pick your check-out" };
+  }
+  if (!local.checkOut) {
+    return {
+      title: "Select check-out date",
+      sub: `Check-in ${shortDate(local.checkIn)}`
+    };
+  }
+  return { title: nightsLabel.value, sub: datesLabel.value };
+});
+
+const guestsLabel = computed(() => {
+  const parts = [`${local.adults} adult${local.adults === 1 ? "" : "s"}`];
+  if (local.children > 0) {
+    parts.push(`${local.children} child${local.children === 1 ? "" : "ren"}`);
+  }
+  parts.push(`${local.rooms} room${local.rooms === 1 ? "" : "s"}`);
+  return parts.join(" · ");
+});
+
+/** Bar value: "3 guests · 1 room" (the popover shows the full breakdown). */
+const guestsShort = computed(() => {
+  const guests = local.adults + local.children;
+  return `${guests} guest${guests === 1 ? "" : "s"} · ${local.rooms} room${
+    local.rooms === 1 ? "" : "s"
+  }`;
+});
+
+function toggle(panel: Panel) {
+  openPanel.value = openPanel.value === panel ? null : panel;
+}
+
+function setOpen(panel: Panel, open: boolean) {
+  if (open) openPanel.value = panel;
+  else if (openPanel.value === panel) openPanel.value = null;
+}
+
+function chooseDestination(slug: string) {
+  local.locationSlug = slug;
+  openPanel.value = null;
+}
+
+function clearDates() {
+  local.checkIn = "";
+  local.checkOut = "";
+}
+
+/** Closing with only check-in picked keeps a valid 1-night stay. */
+function onDatesClosed() {
+  if (local.checkIn && (!local.checkOut || local.checkOut <= local.checkIn)) {
     local.checkOut = addLocalDays(local.checkIn, 1);
   }
 }
 
 async function onSubmit() {
   attempted.value = true;
+  openPanel.value = null;
   if (localError.value) return;
   booking.setSearch({ ...local, hotelSlug: booking.search.hotelSlug });
   const ok = await booking.runSearch();
@@ -209,248 +459,447 @@ async function onSubmit() {
 
 <style scoped>
 .gy-search {
+  /* Layout follows the space the widget gets (hero, header, booking panel),
+     not just the viewport. */
+  container: gy-search / inline-size;
   display: grid;
-  gap: 0.85rem;
-  padding: 1.15rem 1.25rem 1.2rem;
-  background: rgba(255, 255, 255, 0.94);
+  gap: 0.6rem;
   color: var(--gy-ink);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: 12px;
-  box-shadow: 0 22px 48px rgba(12, 18, 16, 0.28);
-  backdrop-filter: blur(10px);
+  font-family: var(--font-display);
 }
 
-/* One row (fields | submit) only where there is room: header bar + desktop
-   hero. The home hero also uses `compact`, so an unscoped 6-column grid broke
-   mobile; narrower screens fall through to the stacked rules below. */
-@media (min-width: 1001px) {
-  .gy-search--compact {
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas:
-      "fields footer"
-      "error error";
-    align-items: end;
-  }
+/* ---- Bar (desktop pill) ---- */
+.gy-search__bar {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr) minmax(0, 1.45fr) minmax(0, 1.05fr)
+    auto;
+  align-items: center;
+  padding: 0.4rem;
+  background: var(--gy-white);
+  border: 1px solid rgba(69, 76, 75, 0.12);
+  border-radius: 999px;
+  box-shadow: 0 18px 44px rgba(28, 36, 33, 0.14);
+  transition: background 0.2s ease;
+}
 
-  .gy-search--compact .gy-search__fields {
-    grid-area: fields;
-    grid-template-columns: 1.2fr 1.25fr 1.25fr 0.62fr 0.62fr 0.62fr;
-  }
+.gy-search--active .gy-search__bar {
+  background: var(--gy-cream);
+}
 
-  .gy-search--compact .gy-search__error {
-    grid-area: error;
-  }
+.gy-seg {
+  position: relative;
+  min-width: 0;
+}
 
-  .gy-search--compact .gy-search__footer {
-    grid-area: footer;
-    flex-wrap: nowrap;
+/* Hairline dividers between segments, hidden next to a hovered/open one. */
+.gy-seg + .gy-seg::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 22%;
+  bottom: 22%;
+  width: 1px;
+  background: rgba(69, 76, 75, 0.14);
+  transition: opacity 0.2s ease;
+}
+
+.gy-seg:hover::before,
+.gy-seg:hover + .gy-seg::before,
+.gy-seg.is-open::before,
+.gy-seg.is-open + .gy-seg::before {
+  opacity: 0;
+}
+
+.gy-seg__btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 3.6rem;
+  padding: 0.55rem 1.25rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.gy-seg__btn:hover {
+  background: var(--gy-sand);
+}
+
+.gy-seg.is-open .gy-seg__btn {
+  background: var(--gy-white);
+  box-shadow: 0 6px 22px rgba(28, 36, 33, 0.12);
+}
+
+.gy-seg__btn:focus-visible {
+  outline: 2px solid var(--gy-forest);
+  outline-offset: -2px;
+}
+
+.gy-seg__icon {
+  flex-shrink: 0;
+  color: var(--gy-forest);
+}
+
+.gy-seg__text {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.gy-seg__label {
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gy-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gy-seg__nights {
+  margin-left: 0.35rem;
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(98, 112, 99, 0.12);
+  color: var(--gy-forest);
+  font-size: 0.72em;
+  font-weight: 600;
+  vertical-align: 0.1em;
+}
+
+.gy-seg__value {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--gy-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gy-seg.is-invalid .gy-seg__btn {
+  box-shadow: inset 0 0 0 1.5px #b4533a;
+}
+
+.gy-seg.is-invalid .gy-seg__icon {
+  color: #b4533a;
+}
+
+.gy-search__action {
+  padding-left: 0.35rem;
+}
+
+.gy-search__submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 3.35rem;
+  padding: 0 1.6rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--gy-forest);
+  color: var(--gy-white);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.gy-search__submit:hover {
+  background: var(--gy-ink);
+  box-shadow: 0 10px 24px rgba(69, 76, 75, 0.28);
+}
+
+.gy-search__submit:active {
+  transform: scale(0.98);
+}
+
+.gy-search__submit:focus-visible {
+  outline: 2px solid var(--gy-forest);
+  outline-offset: 3px;
+}
+
+.gy-search__error,
+.gy-search__hint {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0 1.25rem;
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.gy-search__error {
+  color: #9a3412;
+}
+
+.gy-search__hint {
+  color: var(--gy-muted);
+}
+
+/* ---- Compact (header bar + home hero) ---- */
+.gy-search--compact .gy-search__bar {
+  padding: 0.25rem;
+  box-shadow: 0 10px 30px rgba(28, 36, 33, 0.12);
+}
+
+.gy-search--compact .gy-seg__btn {
+  min-height: 2.75rem;
+  padding: 0.3rem 1rem;
+  gap: 0.6rem;
+}
+
+.gy-search--compact .gy-seg__label {
+  font-size: 0.58rem;
+}
+
+.gy-search--compact .gy-seg__value {
+  font-size: 0.84rem;
+}
+
+.gy-search--compact .gy-search__submit {
+  min-height: 2.6rem;
+  padding: 0 1.15rem;
+}
+
+.gy-search--compact .gy-search__error {
+  padding: 0.4rem 0.9rem;
+  border-radius: 10px;
+  background: var(--gy-white);
+  box-shadow: 0 6px 18px rgba(28, 36, 33, 0.1);
+  justify-self: start;
+}
+
+/* Medium bars (header, booking panel): round icon button so the segments
+   keep room for their values. */
+@container gy-search (min-width: 721px) and (max-width: 900px) {
+  .gy-search__submit,
+  .gy-search--compact .gy-search__submit {
+    width: 3.1rem;
+    min-height: 3.1rem;
+    padding: 0;
   }
 
   .gy-search--compact .gy-search__submit {
-    min-width: 0;
+    width: 2.6rem;
+    min-height: 2.6rem;
+  }
+
+  .gy-search__submit-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
     white-space: nowrap;
   }
 }
 
-.gy-search--compact {
-  gap: 0.4rem 0.6rem;
-  padding: 0.45rem 0.6rem;
-  background: var(--gy-white);
-  border: 1px solid rgba(84, 88, 89, 0.14);
-  border-radius: 10px;
-  box-shadow: none;
-  backdrop-filter: none;
-}
-
-.gy-search--compact .gy-search__fields {
-  gap: 0.45rem;
-}
-
-.gy-search--compact .gy-search__error {
-  padding: 0.35rem 0.55rem;
-  font-size: 0.78rem;
-}
-
-.gy-search--compact .gy-search__field-error {
-  display: none;
-}
-
-.gy-search--compact label {
-  gap: 0.2rem;
-  font-size: 0.6rem;
-}
-
-.gy-search--compact input,
-.gy-search--compact select {
-  min-height: 2.15rem;
-  padding: 0.25rem 0.45rem;
-  border-radius: 6px;
-  font-size: 0.82rem;
-}
-
-.gy-search--compact .gy-search__footer {
-  padding-top: 0;
-  border-top: 0;
-  gap: 0.5rem;
-}
-
-.gy-search--compact .gy-search__nights {
-  font-size: 0.72rem;
-  white-space: nowrap;
-}
-
-.gy-search--compact .gy-search__submit {
-  min-height: 2.15rem;
-  padding: 0.45rem 1rem;
-}
-
-.gy-search__footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
-  padding-top: 0.15rem;
-  border-top: 1px solid rgba(84, 88, 89, 0.14);
-}
-
-.gy-search__hint {
-  margin: 0;
-  flex: 1;
-  min-width: 12rem;
-  font-size: 0.78rem;
-  line-height: 1.45;
-  color: var(--gy-muted);
-  text-transform: none;
-  letter-spacing: normal;
-}
-
-.gy-search__error {
-  margin: 0;
-  padding: 0.55rem 0.7rem;
-  background: var(--gy-sand);
-  border: 1px solid rgba(84, 88, 89, 0.35);
-  color: var(--gy-ink);
-  font-size: 0.86rem;
-}
-
-.gy-search__field-error {
-  margin: 0;
-  font-size: 0.72rem;
-  letter-spacing: normal;
-  text-transform: none;
-  color: #9a3412;
-  line-height: 1.3;
-}
-
-.gy-search__nights {
-  margin: 0;
-  font-size: 0.82rem;
-  color: var(--gy-forest);
-  font-weight: 600;
-}
-
-.gy-search__submit {
-  flex-shrink: 0;
-  min-width: 11.5rem;
-}
-
-.gy-search__fields {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 0.85rem;
-}
-
-label {
-  display: grid;
-  gap: 0.4rem;
-  font-size: 0.7rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--gy-muted);
-}
-
-label.is-invalid input {
-  border-color: #8b2e2e;
-  background: #faf6f4;
-}
-
-input,
-select {
-  width: 100%;
-  min-height: 2.75rem;
-  border: 1px solid rgba(84, 88, 89, 0.22);
-  border-radius: 6px;
-  background: var(--gy-sand);
-  padding: 0.5rem 0.7rem;
-  font: inherit;
-  color: var(--gy-ink);
-  text-transform: none;
-  letter-spacing: normal;
-  transition:
-    border-color 0.2s ease,
-    background 0.2s ease;
-}
-
-input:hover,
-select:hover {
-  border-color: rgba(84, 88, 89, 0.4);
-}
-
-input:focus,
-select:focus {
-  outline: none;
-  border-color: var(--gy-gold-deep);
-  background: var(--gy-white);
-}
-
-@media (max-width: 1000px) {
-  .gy-search__fields {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+/* ---- Stacked card (narrow containers: phones, tablet portrait) ---- */
+@container gy-search (max-width: 720px) {
+  .gy-search__bar,
+  .gy-search--compact .gy-search__bar {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 0.5rem;
+    border-radius: 18px;
+    gap: 0.15rem;
   }
 
-  .gy-search__submit {
-    width: 100%;
-  }
-}
-
-@media (max-width: 600px) {
-  .gy-search {
-    padding: 1rem;
-  }
-
-  /* Destination full width · Check-in | Check-out · Rooms | Adults | Children */
-  .gy-search__fields {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+  .gy-seg + .gy-seg::before {
+    left: 1rem;
+    right: 1rem;
+    top: 0;
+    bottom: auto;
+    width: auto;
+    height: 1px;
   }
 
-  .gy-search__fields > label:nth-child(1) {
-    grid-column: 1 / -1;
+  .gy-seg__btn,
+  .gy-search--compact .gy-seg__btn {
+    min-height: 3.5rem;
+    padding: 0.55rem 0.9rem;
+    border-radius: 12px;
   }
 
-  .gy-search__fields > label:nth-child(2),
-  .gy-search__fields > label:nth-child(3) {
-    grid-column: span 3;
+  .gy-search--compact .gy-seg__label {
+    font-size: 0.62rem;
   }
 
-  .gy-search__fields > label:nth-child(n + 4) {
-    grid-column: span 2;
+  .gy-search--compact .gy-seg__value {
+    font-size: 0.95rem;
   }
 
-  .gy-search__footer {
-    flex-direction: column;
-    align-items: stretch;
+  .gy-search__action {
+    padding: 0.4rem 0 0;
   }
 
   .gy-search__submit,
   .gy-search--compact .gy-search__submit {
     width: 100%;
-    min-width: 0;
+    min-height: 3.1rem;
+    border-radius: 12px;
   }
 
-  input,
-  select {
-    min-width: 0;
+  .gy-search__error,
+  .gy-search__hint {
+    padding: 0 0.5rem;
   }
+}
+</style>
+
+<style>
+/* Popover contents (teleported to <body>, so not scoped). */
+.gy-pop--dates .gy-pop__body {
+  padding: 1.35rem 1.6rem 0.85rem;
+}
+
+.gy-pop--dates.gy-pop {
+  width: min(44rem, calc(100vw - 2rem));
+}
+
+.gy-pop--guests.gy-pop {
+  width: min(22rem, calc(100vw - 2rem));
+}
+
+.gy-pop--guests .gy-pop__body {
+  padding: 0.5rem 1.5rem 0.5rem;
+}
+
+.gy-pop--dest.gy-pop {
+  min-width: 17rem;
+}
+
+.gy-pop--dest .gy-pop__body {
+  padding: 0.5rem;
+}
+
+.gy-dest {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gy-dest__opt {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.8rem 0.9rem;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--gy-ink);
+  font-family: var(--font-display);
+  font-size: 0.92rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+
+.gy-dest__opt:hover,
+.gy-dest__opt:focus-visible {
+  background: var(--gy-sand);
+  outline: none;
+}
+
+.gy-dest__opt.is-selected {
+  background: rgba(98, 112, 99, 0.1);
+  font-weight: 600;
+}
+
+.gy-dest__icon {
+  display: inline-grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 10px;
+  background: var(--gy-sand);
+  color: var(--gy-forest);
+}
+
+.gy-dest__check {
+  margin-left: auto;
+  color: var(--gy-forest);
+}
+
+.gy-pop-summary {
+  display: grid;
+  gap: 0.1rem;
+  margin: 0;
+  font-family: var(--font-display);
+  line-height: 1.3;
+}
+
+.gy-pop-summary strong {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--gy-ink);
+}
+
+.gy-pop-summary span {
+  font-size: 0.78rem;
+  color: var(--gy-muted);
+}
+
+.gy-pop-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.gy-pop-link {
+  padding: 0.5rem 0.75rem;
+  border: 0;
+  background: transparent;
+  color: var(--gy-ink);
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.gy-pop-link:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.gy-pop-apply {
+  min-width: 6.5rem;
+  border-radius: 999px !important;
+}
+
+.gy-pop-apply:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.gy-sheet.gy-pop--dates .gy-sheet__body {
+  padding-top: 0.5rem;
+}
+
+.gy-sheet .gy-pop-apply {
+  min-width: 8rem;
+  min-height: 3rem;
 }
 </style>
