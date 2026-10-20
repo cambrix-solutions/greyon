@@ -34,6 +34,7 @@
             >
               <BookingSearchWidget
                 compact
+                :page-anchor="false"
                 :navigate="true"
                 submit-label="Search"
               />
@@ -302,6 +303,7 @@ import { useRoute } from "vue-router";
 import BookingSearchWidget from "@/components/BookingSearchWidget.vue";
 import CookieNotice from "@/components/CookieNotice.vue";
 import SiteFooter from "@/components/SiteFooter.vue";
+import { usePageSearchVisibility } from "@/composables/usePageSearchVisibility";
 import { useAuthStore } from "@/stores/auth-store";
 import { useCmsStore } from "@/stores/cms-store";
 import { useCustomerStore } from "@/stores/customer-store";
@@ -314,6 +316,7 @@ customer.hydrate();
 const drawerOpen = ref(false);
 const route = useRoute();
 const homePastHero = ref(false);
+const { pageSearchInView } = usePageSearchVisibility();
 
 const accountInitials = computed(() => {
   const parts = customer.displayName.trim().split(/\s+/).filter(Boolean);
@@ -339,19 +342,34 @@ const apartmentProperties = computed(() =>
 let heroScrollBound = false;
 
 const isHome = computed(() => route.path === "/");
-const solidHeader = computed(
-  () => route.meta.solidHeader === true || !isHome.value || homePastHero.value
-);
 
-/** Compact booking bar replaces primary nav on hotel/booking discovery. */
-const showCompactSearch = computed(
+/**
+ * Routes that may show the compact navbar search. Hidden while any in-page
+ * BookingSearchWidget (`pageAnchor`) is in the viewport so the two bars
+ * never appear together; both bind to the same booking-store search state.
+ */
+const compactSearchEligible = computed(
   () =>
     auth.featureEnabled("booking_public") &&
     (route.name === "hotel-detail" ||
       route.name === "booking" ||
       route.name === "hotels" ||
       route.name === "map" ||
-      (isHome.value && homePastHero.value))
+      isHome.value)
+);
+
+const showCompactSearch = computed(
+  () => compactSearchEligible.value && !pageSearchInView.value
+);
+
+const solidHeader = computed(
+  () =>
+    route.meta.solidHeader === true ||
+    !isHome.value ||
+    homePastHero.value ||
+    // Keep solid chrome once the home hero search has left the viewport
+    // and the compact navbar search takes over.
+    showCompactSearch.value
 );
 
 function syncHomeHeader() {

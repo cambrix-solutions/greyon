@@ -1,5 +1,6 @@
 <template>
   <form
+    ref="rootEl"
     class="gy-search"
     :class="{
       'gy-search--compact': compact,
@@ -295,6 +296,7 @@ import { useRouter } from "vue-router";
 import DateRangeCalendar from "@/components/booking/DateRangeCalendar.vue";
 import GuestCounter from "@/components/booking/GuestCounter.vue";
 import SearchPopover from "@/components/booking/SearchPopover.vue";
+import { usePageSearchAnchor } from "@/composables/usePageSearchVisibility";
 import { useBookingStore } from "@/stores/booking-store";
 import { useCmsStore } from "@/stores/cms-store";
 import {
@@ -316,13 +318,24 @@ const props = withDefaults(
     submitLabel?: string;
     navigate?: boolean;
     compact?: boolean;
+    /**
+     * When true (default), this instance is the page’s main search bar.
+     * MainLayout hides the navbar compact search while it is in view.
+     * Set false for the header compact bar itself.
+     */
+    pageAnchor?: boolean;
   }>(),
   {
     submitLabel: "Search availability",
     navigate: true,
-    compact: false
+    compact: false,
+    pageAnchor: true
   }
 );
+
+const rootEl = ref<HTMLElement | null>(null);
+const pageAnchorEnabled = computed(() => props.pageAnchor);
+usePageSearchAnchor(rootEl, pageAnchorEnabled);
 
 /** Same bounds the old number inputs used (min / max attributes). */
 const LIMITS = {
