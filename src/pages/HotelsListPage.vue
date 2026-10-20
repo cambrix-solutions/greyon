@@ -16,7 +16,7 @@
       <div v-reveal="{ delay: '80ms' }" class="filters">
         <label>
           Destination
-          <select v-model="locationFilter">
+          <select :value="locationFilter" @change="onLocationChange">
             <option value="">All destinations</option>
             <option
               v-for="loc in cms.publishedLocations"
@@ -47,14 +47,59 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import HotelCard from "@/components/HotelCard.vue";
 import SeoHead from "@/components/SeoHead.vue";
+import { useBookingStore } from "@/stores/booking-store";
 import { useCmsStore } from "@/stores/cms-store";
+import {
+  queryHasSearchFields,
+  searchParamsFromQuery
+} from "@/utils/bookingSearchQuery";
 
 const cms = useCmsStore();
+const booking = useBookingStore();
+const route = useRoute();
+const router = useRouter();
 const locationFilter = ref("");
 const keyword = ref("");
+
+function applyLocationSlugFromQuery() {
+  const slug =
+    typeof route.query.locationSlug === "string"
+      ? route.query.locationSlug
+      : "";
+  if (!slug) {
+    locationFilter.value = "";
+    return;
+  }
+  const loc = cms.publishedLocations.find(l => l.slug === slug);
+  if (loc) locationFilter.value = loc.id;
+}
+
+function onLocationChange(event: Event) {
+  const id = (event.target as HTMLSelectElement).value;
+  locationFilter.value = id;
+  const loc = cms.publishedLocations.find(l => l.id === id);
+  const nextQuery = { ...route.query } as Record<string, string | string[]>;
+  if (loc) nextQuery.locationSlug = loc.slug;
+  else delete nextQuery.locationSlug;
+  void router.replace({ query: nextQuery });
+}
+
+onMounted(() => {
+  // Support /hotels?locationSlug=…&specialRate=… deep links (hotels/search params).
+  if (queryHasSearchFields(route.query)) {
+    booking.setSearch(searchParamsFromQuery(route.query));
+  }
+  applyLocationSlugFromQuery();
+});
+
+watch(
+  () => cms.publishedLocations.length,
+  () => applyLocationSlugFromQuery()
+);
 
 const filtered = computed(() =>
   cms.publishedHotels.filter(h => {

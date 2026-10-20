@@ -5,6 +5,8 @@
 **SPA:** `D:\cambrix\greyon` · **API:** `D:\cambrix\greyon-engine`  
 **Public site:** https://greyon.site · **Admin:** https://greyon.site/admin
 
+**Latest pass (Oct 2026 feedback A/B/C):** branch `feat/feedback-oct-abc` — Marriott-style Special Rates, larger logo + Hotel/Apartment nav menus + nav↔compact-search transition, `/map` destination picker. See sections **12–14** below.
+
 This doc lists **what Composer already implemented**, **where**, and **how to test** so you can find leftover style debt and booking-flow gaps. Do **not** re-do completed items unless tests fail.
 
 ---
@@ -308,13 +310,18 @@ This doc lists **what Composer already implemented**, **where**, and **how to te
 ```
 src/components/HotelCard.vue
 src/components/FeatureChips.vue
+src/components/BookingSearchWidget.vue
+src/components/DestinationsMap.vue               (new — feedback A/B/C)
 src/components/admin/AmenitiesEditor.vue          (new)
 src/components/admin/ImageDropField.vue
 src/data/standardAmenities.ts                    (new)
+src/data/specialRates.ts                         (new)
 src/css/app.css
 src/layouts/MainLayout.vue
 src/pages/BookingPage.vue
 src/pages/HotelDetailPage.vue
+src/pages/HotelsListPage.vue
+src/pages/MapPage.vue                            (new)
 src/pages/SignUpPage.vue
 src/pages/SitemapPage.vue
 src/pages/admin/AdminHotelsPage.vue
@@ -326,7 +333,10 @@ src/stores/booking-store.ts
 src/stores/auth-store.ts
 src/services/engine/ops.ts
 src/types/greyon.ts
+src/utils/bookingSearchQuery.ts                  (new)
+src/utils/propertyKind.ts                        (new)
 src/utils/sitemap.ts
+src/router/routes.ts
 public/sitemap.xml
 quasar.config.ts
 greyon-engine/.../SiteSettingController.php      (siteName filled)
@@ -334,14 +344,80 @@ greyon-engine/.../SiteSettingController.php      (siteName filled)
 
 ---
 
+## 12. P1 — Marriott-style search + Special Rates
+
+**Status:** `DONE` / `BACKEND-GAP`
+
+**Intent:** Homepage (and compact navbar) search bar mirrors Courtyard: **Dates** / **Rooms & Guests** / **Special Rates**, with rates passed through discovery URLs.
+
+**Changes:**
+
+- `BookingSearchWidget.vue` — labels, Rooms-first guests popover, Special Rates panel (`None`, `AAA/CAA`, `Senior`, `Government/Military`, `Corporate/Promo code` + text input)
+- `src/data/specialRates.ts` — option catalog
+- `BookingSearchParams.specialRate` / `promoCode` in `greyon.ts`, booking store defaults, draft restore
+- `src/utils/bookingSearchQuery.ts` — serialize/parse query for `/booking` and `/hotels`
+- `ops.ts` `searchAvailability` — forwards `specialRate` / `promoCode` on `/availability` (engine may ignore)
+- Compact navbar search uses the same widget (inherits Special Rates)
+
+**Test steps:**
+
+1. Home hero + scrolled compact header + `/booking` search: all three segments present.
+2. Pick Corporate → enter promo → Search → URL has `specialRate=corporate&promoCode=…`.
+3. Open `/booking?specialRate=aaa&checkIn=…&checkOut=…` → store hydrated; search runs when dates present.
+4. Mobile sheet for Special Rates works; existing date/guest validation still friendly.
+
+**Gaps:** Engine has no dedicated special-rate pricing; values are query-only until backend supports them. Do not invent rate math in the SPA.
+
+---
+
+## 13. P1 — Bigger logo, Hotel/Apartment menus, nav transition
+
+**Status:** `DONE`
+
+**Changes:**
+
+- `MainLayout.vue` — logo `clamp(3.1rem … 4.6rem)`, attrs 240×84; Hotel + Apartment dropdowns from `publishedHotels` via `propertyKind.ts`; mobile drawer expansion items; `gy-navswap` transition when compact search replaces primary nav; Map link
+- Apartment list empty → friendly “coming soon” copy (no raw errors)
+
+**Test steps:**
+
+1. Transparent home header + solid header: logo larger, not clipped on phone.
+2. Hover Hotel → property links to `/hotels/:slug`; Apartment lists only apartment-like `propertyType`s.
+3. Scroll home past hero: nav fades/slides into compact search (not an abrupt cut).
+4. Mobile drawer: Hotel/Apartment expanders mirror desktop.
+
+---
+
+## 14. P1 — Map page destination picker
+
+**Status:** `DONE`
+
+**Changes:**
+
+- New `/map` (`MapPage.vue` + `DestinationsMap.vue`) — Leaflet + OSM tiles, destination chips (desktop) / select (mobile), recenter + filter markers from hotel coordinates
+- Footer + sitemap include `/map`
+- Query `?locationSlug=` pre-selects a destination
+
+**Test steps:**
+
+1. Open `/map` — markers for hotels with coordinates; chips filter and recenter.
+2. `/map?locationSlug=siem-reap` pre-selects that city.
+3. Marker popup / list cards link to hotel detail.
+4. Friendly empty state when a destination has no mapped hotels.
+
+**Gaps:** No Google Maps JS key in SPA — OSM/Leaflet only. Hotels without coordinates are omitted from markers.
+
+---
+
 ## What Grok should prioritize next
 
-1. **Visual QA** against PDF pages 2–10: spacing, typography, chip grids, compact header, booking panels — flag anything that still feels “dev default” or brass-era.
+1. **Visual QA** against PDF pages 2–10: spacing, typography, chip grids, compact header (now 4 segments), booking panels — flag anything that still feels “dev default” or brass-era.
 2. **Booking UX friction:** confusing empty results, date prefill on hotel detail, compact header search on mobile gap.
 3. **Room image placeholders** when CMS has no photos.
 4. **Backend guest fields** if structured nationality/address/city required.
 5. **Password rules** parity SPA ↔ Laravel.
-6. **Do not** reintroduce the 6-step bar or HotelCard Book CTA unless product reverses the PDF.
+6. **Backend special rates** if AAA/senior/gov/corporate should affect availability pricing.
+7. **Do not** reintroduce the 6-step bar or HotelCard Book CTA unless product reverses the PDF.
 
 ---
 

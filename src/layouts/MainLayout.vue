@@ -20,68 +20,96 @@
                 : '/logo/Logo white V1-05.png'
             "
             alt="Greyon"
-            width="180"
-            height="62"
+            width="240"
+            height="84"
           />
         </router-link>
 
-        <div v-if="showCompactSearch" class="gy-header__search gt-md">
-          <BookingSearchWidget compact :navigate="true" submit-label="Search" />
-        </div>
-
-        <nav v-else class="gy-nav gt-sm">
-          <router-link to="/" class="gy-nav__link">{{
-            $t("nav.home")
-          }}</router-link>
-          <router-link
-            v-if="auth.featureEnabled('news_public')"
-            to="/news"
-            class="gy-nav__link"
-            >{{ $t("nav.news") }}</router-link
-          >
-
-          <div
-            v-if="auth.featureEnabled('portfolios')"
-            class="gy-nav__dropdown"
-          >
-            <button class="gy-nav__link gy-nav__dropbtn" type="button">
-              {{ $t("nav.portfolios") }}
-            </button>
-            <div class="gy-nav__menu">
-              <router-link to="/hotels">{{
-                $t("portfolios.hotel")
-              }}</router-link>
-              <router-link to="/portfolios/service-apartment">{{
-                $t("portfolios.serviceApartment")
-              }}</router-link>
-              <router-link to="/portfolios/boutique">{{
-                $t("portfolios.boutique")
-              }}</router-link>
-              <router-link to="/portfolios/resort">{{
-                $t("portfolios.resort")
-              }}</router-link>
+        <div class="gy-header__center gt-md">
+          <transition name="gy-navswap" mode="out-in">
+            <div
+              v-if="showCompactSearch"
+              key="search"
+              class="gy-header__search"
+            >
+              <BookingSearchWidget
+                compact
+                :navigate="true"
+                submit-label="Search"
+              />
             </div>
-          </div>
-          <router-link v-else to="/hotels" class="gy-nav__link">{{
-            $t("portfolios.hotel")
-          }}</router-link>
+            <nav v-else key="nav" class="gy-nav">
+              <router-link to="/" class="gy-nav__link">{{
+                $t("nav.home")
+              }}</router-link>
+              <router-link
+                v-if="auth.featureEnabled('news_public')"
+                to="/news"
+                class="gy-nav__link"
+                >{{ $t("nav.news") }}</router-link
+              >
 
-          <router-link to="/locations" class="gy-nav__link">{{
-            $t("nav.location")
-          }}</router-link>
-          <router-link
-            v-if="auth.featureEnabled('booking_public')"
-            to="/booking"
-            class="gy-nav__link"
-            >{{ $t("nav.booking") }}</router-link
-          >
-          <router-link
-            v-if="auth.featureEnabled('contact_public')"
-            to="/contact"
-            class="gy-nav__link"
-            >{{ $t("nav.contact") }}</router-link
-          >
-        </nav>
+              <div class="gy-nav__dropdown">
+                <router-link to="/hotels" class="gy-nav__link gy-nav__dropbtn">
+                  {{ $t("portfolios.hotel") }}
+                </router-link>
+                <div class="gy-nav__menu">
+                  <router-link to="/hotels" class="gy-nav__menu-all"
+                    >All hotels</router-link
+                  >
+                  <router-link
+                    v-for="hotel in hotelProperties"
+                    :key="hotel.id"
+                    :to="`/hotels/${hotel.slug}`"
+                  >
+                    {{ hotel.name }}
+                  </router-link>
+                  <p v-if="!hotelProperties.length" class="gy-nav__empty">
+                    Hotels will appear here when published.
+                  </p>
+                </div>
+              </div>
+
+              <div class="gy-nav__dropdown">
+                <router-link
+                  to="/portfolios/service-apartment"
+                  class="gy-nav__link gy-nav__dropbtn"
+                >
+                  Apartment
+                </router-link>
+                <div class="gy-nav__menu">
+                  <router-link
+                    v-for="hotel in apartmentProperties"
+                    :key="hotel.id"
+                    :to="`/hotels/${hotel.slug}`"
+                  >
+                    {{ hotel.name }}
+                  </router-link>
+                  <p v-if="!apartmentProperties.length" class="gy-nav__empty">
+                    Apartment stays are coming soon.
+                  </p>
+                </div>
+              </div>
+
+              <router-link to="/locations" class="gy-nav__link">{{
+                $t("nav.location")
+              }}</router-link>
+              <router-link to="/map" class="gy-nav__link">Map</router-link>
+              <router-link
+                v-if="auth.featureEnabled('booking_public')"
+                to="/booking"
+                class="gy-nav__link"
+                >{{ $t("nav.booking") }}</router-link
+              >
+              <router-link
+                v-if="auth.featureEnabled('contact_public')"
+                to="/contact"
+                class="gy-nav__link"
+                >{{ $t("nav.contact") }}</router-link
+              >
+            </nav>
+          </transition>
+        </div>
 
         <div class="gy-header__actions">
           <router-link
@@ -128,22 +156,102 @@
       bordered
       class="gy-drawer"
     >
-      <div class="q-pa-lg">
-        <p class="gy-display" style="font-size: 2rem; margin: 0 0 1rem">
-          Greyon
-        </p>
-        <q-list>
+      <div class="q-pa-lg gy-drawer__inner">
+        <p class="gy-display gy-drawer__brand">Greyon</p>
+        <q-list class="gy-drawer__list">
+          <q-item clickable v-ripple to="/" @click="drawerOpen = false">
+            <q-item-section>{{ $t("nav.home") }}</q-item-section>
+          </q-item>
           <q-item
-            v-for="item in drawerItems"
-            :key="item.to"
+            v-if="auth.featureEnabled('news_public')"
             clickable
             v-ripple
-            :to="item.to"
+            to="/news"
             @click="drawerOpen = false"
           >
-            <q-item-section>{{ item.label }}</q-item-section>
+            <q-item-section>{{ $t("nav.news") }}</q-item-section>
+          </q-item>
+
+          <q-expansion-item
+            dense
+            expand-separator
+            label="Hotel"
+            header-class="gy-drawer__expand"
+          >
+            <q-item clickable v-ripple to="/hotels" @click="drawerOpen = false">
+              <q-item-section>All hotels</q-item-section>
+            </q-item>
+            <q-item
+              v-for="hotel in hotelProperties"
+              :key="`d-h-${hotel.id}`"
+              clickable
+              v-ripple
+              :to="`/hotels/${hotel.slug}`"
+              @click="drawerOpen = false"
+            >
+              <q-item-section>{{ hotel.name }}</q-item-section>
+            </q-item>
+            <q-item v-if="!hotelProperties.length">
+              <q-item-section class="gy-muted"
+                >Hotels will appear here when published.</q-item-section
+              >
+            </q-item>
+          </q-expansion-item>
+
+          <q-expansion-item
+            dense
+            expand-separator
+            label="Apartment"
+            header-class="gy-drawer__expand"
+          >
+            <q-item
+              v-for="hotel in apartmentProperties"
+              :key="`d-a-${hotel.id}`"
+              clickable
+              v-ripple
+              :to="`/hotels/${hotel.slug}`"
+              @click="drawerOpen = false"
+            >
+              <q-item-section>{{ hotel.name }}</q-item-section>
+            </q-item>
+            <q-item v-if="!apartmentProperties.length">
+              <q-item-section class="gy-muted"
+                >Apartment stays are coming soon.</q-item-section
+              >
+            </q-item>
+          </q-expansion-item>
+
+          <q-item
+            clickable
+            v-ripple
+            to="/locations"
+            @click="drawerOpen = false"
+          >
+            <q-item-section>{{ $t("nav.location") }}</q-item-section>
+          </q-item>
+          <q-item clickable v-ripple to="/map" @click="drawerOpen = false">
+            <q-item-section>Map</q-item-section>
+          </q-item>
+          <q-item
+            v-if="auth.featureEnabled('booking_public')"
+            clickable
+            v-ripple
+            to="/booking"
+            @click="drawerOpen = false"
+          >
+            <q-item-section>{{ $t("nav.booking") }}</q-item-section>
+          </q-item>
+          <q-item
+            v-if="auth.featureEnabled('contact_public')"
+            clickable
+            v-ripple
+            to="/contact"
+            @click="drawerOpen = false"
+          >
+            <q-item-section>{{ $t("nav.contact") }}</q-item-section>
           </q-item>
         </q-list>
+
         <div class="q-mt-md">
           <router-link
             v-if="customer.isAuthenticated"
@@ -190,7 +298,6 @@
 
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
-import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
 import BookingSearchWidget from "@/components/BookingSearchWidget.vue";
 import CookieNotice from "@/components/CookieNotice.vue";
@@ -198,6 +305,7 @@ import SiteFooter from "@/components/SiteFooter.vue";
 import { useAuthStore } from "@/stores/auth-store";
 import { useCmsStore } from "@/stores/cms-store";
 import { useCustomerStore } from "@/stores/customer-store";
+import { isApartmentProperty, isHotelProperty } from "@/utils/propertyKind";
 
 const auth = useAuthStore();
 const cms = useCmsStore();
@@ -205,7 +313,6 @@ const customer = useCustomerStore();
 customer.hydrate();
 const drawerOpen = ref(false);
 const route = useRoute();
-const { t } = useI18n();
 const homePastHero = ref(false);
 
 const accountInitials = computed(() => {
@@ -214,6 +321,20 @@ const accountInitials = computed(() => {
   if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
   return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
 });
+
+const hotelProperties = computed(() =>
+  cms.publishedHotels
+    .filter(isHotelProperty)
+    .slice()
+    .sort((a, b) => a.name.localeCompare(b.name))
+);
+
+const apartmentProperties = computed(() =>
+  cms.publishedHotels
+    .filter(isApartmentProperty)
+    .slice()
+    .sort((a, b) => a.name.localeCompare(b.name))
+);
 
 let heroScrollBound = false;
 
@@ -229,40 +350,9 @@ const showCompactSearch = computed(
     (route.name === "hotel-detail" ||
       route.name === "booking" ||
       route.name === "hotels" ||
+      route.name === "map" ||
       (isHome.value && homePastHero.value))
 );
-
-const drawerItems = computed(() => {
-  const items = [{ label: t("nav.home"), to: "/" }];
-  if (auth.featureEnabled("news_public")) {
-    items.push({ label: t("nav.news"), to: "/news" });
-  }
-  items.push({ label: t("portfolios.hotel"), to: "/hotels" });
-  if (auth.featureEnabled("portfolios")) {
-    items.push(
-      {
-        label: `${t("portfolios.serviceApartment")} (${t("portfolios.comingSoon")})`,
-        to: "/portfolios/service-apartment"
-      },
-      {
-        label: `${t("portfolios.boutique")} (${t("portfolios.comingSoon")})`,
-        to: "/portfolios/boutique"
-      },
-      {
-        label: `${t("portfolios.resort")} (${t("portfolios.comingSoon")})`,
-        to: "/portfolios/resort"
-      }
-    );
-  }
-  items.push({ label: t("nav.location"), to: "/locations" });
-  if (auth.featureEnabled("booking_public")) {
-    items.push({ label: t("nav.booking"), to: "/booking" });
-  }
-  if (auth.featureEnabled("contact_public")) {
-    items.push({ label: t("nav.contact"), to: "/contact" });
-  }
-  return items;
-});
 
 function syncHomeHeader() {
   if (!isHome.value) {
@@ -358,12 +448,13 @@ onUnmounted(() => {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  min-height: 4.75rem;
+  min-height: 5.5rem;
 }
 
 .gy-logo {
   display: inline-flex;
   align-items: center;
+  flex-shrink: 0;
   color: inherit;
   transition: opacity 0.25s ease;
 }
@@ -374,22 +465,48 @@ onUnmounted(() => {
 
 .gy-logo__img {
   display: block;
-  height: 3.35rem;
+  height: clamp(3.1rem, 5.2vw, 4.6rem);
   width: auto;
+  max-width: min(42vw, 15rem);
   object-fit: contain;
 }
 
-.gy-header__search {
+.gy-header__center {
   flex: 1;
   min-width: 0;
-  max-width: 52rem;
-  margin-inline: 0.75rem;
+  display: flex;
+  justify-content: center;
+}
+
+.gy-header__search {
+  width: 100%;
+  max-width: 58rem;
+  margin-inline: 0.5rem;
 }
 
 .gy-nav {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1.15rem 1.5rem;
+}
+
+.gy-navswap-enter-active,
+.gy-navswap-leave-active {
+  transition:
+    opacity 0.32s ease,
+    transform 0.32s ease;
+}
+
+.gy-navswap-enter-from {
+  opacity: 0;
+  transform: translateY(-0.45rem);
+}
+
+.gy-navswap-leave-to {
+  opacity: 0;
+  transform: translateY(0.35rem);
 }
 
 .gy-nav__link,
@@ -450,25 +567,44 @@ onUnmounted(() => {
 .gy-nav__menu {
   display: none;
   position: absolute;
-  top: 100%;
-  left: 0;
-  min-width: 200px;
-  padding: 0.6rem 0;
+  top: calc(100% + 0.35rem);
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 220px;
+  max-height: min(70vh, 22rem);
+  overflow-y: auto;
+  padding: 0.55rem 0;
   background: var(--gy-cream);
   color: var(--gy-ink);
   box-shadow: var(--gy-shadow);
+  border: 1px solid rgba(69, 76, 75, 0.08);
   z-index: 20;
 }
 
 .gy-nav__menu a {
   display: block;
-  padding: 0.45rem 0.9rem;
+  padding: 0.5rem 1rem;
   color: var(--gy-ink);
   font-size: 0.9rem;
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 .gy-nav__menu a:hover {
-  background: var(--gy-stone);
+  background: var(--gy-sand);
+}
+
+.gy-nav__menu-all {
+  font-weight: 600;
+  border-bottom: 1px solid rgba(69, 76, 75, 0.1);
+  margin-bottom: 0.2rem;
+}
+
+.gy-nav__empty {
+  margin: 0;
+  padding: 0.65rem 1rem;
+  font-size: 0.85rem;
+  color: var(--gy-muted);
 }
 
 .gy-nav__dropdown:hover .gy-nav__menu,
@@ -480,6 +616,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  flex-shrink: 0;
 }
 
 .gy-account-btn {
@@ -553,5 +690,28 @@ onUnmounted(() => {
 
 .gy-drawer {
   background: var(--gy-cream);
+}
+
+.gy-drawer__brand {
+  font-size: 2rem;
+  margin: 0 0 1rem;
+}
+
+.gy-drawer__list :deep(.gy-drawer__expand) {
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 599px) {
+  .gy-header__bar {
+    min-height: 4.5rem;
+  }
+
+  .gy-logo__img {
+    height: 3.25rem;
+    max-width: 48vw;
+  }
 }
 </style>

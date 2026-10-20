@@ -21,6 +21,7 @@
         <nav class="gy-footer__links">
           <router-link to="/hotels">Hotels</router-link>
           <router-link to="/locations">Destinations</router-link>
+          <router-link to="/map">Map</router-link>
           <router-link v-if="auth.featureEnabled('news_public')" to="/news"
             >News</router-link
           >

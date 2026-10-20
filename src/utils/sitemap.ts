@@ -32,6 +32,7 @@ export function buildCmsSitemapEntries(input: {
     { loc: "/", changefreq: "weekly", priority: "1.0" },
     { loc: "/hotels", changefreq: "weekly", priority: "0.9" },
     { loc: "/locations", changefreq: "weekly", priority: "0.8" },
+    { loc: "/map", changefreq: "weekly", priority: "0.7" },
     { loc: "/privacy", changefreq: "yearly", priority: "0.3" },
     { loc: "/terms", changefreq: "yearly", priority: "0.3" }
   ];

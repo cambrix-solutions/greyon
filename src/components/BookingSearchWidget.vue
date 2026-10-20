@@ -83,7 +83,7 @@
         >
           <q-icon name="calendar_month" class="gy-seg__icon" size="20px" />
           <span class="gy-seg__text">
-            <span class="gy-seg__label">Check-in – Check-out</span>
+            <span class="gy-seg__label">Dates</span>
             <span class="gy-seg__value">
               {{ datesShort }}
               <span v-if="nightCount > 0" class="gy-seg__nights">{{
@@ -153,17 +153,23 @@
         >
           <q-icon name="group" class="gy-seg__icon" size="20px" />
           <span class="gy-seg__text">
-            <span class="gy-seg__label">Guests &amp; rooms</span>
+            <span class="gy-seg__label">Rooms &amp; Guests</span>
             <span class="gy-seg__value">{{ guestsShort }}</span>
           </span>
         </button>
         <SearchPopover
           :model-value="openPanel === 'guests'"
           :sheet="sheet"
-          title="Guests & rooms"
+          title="Rooms & guests"
           content-class="gy-pop--guests"
           @update:model-value="setOpen('guests', $event)"
         >
+          <GuestCounter
+            v-model="local.rooms"
+            label="Rooms"
+            :min="LIMITS.rooms[0]"
+            :max="LIMITS.rooms[1]"
+          />
           <GuestCounter
             v-model="local.adults"
             label="Adults"
@@ -176,16 +182,78 @@
             :min="LIMITS.children[0]"
             :max="LIMITS.children[1]"
           />
-          <GuestCounter
-            v-model="local.rooms"
-            label="Rooms"
-            :min="LIMITS.rooms[0]"
-            :max="LIMITS.rooms[1]"
-          />
           <template #footer>
             <p class="gy-pop-summary">
               <strong>{{ guestsLabel }}</strong>
             </p>
+            <button
+              type="button"
+              class="gy-btn gy-btn--light gy-btn--sm gy-pop-apply"
+              @click="openPanel = null"
+            >
+              Done
+            </button>
+          </template>
+        </SearchPopover>
+      </div>
+
+      <!-- Special rates (Courtyard-style) -->
+      <div
+        class="gy-seg gy-seg--rates"
+        :class="{ 'is-open': openPanel === 'rates' }"
+      >
+        <button
+          type="button"
+          class="gy-seg__btn"
+          aria-haspopup="dialog"
+          :aria-expanded="openPanel === 'rates'"
+          @click="toggle('rates')"
+        >
+          <q-icon name="loyalty" class="gy-seg__icon" size="20px" />
+          <span class="gy-seg__text">
+            <span class="gy-seg__label">Special Rates</span>
+            <span class="gy-seg__value">{{ ratesShort }}</span>
+          </span>
+        </button>
+        <SearchPopover
+          :model-value="openPanel === 'rates'"
+          :sheet="sheet"
+          title="Special rates"
+          content-class="gy-pop--rates"
+          @update:model-value="setOpen('rates', $event)"
+        >
+          <ul class="gy-rates" role="listbox" aria-label="Special rates">
+            <li v-for="opt in specialRateOptions" :key="opt.code">
+              <button
+                type="button"
+                role="option"
+                class="gy-rates__opt"
+                :class="{ 'is-selected': local.specialRate === opt.code }"
+                :aria-selected="local.specialRate === opt.code"
+                @click="chooseSpecialRate(opt.code)"
+              >
+                <span>{{ opt.label }}</span>
+                <q-icon
+                  v-if="local.specialRate === opt.code"
+                  name="check"
+                  size="18px"
+                  class="gy-rates__check"
+                />
+              </button>
+            </li>
+          </ul>
+          <div v-if="needsPromoCode" class="gy-rates__code">
+            <label for="gy-promo-code">Corporate / promo code</label>
+            <input
+              id="gy-promo-code"
+              v-model="local.promoCode"
+              type="text"
+              autocomplete="off"
+              placeholder="Enter code"
+              maxlength="64"
+            />
+          </div>
+          <template #footer>
             <button
               type="button"
               class="gy-btn gy-btn--light gy-btn--sm gy-pop-apply"
@@ -229,7 +297,13 @@ import GuestCounter from "@/components/booking/GuestCounter.vue";
 import SearchPopover from "@/components/booking/SearchPopover.vue";
 import { useBookingStore } from "@/stores/booking-store";
 import { useCmsStore } from "@/stores/cms-store";
+import {
+  SPECIAL_RATE_OPTIONS,
+  specialRateLabel,
+  type SpecialRateCode
+} from "@/data/specialRates";
 import type { BookingSearchParams } from "@/types/greyon";
+import { searchParamsToQuery } from "@/utils/bookingSearchQuery";
 import {
   addLocalDays,
   nightsBetweenLocal,
@@ -257,7 +331,9 @@ const LIMITS = {
   children: [0, 6]
 } as const;
 
-type Panel = "dest" | "dates" | "guests";
+type Panel = "dest" | "dates" | "guests" | "rates";
+
+const specialRateOptions = SPECIAL_RATE_OPTIONS;
 
 const $q = useQuasar();
 const booking = useBookingStore();
@@ -274,11 +350,20 @@ const errorId = `gy-search-error-${Math.random().toString(36).slice(2, 8)}`;
 const sheet = computed(() => $q.screen.lt.sm);
 const twoMonths = computed(() => $q.screen.gt.sm);
 
-const local = reactive<BookingSearchParams>({ ...booking.search });
+const local = reactive<BookingSearchParams>({
+  ...booking.search,
+  specialRate: booking.search.specialRate || "none",
+  promoCode: booking.search.promoCode || ""
+});
 
 watch(
   () => booking.search,
-  value => Object.assign(local, value),
+  value =>
+    Object.assign(local, {
+      ...value,
+      specialRate: value.specialRate || "none",
+      promoCode: value.promoCode || ""
+    }),
   { deep: true }
 );
 
@@ -403,20 +488,33 @@ const pickerStatus = computed(() => {
 });
 
 const guestsLabel = computed(() => {
-  const parts = [`${local.adults} adult${local.adults === 1 ? "" : "s"}`];
+  const parts = [`${local.rooms} room${local.rooms === 1 ? "" : "s"}`];
+  parts.push(`${local.adults} adult${local.adults === 1 ? "" : "s"}`);
   if (local.children > 0) {
     parts.push(`${local.children} child${local.children === 1 ? "" : "ren"}`);
   }
-  parts.push(`${local.rooms} room${local.rooms === 1 ? "" : "s"}`);
   return parts.join(" · ");
 });
 
-/** Bar value: "3 guests · 1 room" (the popover shows the full breakdown). */
+/** Bar value: "1 room · 3 guests" (the popover shows the full breakdown). */
 const guestsShort = computed(() => {
   const guests = local.adults + local.children;
-  return `${guests} guest${guests === 1 ? "" : "s"} · ${local.rooms} room${
-    local.rooms === 1 ? "" : "s"
+  return `${local.rooms} room${local.rooms === 1 ? "" : "s"} · ${guests} guest${
+    guests === 1 ? "" : "s"
   }`;
+});
+
+const needsPromoCode = computed(
+  () =>
+    SPECIAL_RATE_OPTIONS.find(o => o.code === local.specialRate)?.needsCode ===
+    true
+);
+
+const ratesShort = computed(() => {
+  if (local.specialRate === "corporate" && local.promoCode.trim()) {
+    return local.promoCode.trim();
+  }
+  return specialRateLabel(local.specialRate);
 });
 
 function toggle(panel: Panel) {
@@ -431,6 +529,11 @@ function setOpen(panel: Panel, open: boolean) {
 function chooseDestination(slug: string) {
   local.locationSlug = slug;
   openPanel.value = null;
+}
+
+function chooseSpecialRate(code: SpecialRateCode) {
+  local.specialRate = code;
+  if (code !== "corporate") local.promoCode = "";
 }
 
 function clearDates() {
@@ -449,10 +552,19 @@ async function onSubmit() {
   attempted.value = true;
   openPanel.value = null;
   if (localError.value) return;
-  booking.setSearch({ ...local, hotelSlug: booking.search.hotelSlug });
+  const next: BookingSearchParams = {
+    ...local,
+    hotelSlug: booking.search.hotelSlug,
+    specialRate: local.specialRate || "none",
+    promoCode: needsPromoCode.value ? local.promoCode.trim() : ""
+  };
+  booking.setSearch(next);
   const ok = await booking.runSearch();
   if (ok && props.navigate) {
-    void router.push({ name: "booking" });
+    void router.push({
+      name: "booking",
+      query: searchParamsToQuery(next)
+    });
   }
 }
 </script>
@@ -472,7 +584,7 @@ async function onSubmit() {
 .gy-search__bar {
   display: grid;
   grid-template-columns:
-    minmax(0, 1fr) minmax(0, 1.45fr) minmax(0, 1.05fr)
+    minmax(0, 1.1fr) minmax(0, 1.35fr) minmax(0, 1.1fr) minmax(0, 1.05fr)
     auto;
   align-items: center;
   padding: 0.4rem;
@@ -790,6 +902,87 @@ async function onSubmit() {
 
 .gy-pop--dest .gy-pop__body {
   padding: 0.5rem;
+}
+
+.gy-pop--rates.gy-pop {
+  min-width: 18rem;
+  width: min(22rem, calc(100vw - 2rem));
+}
+
+.gy-pop--rates .gy-pop__body {
+  padding: 0.5rem;
+}
+
+.gy-rates {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gy-rates__opt {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 0.9rem;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--gy-ink);
+  font-family: var(--font-display);
+  font-size: 0.92rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+
+.gy-rates__opt:hover,
+.gy-rates__opt:focus-visible {
+  background: var(--gy-sand);
+  outline: none;
+}
+
+.gy-rates__opt.is-selected {
+  background: rgba(98, 112, 99, 0.1);
+  font-weight: 600;
+}
+
+.gy-rates__check {
+  margin-left: auto;
+  color: var(--gy-forest);
+}
+
+.gy-rates__code {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.35rem 0.5rem 0.75rem;
+  padding: 0.75rem 0.85rem;
+  border-radius: 12px;
+  background: var(--gy-sand);
+}
+
+.gy-rates__code label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gy-muted);
+}
+
+.gy-rates__code input {
+  min-height: 2.5rem;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid rgba(69, 76, 75, 0.18);
+  border-radius: 8px;
+  background: var(--gy-white);
+  color: var(--gy-ink);
+  font: inherit;
+  font-size: 0.95rem;
+}
+
+.gy-rates__code input:focus {
+  outline: 2px solid var(--gy-forest);
+  outline-offset: 1px;
 }
 
 .gy-dest {

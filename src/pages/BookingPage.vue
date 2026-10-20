@@ -525,6 +525,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import BookingSearchWidget from "@/components/BookingSearchWidget.vue";
 import FeatureChips from "@/components/FeatureChips.vue";
 import SeoHead from "@/components/SeoHead.vue";
@@ -532,6 +533,11 @@ import { useBookingStore } from "@/stores/booking-store";
 import { useCmsStore } from "@/stores/cms-store";
 import { useCustomerStore } from "@/stores/customer-store";
 import type { RoomType } from "@/types/greyon";
+import {
+  queryHasSearchFields,
+  searchParamsFromQuery,
+  searchParamsToQuery
+} from "@/utils/bookingSearchQuery";
 import {
   formatStayRange,
   hotelCheckInTime,
@@ -541,15 +547,40 @@ import {
 const booking = useBookingStore();
 const cms = useCmsStore();
 const customer = useCustomerStore();
+const route = useRoute();
+const router = useRouter();
 customer.hydrate();
 
 onMounted(() => {
-  // After sign-in return: restore draft (if any) and fill account details.
-  booking.restoreDraft();
+  // Prefer explicit search query (deep links / home search) over a stale draft.
+  if (queryHasSearchFields(route.query)) {
+    booking.setSearch(searchParamsFromQuery(route.query));
+    if (booking.search.checkIn && booking.search.checkOut) {
+      void booking.runSearch();
+    }
+  } else {
+    // After sign-in return: restore draft (if any) and fill account details.
+    booking.restoreDraft();
+  }
   if (customer.isAuthenticated && booking.step >= 4) {
     void booking.applyCustomerToGuest();
   }
 });
+
+watch(
+  () => booking.search,
+  value => {
+    if (route.name !== "booking") return;
+    const next = searchParamsToQuery(value);
+    const same = Object.keys(next).every(
+      k => String(route.query[k] ?? "") === String(next[k] ?? "")
+    );
+    if (!same) {
+      void router.replace({ name: "booking", query: next });
+    }
+  },
+  { deep: true }
+);
 
 watch(
   () => customer.isAuthenticated,
