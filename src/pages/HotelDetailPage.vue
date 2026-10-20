@@ -105,7 +105,10 @@
             :key="product.id"
             class="product-card"
           >
-            <div class="product-card__media">
+            <div
+              class="product-card__media"
+              :class="{ 'product-card__media--icon': !product.imageUrl }"
+            >
               <img
                 v-if="product.imageUrl"
                 :src="product.imageUrl"
@@ -340,22 +343,27 @@ watch(
   { immediate: true }
 );
 
-const hotelServices = computed(() => {
-  const list = hotel.value?.services ?? [];
-  return [...list].sort(
-    (a, b) =>
-      (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || a.name.localeCompare(b.name)
-  );
-});
+function compareLinked(
+  a: { name: string; sortOrder?: number },
+  b: { name: string; sortOrder?: number }
+) {
+  const ao = a.sortOrder;
+  const bo = b.sortOrder;
+  if (ao !== undefined && bo !== undefined && ao !== bo) return ao - bo;
+  if (ao !== undefined && bo === undefined) return -1;
+  if (ao === undefined && bo !== undefined) return 1;
+  return a.name.localeCompare(b.name);
+}
 
-const hotelProducts = computed(() => {
-  const list = hotel.value?.products ?? [];
-  return [...list].sort(
-    (a, b) =>
-      (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || a.name.localeCompare(b.name)
-  );
-});
+const hotelServices = computed(() =>
+  [...(hotel.value?.services ?? [])].sort(compareLinked)
+);
 
+const hotelProducts = computed(() =>
+  [...(hotel.value?.products ?? [])].sort(compareLinked)
+);
+
+/** Price only when the API included it on the product. */
 function productPriceLabel(product: HotelProductRef) {
   if (product.price === null || product.price === undefined) return "";
   const cur = (product.currency || "USD").toUpperCase();

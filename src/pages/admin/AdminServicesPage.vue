@@ -52,7 +52,10 @@
         </div>
         <div class="svc-card__body">
           <div class="svc-card__top">
-            <span class="svc-card__order">#{{ item.sortOrder }}</span>
+            <span v-if="item.sortOrder !== undefined" class="svc-card__order"
+              >#{{ item.sortOrder }}</span
+            >
+            <span v-else class="svc-card__order" />
             <span class="svc-card__status" :data-status="item.status">{{
               item.status
             }}</span>
@@ -62,7 +65,7 @@
           <p v-if="item.description" class="svc-card__desc">
             {{ item.description }}
           </p>
-          <p class="svc-card__meta">
+          <p v-if="item.hotelsCount !== undefined" class="svc-card__meta">
             {{ item.hotelsCount }} hotel{{ item.hotelsCount === 1 ? "" : "s" }}
           </p>
         </div>
@@ -116,7 +119,7 @@
     >
       <AdminFormSection title="Essentials" :columns="2">
         <q-input
-          v-model="form.name"
+          :model-value="form.name"
           label="Name *"
           outlined
           dense
@@ -124,15 +127,18 @@
           :error-message="fieldErrors.name"
           maxlength="255"
           class="admin-form-span-2"
+          @update:model-value="onNameUpdate"
         />
         <q-input
-          v-model="form.slug"
-          label="URL slug"
+          :model-value="form.slug"
+          label="URL slug *"
           outlined
           dense
-          hint="Optional — lowercase dashes; auto from name if blank"
+          hint="Lowercase dashes — auto-filled from name"
           :error="Boolean(fieldErrors.slug)"
           :error-message="fieldErrors.slug"
+          class="admin-form-span-2"
+          @update:model-value="onSlugUpdate"
         />
         <q-select
           v-model="form.status"
@@ -140,17 +146,7 @@
           label="Status"
           outlined
           dense
-        />
-        <q-input
-          v-model.number="form.sortOrder"
-          type="number"
-          label="Sort order"
-          outlined
-          dense
-          :min="0"
-          :max="65535"
-          :error="Boolean(fieldErrors.sortOrder)"
-          :error-message="fieldErrors.sortOrder"
+          class="admin-form-span-2"
         />
       </AdminFormSection>
       <AdminFormSection
@@ -195,7 +191,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, watch } from "vue";
+import { computed, onMounted, reactive, ref } from "vue";
 import { useQuasar } from "quasar";
 import AdminDialog from "@/components/admin/AdminDialog.vue";
 import AdminEntityActions from "@/components/admin/AdminEntityActions.vue";
@@ -204,6 +200,7 @@ import AdminPageHeader from "@/components/admin/AdminPageHeader.vue";
 import IconPicker from "@/components/admin/IconPicker.vue";
 import { DEFAULT_SERVICE_ICON } from "@/data/serviceIcons";
 import {
+  compareCatalogItems,
   createService,
   destroyService,
   fetchAdminServices,
@@ -214,6 +211,7 @@ import { useAuthStore } from "@/stores/auth-store";
 import { useCmsStore } from "@/stores/cms-store";
 import type { ContentStatus } from "@/types/greyon";
 import { fieldErrorsFromApi, friendlyApiError } from "@/utils/apiErrors";
+import { slugify } from "@/utils/slugify";
 
 const cms = useCmsStore();
 const auth = useAuthStore();
@@ -226,6 +224,7 @@ const dialog = ref(false);
 const editing = ref<string | null>(null);
 const query = ref("");
 const statusFilter = ref("all");
+const slugTouched = ref(false);
 const fieldErrors = reactive<Record<string, string>>({});
 
 const statusOptions = [
@@ -240,7 +239,6 @@ const form = reactive({
   slug: "",
   description: "",
   icon: DEFAULT_SERVICE_ICON,
-  sortOrder: 0,
   status: "draft" as ContentStatus
 });
 
@@ -256,11 +254,7 @@ const filtered = computed(() => {
         .toLowerCase()
         .includes(q);
     })
-    .sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name));
-});
-
-watch(statusFilter, () => {
-  void reload();
+    .sort(compareCatalogItems);
 });
 
 onMounted(() => {
@@ -275,12 +269,22 @@ function clearFieldErrors() {
   for (const key of Object.keys(fieldErrors)) delete fieldErrors[key];
 }
 
+function onNameUpdate(value: string | number | null) {
+  form.name = value == null ? "" : String(value);
+  if (!slugTouched.value) {
+    form.slug = slugify(form.name);
+  }
+}
+
+function onSlugUpdate(value: string | number | null) {
+  slugTouched.value = true;
+  form.slug = value == null ? "" : String(value);
+}
+
 async function reload() {
   loading.value = true;
   try {
-    items.value = await fetchAdminServices({
-      status: statusFilter.value
-    });
+    items.value = await fetchAdminServices();
   } catch (e) {
     $q.notify({ type: "negative", message: friendlyApiError(e) });
   } finally {
@@ -294,10 +298,8 @@ function openCreate() {
   form.slug = "";
   form.description = "";
   form.icon = DEFAULT_SERVICE_ICON;
-  form.sortOrder = items.value.length
-    ? Math.max(...items.value.map(i => i.sortOrder)) + 1
-    : 0;
   form.status = "draft";
+  slugTouched.value = false;
   clearFieldErrors();
   dialog.value = true;
 }
@@ -308,26 +310,31 @@ function openEdit(item: CatalogService) {
   form.slug = item.slug;
   form.description = item.description;
   form.icon = item.icon || DEFAULT_SERVICE_ICON;
-  form.sortOrder = item.sortOrder;
   form.status = item.status;
+  slugTouched.value = true;
   clearFieldErrors();
   dialog.value = true;
 }
 
 async function save() {
+  clearFieldErrors();
   if (!form.name.trim()) {
     fieldErrors.name = "Name is required.";
     return;
   }
+  const slug = form.slug.trim() || slugify(form.name);
+  if (!slug) {
+    fieldErrors.slug = "Slug is required.";
+    return;
+  }
+  form.slug = slug;
   saving.value = true;
-  clearFieldErrors();
   try {
     const payload = {
       name: form.name.trim(),
-      ...(form.slug.trim() ? { slug: form.slug.trim() } : {}),
+      slug,
       description: form.description.trim(),
       icon: form.icon.trim() || DEFAULT_SERVICE_ICON,
-      sortOrder: Math.min(65535, Math.max(0, Number(form.sortOrder) || 0)),
       status: form.status
     };
     if (editing.value) {
@@ -408,6 +415,7 @@ function remove(item: CatalogService) {
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
+  min-height: 1.25rem;
 }
 
 .svc-card__order {

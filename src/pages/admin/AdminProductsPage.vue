@@ -47,28 +47,28 @@
 
     <div v-else v-reveal="{ delay: '80ms' }" class="prod-grid">
       <article v-for="item in filtered" :key="item.id" class="prod-card">
-        <div class="prod-card__media">
-          <img
-            v-if="item.imageUrl"
-            :src="item.imageUrl"
-            :alt="item.name"
-            loading="lazy"
-          />
-          <div v-else class="prod-card__placeholder" aria-hidden="true">
-            <q-icon :name="item.icon || 'storefront'" size="28px" />
-          </div>
+        <div v-if="item.imageUrl" class="prod-card__media">
+          <img :src="item.imageUrl" :alt="item.name" loading="lazy" />
+        </div>
+        <div v-else class="prod-card__media prod-card__media--icon">
+          <q-icon :name="item.icon || 'storefront'" size="28px" />
         </div>
         <div class="prod-card__body">
           <div class="prod-card__top">
-            <span class="prod-card__order">#{{ item.sortOrder }}</span>
+            <span v-if="item.sortOrder !== undefined" class="prod-card__order"
+              >#{{ item.sortOrder }}</span
+            >
+            <span v-else class="prod-card__order" />
             <span class="prod-card__status" :data-status="item.status">{{
               item.status
             }}</span>
           </div>
           <h2 class="prod-card__title">{{ item.name }}</h2>
           <p class="prod-card__slug">{{ item.slug }}</p>
-          <p class="prod-card__price">{{ priceLabel(item) }}</p>
-          <p class="prod-card__meta">
+          <p v-if="priceLabel(item)" class="prod-card__price">
+            {{ priceLabel(item) }}
+          </p>
+          <p v-if="item.hotelsCount !== undefined" class="prod-card__meta">
             {{ item.hotelsCount }} hotel{{ item.hotelsCount === 1 ? "" : "s" }}
           </p>
         </div>
@@ -114,7 +114,7 @@
 
     <AdminDialog
       v-model="dialog"
-      size="lg"
+      size="md"
       icon="storefront"
       eyebrow="Catalog"
       :title="editing ? 'Edit product' : 'Add product'"
@@ -122,7 +122,7 @@
     >
       <AdminFormSection title="Essentials" :columns="2">
         <q-input
-          v-model="form.name"
+          :model-value="form.name"
           label="Name *"
           outlined
           dense
@@ -130,15 +130,18 @@
           :error-message="fieldErrors.name"
           maxlength="255"
           class="admin-form-span-2"
+          @update:model-value="onNameUpdate"
         />
         <q-input
-          v-model="form.slug"
-          label="URL slug"
+          :model-value="form.slug"
+          label="URL slug *"
           outlined
           dense
-          hint="Optional — lowercase dashes; auto from name if blank"
+          hint="Lowercase dashes — auto-filled from name"
           :error="Boolean(fieldErrors.slug)"
           :error-message="fieldErrors.slug"
+          class="admin-form-span-2"
+          @update:model-value="onSlugUpdate"
         />
         <q-select
           v-model="form.status"
@@ -146,59 +149,18 @@
           label="Status"
           outlined
           dense
-        />
-        <q-input
-          v-model.number="form.sortOrder"
-          type="number"
-          label="Sort order"
-          outlined
-          dense
-          :min="0"
-          :max="65535"
-          :error="Boolean(fieldErrors.sortOrder)"
-          :error-message="fieldErrors.sortOrder"
-        />
-        <q-input
-          v-model.number="form.price"
-          type="number"
-          label="Price"
-          outlined
-          dense
-          :min="0"
-          step="0.01"
-          clearable
-          hint="Leave blank for no price"
-          :error="Boolean(fieldErrors.price)"
-          :error-message="fieldErrors.price"
-        />
-        <q-select
-          v-model="form.currency"
-          :options="currencyOptions"
-          label="Currency"
-          outlined
-          dense
-          emit-value
-          map-options
-          :error="Boolean(fieldErrors.currency)"
-          :error-message="fieldErrors.currency"
+          class="admin-form-span-2"
         />
       </AdminFormSection>
       <AdminFormSection
-        title="Image"
-        hint="Uploads to products/&lt;slug&gt; via the shared image field."
+        title="Icon"
+        hint="Shown when no product image is returned by the API."
       >
-        <ImageDropField
-          v-model="form.imageUrl"
-          :folder="productUploadFolder"
-          title="Drop or browse product image"
-          @update:busy="uploadBusy = $event"
+        <IconPicker
+          v-model="form.icon"
+          :error="fieldErrors.icon"
+          class="admin-form-span-2"
         />
-        <p
-          v-if="fieldErrors.imageUrl"
-          class="text-negative text-caption q-mt-xs"
-        >
-          {{ fieldErrors.imageUrl }}
-        </p>
       </AdminFormSection>
       <AdminFormSection title="Description">
         <q-input
@@ -223,7 +185,6 @@
           unelevated
           no-caps
           :loading="saving"
-          :disable="uploadBusy"
           :label="editing ? 'Save changes' : 'Create product'"
           @click="save"
         />
@@ -233,14 +194,15 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, watch } from "vue";
+import { computed, onMounted, reactive, ref } from "vue";
 import { useQuasar } from "quasar";
 import AdminDialog from "@/components/admin/AdminDialog.vue";
 import AdminEntityActions from "@/components/admin/AdminEntityActions.vue";
 import AdminFormSection from "@/components/admin/AdminFormSection.vue";
 import AdminPageHeader from "@/components/admin/AdminPageHeader.vue";
-import ImageDropField from "@/components/admin/ImageDropField.vue";
+import IconPicker from "@/components/admin/IconPicker.vue";
 import {
+  compareCatalogItems,
   createProduct,
   destroyProduct,
   fetchAdminProducts,
@@ -251,7 +213,7 @@ import { useAuthStore } from "@/stores/auth-store";
 import { useCmsStore } from "@/stores/cms-store";
 import type { ContentStatus } from "@/types/greyon";
 import { fieldErrorsFromApi, friendlyApiError } from "@/utils/apiErrors";
-import { uploadFolder } from "@/utils/uploadFolder";
+import { slugify } from "@/utils/slugify";
 
 const cms = useCmsStore();
 const auth = useAuthStore();
@@ -260,11 +222,11 @@ const $q = useQuasar();
 const items = ref<CatalogProduct[]>([]);
 const loading = ref(false);
 const saving = ref(false);
-const uploadBusy = ref(false);
 const dialog = ref(false);
 const editing = ref<string | null>(null);
 const query = ref("");
 const statusFilter = ref("all");
+const slugTouched = ref(false);
 const fieldErrors = reactive<Record<string, string>>({});
 
 const statusOptions = [
@@ -274,25 +236,13 @@ const statusOptions = [
   { label: "archived", value: "archived" }
 ];
 
-const currencyOptions = [
-  { label: "USD", value: "USD" },
-  { label: "KHR", value: "KHR" }
-];
-
 const form = reactive({
   name: "",
   slug: "",
   description: "",
-  imageUrl: "",
-  price: null as number | null,
-  currency: "USD",
-  sortOrder: 0,
+  icon: "storefront",
   status: "draft" as ContentStatus
 });
-
-const productUploadFolder = computed(() =>
-  uploadFolder("products", form.slug || form.name || "new")
-);
 
 const filtered = computed(() => {
   const q = query.value.trim().toLowerCase();
@@ -306,11 +256,7 @@ const filtered = computed(() => {
         .toLowerCase()
         .includes(q);
     })
-    .sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name));
-});
-
-watch(statusFilter, () => {
-  void reload();
+    .sort(compareCatalogItems);
 });
 
 onMounted(() => {
@@ -325,9 +271,22 @@ function clearFieldErrors() {
   for (const key of Object.keys(fieldErrors)) delete fieldErrors[key];
 }
 
+function onNameUpdate(value: string | number | null) {
+  form.name = value == null ? "" : String(value);
+  if (!slugTouched.value) {
+    form.slug = slugify(form.name);
+  }
+}
+
+function onSlugUpdate(value: string | number | null) {
+  slugTouched.value = true;
+  form.slug = value == null ? "" : String(value);
+}
+
+/** Only when API returned a price (optional field). */
 function priceLabel(item: CatalogProduct) {
-  if (item.price === null || item.price === undefined) return "No price set";
-  const cur = item.currency || "USD";
+  if (item.price === undefined || item.price === null) return "";
+  const cur = (item.currency || "USD").toUpperCase();
   if (cur === "KHR") {
     return `${Math.round(item.price).toLocaleString()} KHR`;
   }
@@ -337,9 +296,7 @@ function priceLabel(item: CatalogProduct) {
 async function reload() {
   loading.value = true;
   try {
-    items.value = await fetchAdminProducts({
-      status: statusFilter.value
-    });
+    items.value = await fetchAdminProducts();
   } catch (e) {
     $q.notify({ type: "negative", message: friendlyApiError(e) });
   } finally {
@@ -352,13 +309,9 @@ function openCreate() {
   form.name = "";
   form.slug = "";
   form.description = "";
-  form.imageUrl = "";
-  form.price = null;
-  form.currency = "USD";
-  form.sortOrder = items.value.length
-    ? Math.max(...items.value.map(i => i.sortOrder)) + 1
-    : 0;
+  form.icon = "storefront";
   form.status = "draft";
+  slugTouched.value = false;
   clearFieldErrors();
   dialog.value = true;
 }
@@ -368,41 +321,32 @@ function openEdit(item: CatalogProduct) {
   form.name = item.name;
   form.slug = item.slug;
   form.description = item.description;
-  form.imageUrl = item.imageUrl;
-  form.price = item.price;
-  form.currency = item.currency || "USD";
-  form.sortOrder = item.sortOrder;
+  form.icon = item.icon || "storefront";
   form.status = item.status;
+  slugTouched.value = true;
   clearFieldErrors();
   dialog.value = true;
 }
 
 async function save() {
+  clearFieldErrors();
   if (!form.name.trim()) {
     fieldErrors.name = "Name is required.";
     return;
   }
-  const priceValue =
-    form.price === null ||
-    form.price === undefined ||
-    Number.isNaN(Number(form.price))
-      ? null
-      : Number(form.price);
-  if (priceValue !== null && priceValue < 0) {
-    fieldErrors.price = "Price must be zero or greater.";
+  const slug = form.slug.trim() || slugify(form.name);
+  if (!slug) {
+    fieldErrors.slug = "Slug is required.";
     return;
   }
+  form.slug = slug;
   saving.value = true;
-  clearFieldErrors();
   try {
     const payload = {
       name: form.name.trim(),
-      ...(form.slug.trim() ? { slug: form.slug.trim() } : {}),
+      slug,
       description: form.description.trim(),
-      imageUrl: form.imageUrl.trim(),
-      price: priceValue,
-      currency: form.currency || "USD",
-      sortOrder: Math.min(65535, Math.max(0, Number(form.sortOrder) || 0)),
+      icon: form.icon.trim() || "storefront",
       status: form.status
     };
     if (editing.value) {
@@ -479,10 +423,9 @@ function remove(item: CatalogProduct) {
   display: block;
 }
 
-.prod-card__placeholder {
+.prod-card__media--icon {
   display: grid;
   place-items: center;
-  height: 100%;
   color: var(--gy-forest);
 }
 
@@ -495,6 +438,7 @@ function remove(item: CatalogProduct) {
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
+  min-height: 1.25rem;
 }
 
 .prod-card__order {

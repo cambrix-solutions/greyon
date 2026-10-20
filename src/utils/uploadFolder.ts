@@ -1,11 +1,6 @@
 /** Build the optional `folder` value for `POST /admin/uploads`. */
 
-export type UploadFolderKind =
-  | "hotels"
-  | "rooms"
-  | "locations"
-  | "media"
-  | "products";
+export type UploadFolderKind = "hotels" | "rooms" | "locations" | "media";
 
 function segment(value?: string | number | null): string {
   const raw = String(value ?? "")

@@ -261,15 +261,20 @@ function mapHotelServiceRefs(
   rows: EngineHotelService[] | undefined
 ): Hotel["services"] {
   if (!rows?.length) return undefined;
-  return rows.map(item => ({
-    id: String(item.id),
-    name: item.name,
-    slug: item.slug,
-    description: item.description ?? "",
-    icon: item.icon?.trim() || "spa",
-    sortOrder: Number(item.sortOrder ?? 0) || 0,
-    status: asStatus(item.status)
-  }));
+  return rows.map(item => {
+    const out: NonNullable<Hotel["services"]>[number] = {
+      id: String(item.id),
+      name: item.name,
+      slug: item.slug,
+      description: item.description ?? "",
+      icon: item.icon?.trim() || "spa",
+      status: asStatus(item.status)
+    };
+    if (item.sortOrder !== undefined && item.sortOrder !== null) {
+      out.sortOrder = Number(item.sortOrder) || 0;
+    }
+    return out;
+  });
 }
 
 function mapHotelProductRefs(
@@ -277,24 +282,32 @@ function mapHotelProductRefs(
 ): Hotel["products"] {
   if (!rows?.length) return undefined;
   return rows.map(item => {
-    const price =
-      item.price === null || item.price === undefined
-        ? null
-        : Number.isFinite(Number(item.price))
-          ? Number(item.price)
-          : null;
-    return {
+    const out: NonNullable<Hotel["products"]>[number] = {
       id: String(item.id),
       name: item.name,
       slug: item.slug,
       description: item.description ?? "",
       icon: item.icon?.trim() || "storefront",
-      imageUrl: item.imageUrl ?? "",
-      price,
-      currency: (item.currency ?? "USD").toUpperCase().slice(0, 3) || "USD",
-      sortOrder: Number(item.sortOrder ?? 0) || 0,
       status: asStatus(item.status)
     };
+    if (item.sortOrder !== undefined && item.sortOrder !== null) {
+      out.sortOrder = Number(item.sortOrder) || 0;
+    }
+    if (item.imageUrl != null && String(item.imageUrl).trim()) {
+      out.imageUrl = String(item.imageUrl).trim();
+    }
+    if (item.price !== undefined) {
+      out.price =
+        item.price === null
+          ? null
+          : Number.isFinite(Number(item.price))
+            ? Number(item.price)
+            : null;
+    }
+    if (item.currency != null && String(item.currency).trim()) {
+      out.currency = String(item.currency).toUpperCase().slice(0, 3);
+    }
+    return out;
   });
 }
 
