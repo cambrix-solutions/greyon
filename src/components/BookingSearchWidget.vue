@@ -23,7 +23,9 @@
           required
           :min="today"
           :aria-invalid="Boolean(fieldError.checkIn)"
-          :aria-describedby="showError ? 'booking-search-error' : undefined"
+          :aria-describedby="
+            showSummaryError ? 'booking-search-error' : undefined
+          "
           @change="onCheckInChange"
         />
       </label>
@@ -38,7 +40,7 @@
           :aria-describedby="
             fieldError.checkOut && dateRangeInvalid
               ? 'booking-checkout-error'
-              : showError
+              : showSummaryError
                 ? 'booking-search-error'
                 : undefined
           "
@@ -66,7 +68,7 @@
     </div>
 
     <p
-      v-if="showError"
+      v-if="showSummaryError"
       id="booking-search-error"
       class="gy-search__error"
       role="alert"
@@ -171,6 +173,14 @@ const showError = computed(
       Boolean(local.checkIn && local.checkIn < today))
 );
 
+/**
+ * The date-range message already sits under Check-out — don't repeat it.
+ * The compact header bar hides field messages, so it keeps the summary.
+ */
+const showSummaryError = computed(
+  () => showError.value && (props.compact || !dateRangeInvalid.value)
+);
+
 const fieldError = computed(() => {
   const highlightDates = attempted.value || showError.value;
   return {
@@ -210,37 +220,70 @@ async function onSubmit() {
   backdrop-filter: blur(10px);
 }
 
+/* Header bar: one row (fields | submit) that sits inside the solid header
+   instead of a floating two-row card that spills over the page. */
 .gy-search--compact {
-  gap: 0.55rem;
-  padding: 0.85rem 1rem 0.9rem;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "fields footer"
+    "error error";
+  align-items: end;
+  gap: 0.4rem 0.6rem;
+  padding: 0.45rem 0.6rem;
+  background: var(--gy-white);
+  border: 1px solid rgba(84, 88, 89, 0.14);
+  border-radius: 10px;
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
 .gy-search--compact .gy-search__fields {
-  gap: 0.55rem;
+  grid-area: fields;
+  grid-template-columns: 1.2fr 1.25fr 1.25fr 0.62fr 0.62fr 0.62fr;
+  gap: 0.45rem;
+}
+
+.gy-search--compact .gy-search__error {
+  grid-area: error;
+  padding: 0.35rem 0.55rem;
+  font-size: 0.78rem;
+}
+
+.gy-search--compact .gy-search__field-error {
+  display: none;
 }
 
 .gy-search--compact label {
-  gap: 0.25rem;
-  font-size: 0.65rem;
+  gap: 0.2rem;
+  font-size: 0.6rem;
 }
 
 .gy-search--compact input,
 .gy-search--compact select {
-  min-height: 2.35rem;
-  padding: 0.35rem 0.55rem;
+  min-height: 2.15rem;
+  padding: 0.25rem 0.45rem;
   border-radius: 6px;
+  font-size: 0.82rem;
 }
 
 .gy-search--compact .gy-search__footer {
+  grid-area: footer;
+  flex-wrap: nowrap;
   padding-top: 0;
   border-top: 0;
-  gap: 0.65rem;
+  gap: 0.5rem;
+}
+
+.gy-search--compact .gy-search__nights {
+  font-size: 0.72rem;
+  white-space: nowrap;
 }
 
 .gy-search--compact .gy-search__submit {
-  min-height: 2.45rem;
-  min-width: 10rem;
-  padding: 0.55rem 1.1rem;
+  min-height: 2.15rem;
+  min-width: 0;
+  padding: 0.45rem 1rem;
+  white-space: nowrap;
 }
 
 .gy-search__footer {

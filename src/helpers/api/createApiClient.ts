@@ -1,3 +1,5 @@
+import { getApiMode } from "./apiConfig";
+
 /**
  * Lightweight API client factory (IBPF-style createAxiosInstance, but fetch).
  * Session-cookie auth for greyon-engine — no Bearer refresh queue.
@@ -66,18 +68,29 @@ function messageFromErrorBody(
     /<title>\s*Herd\s*-\s*Site not found/i.test(trimmed);
 
   if (looksHtml) {
-    if (/Herd\s*-\s*Site not found/i.test(trimmed) || status === 404) {
+    if (
+      getApiMode() === "local" &&
+      (/Herd\s*-\s*Site not found/i.test(trimmed) || status === 404)
+    ) {
       return "Booking API is unreachable. Check that greyon-engine is running in Herd (https://greyon-engine.test).";
     }
-    return `Booking API returned an unexpected response (${status}).`;
+    return FRIENDLY_SERVER_ERROR;
   }
+
+  if (status >= 500) return FRIENDLY_SERVER_ERROR;
 
   if (trimmed && trimmed.length <= 280 && !trimmed.includes("<")) {
     return trimmed;
   }
 
-  return `API error ${status}`;
+  return FRIENDLY_SERVER_ERROR;
 }
+
+/** Shown instead of raw "Failed to fetch" / "API error 500" in the UI. */
+export const FRIENDLY_NETWORK_ERROR =
+  "We couldn’t reach Greyon just now. Please check your connection and try again.";
+export const FRIENDLY_SERVER_ERROR =
+  "Something went wrong on our side. Please try again in a moment.";
 
 export type CreateApiClientOptions = {
   /** Default true — required for greyon-engine session cookies */
@@ -118,11 +131,19 @@ export function createApiClient(
     }
 
     const url = path.startsWith("http") ? path : `${root}${path}`;
-    const response = await fetch(url, {
-      ...init,
-      headers,
-      credentials: withCredentials ? "include" : "same-origin"
-    });
+    let response: Response;
+    try {
+      response = await fetch(url, {
+        ...init,
+        headers,
+        credentials: withCredentials ? "include" : "same-origin"
+      });
+    } catch (e) {
+      // Aborts are intentional — let callers see them unchanged.
+      if (e instanceof DOMException && e.name === "AbortError") throw e;
+      // Offline / DNS / CORS: fetch throws a bare TypeError("Failed to fetch").
+      throw new ApiError(0, FRIENDLY_NETWORK_ERROR, e);
+    }
 
     if (!response.ok) {
       let body: EngineErrorBody | string | undefined;

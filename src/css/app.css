@@ -179,6 +179,15 @@ a {
   transform: scale(1.08);
 }
 
+/* Photo failed to load (see boot/motion.ts) — show the placeholder wash. */
+img.gy-img--broken {
+  visibility: hidden;
+}
+
+.gy-card-media:has(> img.gy-img--broken) {
+  background: linear-gradient(135deg, var(--gy-sand), var(--gy-stone));
+}
+
 .gy-muted {
   color: var(--gy-muted);
 }

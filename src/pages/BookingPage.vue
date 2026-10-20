@@ -69,22 +69,22 @@
                 {{ result.roomType.name }} · {{ result.ratePlan.name }}
               </p>
               <p class="result-card__facts">
-                {{ result.roomType.bedType }}
-                <span>·</span>
-                {{ result.roomType.roomSize }}
-                <span>·</span>
-                Up to {{ result.roomType.maxGuests }} guests
+                {{ roomFactsLine(result.roomType) }}
               </p>
               <FeatureChips
                 :items="result.roomType.amenities.slice(0, 4)"
                 size="sm"
               />
               <p class="result-card__meta">
-                {{ result.ratePlan.mealBenefit }}
-                <span>·</span>
-                {{ result.availableUnits }} left
-                <span>·</span>
-                {{ result.nights }} night{{ result.nights === 1 ? "" : "s" }}
+                {{
+                  [
+                    result.ratePlan.mealBenefit,
+                    `${result.availableUnits} left`,
+                    `${result.nights} night${result.nights === 1 ? "" : "s"}`
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")
+                }}
               </p>
             </div>
             <div class="result-card__price">
@@ -100,7 +100,7 @@
             </div>
           </article>
         </div>
-        <p v-else class="empty-note">
+        <p v-else-if="!booking.errorMessage" class="empty-note">
           No rooms available for this search. Try different dates or occupancy.
         </p>
       </section>
@@ -124,11 +124,7 @@
             {{ booking.selected.ratePlan.name }}
           </p>
           <p class="result-card__facts">
-            {{ booking.selected.roomType.bedType }}
-            <span>·</span>
-            {{ booking.selected.roomType.roomSize }}
-            <span>·</span>
-            Up to {{ booking.selected.roomType.maxGuests }} guests
+            {{ roomFactsLine(booking.selected.roomType) }}
           </p>
           <FeatureChips :items="booking.selected.roomType.amenities" />
           <p class="gy-muted summary-card__desc">
@@ -219,7 +215,11 @@
             </div>
           </div>
 
-          <form class="form-grid" @submit.prevent="booking.goToReview()">
+          <form
+            class="form-grid"
+            novalidate
+            @submit.prevent="booking.goToReview()"
+          >
             <div class="form-row">
               <label :class="{ 'is-invalid': showGuestError('firstName') }">
                 First name *
@@ -558,6 +558,28 @@ watch(
   }
 );
 
+/** "1 bedroom · 45 sqm · Up to 3 guests" without stray dots for blank CMS fields. */
+function roomFactsLine(room: RoomType) {
+  return [
+    room.bedType?.trim(),
+    room.roomSize?.trim(),
+    room.maxGuests ? `Up to ${room.maxGuests} guests` : ""
+  ]
+    .filter(Boolean)
+    .join(" · ");
+}
+
+// Each step swaps the whole panel — start the new step at the top so mobile
+// users don't land mid-page (e.g. after a long results list).
+watch(
+  () => booking.step,
+  () => {
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }
+);
+
 function roomCover(room: RoomType) {
   return room.images?.find(src => src?.trim())?.trim() || "";
 }
@@ -681,6 +703,12 @@ function showGuestError(
 .panel-title {
   margin: 0 0 0.35rem;
   font-size: clamp(1.7rem, 3vw, 2.1rem);
+  line-height: 1.15;
+}
+
+.panel__head .gy-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .panel-sub {
@@ -711,6 +739,10 @@ function showGuestError(
 }
 
 .result-card__media {
+  /* Explicit width keeps the 4:3 box inside its 140px column (stretched
+     height + aspect-ratio otherwise widened it over the room title). */
+  width: 100%;
+  align-self: start;
   aspect-ratio: 4 / 3;
   min-height: 100px;
   background: var(--gy-sand);
