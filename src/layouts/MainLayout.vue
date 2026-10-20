@@ -25,7 +25,7 @@
           />
         </router-link>
 
-        <div class="gy-header__center gt-md">
+        <div class="gy-header__center gt-sm">
           <transition name="gy-navswap" mode="out-in">
             <div
               v-if="showCompactSearch"
