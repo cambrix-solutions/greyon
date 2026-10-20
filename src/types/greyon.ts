@@ -104,6 +104,31 @@ export interface NearbyLandmark {
   distance: string;
 }
 
+/** Hotel-linked service (from admin hotel or public hotel slug payload). */
+export interface HotelServiceRef {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  icon: string;
+  sortOrder?: number;
+  status?: ContentStatus;
+}
+
+/** Hotel-linked product / add-on. */
+export interface HotelProductRef {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  icon?: string;
+  imageUrl?: string;
+  price?: number | null;
+  currency?: string;
+  sortOrder?: number;
+  status?: ContentStatus;
+}
+
 export interface Hotel {
   id: string;
   name: string;
@@ -128,6 +153,10 @@ export interface Hotel {
   gallery: string[];
   amenities: string[];
   policies: string[];
+  /** Linked catalog services (admin: all statuses; public: published only). */
+  services?: HotelServiceRef[];
+  /** Linked catalog products (admin: all statuses; public: published only). */
+  products?: HotelProductRef[];
   checkInTime: string;
   checkOutTime: string;
   featured?: boolean;

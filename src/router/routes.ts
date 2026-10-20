@@ -255,6 +255,18 @@ const routes: RouteRecordRaw[] = [
         meta: { title: "Media | Greyon Admin", perm: "media" }
       },
       {
+        path: "services",
+        name: "admin-services",
+        component: () => import("@/pages/admin/AdminServicesPage.vue"),
+        meta: { title: "Services | Greyon Admin", perm: "services" }
+      },
+      {
+        path: "products",
+        name: "admin-products",
+        component: () => import("@/pages/admin/AdminProductsPage.vue"),
+        meta: { title: "Products | Greyon Admin", perm: "products" }
+      },
+      {
         path: "hero-slides",
         name: "admin-hero-slides",
         component: () => import("@/pages/admin/AdminHeroSlidesPage.vue"),
