@@ -376,9 +376,8 @@ greyon-engine/.../SiteSettingController.php      (siteName filled)
 
 **Changes:**
 
-- `MainLayout.vue` — logo `clamp(3.1rem … 4.6rem)`, attrs 240×84; Hotel + Apartment dropdowns from `publishedHotels` via `propertyKind.ts`; mobile drawer expansion items; `gy-navswap` transition when compact search replaces primary nav; Map link
+- `MainLayout.vue` — logo `clamp(3.1rem … 4.6rem)`, attrs 240×84; **separate** Hotel + Apartment nav buttons (not links, not merged/“Services”) — hover/click opens a dropdown of property detail links from `publishedHotels` via `propertyKind.ts`; empty list shows a **Coming soon** entry; mobile drawer expansion items; `gy-navswap` transition when compact search replaces primary nav; Map link; keeps Home / News / Destination / Booking / Contact
 - `usePageSearchVisibility.ts` — IntersectionObserver hides navbar compact search while any in-page `BookingSearchWidget` (`pageAnchor`) is in view; shared booking-store state; pages without an in-page bar keep the compact navbar search
-- Apartment list empty → friendly “coming soon” copy (no raw errors)
 
 **Test steps:**
 

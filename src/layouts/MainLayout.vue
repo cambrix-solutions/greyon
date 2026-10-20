@@ -50,45 +50,71 @@
                 >{{ $t("nav.news") }}</router-link
               >
 
-              <div class="gy-nav__dropdown">
-                <router-link to="/hotels" class="gy-nav__link gy-nav__dropbtn">
-                  {{ $t("portfolios.hotel") }}
-                </router-link>
-                <div class="gy-nav__menu">
-                  <router-link to="/hotels" class="gy-nav__menu-all"
-                    >All hotels</router-link
-                  >
+              <div
+                class="gy-nav__dropdown"
+                :class="{ 'is-open': openMenu === 'hotel' }"
+                @mouseenter="openNavMenu('hotel')"
+                @mouseleave="closeNavMenu('hotel')"
+              >
+                <button
+                  type="button"
+                  class="gy-nav__link gy-nav__dropbtn"
+                  aria-haspopup="true"
+                  :aria-expanded="openMenu === 'hotel'"
+                  @click="toggleNavMenu('hotel')"
+                >
+                  Hotel
+                </button>
+                <div class="gy-nav__menu" role="menu" aria-label="Hotels">
                   <router-link
                     v-for="hotel in hotelProperties"
                     :key="hotel.id"
+                    role="menuitem"
                     :to="`/hotels/${hotel.slug}`"
+                    @click="closeAllNavMenus"
                   >
                     {{ hotel.name }}
                   </router-link>
-                  <p v-if="!hotelProperties.length" class="gy-nav__empty">
-                    Hotels will appear here when published.
-                  </p>
+                  <span
+                    v-if="!hotelProperties.length"
+                    class="gy-nav__soon"
+                    role="menuitem"
+                    >Coming soon</span
+                  >
                 </div>
               </div>
 
-              <div class="gy-nav__dropdown">
-                <router-link
-                  to="/portfolios/service-apartment"
+              <div
+                class="gy-nav__dropdown"
+                :class="{ 'is-open': openMenu === 'apartment' }"
+                @mouseenter="openNavMenu('apartment')"
+                @mouseleave="closeNavMenu('apartment')"
+              >
+                <button
+                  type="button"
                   class="gy-nav__link gy-nav__dropbtn"
+                  aria-haspopup="true"
+                  :aria-expanded="openMenu === 'apartment'"
+                  @click="toggleNavMenu('apartment')"
                 >
                   Apartment
-                </router-link>
-                <div class="gy-nav__menu">
+                </button>
+                <div class="gy-nav__menu" role="menu" aria-label="Apartments">
                   <router-link
                     v-for="hotel in apartmentProperties"
                     :key="hotel.id"
+                    role="menuitem"
                     :to="`/hotels/${hotel.slug}`"
+                    @click="closeAllNavMenus"
                   >
                     {{ hotel.name }}
                   </router-link>
-                  <p v-if="!apartmentProperties.length" class="gy-nav__empty">
-                    Apartment stays are coming soon.
-                  </p>
+                  <span
+                    v-if="!apartmentProperties.length"
+                    class="gy-nav__soon"
+                    role="menuitem"
+                    >Coming soon</span
+                  >
                 </div>
               </div>
 
@@ -179,9 +205,6 @@
             label="Hotel"
             header-class="gy-drawer__expand"
           >
-            <q-item clickable v-ripple to="/hotels" @click="drawerOpen = false">
-              <q-item-section>All hotels</q-item-section>
-            </q-item>
             <q-item
               v-for="hotel in hotelProperties"
               :key="`d-h-${hotel.id}`"
@@ -193,9 +216,7 @@
               <q-item-section>{{ hotel.name }}</q-item-section>
             </q-item>
             <q-item v-if="!hotelProperties.length">
-              <q-item-section class="gy-muted"
-                >Hotels will appear here when published.</q-item-section
-              >
+              <q-item-section class="gy-muted">Coming soon</q-item-section>
             </q-item>
           </q-expansion-item>
 
@@ -216,9 +237,7 @@
               <q-item-section>{{ hotel.name }}</q-item-section>
             </q-item>
             <q-item v-if="!apartmentProperties.length">
-              <q-item-section class="gy-muted"
-                >Apartment stays are coming soon.</q-item-section
-              >
+              <q-item-section class="gy-muted">Coming soon</q-item-section>
             </q-item>
           </q-expansion-item>
 
@@ -316,7 +335,33 @@ customer.hydrate();
 const drawerOpen = ref(false);
 const route = useRoute();
 const homePastHero = ref(false);
+const openMenu = ref<"hotel" | "apartment" | null>(null);
 const { pageSearchInView } = usePageSearchVisibility();
+
+type NavMenu = "hotel" | "apartment";
+
+function openNavMenu(menu: NavMenu) {
+  openMenu.value = menu;
+}
+
+function closeNavMenu(menu: NavMenu) {
+  if (openMenu.value === menu) openMenu.value = null;
+}
+
+function toggleNavMenu(menu: NavMenu) {
+  openMenu.value = openMenu.value === menu ? null : menu;
+}
+
+function closeAllNavMenus() {
+  openMenu.value = null;
+}
+
+function onDocumentPointerDown(event: Event) {
+  if (!openMenu.value) return;
+  const target = event.target as Node | null;
+  const root = document.querySelector(".gy-nav");
+  if (root && target && !root.contains(target)) closeAllNavMenus();
+}
 
 const accountInitials = computed(() => {
   const parts = customer.displayName.trim().split(/\s+/).filter(Boolean);
@@ -405,6 +450,7 @@ watch(isHome, async () => {
 watch(
   () => route.path,
   async () => {
+    closeAllNavMenus();
     await nextTick();
     // After page transition, re-sync (hero may remount).
     requestAnimationFrame(syncHomeHeader);
@@ -415,10 +461,12 @@ onMounted(async () => {
   void cms.ensurePublicCatalog();
   await nextTick();
   bindHeroScroll();
+  document.addEventListener("pointerdown", onDocumentPointerDown);
 });
 
 onUnmounted(() => {
   unbindHeroScroll();
+  document.removeEventListener("pointerdown", onDocumentPointerDown);
 });
 </script>
 
@@ -561,25 +609,42 @@ onUnmounted(() => {
 }
 
 .gy-nav__link:hover::after,
-.gy-nav__link.router-link-active::after {
+.gy-nav__link.router-link-active::after,
+.gy-nav__dropdown.is-open .gy-nav__dropbtn::after {
   transform: scaleX(1);
 }
 
 .gy-nav__link.router-link-active,
 .gy-nav__link:hover,
-.gy-nav__dropbtn:hover {
+.gy-nav__dropbtn:hover,
+.gy-nav__dropdown.is-open .gy-nav__dropbtn {
   opacity: 1;
   color: var(--gy-gold);
 }
 
 .gy-header--solid .gy-nav__link.router-link-active,
 .gy-header--solid .gy-nav__link:hover,
-.gy-header--solid .gy-nav__dropbtn:hover {
+.gy-header--solid .gy-nav__dropbtn:hover,
+.gy-header--solid .gy-nav__dropdown.is-open .gy-nav__dropbtn {
   color: var(--gy-gold-deep);
 }
 
 .gy-nav__dropdown {
   position: relative;
+}
+
+.gy-nav__dropbtn::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -0.15rem;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.28s ease;
+  opacity: 0.7;
 }
 
 .gy-nav__menu {
@@ -599,32 +664,28 @@ onUnmounted(() => {
   z-index: 20;
 }
 
-.gy-nav__menu a {
+.gy-nav__menu a,
+.gy-nav__soon {
   display: block;
   padding: 0.5rem 1rem;
   color: var(--gy-ink);
   font-size: 0.9rem;
   text-transform: none;
   letter-spacing: 0;
+  font-weight: 500;
 }
 
 .gy-nav__menu a:hover {
   background: var(--gy-sand);
 }
 
-.gy-nav__menu-all {
-  font-weight: 600;
-  border-bottom: 1px solid rgba(69, 76, 75, 0.1);
-  margin-bottom: 0.2rem;
-}
-
-.gy-nav__empty {
-  margin: 0;
-  padding: 0.65rem 1rem;
-  font-size: 0.85rem;
+.gy-nav__soon {
   color: var(--gy-muted);
+  font-style: italic;
+  cursor: default;
 }
 
+.gy-nav__dropdown.is-open .gy-nav__menu,
 .gy-nav__dropdown:hover .gy-nav__menu,
 .gy-nav__dropdown:focus-within .gy-nav__menu {
   display: block;
