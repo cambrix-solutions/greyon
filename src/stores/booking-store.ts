@@ -77,6 +77,7 @@ export const useBookingStore = defineStore("booking", () => {
   const confirmedBooking = ref<Booking | null>(null);
   const errorMessage = ref("");
   const submitting = ref(false);
+  const searching = ref(false);
   const guestAttempted = ref(false);
 
   const nights = computed(() => selected.value?.nights ?? 0);
@@ -251,6 +252,7 @@ export const useBookingStore = defineStore("booking", () => {
     if (search.value.checkOut <= search.value.checkIn) {
       search.value.checkOut = addLocalDays(search.value.checkIn, 1);
     }
+    searching.value = true;
     try {
       results.value = (await searchAvailability(
         search.value
@@ -262,6 +264,8 @@ export const useBookingStore = defineStore("booking", () => {
           ? raw
           : "We couldn’t find availability just now. Please try again.";
       results.value = [];
+    } finally {
+      searching.value = false;
     }
     selected.value = null;
     confirmedBooking.value = null;
@@ -386,6 +390,7 @@ export const useBookingStore = defineStore("booking", () => {
     confirmedBooking,
     errorMessage,
     submitting,
+    searching,
     guestAttempted,
     searchError,
     guestErrors,
