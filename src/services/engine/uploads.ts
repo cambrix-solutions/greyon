@@ -24,9 +24,9 @@ export type UploadProgress = {
 
 export type UploadOptions = {
   /** Storage folder hint, e.g. `hotels/sihanoukville`, `rooms/12`, `media` */
-  folder?: string;
-  signal?: AbortSignal;
-  onProgress?: (progress: UploadProgress) => void;
+  folder?: string | undefined;
+  signal?: AbortSignal | undefined;
+  onProgress?: ((progress: UploadProgress) => void) | undefined;
 };
 
 export const UPLOADS_NOT_ENABLED_MESSAGE =

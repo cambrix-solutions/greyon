@@ -75,7 +75,7 @@ function canvasToBlob(
  */
 export async function prepareImageForUpload(
   file: File,
-  options: { longEdge?: number; quality?: number } = {}
+  options: { longEdge?: number | undefined; quality?: number | undefined } = {}
 ): Promise<File> {
   const longEdge = options.longEdge ?? DEFAULT_LONG_EDGE;
   const quality = options.quality ?? 0.85;
