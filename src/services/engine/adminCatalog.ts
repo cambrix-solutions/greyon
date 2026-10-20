@@ -96,6 +96,10 @@ export type HotelInput = {
   gallery?: string[];
   amenities?: string[];
   policies?: string[];
+  /** Replace linked services; omit to leave unchanged; [] clears. */
+  serviceIds?: Array<string | number>;
+  /** Replace linked products; omit to leave unchanged; [] clears. */
+  productIds?: Array<string | number>;
   checkInTime?: string;
   checkOutTime?: string;
   featured?: boolean;
@@ -159,12 +163,23 @@ export async function destroyLocation(id: string) {
   await engineAPI.delete(`/admin/locations/${numId(id)}`);
 }
 
+function mapIdList(ids: Array<string | number> | undefined) {
+  if (ids === undefined) return undefined;
+  return ids.map(id => Number(id));
+}
+
 export async function createHotel(input: HotelInput) {
   const { hotel } = await engineAPI.post<{ hotel: EngineHotel }>(
     "/admin/hotels",
     {
       ...input,
-      locationId: numId(input.locationId)
+      locationId: numId(input.locationId),
+      ...(input.serviceIds !== undefined
+        ? { serviceIds: mapIdList(input.serviceIds) }
+        : {}),
+      ...(input.productIds !== undefined
+        ? { productIds: mapIdList(input.productIds) }
+        : {})
     }
   );
   return mapEngineHotel(hotel);
@@ -173,6 +188,12 @@ export async function createHotel(input: HotelInput) {
 export async function updateHotel(id: string, input: Partial<HotelInput>) {
   const body: Record<string, unknown> = { ...input };
   if (input.locationId !== undefined) body.locationId = numId(input.locationId);
+  if (input.serviceIds !== undefined) {
+    body.serviceIds = mapIdList(input.serviceIds);
+  }
+  if (input.productIds !== undefined) {
+    body.productIds = mapIdList(input.productIds);
+  }
   const { hotel } = await engineAPI.patch<{ hotel: EngineHotel }>(
     `/admin/hotels/${numId(id)}`,
     body

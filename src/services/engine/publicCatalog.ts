@@ -45,3 +45,14 @@ export async function fetchPublicCatalog(): Promise<PublicCatalog> {
     news: (payload.news ?? []).map(mapEngineNews)
   };
 }
+
+/**
+ * Single published hotel by slug — includes published services/products
+ * sorted by the engine.
+ */
+export async function fetchPublicHotelBySlug(slug: string): Promise<Hotel> {
+  const payload = await engineAPI.get<{ hotel: EngineHotel }>(
+    `/hotels/${encodeURIComponent(slug)}`
+  );
+  return mapEngineHotel(payload.hotel);
+}

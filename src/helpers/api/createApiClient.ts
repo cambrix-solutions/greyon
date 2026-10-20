@@ -53,6 +53,13 @@ function messageFromErrorBody(
   body: EngineErrorBody | string | undefined
 ): string {
   if (typeof body === "object" && body) {
+    const fieldErrors = body.errors;
+    if (fieldErrors && typeof fieldErrors === "object") {
+      for (const msgs of Object.values(fieldErrors)) {
+        const first = Array.isArray(msgs) ? msgs[0] : undefined;
+        if (typeof first === "string" && first.trim()) return first.trim();
+      }
+    }
     if (typeof body.message === "string" && body.message.trim()) {
       return body.message;
     }

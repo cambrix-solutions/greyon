@@ -515,6 +515,20 @@ const nav = computed<NavItem[]>(() => [
     group: "publishing"
   },
   {
+    label: "Services",
+    to: "/admin/services",
+    icon: "spa",
+    perm: "services",
+    group: "publishing"
+  },
+  {
+    label: "Products",
+    to: "/admin/products",
+    icon: "storefront",
+    perm: "products",
+    group: "publishing"
+  },
+  {
     label: "Hero slides",
     to: "/admin/hero-slides",
     icon: "view_carousel",

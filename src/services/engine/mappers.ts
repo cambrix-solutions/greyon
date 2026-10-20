@@ -105,6 +105,29 @@ export interface EngineNearbyLandmark {
   distance?: string | null;
 }
 
+export interface EngineHotelService {
+  id: number | string;
+  name: string;
+  slug: string;
+  description?: string | null;
+  icon?: string | null;
+  sortOrder?: number | null;
+  status?: string;
+}
+
+export interface EngineHotelProduct {
+  id: number | string;
+  name: string;
+  slug: string;
+  description?: string | null;
+  icon?: string | null;
+  imageUrl?: string | null;
+  price?: number | null;
+  currency?: string | null;
+  sortOrder?: number | null;
+  status?: string;
+}
+
 export interface EngineHotel {
   id: number | string;
   locationId: number | string;
@@ -125,6 +148,8 @@ export interface EngineHotel {
   gallery?: string[];
   amenities?: string[];
   policies?: string[];
+  services?: EngineHotelService[];
+  products?: EngineHotelProduct[];
   checkInTime?: string | null;
   checkOutTime?: string | null;
   featured?: boolean;
@@ -232,6 +257,60 @@ export function mapEngineLocation(row: EngineLocation): Location {
   };
 }
 
+function mapHotelServiceRefs(
+  rows: EngineHotelService[] | undefined
+): Hotel["services"] {
+  if (!rows?.length) return undefined;
+  return rows.map(item => {
+    const out: NonNullable<Hotel["services"]>[number] = {
+      id: String(item.id),
+      name: item.name,
+      slug: item.slug,
+      description: item.description ?? "",
+      icon: item.icon?.trim() || "spa",
+      status: asStatus(item.status)
+    };
+    if (item.sortOrder !== undefined && item.sortOrder !== null) {
+      out.sortOrder = Number(item.sortOrder) || 0;
+    }
+    return out;
+  });
+}
+
+function mapHotelProductRefs(
+  rows: EngineHotelProduct[] | undefined
+): Hotel["products"] {
+  if (!rows?.length) return undefined;
+  return rows.map(item => {
+    const out: NonNullable<Hotel["products"]>[number] = {
+      id: String(item.id),
+      name: item.name,
+      slug: item.slug,
+      description: item.description ?? "",
+      icon: item.icon?.trim() || "storefront",
+      status: asStatus(item.status)
+    };
+    if (item.sortOrder !== undefined && item.sortOrder !== null) {
+      out.sortOrder = Number(item.sortOrder) || 0;
+    }
+    if (item.imageUrl != null && String(item.imageUrl).trim()) {
+      out.imageUrl = String(item.imageUrl).trim();
+    }
+    if (item.price !== undefined) {
+      out.price =
+        item.price === null
+          ? null
+          : Number.isFinite(Number(item.price))
+            ? Number(item.price)
+            : null;
+    }
+    if (item.currency != null && String(item.currency).trim()) {
+      out.currency = String(item.currency).toUpperCase().slice(0, 3);
+    }
+    return out;
+  });
+}
+
 export function mapEngineHotel(row: EngineHotel): Hotel {
   const landmarks = (row.nearbyLandmarks ?? [])
     .map(item => ({
@@ -244,6 +323,9 @@ export function mapEngineHotel(row: EngineHotel): Hotel {
     typeof row.starRating === "number" && Number.isFinite(row.starRating)
       ? row.starRating
       : null;
+
+  const services = mapHotelServiceRefs(row.services);
+  const products = mapHotelProductRefs(row.products);
 
   return {
     id: String(row.id),
@@ -268,6 +350,8 @@ export function mapEngineHotel(row: EngineHotel): Hotel {
     gallery: row.gallery ?? [],
     amenities: row.amenities ?? [],
     policies: row.policies ?? [],
+    ...(services ? { services } : {}),
+    ...(products ? { products } : {}),
     checkInTime: row.checkInTime ?? "",
     checkOutTime: row.checkOutTime ?? "",
     featured: Boolean(row.featured),

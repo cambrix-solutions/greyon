@@ -66,7 +66,10 @@ import {
   updatePackage
 } from "@/services/engine/developer";
 import { searchAvailability as fetchEngineAvailability } from "@/services/engine/ops";
-import { fetchPublicCatalog } from "@/services/engine/publicCatalog";
+import {
+  fetchPublicCatalog,
+  fetchPublicHotelBySlug
+} from "@/services/engine/publicCatalog";
 import { useAuthStore } from "@/stores/auth-store";
 import type {
   AdminRole,
@@ -542,6 +545,31 @@ export const useCmsStore = defineStore("cms", () => {
   function getHotelById(id: string) {
     return hotels.value.find(h => h.id === id);
   }
+
+  /** Enrich a published hotel with services/products from GET /hotels/:slug. */
+  async function hydrateHotelDetail(slug: string) {
+    const detail = await fetchPublicHotelBySlug(slug);
+    const idx = hotels.value.findIndex(
+      h => h.slug === slug || h.id === detail.id
+    );
+    if (idx >= 0) {
+      const prev = hotels.value[idx]!;
+      hotels.value[idx] = {
+        ...prev,
+        ...detail,
+        // Keep list-level fields if detail omits them.
+        amenities: detail.amenities?.length ? detail.amenities : prev.amenities,
+        gallery: detail.gallery?.length ? detail.gallery : prev.gallery,
+        services: detail.services ?? prev.services,
+        products: detail.products ?? prev.products
+      };
+    } else {
+      hotels.value = [...hotels.value, detail];
+    }
+    return (
+      hotels.value.find(h => h.slug === slug || h.id === detail.id) ?? detail
+    );
+  }
   function getLocationBySlug(slug: string) {
     return publishedLocations.value.find(l => l.slug === slug);
   }
@@ -596,6 +624,8 @@ export const useCmsStore = defineStore("cms", () => {
     gallery?: string[];
     amenities?: string[];
     policies?: string[];
+    serviceIds?: Array<string | number>;
+    productIds?: Array<string | number>;
     checkInTime?: string;
     checkOutTime?: string;
     featured?: boolean;
@@ -628,7 +658,10 @@ export const useCmsStore = defineStore("cms", () => {
       status: input.status,
       seoTitle: input.seoTitle,
       seoDescription: input.seoDescription
-    });
+    }) as Record<string, unknown>;
+    // Always send ids when provided (including []) so the engine can clear links.
+    if (input.serviceIds !== undefined) payload.serviceIds = input.serviceIds;
+    if (input.productIds !== undefined) payload.productIds = input.productIds;
     const saved = input.id
       ? await updateHotel(
           input.id,
@@ -1339,6 +1372,7 @@ export const useCmsStore = defineStore("cms", () => {
     roleOptions,
     getHotelBySlug,
     getHotelById,
+    hydrateHotelDetail,
     getLocationBySlug,
     getLocationById,
     getNewsBySlug,

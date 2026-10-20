@@ -451,6 +451,25 @@
         <AmenitiesEditor v-model="hotelPolicies" label="Stay policies" />
       </AdminFormSection>
       <AdminFormSection
+        title="Services & products"
+        hint="Pick from the catalog. Empty selection clears links on save."
+      >
+        <CatalogChipSelect
+          v-model="hotelServiceIds"
+          :options="serviceOptions"
+          :loading="catalogLoading"
+          label="Services"
+          hint="Searchable multi-select — published items appear on the public hotel page"
+        />
+        <CatalogChipSelect
+          v-model="hotelProductIds"
+          :options="productOptions"
+          :loading="catalogLoading"
+          label="Products"
+          hint="Searchable multi-select — published items appear as product cards"
+        />
+      </AdminFormSection>
+      <AdminFormSection
         title="Nearby landmarks"
         hint="Place + distance for the public hotel page."
       >
@@ -621,10 +640,17 @@ import AdminEntityActions from "@/components/admin/AdminEntityActions.vue";
 import AdminFormSection from "@/components/admin/AdminFormSection.vue";
 import AdminPageHeader from "@/components/admin/AdminPageHeader.vue";
 import AmenitiesEditor from "@/components/admin/AmenitiesEditor.vue";
+import CatalogChipSelect from "@/components/admin/CatalogChipSelect.vue";
 import GalleryEditor from "@/components/admin/GalleryEditor.vue";
 import ImageDropField from "@/components/admin/ImageDropField.vue";
 import LandmarksEditor from "@/components/admin/LandmarksEditor.vue";
 import MapPinPicker from "@/components/admin/MapPinPicker.vue";
+import {
+  fetchAdminProducts,
+  fetchAdminServices,
+  type CatalogProduct,
+  type CatalogService
+} from "@/services/engine/adminCatalogEntities";
 import { useAuthStore } from "@/stores/auth-store";
 import { useCmsStore } from "@/stores/cms-store";
 import type {
@@ -633,6 +659,7 @@ import type {
   NearbyLandmark,
   RoomType
 } from "@/types/greyon";
+import { friendlyApiError } from "@/utils/apiErrors";
 import { uploadFolder } from "@/utils/uploadFolder";
 
 const cms = useCmsStore();
@@ -784,6 +811,50 @@ const hotelGallery = ref<string[]>([]);
 const hotelAmenities = ref<string[]>([]);
 const hotelPolicies = ref<string[]>([]);
 const hotelLandmarks = ref<NearbyLandmark[]>([]);
+const hotelServiceIds = ref<string[]>([]);
+const hotelProductIds = ref<string[]>([]);
+const catalogServices = ref<CatalogService[]>([]);
+const catalogProducts = ref<CatalogProduct[]>([]);
+const catalogLoading = ref(false);
+
+const serviceOptions = computed(() =>
+  catalogServices.value.map(s => ({
+    label: s.name,
+    value: s.id,
+    icon: s.icon,
+    caption: s.slug,
+    status: s.status
+  }))
+);
+const productOptions = computed(() =>
+  catalogProducts.value.map(p => ({
+    label: p.name,
+    value: p.id,
+    icon: p.icon || "storefront",
+    caption: p.slug,
+    status: p.status
+  }))
+);
+
+async function loadCatalogOptions() {
+  catalogLoading.value = true;
+  try {
+    const [services, products] = await Promise.all([
+      fetchAdminServices(),
+      fetchAdminProducts()
+    ]);
+    catalogServices.value = services;
+    catalogProducts.value = products;
+  } catch (e) {
+    $q.notify({
+      type: "negative",
+      message: friendlyApiError(e, "Could not load services/products.")
+    });
+  } finally {
+    catalogLoading.value = false;
+  }
+}
+
 const starRatingOptions = [
   { label: "1 star", value: 1 },
   { label: "2 stars", value: 2 },
@@ -839,6 +910,8 @@ function blankHotel() {
   hotelAmenities.value = [];
   hotelPolicies.value = [];
   hotelLandmarks.value = [];
+  hotelServiceIds.value = [];
+  hotelProductIds.value = [];
 }
 
 function openCreateHotel() {
@@ -851,6 +924,7 @@ function openCreateHotel() {
   }
   hotelEditing.value = null;
   blankHotel();
+  void loadCatalogOptions();
   hotelDialog.value = true;
 }
 
@@ -888,6 +962,9 @@ function openEditHotel(hotel: Hotel) {
   hotelAmenities.value = [...hotel.amenities];
   hotelPolicies.value = [...(hotel.policies ?? [])];
   hotelLandmarks.value = (hotel.nearbyLandmarks ?? []).map(l => ({ ...l }));
+  hotelServiceIds.value = (hotel.services ?? []).map(s => s.id);
+  hotelProductIds.value = (hotel.products ?? []).map(p => p.id);
+  void loadCatalogOptions();
   hotelDialog.value = true;
 }
 
@@ -940,6 +1017,8 @@ function saveHotel() {
         gallery: hotelGallery.value.filter(Boolean),
         amenities: hotelAmenities.value,
         policies: hotelPolicies.value,
+        serviceIds: hotelServiceIds.value,
+        productIds: hotelProductIds.value,
         status: hotelForm.status,
         featured: hotelForm.featured
       });
@@ -948,7 +1027,7 @@ function saveHotel() {
     } catch (e) {
       $q.notify({
         type: "negative",
-        message: e instanceof Error ? e.message : "Save failed."
+        message: friendlyApiError(e, "Save failed.")
       });
     }
   })();

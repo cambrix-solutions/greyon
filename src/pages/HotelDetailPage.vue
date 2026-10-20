@@ -77,6 +77,61 @@
         <FeatureChips :items="hotel.amenities" />
       </section>
 
+      <section v-if="hotelServices.length" v-reveal class="block">
+        <div class="block-head">
+          <h2 class="gy-display">Services</h2>
+          <p class="gy-muted"
+            >Experiences and facilities available at this property.</p
+          >
+        </div>
+        <ul class="service-chips">
+          <li v-for="svc in hotelServices" :key="svc.id">
+            <q-icon :name="svc.icon || 'spa'" size="14px" />
+            <span>{{ svc.name }}</span>
+          </li>
+        </ul>
+      </section>
+
+      <section v-if="hotelProducts.length" v-reveal class="block">
+        <div class="block-head">
+          <h2 class="gy-display">Products</h2>
+          <p class="gy-muted"
+            >Add-ons and items you can request with your stay.</p
+          >
+        </div>
+        <div class="product-grid">
+          <article
+            v-for="product in hotelProducts"
+            :key="product.id"
+            class="product-card"
+          >
+            <div
+              class="product-card__media"
+              :class="{ 'product-card__media--icon': !product.imageUrl }"
+            >
+              <img
+                v-if="product.imageUrl"
+                :src="product.imageUrl"
+                :alt="product.name"
+                loading="lazy"
+              />
+              <div v-else class="product-card__placeholder" aria-hidden="true">
+                <q-icon :name="product.icon || 'storefront'" size="28px" />
+              </div>
+            </div>
+            <div class="product-card__body">
+              <h3 class="product-card__title">{{ product.name }}</h3>
+              <p v-if="product.description" class="product-card__desc">
+                {{ product.description }}
+              </p>
+              <p v-if="productPriceLabel(product)" class="product-card__price">
+                {{ productPriceLabel(product) }}
+              </p>
+            </div>
+          </article>
+        </div>
+      </section>
+
       <section v-if="landmarks.length" v-reveal class="block">
         <div class="block-head">
           <h2 class="gy-display">Nearby landmarks</h2>
@@ -252,7 +307,7 @@ import RoomOfferCard from "@/components/RoomOfferCard.vue";
 import SeoHead from "@/components/SeoHead.vue";
 import { useBookingStore } from "@/stores/booking-store";
 import { useCmsStore } from "@/stores/cms-store";
-import type { RoomType } from "@/types/greyon";
+import type { HotelProductRef, RoomType } from "@/types/greyon";
 
 const route = useRoute();
 const router = useRouter();
@@ -261,6 +316,17 @@ const booking = useBookingStore();
 const cms = useCmsStore();
 
 const hotel = computed(() => cms.getHotelBySlug(String(route.params.slug)));
+
+watch(
+  () => String(route.params.slug),
+  slug => {
+    if (!slug) return;
+    void cms.hydrateHotelDetail(slug).catch(() => {
+      /* catalog list still usable if detail enrich fails */
+    });
+  },
+  { immediate: true }
+);
 
 watch(
   hotel,
@@ -276,6 +342,36 @@ watch(
   },
   { immediate: true }
 );
+
+function compareLinked(
+  a: { name: string; sortOrder?: number },
+  b: { name: string; sortOrder?: number }
+) {
+  const ao = a.sortOrder;
+  const bo = b.sortOrder;
+  if (ao !== undefined && bo !== undefined && ao !== bo) return ao - bo;
+  if (ao !== undefined && bo === undefined) return -1;
+  if (ao === undefined && bo !== undefined) return 1;
+  return a.name.localeCompare(b.name);
+}
+
+const hotelServices = computed(() =>
+  [...(hotel.value?.services ?? [])].sort(compareLinked)
+);
+
+const hotelProducts = computed(() =>
+  [...(hotel.value?.products ?? [])].sort(compareLinked)
+);
+
+/** Price only when the API included it on the product. */
+function productPriceLabel(product: HotelProductRef) {
+  if (product.price === null || product.price === undefined) return "";
+  const cur = (product.currency || "USD").toUpperCase();
+  if (cur === "KHR") {
+    return `${Math.round(product.price).toLocaleString()} KHR`;
+  }
+  return `$${Number(product.price).toFixed(2)}`;
+}
 const locationName = computed(
   () => cms.getLocationById(hotel.value?.locationId ?? "")?.name ?? "Cambodia"
 );
@@ -688,6 +784,99 @@ async function openRoom(roomTypeId: string) {
   letter-spacing: 0.02em;
   color: var(--gy-gold-deep);
   white-space: nowrap;
+}
+
+.service-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.service-chips li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  max-width: 100%;
+  padding: 0.38rem 0.78rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  line-height: 1.25;
+  color: var(--gy-ink);
+  background: var(--gy-sand);
+}
+
+.service-chips li .q-icon {
+  flex-shrink: 0;
+  color: var(--gy-forest);
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.product-card {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  background: #fff;
+  border: 1px solid rgba(18, 17, 16, 0.08);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.product-card__media {
+  aspect-ratio: 4 / 3;
+  background: var(--gy-sand);
+}
+
+.product-card__media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.product-card__placeholder {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: var(--gy-forest);
+}
+
+.product-card__body {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.85rem 0.95rem 1rem;
+  align-content: start;
+}
+
+.product-card__title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 650;
+  line-height: 1.25;
+}
+
+.product-card__desc {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--gy-muted);
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.product-card__price {
+  margin: 0.15rem 0 0;
+  font-size: 0.95rem;
+  font-weight: 650;
+  color: var(--gy-ink);
 }
 
 @media (max-width: 960px) {
