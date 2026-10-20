@@ -220,14 +220,39 @@ async function onSubmit() {
   backdrop-filter: blur(10px);
 }
 
-/* Header bar: one row (fields | submit) that sits inside the solid header
-   instead of a floating two-row card that spills over the page. */
+/* One row (fields | submit) only where there is room: header bar + desktop
+   hero. The home hero also uses `compact`, so an unscoped 6-column grid broke
+   mobile; narrower screens fall through to the stacked rules below. */
+@media (min-width: 1001px) {
+  .gy-search--compact {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "fields footer"
+      "error error";
+    align-items: end;
+  }
+
+  .gy-search--compact .gy-search__fields {
+    grid-area: fields;
+    grid-template-columns: 1.2fr 1.25fr 1.25fr 0.62fr 0.62fr 0.62fr;
+  }
+
+  .gy-search--compact .gy-search__error {
+    grid-area: error;
+  }
+
+  .gy-search--compact .gy-search__footer {
+    grid-area: footer;
+    flex-wrap: nowrap;
+  }
+
+  .gy-search--compact .gy-search__submit {
+    min-width: 0;
+    white-space: nowrap;
+  }
+}
+
 .gy-search--compact {
-  grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-areas:
-    "fields footer"
-    "error error";
-  align-items: end;
   gap: 0.4rem 0.6rem;
   padding: 0.45rem 0.6rem;
   background: var(--gy-white);
@@ -238,13 +263,10 @@ async function onSubmit() {
 }
 
 .gy-search--compact .gy-search__fields {
-  grid-area: fields;
-  grid-template-columns: 1.2fr 1.25fr 1.25fr 0.62fr 0.62fr 0.62fr;
   gap: 0.45rem;
 }
 
 .gy-search--compact .gy-search__error {
-  grid-area: error;
   padding: 0.35rem 0.55rem;
   font-size: 0.78rem;
 }
@@ -267,8 +289,6 @@ async function onSubmit() {
 }
 
 .gy-search--compact .gy-search__footer {
-  grid-area: footer;
-  flex-wrap: nowrap;
   padding-top: 0;
   border-top: 0;
   gap: 0.5rem;
@@ -281,9 +301,7 @@ async function onSubmit() {
 
 .gy-search--compact .gy-search__submit {
   min-height: 2.15rem;
-  min-width: 0;
   padding: 0.45rem 1rem;
-  white-space: nowrap;
 }
 
 .gy-search__footer {
@@ -396,13 +414,43 @@ select:focus {
   }
 }
 
-@media (max-width: 520px) {
+@media (max-width: 600px) {
   .gy-search {
     padding: 1rem;
   }
 
+  /* Destination full width · Check-in | Check-out · Rooms | Adults | Children */
   .gy-search__fields {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .gy-search__fields > label:nth-child(1) {
+    grid-column: 1 / -1;
+  }
+
+  .gy-search__fields > label:nth-child(2),
+  .gy-search__fields > label:nth-child(3) {
+    grid-column: span 3;
+  }
+
+  .gy-search__fields > label:nth-child(n + 4) {
+    grid-column: span 2;
+  }
+
+  .gy-search__footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .gy-search__submit,
+  .gy-search--compact .gy-search__submit {
+    width: 100%;
+    min-width: 0;
+  }
+
+  input,
+  select {
+    min-width: 0;
   }
 }
 </style>
