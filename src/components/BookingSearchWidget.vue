@@ -5,6 +5,7 @@
     :class="{
       'gy-search--compact': compact,
       'gy-search--no-rates': !showSpecialRates,
+      'gy-search--stacked': stacked,
       'gy-search--active': Boolean(openPanel)
     }"
     novalidate
@@ -321,6 +322,11 @@ const props = withDefaults(
     navigate?: boolean;
     compact?: boolean;
     /**
+     * Force a vertical stack (Destination → Dates → Guests → submit).
+     * Used by the header search dialog only — leave false for hero / hotels.
+     */
+    stacked?: boolean;
+    /**
      * When true (default), this instance is the page’s main search bar.
      * MainLayout hides the header search trigger while it is in view.
      * Set false for the header search dialog / non-page instances.
@@ -336,6 +342,7 @@ const props = withDefaults(
     submitLabel: "Search availability",
     navigate: true,
     compact: false,
+    stacked: false,
     pageAnchor: true,
     showSpecialRates: true
   }
@@ -870,10 +877,12 @@ async function onSubmit() {
 
 /* Tablet / mid-width bars: 2-row layout so values stay readable and the
    submit label is never clipped. Covers ~768–1100px containers (home,
-   hotel pages, booking). Header compact (no-rates) stays a single row. */
+   hotel pages, booking). Header compact (no-rates) stays a single row.
+   Header dialog uses .gy-search--stacked and is excluded here. */
 @container gy-search (min-width: 561px) and (max-width: 1100px) {
-  .gy-search__bar,
-  .gy-search--compact:not(.gy-search--no-rates) .gy-search__bar {
+  .gy-search:not(.gy-search--stacked) .gy-search__bar,
+  .gy-search--compact:not(.gy-search--no-rates):not(.gy-search--stacked)
+    .gy-search__bar {
     grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
     grid-template-areas:
       "dest dates action"
@@ -1023,7 +1032,7 @@ async function onSubmit() {
   }
 }
 
-/* ---- Stacked card (phones / narrow containers) ---- */
+/* ---- Stacked card (phones / narrow containers, or forced via stacked prop) ---- */
 @container gy-search (max-width: 560px) {
   .gy-search__bar,
   .gy-search--compact .gy-search__bar {
@@ -1087,6 +1096,95 @@ async function onSubmit() {
   .gy-search__hint {
     padding: 0 0.5rem;
   }
+}
+
+/* Header dialog: always stack, ignore container mid-width / desktop pill rules. */
+.gy-search--stacked .gy-search__bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: none;
+  padding: 0.35rem;
+  border-radius: 18px;
+  gap: 0.2rem;
+  max-height: none;
+  box-shadow: none;
+  border: 1px solid rgba(69, 76, 75, 0.1);
+  background: var(--gy-white);
+}
+
+.gy-search--stacked .gy-seg--dest,
+.gy-search--stacked .gy-seg--dates,
+.gy-search--stacked .gy-seg--guests,
+.gy-search--stacked .gy-seg--rates,
+.gy-search--stacked .gy-search__action {
+  grid-area: auto;
+}
+
+.gy-search--stacked .gy-seg + .gy-seg::before {
+  left: 0.85rem;
+  right: 0.85rem;
+  top: 0;
+  bottom: auto;
+  width: auto;
+  height: 1px;
+  display: block;
+  opacity: 1;
+}
+
+.gy-search--stacked .gy-seg__btn {
+  min-height: 3.6rem;
+  padding: 0.65rem 0.95rem;
+  border-radius: 12px;
+  gap: 0.7rem;
+}
+
+.gy-search--stacked .gy-seg__label {
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: unset;
+}
+
+.gy-search--stacked .gy-seg__value {
+  font-size: 0.98rem;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+  display: block;
+  -webkit-line-clamp: unset;
+  -webkit-box-orient: unset;
+}
+
+.gy-search--stacked .gy-search__action {
+  padding: 0.45rem 0.15rem 0.15rem;
+  display: block;
+  align-self: stretch;
+}
+
+.gy-search--stacked .gy-search__submit {
+  width: 100%;
+  min-width: 0;
+  height: auto;
+  min-height: 3.15rem;
+  padding: 0 1.25rem;
+  border-radius: 12px;
+  white-space: nowrap;
+  font-size: 0.78rem;
+}
+
+.gy-search--stacked .gy-search__submit-text {
+  position: static;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip-path: none;
+  white-space: nowrap;
+}
+
+.gy-search--stacked .gy-search__error,
+.gy-search--stacked .gy-search__hint {
+  padding: 0 0.35rem;
 }
 </style>
 
