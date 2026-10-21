@@ -25,21 +25,45 @@
           />
         </router-link>
 
-        <div class="gy-header__center gt-sm">
+        <div class="gy-header__center">
           <transition name="gy-navswap" mode="out-in">
             <div
               v-if="showCompactSearch"
               key="search"
               class="gy-header__search"
             >
+              <!-- Desktop: slim single-row pill (no Special rates). -->
               <BookingSearchWidget
+                class="gt-md"
                 compact
+                :show-special-rates="false"
                 :page-anchor="false"
                 :navigate="true"
                 submit-label="Search"
               />
+              <!-- Tablet / phone: compact trigger that opens the full search. -->
+              <button
+                type="button"
+                class="lt-md gy-header__search-pill"
+                aria-haspopup="dialog"
+                :aria-expanded="headerSearchOpen"
+                aria-label="Open search"
+                @click="headerSearchOpen = true"
+              >
+                <q-icon
+                  name="search"
+                  size="18px"
+                  class="gy-header__pill-icon"
+                />
+                <span class="gy-header__pill-text">
+                  <span class="gy-header__pill-title">{{
+                    headerSearchTitle
+                  }}</span>
+                  <span class="gy-header__pill-sub">{{ headerSearchSub }}</span>
+                </span>
+              </button>
             </div>
-            <nav v-else key="nav" class="gy-nav">
+            <nav v-else key="nav" class="gy-nav gt-sm">
               <router-link to="/" class="gy-nav__link">{{
                 $t("nav.home")
               }}</router-link>
@@ -377,6 +401,32 @@
       <SiteFooter />
       <CookieNotice :hidden="drawerOpen" />
     </q-page-container>
+
+    <q-dialog
+      v-model="headerSearchOpen"
+      position="top"
+      transition-show="slide-down"
+      transition-hide="slide-up"
+    >
+      <div class="gy-header-search-sheet">
+        <header class="gy-header-search-sheet__head">
+          <h2 class="gy-header-search-sheet__title">Search stays</h2>
+          <button
+            type="button"
+            class="gy-header-search-sheet__close"
+            aria-label="Close search"
+            @click="headerSearchOpen = false"
+          >
+            <q-icon name="close" size="22px" />
+          </button>
+        </header>
+        <BookingSearchWidget
+          :page-anchor="false"
+          :navigate="true"
+          submit-label="Search availability"
+        />
+      </div>
+    </q-dialog>
   </q-layout>
 </template>
 
@@ -390,8 +440,10 @@ import ServicesMegaMenu from "@/components/ServicesMegaMenu.vue";
 import SiteFooter from "@/components/SiteFooter.vue";
 import { usePageSearchVisibility } from "@/composables/usePageSearchVisibility";
 import { useAuthStore } from "@/stores/auth-store";
+import { useBookingStore } from "@/stores/booking-store";
 import { useCmsStore } from "@/stores/cms-store";
 import { useCustomerStore } from "@/stores/customer-store";
+import { parseYmd } from "@/utils/datetime";
 import {
   filterApartmentServices,
   filterHotelServices,
@@ -400,6 +452,7 @@ import {
 
 const auth = useAuthStore();
 const cms = useCmsStore();
+const booking = useBookingStore();
 const customer = useCustomerStore();
 customer.hydrate();
 const { t } = useI18n();
@@ -413,6 +466,7 @@ const drawerApartmentsOpen = ref(false);
 const homePastHero = ref(false);
 const servicesOpen = ref(false);
 const catalogLoading = ref(false);
+const headerSearchOpen = ref(false);
 
 const CLOSE_DELAY_MS = 240;
 let closeServicesTimer: ReturnType<typeof setTimeout> | null = null;
@@ -575,6 +629,33 @@ const showCompactSearch = computed(
   () => compactSearchEligible.value && !pageSearchInView.value
 );
 
+function dayMonthShort(ymd: string) {
+  const d = parseYmd(ymd);
+  return d
+    ? d.toLocaleDateString("en-GB", { day: "numeric", month: "short" })
+    : "";
+}
+
+const headerSearchTitle = computed(() => {
+  const slug = booking.search.locationSlug;
+  if (!slug) return "Search stays";
+  return (
+    cms.publishedLocations.find(l => l.slug === slug)?.name || "Search stays"
+  );
+});
+
+const headerSearchSub = computed(() => {
+  const { checkIn, checkOut, rooms, adults, children } = booking.search;
+  const guests = adults + children;
+  const dates =
+    checkIn && checkOut
+      ? `${dayMonthShort(checkIn)}–${dayMonthShort(checkOut)}`
+      : "Add dates";
+  return `${dates} · ${rooms} room${rooms === 1 ? "" : "s"} · ${guests} guest${
+    guests === 1 ? "" : "s"
+  }`;
+});
+
 const solidHeader = computed(
   () =>
     route.meta.solidHeader === true ||
@@ -613,13 +694,18 @@ watch(isHome, async () => {
 });
 
 watch(
-  () => route.path,
+  () => route.fullPath,
   async () => {
     closeAllNavMenus();
+    headerSearchOpen.value = false;
     await nextTick();
     requestAnimationFrame(syncHomeHeader);
   }
 );
+
+watch(showCompactSearch, visible => {
+  if (!visible) headerSearchOpen.value = false;
+});
 
 watch(drawerOpen, open => {
   if (open) void refreshCatalogIfNeeded(cms.publishedHotels.length === 0);
@@ -727,8 +813,110 @@ onUnmounted(() => {
 
 .gy-header__search {
   width: 100%;
-  max-width: 58rem;
-  margin-inline: 0.5rem;
+  max-width: min(52rem, 100%);
+  margin-inline: 0.35rem;
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+}
+
+.gy-header__search-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: min(100%, 22rem);
+  min-height: 2.75rem;
+  padding: 0.35rem 0.85rem 0.35rem 0.65rem;
+  border: 1px solid rgba(69, 76, 75, 0.14);
+  border-radius: 999px;
+  background: var(--gy-white);
+  color: var(--gy-ink);
+  box-shadow: 0 8px 22px rgba(28, 36, 33, 0.1);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.gy-header__search-pill:hover {
+  box-shadow: 0 10px 26px rgba(28, 36, 33, 0.14);
+}
+
+.gy-header__search-pill:focus-visible {
+  outline: 2px solid var(--gy-forest);
+  outline-offset: 2px;
+}
+
+.gy-header__pill-icon {
+  flex-shrink: 0;
+  color: var(--gy-forest);
+}
+
+.gy-header__pill-text {
+  display: grid;
+  gap: 0.05rem;
+  min-width: 0;
+}
+
+.gy-header__pill-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gy-header__pill-sub {
+  font-size: 0.68rem;
+  color: var(--gy-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gy-header-search-sheet {
+  width: min(36rem, 100vw);
+  margin: 0.75rem;
+  padding: 1rem 1rem 1.15rem;
+  border-radius: 18px;
+  background: var(--gy-cream, #f7f4ef);
+  color: var(--gy-ink);
+  box-shadow: 0 18px 48px rgba(28, 36, 33, 0.18);
+}
+
+.gy-header-search-sheet__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.gy-header-search-sheet__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.gy-header-search-sheet__close {
+  display: inline-grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(69, 76, 75, 0.08);
+  color: var(--gy-ink);
+  cursor: pointer;
+}
+
+.gy-header-search-sheet__close:focus-visible {
+  outline: 2px solid var(--gy-forest);
+  outline-offset: 2px;
 }
 
 .gy-nav {

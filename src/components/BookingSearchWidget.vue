@@ -4,6 +4,7 @@
     class="gy-search"
     :class="{
       'gy-search--compact': compact,
+      'gy-search--no-rates': !showSpecialRates,
       'gy-search--active': Boolean(openPanel)
     }"
     novalidate
@@ -198,8 +199,9 @@
         </SearchPopover>
       </div>
 
-      <!-- Special rates (Courtyard-style) -->
+      <!-- Special rates (Courtyard-style). Hidden in header compact bar. -->
       <div
+        v-if="showSpecialRates"
         class="gy-seg gy-seg--rates"
         :class="{ 'is-open': openPanel === 'rates' }"
       >
@@ -324,12 +326,18 @@ const props = withDefaults(
      * Set false for the header compact bar itself.
      */
     pageAnchor?: boolean;
+    /**
+     * Special rates segment (home, booking, hotel page search).
+     * Set false for the sticky header bar so Sign in / Book now still fit.
+     */
+    showSpecialRates?: boolean;
   }>(),
   {
     submitLabel: "Search availability",
     navigate: true,
     compact: false,
-    pageAnchor: true
+    pageAnchor: true,
+    showSpecialRates: true
   }
 );
 
@@ -608,6 +616,13 @@ async function onSubmit() {
   transition: background 0.2s ease;
 }
 
+/* Header / no-rates: three fields + search (Destination · Dates · Guests). */
+.gy-search--no-rates .gy-search__bar {
+  grid-template-columns:
+    minmax(0, 1.2fr) minmax(0, 1.4fr) minmax(0, 1.15fr)
+    auto;
+}
+
 .gy-search--active .gy-search__bar {
   background: var(--gy-cream);
 }
@@ -784,27 +799,45 @@ async function onSubmit() {
 
 /* ---- Compact (header bar + home hero) ---- */
 .gy-search--compact .gy-search__bar {
-  padding: 0.25rem;
-  box-shadow: 0 10px 30px rgba(28, 36, 33, 0.12);
+  padding: 0.2rem;
+  box-shadow: 0 8px 22px rgba(28, 36, 33, 0.1);
 }
 
 .gy-search--compact .gy-seg__btn {
-  min-height: 2.75rem;
-  padding: 0.3rem 1rem;
-  gap: 0.6rem;
+  min-height: 2.5rem;
+  padding: 0.2rem 0.85rem;
+  gap: 0.45rem;
+}
+
+.gy-search--compact .gy-seg__icon {
+  font-size: 18px;
 }
 
 .gy-search--compact .gy-seg__label {
-  font-size: 0.58rem;
+  font-size: 0.55rem;
+  letter-spacing: 0.1em;
 }
 
 .gy-search--compact .gy-seg__value {
-  font-size: 0.84rem;
+  font-size: 0.78rem;
+  line-height: 1.2;
+}
+
+.gy-search--compact .gy-seg__nights {
+  margin-left: 0.25rem;
+  padding: 0.02rem 0.35rem;
+  font-size: 0.68em;
 }
 
 .gy-search--compact .gy-search__submit {
-  min-height: 2.6rem;
-  padding: 0 1.15rem;
+  min-height: 2.4rem;
+  padding: 0 0.95rem;
+  gap: 0.35rem;
+  font-size: 0.7rem;
+}
+
+.gy-search--compact .gy-search__submit :deep(.q-icon) {
+  font-size: 18px;
 }
 
 .gy-search--compact .gy-search__error {
@@ -815,12 +848,32 @@ async function onSubmit() {
   justify-self: start;
 }
 
+/* Sticky header: keep a single slim pill (~48–56px) even in mid-width
+   containers so Sign in / Book now still fit beside it. */
+.gy-search--compact.gy-search--no-rates .gy-search__bar {
+  min-height: 3rem;
+  max-height: 3.5rem;
+  padding: 0.15rem 0.15rem 0.15rem 0.2rem;
+}
+
+.gy-search--compact.gy-search--no-rates .gy-seg__btn {
+  min-height: 2.65rem;
+  padding: 0.15rem 0.7rem;
+}
+
+.gy-search--compact.gy-search--no-rates .gy-search__submit {
+  min-height: 2.5rem;
+  min-width: 2.5rem;
+  padding: 0 0.85rem;
+  border-radius: 999px;
+}
+
 /* Tablet / mid-width bars: 2-row layout so values stay readable and the
    submit label is never clipped. Covers ~768–1100px containers (home,
-   hotel pages, booking). */
+   hotel pages, booking). Header compact (no-rates) stays a single row. */
 @container gy-search (min-width: 561px) and (max-width: 1100px) {
   .gy-search__bar,
-  .gy-search--compact .gy-search__bar {
+  .gy-search--compact:not(.gy-search--no-rates) .gy-search__bar {
     grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
     grid-template-areas:
       "dest dates action"
@@ -828,6 +881,7 @@ async function onSubmit() {
     border-radius: 22px;
     gap: 0.15rem 0.2rem;
     padding: 0.45rem;
+    max-height: none;
   }
 
   .gy-seg--dest {
@@ -858,7 +912,7 @@ async function onSubmit() {
   }
 
   .gy-seg__btn,
-  .gy-search--compact .gy-seg__btn {
+  .gy-search--compact:not(.gy-search--no-rates) .gy-seg__btn {
     min-height: 3.1rem;
     padding: 0.4rem 0.85rem;
     border-radius: 14px;
@@ -866,12 +920,12 @@ async function onSubmit() {
   }
 
   .gy-seg__label,
-  .gy-search--compact .gy-seg__label {
+  .gy-search--compact:not(.gy-search--no-rates) .gy-seg__label {
     font-size: 0.58rem;
   }
 
   .gy-seg__value,
-  .gy-search--compact .gy-seg__value {
+  .gy-search--compact:not(.gy-search--no-rates) .gy-seg__value {
     font-size: 0.84rem;
     white-space: normal;
     overflow: visible;
@@ -882,7 +936,7 @@ async function onSubmit() {
   }
 
   .gy-search__submit,
-  .gy-search--compact .gy-search__submit {
+  .gy-search--compact:not(.gy-search--no-rates) .gy-search__submit {
     width: auto;
     min-width: 5.5rem;
     height: 100%;
@@ -902,6 +956,70 @@ async function onSubmit() {
     clip-path: none;
     white-space: normal;
     font-size: 0.68rem;
+  }
+
+  /* Header compact: stay one slim row; tighten type so nothing clips. */
+  .gy-search--compact.gy-search--no-rates .gy-search__bar {
+    grid-template-columns:
+      minmax(0, 1.15fr) minmax(0, 1.35fr) minmax(0, 1.1fr)
+      auto;
+    grid-template-areas: none;
+    border-radius: 999px;
+    gap: 0;
+    padding: 0.15rem;
+    max-height: 3.5rem;
+  }
+
+  .gy-search--compact.gy-search--no-rates .gy-seg--dest,
+  .gy-search--compact.gy-search--no-rates .gy-seg--dates,
+  .gy-search--compact.gy-search--no-rates .gy-seg--guests,
+  .gy-search--compact.gy-search--no-rates .gy-search__action {
+    grid-area: auto;
+  }
+
+  .gy-search--compact.gy-search--no-rates .gy-search__action {
+    align-self: center;
+    padding: 0 0.1rem 0 0.2rem;
+  }
+
+  .gy-search--compact.gy-search--no-rates .gy-seg + .gy-seg::before {
+    display: block;
+  }
+
+  .gy-search--compact.gy-search--no-rates .gy-seg__btn {
+    min-height: 2.65rem;
+    padding: 0.15rem 0.65rem;
+    border-radius: 999px;
+    gap: 0.4rem;
+  }
+
+  .gy-search--compact.gy-search--no-rates .gy-seg__label {
+    font-size: 0.52rem;
+  }
+
+  .gy-search--compact.gy-search--no-rates .gy-seg__value {
+    font-size: 0.74rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    -webkit-line-clamp: unset;
+    -webkit-box-orient: unset;
+  }
+
+  .gy-search--compact.gy-search--no-rates .gy-search__submit {
+    width: auto;
+    min-width: 2.5rem;
+    height: auto;
+    min-height: 2.5rem;
+    padding: 0 0.75rem;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  .gy-search--compact.gy-search--no-rates .gy-search__submit-text {
+    font-size: 0.65rem;
+    white-space: nowrap;
   }
 }
 
