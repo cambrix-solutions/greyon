@@ -93,6 +93,8 @@
       </div>
     </section>
 
+    <CustomerReviewsSection />
+
     <section class="locations-band">
       <div class="gy-container locations-band__intro">
         <header v-reveal class="section-intro section-intro--row">
@@ -190,6 +192,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import BookingSearchWidget from "@/components/BookingSearchWidget.vue";
+import CustomerReviewsSection from "@/components/CustomerReviewsSection.vue";
 import HotelCard from "@/components/HotelCard.vue";
 import SeoHead from "@/components/SeoHead.vue";
 import { useAuthStore } from "@/stores/auth-store";
