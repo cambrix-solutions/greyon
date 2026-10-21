@@ -322,13 +322,13 @@ const props = withDefaults(
     compact?: boolean;
     /**
      * When true (default), this instance is the page’s main search bar.
-     * MainLayout hides the navbar compact search while it is in view.
-     * Set false for the header compact bar itself.
+     * MainLayout hides the header search trigger while it is in view.
+     * Set false for the header search dialog / non-page instances.
      */
     pageAnchor?: boolean;
     /**
      * Special rates segment (home, booking, hotel page search).
-     * Set false for the sticky header bar so Sign in / Book now still fit.
+     * Keep false for slim header contexts; full page search shows it.
      */
     showSpecialRates?: boolean;
   }>(),

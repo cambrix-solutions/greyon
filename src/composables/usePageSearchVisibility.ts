@@ -2,11 +2,11 @@ import { computed, onBeforeUnmount, ref, watch, type Ref } from "vue";
 
 /**
  * Tracks whether any in-page booking search bar is visible in the viewport.
- * MainLayout hides the navbar compact search while this is true so the two
- * bars never stack. Both bars share booking-store search state.
+ * MainLayout hides the header search trigger while this is true so the page
+ * search and header trigger never compete. Both share booking-store state.
  *
  * Header rootMargin pulls the “visible” line below the sticky header so the
- * compact bar appears as soon as the page search scrolls under the nav.
+ * trigger appears as soon as the page search scrolls under the nav.
  */
 
 const visibleEls = ref(new Set<Element>());
