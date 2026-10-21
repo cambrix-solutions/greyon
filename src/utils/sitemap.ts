@@ -31,6 +31,8 @@ export function buildCmsSitemapEntries(input: {
   const list: SitemapEntry[] = [
     { loc: "/", changefreq: "weekly", priority: "1.0" },
     { loc: "/hotels", changefreq: "weekly", priority: "0.9" },
+    { loc: "/apartments", changefreq: "weekly", priority: "0.85" },
+    { loc: "/about", changefreq: "monthly", priority: "0.5" },
     { loc: "/locations", changefreq: "weekly", priority: "0.8" },
     { loc: "/map", changefreq: "weekly", priority: "0.7" },
     { loc: "/privacy", changefreq: "yearly", priority: "0.3" },

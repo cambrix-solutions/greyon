@@ -251,7 +251,18 @@ export const useCmsStore = defineStore("cms", () => {
     ratePlans: RatePlan[];
   }) {
     locations.value = data.locations;
-    hotels.value = data.hotels;
+    // Preserve detail-only fields (services/products) if a hotel page already
+    // hydrated them — catalog list responses omit those and would wipe them.
+    const prevById = new Map(hotels.value.map(h => [h.id, h]));
+    hotels.value = data.hotels.map(h => {
+      const prev = prevById.get(h.id);
+      if (!prev) return h;
+      return {
+        ...h,
+        services: h.services ?? prev.services,
+        products: h.products ?? prev.products
+      };
+    });
     roomTypes.value = data.roomTypes;
     ratePlans.value = data.ratePlans;
   }

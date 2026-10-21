@@ -20,6 +20,8 @@
         <p class="gy-footer__title">Explore</p>
         <nav class="gy-footer__links">
           <router-link to="/hotels">Hotels</router-link>
+          <router-link to="/apartments">Apartments</router-link>
+          <router-link to="/about">About</router-link>
           <router-link to="/locations">Destinations</router-link>
           <router-link to="/map">Map</router-link>
           <router-link v-if="auth.featureEnabled('news_public')" to="/news"
@@ -119,10 +121,14 @@ const year = new Date().getFullYear();
 
 .gy-footer__links {
   display: grid;
-  gap: 0.5rem;
+  gap: 0.15rem;
 }
 
 .gy-footer__links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding-block: 0.35rem;
   transition:
     color 0.25s ease,
     padding-left 0.25s ease;

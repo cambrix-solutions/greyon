@@ -37,7 +37,7 @@
           map-options
           options-dense
           label="Destination"
-          style="min-width: 180px; background: #fff"
+          class="media-toolbar-select"
           popup-content-class="admin-filter-menu"
           @update:model-value="onLocationFilterChange"
         />
@@ -50,7 +50,7 @@
           map-options
           options-dense
           label="Hotel"
-          style="min-width: 180px; background: #fff"
+          class="media-toolbar-select"
           popup-content-class="admin-filter-menu"
         />
       </template>
@@ -65,11 +65,11 @@
         v-for="(item, i) in filtered"
         :key="item.id"
         v-reveal="{ delay: `${Math.min(i, 5) * 60}ms` }"
-        class="col-6 col-sm-4 col-md-3"
+        class="col-12 col-sm-6 col-md-4 col-lg-3"
       >
         <q-card flat bordered class="bg-white media-card gy-interactive">
           <q-img :src="item.src" :ratio="4 / 3" :alt="item.alt" />
-          <q-card-section class="q-gutter-sm">
+          <q-card-section class="q-gutter-sm media-card__body">
             <p class="media-card__scope">{{ scopeLabel(item) }}</p>
             <q-input
               dense
@@ -81,36 +81,40 @@
                 v => cms.updateMedia(item.id, { alt: String(v ?? '') })
               "
             />
-            <q-select
-              dense
-              outlined
-              emit-value
-              map-options
-              options-dense
-              label="Destination"
-              :model-value="item.locationId ?? null"
-              :options="locationOptions"
-              :disable="!auth.canAction('media', 'update')"
-              @update:model-value="
-                (v: string) => patchScope(item.id, v, item.hotelId)
-              "
-            />
-            <q-select
-              dense
-              outlined
-              emit-value
-              map-options
-              options-dense
-              clearable
-              label="Hotel (optional)"
-              :model-value="item.hotelId ?? null"
-              :options="hotelOptionsForLocation(item.locationId)"
-              :disable="!auth.canAction('media', 'update') || !item.locationId"
-              @update:model-value="
-                (v: string | null) => patchScope(item.id, item.locationId, v)
-              "
-            />
-            <div class="row q-gutter-sm">
+            <div class="media-card__scope-fields">
+              <q-select
+                dense
+                outlined
+                emit-value
+                map-options
+                options-dense
+                label="Destination"
+                :model-value="item.locationId ?? null"
+                :options="locationOptions"
+                :disable="!auth.canAction('media', 'update')"
+                @update:model-value="
+                  (v: string) => patchScope(item.id, v, item.hotelId)
+                "
+              />
+              <q-select
+                dense
+                outlined
+                emit-value
+                map-options
+                options-dense
+                clearable
+                label="Hotel (optional)"
+                :model-value="item.hotelId ?? null"
+                :options="hotelOptionsForLocation(item.locationId)"
+                :disable="
+                  !auth.canAction('media', 'update') || !item.locationId
+                "
+                @update:model-value="
+                  (v: string | null) => patchScope(item.id, item.locationId, v)
+                "
+              />
+            </div>
+            <div class="media-card__actions">
               <q-btn
                 dense
                 flat
@@ -423,8 +427,20 @@ function remove(id: string) {
 </script>
 
 <style scoped>
+.media-toolbar-select {
+  flex: 1 1 140px;
+  min-width: 0;
+  max-width: 100%;
+  background: #fff;
+}
+
 .media-card {
   overflow: hidden;
+  min-width: 0;
+}
+
+.media-card__body {
+  min-width: 0;
 }
 
 .media-card__scope {
@@ -434,5 +450,28 @@ function remove(id: string) {
   text-transform: uppercase;
   color: var(--gy-gold-deep);
   font-weight: 600;
+}
+
+.media-card__scope-fields {
+  display: grid;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.media-card__scope-fields :deep(.q-field) {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.media-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+@media (min-width: 900px) {
+  .media-card__scope-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 </style>

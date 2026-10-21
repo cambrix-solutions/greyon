@@ -123,11 +123,12 @@
           >
           <q-btn
             flat
-            dense
             round
             icon="menu"
             class="lt-md gy-menu-btn"
             aria-label="Open menu"
+            size="md"
+            padding="10px"
             @click="openDrawer"
           />
         </div>
@@ -374,7 +375,7 @@
         </transition>
       </router-view>
       <SiteFooter />
-      <CookieNotice />
+      <CookieNotice :hidden="drawerOpen" />
     </q-page-container>
   </q-layout>
 </template>
@@ -684,6 +685,11 @@ onUnmounted(() => {
   color: var(--gy-ink);
 }
 
+.gy-menu-btn {
+  min-width: 44px !important;
+  min-height: 44px !important;
+}
+
 .gy-header__bar {
   display: flex;
   align-items: center;
@@ -896,7 +902,13 @@ onUnmounted(() => {
 
 /* ---- Mobile drawer sheet ---- */
 .gy-drawer {
+  /* Above Quasar defaults; cookie banner is also hidden while open. */
+  z-index: 6000 !important;
   background: var(--gy-cream) !important;
+}
+
+.gy-layout :deep(.q-drawer__backdrop) {
+  z-index: 5990 !important;
 }
 
 .gy-drawer :deep(.q-drawer__content) {
@@ -1206,9 +1218,18 @@ onUnmounted(() => {
 .gy-drawer__footer {
   display: grid;
   gap: 0.65rem;
-  padding: 0.9rem 1rem calc(0.9rem + env(safe-area-inset-bottom, 0px));
+  /* Extra bottom pad clears the cookie banner if it ever peeks through. */
+  padding: 0.9rem 1rem
+    calc(
+      0.9rem + env(safe-area-inset-bottom, 0px) +
+        var(--gy-cookie-clearance, 0px)
+    );
   border-top: 1px solid rgba(69, 76, 75, 0.1);
   background: var(--gy-white);
+}
+
+.gy-layout:has(.cookie-notice) {
+  --gy-cookie-clearance: 7.5rem;
 }
 
 .gy-drawer__cta {

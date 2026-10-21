@@ -130,6 +130,11 @@ const linkLabel = computed(() => {
 }
 
 .map-embed__link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding-block: 0.45rem;
   font-size: 0.9rem;
   color: var(--gy-forest);
   text-decoration: underline;

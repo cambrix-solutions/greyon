@@ -288,20 +288,57 @@ function onUpdate(value: boolean) {
 }
 
 @media (max-width: 600px) {
+  .admin-dialog,
+  .admin-dialog--sm,
+  .admin-dialog--md,
+  .admin-dialog--lg,
+  .admin-dialog--xl,
+  .admin-dialog--2xl {
+    width: 100vw;
+    max-width: 100vw;
+    max-height: 100dvh;
+    border-radius: 0 !important;
+  }
+
   .admin-dialog__head,
   .admin-dialog__body,
   .admin-dialog__foot {
     padding-left: 1rem;
     padding-right: 1rem;
+    min-width: 0;
   }
 
   .admin-dialog__notice {
     margin-left: 1rem;
     margin-right: 1rem;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .admin-dialog__body {
+    overflow-x: hidden;
+  }
+
+  .admin-dialog__body :deep(*) {
+    min-width: 0;
+  }
+
+  .admin-dialog__copy {
+    min-width: 0;
   }
 
   .admin-dialog__icon {
     display: none;
+  }
+
+  .admin-dialog__foot {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .admin-dialog__foot :deep(.q-btn) {
+    width: 100%;
   }
 }
 </style>

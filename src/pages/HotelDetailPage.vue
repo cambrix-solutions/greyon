@@ -262,6 +262,9 @@
             v-if="hotel.policies.length"
             :items="hotel.policies"
             :show-icons="false"
+            wrap
+            :limit="4"
+            sheet-title="Stay policies"
           />
           <p v-else class="gy-muted">Policies will appear here when set.</p>
         </div>
@@ -321,9 +324,16 @@ watch(
   () => String(route.params.slug),
   slug => {
     if (!slug) return;
-    void cms.hydrateHotelDetail(slug).catch(() => {
-      /* catalog list still usable if detail enrich fails */
-    });
+    void (async () => {
+      try {
+        // Wait for the list catalog so a later applyCatalog cannot race past
+        // this detail enrich and drop services/products.
+        await cms.ensurePublicCatalog();
+        await cms.hydrateHotelDetail(slug);
+      } catch {
+        /* catalog list still usable if detail enrich fails */
+      }
+    })();
   },
   { immediate: true }
 );

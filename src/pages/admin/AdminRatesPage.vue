@@ -23,14 +23,14 @@
           outlined
           clearable
           label="Search plans / rooms / hotels"
-          style="min-width: 220px; background: #fff"
+          class="rates-toolbar-field"
         />
         <q-select
           v-model="planStatusFilter"
           :options="planStatusOptions"
           dense
           outlined
-          style="min-width: 140px; background: #fff"
+          class="rates-toolbar-field rates-toolbar-field--sm"
           label="Status"
         />
         <q-select
@@ -42,7 +42,7 @@
           map-options
           clearable
           label="Hotel"
-          style="min-width: 180px; background: #fff"
+          class="rates-toolbar-field"
         />
         <q-select
           v-model="planRoomFilter"
@@ -53,7 +53,7 @@
           map-options
           clearable
           label="Room type"
-          style="min-width: 200px; background: #fff"
+          class="rates-toolbar-field"
         />
         <q-select
           v-model="planPageSize"
@@ -63,7 +63,7 @@
           emit-value
           map-options
           label="Per page"
-          style="min-width: 110px; background: #fff"
+          class="rates-toolbar-field rates-toolbar-field--sm"
         />
       </template>
     </AdminPageHeader>
@@ -77,69 +77,141 @@
       </template>
     </q-banner>
 
-    <div v-reveal="{ delay: '140ms' }" class="admin-scroll">
-      <q-markup-table flat bordered class="bg-white">
-        <thead>
-          <tr>
-            <th class="text-left">Hotel</th>
-            <th class="text-left">Price plan</th>
-            <th class="text-left">Room type</th>
-            <th class="text-right">Default price</th>
-            <th class="text-left">Tax / fee</th>
-            <th class="text-left">Status</th>
-            <th class="text-left">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="plan in pagedPlans" :key="plan.id">
-            <td>{{ hotelNameForPlan(plan.roomTypeId) }}</td>
-            <td>{{ plan.name }}</td>
-            <td>{{ roomName(plan.roomTypeId) }}</td>
-            <td class="text-right">${{ plan.basePrice }}</td>
-            <td>{{ plan.taxPercent }}% + {{ plan.serviceFeePercent }}%</td>
-            <td>{{ plan.status }}</td>
-            <td>
-              <q-btn
-                v-if="auth.canAction('rates', 'update')"
-                flat
-                dense
-                color="primary"
-                label="Edit"
-                @click="openEdit(plan)"
-              />
-              <q-btn
-                v-if="auth.isDeveloper"
-                flat
-                dense
-                color="primary"
-                label="Daily rooms"
-                @click="jumpToInventory(plan.roomTypeId)"
-              />
-              <q-btn
-                v-if="auth.canAction('rates', 'delete')"
-                flat
-                dense
-                color="negative"
-                label="Delete"
-                @click="remove(plan.id)"
-              />
-            </td>
-          </tr>
-          <tr v-if="!filteredPlans.length">
-            <td colspan="7" class="text-grey">
-              No price plans match.
-              <q-btn
-                v-if="auth.canAction('rates', 'create')"
-                flat
-                dense
-                color="primary"
-                label="Add price plan"
-                @click="openCreate"
-              />
-            </td>
-          </tr>
-        </tbody>
-      </q-markup-table>
+    <div v-reveal="{ delay: '140ms' }" class="admin-data">
+      <div class="admin-data__table">
+        <q-markup-table flat bordered class="bg-white">
+          <thead>
+            <tr>
+              <th class="text-left">Hotel</th>
+              <th class="text-left">Price plan</th>
+              <th class="text-left">Room type</th>
+              <th class="text-right">Default price</th>
+              <th class="text-left">Tax / fee</th>
+              <th class="text-left">Status</th>
+              <th class="text-left">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="plan in pagedPlans" :key="plan.id">
+              <td>{{ hotelNameForPlan(plan.roomTypeId) }}</td>
+              <td>{{ plan.name }}</td>
+              <td>{{ roomName(plan.roomTypeId) }}</td>
+              <td class="text-right">${{ plan.basePrice }}</td>
+              <td>{{ plan.taxPercent }}% + {{ plan.serviceFeePercent }}%</td>
+              <td>{{ plan.status }}</td>
+              <td>
+                <q-btn
+                  v-if="auth.canAction('rates', 'update')"
+                  flat
+                  dense
+                  color="primary"
+                  label="Edit"
+                  @click="openEdit(plan)"
+                />
+                <q-btn
+                  v-if="auth.isDeveloper"
+                  flat
+                  dense
+                  color="primary"
+                  label="Daily rooms"
+                  @click="jumpToInventory(plan.roomTypeId)"
+                />
+                <q-btn
+                  v-if="auth.canAction('rates', 'delete')"
+                  flat
+                  dense
+                  color="negative"
+                  label="Delete"
+                  @click="remove(plan.id)"
+                />
+              </td>
+            </tr>
+            <tr v-if="!filteredPlans.length">
+              <td colspan="7" class="text-grey">
+                No price plans match.
+                <q-btn
+                  v-if="auth.canAction('rates', 'create')"
+                  flat
+                  dense
+                  color="primary"
+                  label="Add price plan"
+                  @click="openCreate"
+                />
+              </td>
+            </tr>
+          </tbody>
+        </q-markup-table>
+      </div>
+
+      <div class="admin-data__cards" aria-label="Price plans">
+        <article
+          v-for="plan in pagedPlans"
+          :key="`card-${plan.id}`"
+          class="admin-data-card"
+        >
+          <div class="admin-data-card__head">
+            <div>
+              <h3 class="admin-data-card__title">{{ plan.name }}</h3>
+              <p class="admin-data-card__sub">{{
+                hotelNameForPlan(plan.roomTypeId)
+              }}</p>
+            </div>
+            <span class="text-caption text-grey-7">{{ plan.status }}</span>
+          </div>
+          <dl class="admin-data-card__rows">
+            <div class="admin-data-card__row">
+              <dt>Room type</dt>
+              <dd>{{ roomName(plan.roomTypeId) }}</dd>
+            </div>
+            <div class="admin-data-card__row">
+              <dt>Default price</dt>
+              <dd>${{ plan.basePrice }}</dd>
+            </div>
+            <div class="admin-data-card__row">
+              <dt>Tax / fee</dt>
+              <dd>{{ plan.taxPercent }}% + {{ plan.serviceFeePercent }}%</dd>
+            </div>
+          </dl>
+          <div class="admin-data-card__actions">
+            <q-btn
+              v-if="auth.canAction('rates', 'update')"
+              flat
+              dense
+              color="primary"
+              label="Edit"
+              @click="openEdit(plan)"
+            />
+            <q-btn
+              v-if="auth.isDeveloper"
+              flat
+              dense
+              color="primary"
+              label="Daily rooms"
+              @click="jumpToInventory(plan.roomTypeId)"
+            />
+            <q-btn
+              v-if="auth.canAction('rates', 'delete')"
+              flat
+              dense
+              color="negative"
+              label="Delete"
+              @click="remove(plan.id)"
+            />
+          </div>
+        </article>
+        <p v-if="!filteredPlans.length" class="admin-data-card__empty">
+          No price plans match.
+          <q-btn
+            v-if="auth.canAction('rates', 'create')"
+            flat
+            dense
+            color="primary"
+            label="Add price plan"
+            @click="openCreate"
+          />
+        </p>
+      </div>
+
       <div v-if="filteredPlans.length" class="rates-pager">
         <p class="rates-pager__meta">
           Showing {{ planRangeStart }}–{{ planRangeEnd }} of
@@ -1097,6 +1169,17 @@ function remove(id: string) {
 </script>
 
 <style scoped>
+.rates-toolbar-field {
+  flex: 1 1 140px;
+  min-width: 0;
+  max-width: 100%;
+  background: #fff;
+}
+
+.rates-toolbar-field--sm {
+  flex: 0 1 120px;
+}
+
 .cal {
   border: 1px solid rgba(0, 0, 0, 0.12);
   border-radius: 8px;

@@ -6,7 +6,8 @@
         `feature-chips--${size}`,
         {
           'feature-chips--on-dark': onDark,
-          'feature-chips--expandable': expandable
+          'feature-chips--expandable': expandable,
+          'feature-chips--wrap': wrap
         }
       ]"
     >
@@ -86,6 +87,8 @@ const props = withDefaults(
     /** On phones, +N opens a bottom sheet instead of inline expand. */
     sheetOnMobile?: boolean;
     sheetTitle?: string;
+    /** Allow chip text to wrap onto multiple lines (policies, long labels). */
+    wrap?: boolean;
   }>(),
   {
     moreCount: 0,
@@ -95,7 +98,8 @@ const props = withDefaults(
     limit: 6,
     expandable: true,
     sheetOnMobile: true,
-    sheetTitle: "Amenities"
+    sheetTitle: "Amenities",
+    wrap: false
   }
 );
 
@@ -229,15 +233,33 @@ function iconFor(label: string) {
   white-space: nowrap;
 }
 
+.feature-chips--wrap li {
+  max-width: 100%;
+  align-items: flex-start;
+  border-radius: 14px;
+  white-space: normal;
+}
+
+.feature-chips--wrap li span {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+  overflow-wrap: anywhere;
+}
+
 .feature-chips--sm li {
   padding: 0.3rem 0.68rem;
   font-size: 0.72rem;
 }
 
 .feature-chips__more-btn {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  padding: 0;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.35rem 0.15rem;
   border: 0;
   background: transparent;
   color: var(--gy-forest);
@@ -249,6 +271,8 @@ function iconFor(label: string) {
 
 .feature-chips li:has(.feature-chips__more-btn) {
   background: rgba(98, 112, 99, 0.12);
+  min-height: 44px;
+  padding-block: 0;
 }
 
 .feature-chips li:has(.feature-chips__more-btn):hover {

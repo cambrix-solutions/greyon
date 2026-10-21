@@ -109,14 +109,29 @@ withDefaults(
 }
 
 @media (max-width: 720px) {
+  .admin-form-section {
+    min-width: 0;
+    padding-left: 0.85rem;
+    padding-right: 0.85rem;
+  }
+
   .admin-form-section__fields--2,
   .admin-form-section__fields--3 {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .admin-form-section__fields > .admin-form-span-2,
-  .admin-form-section__fields > .admin-form-span-3 {
+  .admin-form-section__fields > .admin-form-span-3,
+  .admin-form-section__fields :deep(.admin-form-span-2),
+  .admin-form-section__fields :deep(.admin-form-span-3) {
     grid-column: auto;
+  }
+
+  .admin-form-section__fields :deep(.q-field),
+  .admin-form-section__fields :deep(.q-select),
+  .admin-form-section__fields :deep(.q-input) {
+    min-width: 0;
+    max-width: 100%;
   }
 }
 </style>

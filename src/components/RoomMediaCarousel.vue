@@ -207,10 +207,17 @@ function openGallery(idx: number) {
 }
 
 .room-media__carousel :deep(.q-carousel__navigation .q-btn) {
+  position: relative;
   margin: 0 0.12rem;
   padding: 0;
-  min-height: 0;
-  min-width: 0;
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.room-media__carousel :deep(.q-carousel__navigation .q-btn::before) {
+  content: "";
+  position: absolute;
+  inset: 0;
 }
 
 .room-media__carousel :deep(.q-carousel__navigation-icon) {

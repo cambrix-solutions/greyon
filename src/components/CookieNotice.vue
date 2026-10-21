@@ -1,5 +1,5 @@
 <template>
-  <div v-if="visible" class="cookie-notice">
+  <div v-if="visible && !hidden" class="cookie-notice">
     <p>
       Greyon uses essential cookies for site operation. Analytics cookies are
       enabled only when configured.
@@ -11,6 +11,14 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
+
+withDefaults(
+  defineProps<{
+    /** Hide while the mobile drawer is open so footer CTAs stay reachable. */
+    hidden?: boolean;
+  }>(),
+  { hidden: false }
+);
 
 const key = "greyon_cookie_ok";
 const visible = ref(
@@ -39,6 +47,8 @@ function accept() {
   color: rgba(255, 255, 255, 0.9);
   box-shadow: var(--gy-shadow);
 }
+
+/* While the mobile drawer is open it sits above this banner (see MainLayout). */
 
 .cookie-notice a {
   color: var(--gy-gold);
