@@ -32,16 +32,17 @@
               key="search"
               class="gy-header__search"
             >
-              <!-- Desktop: slim single-row pill (no Special rates). -->
+              <!-- md+ (≥1024): slim single-row pill (no Special rates).
+                   Quasar gt-sm = greater than sm breakpoint = md/lg/xl. -->
               <BookingSearchWidget
-                class="gt-md"
+                class="gt-sm gy-header__search-widget"
                 compact
                 :show-special-rates="false"
                 :page-anchor="false"
                 :navigate="true"
                 submit-label="Search"
               />
-              <!-- Tablet / phone: compact trigger that opens the full search. -->
+              <!-- xs/sm (<1024): compact trigger that opens the full search. -->
               <button
                 type="button"
                 class="lt-md gy-header__search-pill"
@@ -817,6 +818,12 @@ onUnmounted(() => {
   margin-inline: 0.35rem;
   display: flex;
   justify-content: center;
+  align-items: center;
+  min-width: 0;
+}
+
+.gy-header__search-widget {
+  width: 100%;
   min-width: 0;
 }
 
