@@ -21,9 +21,10 @@ const PORTFOLIO_PATHS = [
 ] as const;
 
 export function buildCmsSitemapEntries(input: {
-  hotels: Array<{ slug: string }>;
+  hotels: Array<{ id?: string; slug: string }>;
   locations: Array<{ slug: string }>;
   news: Array<{ slug: string; publishedAt?: string }>;
+  roomTypes?: Array<{ slug: string; hotelId: string; status?: string }>;
   /** Defaults: all gated surfaces off so disabled routes never leak into the XML. */
   enabled?: SitemapPublicFlags;
 }): SitemapEntry[] {
@@ -68,11 +69,26 @@ export function buildCmsSitemapEntries(input: {
     }
   }
 
+  const hotelById = new Map(
+    input.hotels
+      .filter(h => h.id != null && String(h.id) !== "")
+      .map(h => [String(h.id), h.slug])
+  );
   for (const hotel of input.hotels) {
     list.push({
       loc: `/hotels/${hotel.slug}`,
       changefreq: "weekly",
       priority: "0.8"
+    });
+  }
+  for (const room of input.roomTypes ?? []) {
+    if (room.status && room.status !== "published") continue;
+    const hotelSlug = hotelById.get(String(room.hotelId));
+    if (!hotelSlug || !room.slug) continue;
+    list.push({
+      loc: `/hotels/${hotelSlug}/rooms/${room.slug}`,
+      changefreq: "weekly",
+      priority: "0.7"
     });
   }
   for (const loc of input.locations) {

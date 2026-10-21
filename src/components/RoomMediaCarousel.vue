@@ -33,6 +33,7 @@
         class="room-media__slide"
       >
         <button
+          v-if="lightbox"
           type="button"
           class="room-media__tap"
           :aria-label="`View photo ${Number(idx) + 1} of ${images.length}`"
@@ -47,13 +48,23 @@
             @load="markLoaded(src)"
           />
         </button>
+        <div v-else class="room-media__tap room-media__tap--static">
+          <img
+            :src="src"
+            :alt="`${alt} photo ${Number(idx) + 1}`"
+            :loading="idx === 0 ? 'eager' : 'lazy'"
+            decoding="async"
+            @error="markBroken(src)"
+            @load="markLoaded(src)"
+          />
+        </div>
       </q-carousel-slide>
     </q-carousel>
 
     <div v-if="badge" class="room-media__badge">{{ badge }}</div>
 
     <q-dialog
-      v-if="hasImages && !allBroken"
+      v-if="lightbox && hasImages && !allBroken"
       v-model="galleryOpen"
       maximized
       transition-show="fade"
@@ -111,12 +122,15 @@ const props = withDefaults(
     badge?: string;
     /** Stretch to parent height (horizontal card layouts). */
     fill?: boolean;
+    /** When false, photos are display-only (no fullscreen lightbox). */
+    lightbox?: boolean;
   }>(),
   {
     images: () => [],
     alt: "Room",
     badge: "",
-    fill: false
+    fill: false,
+    lightbox: true
   }
 );
 
@@ -167,7 +181,7 @@ function markLoaded(src: string) {
 }
 
 function openGallery(idx: number) {
-  if (!hasImages.value || allBroken.value) return;
+  if (!props.lightbox || !hasImages.value || allBroken.value) return;
   gallerySlide.value = idx;
   galleryOpen.value = true;
 }
@@ -243,6 +257,11 @@ function openGallery(idx: number) {
   border: 0;
   background: transparent;
   cursor: zoom-in;
+}
+
+.room-media__tap--static {
+  cursor: inherit;
+  pointer-events: none;
 }
 
 .room-media__tap img,

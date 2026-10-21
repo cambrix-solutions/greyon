@@ -51,6 +51,7 @@ const entries = computed(() =>
     hotels: cms.publishedHotels,
     locations: cms.publishedLocations,
     news: cms.publishedNews,
+    roomTypes: cms.roomTypes,
     // Match router public gates — never advertise routes that 404 as "not enabled".
     // Portfolio stubs stay out even when the nav gate is on (coming-soon pages).
     enabled: {
