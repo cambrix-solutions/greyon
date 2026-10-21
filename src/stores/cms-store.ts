@@ -595,6 +595,14 @@ export const useCmsStore = defineStore("cms", () => {
       r => r.hotelId === hotelId && r.status === "published"
     );
   }
+  /** Resolve a published room by slug or id within a hotel. */
+  function getRoomTypeByHotelAndKey(hotelId: string, key: string) {
+    const needle = key.trim();
+    if (!needle) return undefined;
+    return getRoomTypesByHotelId(hotelId).find(
+      r => r.slug === needle || r.id === needle
+    );
+  }
   function getRatePlanByRoomTypeId(roomTypeId: string) {
     return ratePlans.value.find(
       r => r.roomTypeId === roomTypeId && r.status === "published"
@@ -1388,6 +1396,7 @@ export const useCmsStore = defineStore("cms", () => {
     getLocationById,
     getNewsBySlug,
     getRoomTypesByHotelId,
+    getRoomTypeByHotelAndKey,
     getRatePlanByRoomTypeId,
     getRoomTypeById,
     getRatePlanById,

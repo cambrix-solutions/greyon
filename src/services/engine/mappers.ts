@@ -19,6 +19,7 @@ import type {
   RatePlan,
   RoomType
 } from "@/types/greyon";
+import { slugify } from "@/utils/slugify";
 
 /** Site SEO / contact settings (matches cms-store SiteSettings). */
 export interface HeroSlide {
@@ -392,11 +393,15 @@ export interface EngineRatePlan {
 }
 
 export function mapEngineRoomType(row: EngineRoomType): RoomType {
+  const rawSlug = typeof row.slug === "string" ? row.slug.trim() : "";
+  // Client-only fallback when the engine omits slug — do not invent server fields.
+  const slug = rawSlug || slugify(row.name || "") || String(row.id);
+
   return {
     id: String(row.id),
     hotelId: String(row.hotelId),
     name: row.name,
-    slug: row.slug,
+    slug,
     description: row.description ?? "",
     images: row.images ?? [],
     bedType: row.bedType ?? "",

@@ -209,9 +209,11 @@
             :price-hint="
               pricedRoom(room.id) ? 'incl. taxes & fees for your dates' : ''
             "
+            :detail-to="roomDetailPath(hotel, room)"
+            :show-view-details="true"
             :cta-label="
               hasSearchedDates && pricedRoom(room.id)
-                ? 'View room details'
+                ? 'Book'
                 : 'Check availability'
             "
             :cta-outline="!(hasSearchedDates && pricedRoom(room.id))"
@@ -251,7 +253,7 @@
             stickyPriced ? openRoom(stickyPriced.roomType.id) : focusSearch()
           "
         >
-          {{ stickyPriced ? "View room details" : "Check availability" }}
+          {{ stickyPriced ? "Book" : "Check availability" }}
         </button>
       </div>
 
@@ -311,6 +313,7 @@ import SeoHead from "@/components/SeoHead.vue";
 import { useBookingStore } from "@/stores/booking-store";
 import { useCmsStore } from "@/stores/cms-store";
 import type { HotelProductRef, RoomType } from "@/types/greyon";
+import { roomDetailPath } from "@/utils/roomPath";
 
 const route = useRoute();
 const router = useRouter();
