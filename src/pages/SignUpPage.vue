@@ -72,15 +72,33 @@
       </label>
       <label class="auth-field">
         Password
-        <input
+        <q-input
           v-model="password"
-          type="password"
+          :type="showPassword ? 'text' : 'password'"
+          outlined
+          dense
+          hide-bottom-space
           required
           minlength="8"
           autocomplete="new-password"
           placeholder="8+ chars, upper, lower, number, symbol"
-          @input="touchedPassword = true"
-        />
+          class="auth-q-input"
+          @update:model-value="touchedPassword = true"
+        >
+          <template #append>
+            <button
+              type="button"
+              class="auth-eye"
+              :aria-label="showPassword ? 'Hide password' : 'Show password'"
+              @click="showPassword = !showPassword"
+            >
+              <q-icon
+                :name="showPassword ? 'visibility_off' : 'visibility'"
+                size="22px"
+              />
+            </button>
+          </template>
+        </q-input>
       </label>
       <div v-if="password.length" class="pw-meter" aria-live="polite">
         <div class="pw-meter__bar">
@@ -100,15 +118,35 @@
         :class="{ 'auth-field--invalid': confirmMismatch }"
       >
         Confirm password
-        <input
+        <q-input
           v-model="passwordConfirmation"
-          type="password"
+          :type="showPasswordConfirm ? 'text' : 'password'"
+          outlined
+          dense
+          hide-bottom-space
           required
           minlength="8"
           autocomplete="new-password"
           placeholder="Repeat password"
-          @input="touchedConfirm = true"
-        />
+          class="auth-q-input"
+          @update:model-value="touchedConfirm = true"
+        >
+          <template #append>
+            <button
+              type="button"
+              class="auth-eye"
+              :aria-label="
+                showPasswordConfirm ? 'Hide password' : 'Show password'
+              "
+              @click="showPasswordConfirm = !showPasswordConfirm"
+            >
+              <q-icon
+                :name="showPasswordConfirm ? 'visibility_off' : 'visibility'"
+                size="22px"
+              />
+            </button>
+          </template>
+        </q-input>
         <span v-if="confirmMismatch" class="auth-field__error">
           Passwords do not match.
         </span>
@@ -119,7 +157,7 @@
       <button
         class="gy-btn auth-card__submit"
         type="submit"
-        :disabled="submitting"
+        :disabled="submitting || (password.length > 0 && !passwordAcceptable)"
       >
         {{ submitting ? "Creating…" : "Create account" }}
       </button>
@@ -154,6 +192,8 @@ const error = ref("");
 const submitting = ref(false);
 const touchedPassword = ref(false);
 const touchedConfirm = ref(false);
+const showPassword = ref(false);
+const showPasswordConfirm = ref(false);
 
 const passwordChecks = computed(() => {
   const value = password.value;
@@ -171,14 +211,13 @@ const passwordStrength = computed(() => {
   const score = [c.length, c.upper, c.lower, c.number, c.symbol].filter(
     Boolean
   ).length;
-  if (score <= 2) return { pct: 28, label: "Weak" };
-  if (score <= 4) return { pct: 64, label: "Fair" };
-  return { pct: 100, label: "Strong" };
+  if (score <= 2) return { pct: 28, label: "Weak", score };
+  if (score <= 4) return { pct: 64, label: "Fair", score };
+  return { pct: 100, label: "Strong", score };
 });
 
-const passwordStrong = computed(() =>
-  Object.values(passwordChecks.value).every(Boolean)
-);
+/** Fair or Strong (3+ checklist items). Weak still blocked. */
+const passwordAcceptable = computed(() => passwordStrength.value.score >= 3);
 
 const confirmMismatch = computed(
   () =>
@@ -200,8 +239,9 @@ onMounted(() => {
 async function onSubmit() {
   touchedPassword.value = true;
   touchedConfirm.value = true;
-  if (!passwordStrong.value) {
-    error.value = "Use 8+ characters with upper, lower, number, and symbol.";
+  if (!passwordAcceptable.value) {
+    error.value =
+      "Please choose a Fair or Strong password using the checklist below.";
     return;
   }
   if (password.value !== passwordConfirmation.value) {
@@ -299,8 +339,8 @@ function onGoogle() {
   color: var(--gy-forest);
 }
 
-.auth-field--invalid input {
-  border-color: #b42318;
+.auth-field--invalid :deep(.q-field__control) {
+  border-color: #b42318 !important;
 }
 
 .auth-field__error {
@@ -308,6 +348,9 @@ function onGoogle() {
   margin-top: 0.25rem;
   font-size: 0.78rem;
   color: #b42318;
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 500;
 }
 
 .auth-google {
@@ -420,6 +463,83 @@ function onGoogle() {
   border-color: var(--gy-gold);
   background: #fff;
   box-shadow: 0 0 0 3px rgba(111, 128, 103, 0.18);
+}
+
+.auth-q-input {
+  width: 100%;
+}
+
+.auth-q-input :deep(.q-field__control) {
+  min-height: 3.1rem;
+  padding: 0 0.35rem 0 0.85rem;
+  border-radius: 10px;
+  background: var(--gy-sand);
+  border-color: rgba(18, 17, 16, 0.12);
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.auth-q-input :deep(.q-field__control):before,
+.auth-q-input :deep(.q-field__control):after {
+  border: none;
+  display: none;
+}
+
+.auth-q-input :deep(.q-field__native) {
+  padding: 0.7rem 0.25rem 0.7rem 0;
+  font: inherit;
+  font-size: 1.02rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--gy-ink);
+}
+
+.auth-q-input :deep(.q-field__append) {
+  padding-left: 0;
+  height: auto;
+}
+
+.auth-q-input.q-field--focused :deep(.q-field__control) {
+  background: #fff;
+  border-color: var(--gy-gold);
+  box-shadow: 0 0 0 3px rgba(111, 128, 103, 0.18);
+}
+
+.auth-eye {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--gy-muted);
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
+}
+
+.auth-eye:hover {
+  color: var(--gy-ink);
+  background: rgba(18, 17, 16, 0.04);
+}
+
+.auth-eye:focus-visible {
+  outline: 2px solid var(--gy-gold);
+  outline-offset: 1px;
+}
+
+.auth-card__submit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .auth-error {
