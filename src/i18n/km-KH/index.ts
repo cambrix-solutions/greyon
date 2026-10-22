@@ -46,7 +46,8 @@ export default {
     rooms: "បន្ទប់",
     starClass: "{n} ផ្កាយ",
     checkIn: "ម៉ោងចូល",
-    checkOut: "ម៉ោងចេញ"
+    checkOut: "ម៉ោងចេញ",
+    amenities: "គ្រឿងបរិក្ខារ"
   },
   booking: {
     paymentNotice:

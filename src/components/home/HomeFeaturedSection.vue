@@ -1,239 +1,134 @@
 <template>
   <section
-    class="gy-section featured-section"
+    v-if="featuredHotels.length"
+    id="home-featured"
+    class="featured"
     aria-labelledby="home-featured-title"
   >
-    <div class="gy-container">
-      <header v-reveal class="section-head">
-        <div>
-          <p class="gy-eyebrow section-kicker">{{ $t("home.featured") }}</p>
-          <h2 id="home-featured-title" class="gy-display section-title">
-            {{ $t("home.stayWith") }}
-          </h2>
-        </div>
-        <router-link to="/hotels" class="gy-link-arrow">
-          {{ $t("home.viewHotels") }}
-          <span aria-hidden="true">→</span>
-        </router-link>
-      </header>
-
+    <article
+      v-for="(hotel, hotelIndex) in featuredHotels"
+      :key="hotel.id"
+      class="property"
+    >
       <div
-        v-if="featuredLocations.length > 1"
-        v-reveal="{ delay: '70ms' }"
-        ref="filterTabs"
-        class="filter-row"
-        role="tablist"
-        :aria-label="$t('home.featured')"
+        class="property__media"
+        @touchstart.passive="onTouchStart"
+        @touchend.passive="onTouchEnd($event, hotel.id)"
       >
-        <button
-          type="button"
-          role="tab"
-          class="filter-chip"
-          :class="{ 'is-active': locationFilter === '' }"
-          :aria-selected="locationFilter === ''"
-          @click="locationFilter = ''"
-          @keydown="onFilterKey"
-        >
-          {{ $t("home.allFeatured") }}
-        </button>
-        <button
-          v-for="loc in featuredLocations"
-          :key="loc.id"
-          type="button"
-          role="tab"
-          class="filter-chip"
-          :class="{ 'is-active': locationFilter === loc.id }"
-          :aria-selected="locationFilter === loc.id"
-          @click="locationFilter = loc.id"
-          @keydown="onFilterKey"
-        >
-          {{ loc.name }}
-          <span class="filter-chip__count">{{ countFor(loc.id) }}</span>
-        </button>
+        <img
+          v-if="photoFor(hotel)"
+          :key="photoFor(hotel)"
+          class="property__img"
+          :src="photoFor(hotel)"
+          :alt="hotel.name"
+        />
+        <div class="property__veil" />
+        <template v-if="photosFor(hotel).length > 1">
+          <button
+            type="button"
+            class="shot-nav shot-nav--prev"
+            aria-label="Previous photo"
+            @click="stepPhoto(hotel.id, -1, photosFor(hotel).length)"
+          >
+            <q-icon name="chevron_left" size="26px" />
+          </button>
+          <button
+            type="button"
+            class="shot-nav shot-nav--next"
+            aria-label="Next photo"
+            @click="stepPhoto(hotel.id, 1, photosFor(hotel).length)"
+          >
+            <q-icon name="chevron_right" size="26px" />
+          </button>
+          <p class="property__count">
+            {{ indexFor(hotel.id) + 1 }} / {{ photosFor(hotel).length }}
+          </p>
+        </template>
+        <div class="property__copy">
+          <div>
+            <p v-if="metaLine(hotel)" class="property__meta">
+              {{ metaLine(hotel) }}
+            </p>
+            <h2
+              v-if="hotelIndex === 0"
+              id="home-featured-title"
+              class="property__name"
+            >
+              <router-link :to="hotelPath(hotel)">{{ hotel.name }}</router-link>
+            </h2>
+            <h2 v-else class="property__name">
+              <router-link :to="hotelPath(hotel)">{{ hotel.name }}</router-link>
+            </h2>
+          </div>
+          <router-link
+            class="gy-btn gy-btn--ghost property__cta"
+            :to="hotelPath(hotel)"
+          >
+            View Hotel
+          </router-link>
+        </div>
       </div>
 
-      <article
-        v-if="spotlight"
-        :key="spotlight.id"
-        v-reveal="{ delay: '90ms' }"
-        class="spotlight"
-      >
-        <div
-          class="spotlight__media gy-card-media"
-          @touchstart.passive="onShotTouchStart"
-          @touchend.passive="onShotTouchEnd"
-        >
-          <img v-if="activePhoto" :src="activePhoto" :alt="spotlight.name" />
-          <router-link
-            class="spotlight__shot"
-            :to="hotelPath(spotlight)"
-            :aria-label="spotlight.name"
-          />
-          <template v-if="photos.length > 1">
-            <button
-              type="button"
-              class="shot-nav shot-nav--prev"
-              aria-label="Previous photo"
-              @click="stepPhoto(-1)"
-            >
-              <q-icon name="chevron_left" size="26px" />
-            </button>
-            <button
-              type="button"
-              class="shot-nav shot-nav--next"
-              aria-label="Next photo"
-              @click="stepPhoto(1)"
-            >
-              <q-icon name="chevron_right" size="26px" />
-            </button>
-            <p class="spotlight__count" aria-live="polite">
-              {{ photoIndex + 1 }} / {{ photos.length }}
-            </p>
-          </template>
-          <span v-if="locationName(spotlight)" class="spotlight__loc">
-            {{ locationName(spotlight) }}
-          </span>
-        </div>
-
-        <div class="spotlight__body">
-          <h3 class="gy-display spotlight__name">
-            <router-link :to="hotelPath(spotlight)">{{
-              spotlight.name
-            }}</router-link>
-          </h3>
-          <ul v-if="metaChips(spotlight).length" class="meta-chips">
-            <li v-for="chip in metaChips(spotlight)" :key="chip">{{ chip }}</li>
-          </ul>
-          <p v-if="spotlight.shortDescription" class="spotlight__desc">
-            {{ spotlight.shortDescription }}
-          </p>
-          <p v-if="hasTimes(spotlight)" class="spotlight__times">
-            <q-icon name="schedule" size="16px" />
-            <span v-if="spotlight.checkInTime">
-              {{ $t("home.checkIn") }} {{ formatTime(spotlight.checkInTime) }}
-            </span>
-            <span
-              v-if="spotlight.checkInTime && spotlight.checkOutTime"
-              aria-hidden="true"
-              >·</span
-            >
-            <span v-if="spotlight.checkOutTime">
-              {{ $t("home.checkOut") }}
-              {{ formatTime(spotlight.checkOutTime) }}
-            </span>
-          </p>
+      <div class="property__note">
+        <p v-if="hotel.shortDescription" class="property__lead">
+          {{ hotel.shortDescription }}
+        </p>
+        <div class="property__facts">
           <FeatureChips
-            v-if="spotlight.amenities.length"
-            :items="spotlight.amenities"
-            :limit="5"
+            v-if="hotel.amenities.length"
+            :items="hotel.amenities"
+            :limit="6"
             size="sm"
             sheet-title="Amenities"
           />
-          <div class="spotlight__cta">
-            <router-link
-              class="gy-btn gy-btn--light gy-btn--sm"
-              :to="hotelPath(spotlight)"
+          <p v-if="hasTimes(hotel)" class="property__times">
+            <span v-if="hotel.checkInTime">
+              {{ $t("home.checkIn") }} {{ formatTime(hotel.checkInTime) }}
+            </span>
+            <span
+              v-if="hotel.checkInTime && hotel.checkOutTime"
+              aria-hidden="true"
+              >·</span
             >
-              View Hotel
-            </router-link>
-          </div>
-        </div>
-      </article>
-
-      <div
-        v-else-if="visibleHotels.length"
-        class="stay-grid"
-        :class="{
-          'stay-grid--two': visibleHotels.length === 2,
-          'stay-grid--many': visibleHotels.length >= 3
-        }"
-      >
-        <div
-          v-for="(hotel, i) in visibleHotels"
-          :key="hotel.id"
-          v-reveal="{ delay: `${Math.min(i, 5) * 80}ms` }"
-          class="stay-grid__item"
-        >
-          <article class="stay-card">
-            <router-link
-              :to="hotelPath(hotel)"
-              class="stay-card__media gy-card-media"
-            >
-              <img
-                v-if="coverImage(hotel)"
-                :src="coverImage(hotel)"
-                :alt="hotel.name"
-                loading="lazy"
-              />
-              <span v-if="locationName(hotel)" class="stay-card__loc">{{
-                locationName(hotel)
-              }}</span>
-            </router-link>
-            <div class="stay-card__body">
-              <h3 class="gy-display">
-                <router-link :to="hotelPath(hotel)">{{
-                  hotel.name
-                }}</router-link>
-              </h3>
-              <ul v-if="metaChips(hotel).length" class="meta-chips">
-                <li v-for="chip in metaChips(hotel)" :key="chip">{{ chip }}</li>
-              </ul>
-              <p v-if="hotel.shortDescription" class="stay-card__desc">
-                {{ hotel.shortDescription }}
-              </p>
-              <FeatureChips
-                v-if="hotel.amenities.length"
-                :items="hotel.amenities"
-                :limit="3"
-                size="sm"
-                sheet-title="Amenities"
-              />
-              <router-link
-                class="gy-btn gy-btn--light gy-btn--sm stay-card__cta"
-                :to="hotelPath(hotel)"
-              >
-                View Hotel
-              </router-link>
-            </div>
-          </article>
+            <span v-if="hotel.checkOutTime">
+              {{ $t("home.checkOut") }} {{ formatTime(hotel.checkOutTime) }}
+            </span>
+          </p>
         </div>
       </div>
+    </article>
 
-      <div
-        v-if="spotlight && spotlightRooms.length"
-        class="rooms"
-        aria-roledescription="carousel"
-        :aria-label="$t('home.rooms')"
-      >
-        <div class="rooms__bar">
-          <h3 class="gy-display rooms__title">{{ $t("home.rooms") }}</h3>
-          <div v-if="spotlightRooms.length > 1" class="rooms__nav">
-            <button
-              type="button"
-              class="round-btn"
-              aria-label="Previous rooms"
-              @click="scrollRooms(-1)"
-            >
-              <q-icon name="chevron_left" size="22px" />
-            </button>
-            <button
-              type="button"
-              class="round-btn"
-              aria-label="Next rooms"
-              @click="scrollRooms(1)"
-            >
-              <q-icon name="chevron_right" size="22px" />
-            </button>
-          </div>
-        </div>
+    <div
+      v-if="rooms.length"
+      id="home-rooms"
+      class="rooms"
+      aria-roledescription="carousel"
+      :aria-label="$t('home.rooms')"
+    >
+      <div class="rooms__head">
+        <p class="eyebrow">{{ $t("home.featured") }}</p>
+        <h2 id="home-rooms-title" class="rooms__title">{{
+          $t("home.rooms")
+        }}</h2>
+      </div>
+      <div class="rooms__frame">
+        <button
+          v-if="rooms.length > 1"
+          type="button"
+          class="shot-nav shot-nav--prev rooms__arrow"
+          aria-label="Previous rooms"
+          @click="scrollRooms(-1)"
+        >
+          <q-icon name="chevron_left" size="26px" />
+        </button>
         <div ref="roomTrack" class="rooms__track">
           <router-link
-            v-for="room in spotlightRooms"
+            v-for="room in rooms"
             :key="room.id"
-            :to="roomDetailPath(spotlight, room)"
-            class="room-card"
+            :to="roomLink(room)"
+            class="room"
           >
-            <span class="room-card__media gy-card-media">
+            <span class="room__media">
               <img
                 v-if="roomImage(room)"
                 :src="roomImage(room)"
@@ -241,21 +136,33 @@
                 loading="lazy"
               />
             </span>
-            <span class="room-card__name">{{ room.name }}</span>
-            <span v-if="roomMeta(room)" class="room-card__meta">{{
-              roomMeta(room)
-            }}</span>
+            <span class="room__shade">
+              <span class="room__name">{{ room.name }}</span>
+              <span v-if="roomDetail(room)" class="room__detail">{{
+                roomDetail(room)
+              }}</span>
+            </span>
           </router-link>
         </div>
+        <button
+          v-if="rooms.length > 1"
+          type="button"
+          class="shot-nav shot-nav--next rooms__arrow"
+          aria-label="Next rooms"
+          @click="scrollRooms(1)"
+        >
+          <q-icon name="chevron_right" size="26px" />
+        </button>
       </div>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import FeatureChips from "@/components/FeatureChips.vue";
+import { useDragScroll } from "@/components/home/useDragScroll";
 import { useCmsStore } from "@/stores/cms-store";
 import type { Hotel, RoomType } from "@/types/greyon";
 import { formatTime } from "@/utils/datetime";
@@ -265,665 +172,475 @@ const SWIPE_PX = 48;
 
 const cms = useCmsStore();
 const { t } = useI18n();
-
-const locationFilter = ref("");
-const photoIndex = ref(0);
-const filterTabs = ref<HTMLElement | null>(null);
+const photoIndex = ref<Record<string, number>>({});
 const roomTrack = ref<HTMLElement | null>(null);
 let touchX: number | null = null;
+
+useDragScroll(roomTrack);
 
 const featuredHotels = computed(() =>
   cms.publishedHotels.filter(hotel => hotel.featured)
 );
 
-const featuredLocations = computed(() => {
-  const ids = new Set(featuredHotels.value.map(hotel => hotel.locationId));
-  return cms.publishedLocations.filter(loc => ids.has(loc.id));
-});
-
-const visibleHotels = computed(() => {
-  if (!locationFilter.value) return featuredHotels.value;
-  return featuredHotels.value.filter(
-    hotel => hotel.locationId === locationFilter.value
-  );
-});
-
-const spotlight = computed(() =>
-  visibleHotels.value.length === 1 ? visibleHotels.value[0] : null
-);
-
-const photos = computed(() =>
-  spotlight.value ? galleryFor(spotlight.value) : []
-);
-
-const activePhoto = computed(() => photos.value[photoIndex.value] ?? "");
-
-const spotlightRooms = computed(() => {
-  const hotel = spotlight.value;
-  if (!hotel) return [];
+const rooms = computed(() => {
+  const ids = new Set(featuredHotels.value.map(hotel => hotel.id));
   return cms.roomTypes.filter(
-    room => room.hotelId === hotel.id && room.status === "published"
+    room => ids.has(room.hotelId) && room.status === "published"
   );
 });
 
-watch(spotlight, () => {
-  photoIndex.value = 0;
-});
-
-watch(featuredLocations, locs => {
-  if (
-    locationFilter.value &&
-    !locs.some(loc => loc.id === locationFilter.value)
-  ) {
-    locationFilter.value = "";
+function photosFor(hotel: Hotel) {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const raw of [hotel.heroImage, ...hotel.gallery]) {
+    const src = raw?.trim();
+    if (!src || seen.has(src)) continue;
+    seen.add(src);
+    out.push(src);
   }
-});
+  return out;
+}
 
-function countFor(locationId: string) {
-  return featuredHotels.value.filter(hotel => hotel.locationId === locationId)
-    .length;
+function indexFor(id: string) {
+  return photoIndex.value[id] ?? 0;
+}
+
+function photoFor(hotel: Hotel) {
+  const photos = photosFor(hotel);
+  return photos[indexFor(hotel.id)] ?? "";
+}
+
+function stepPhoto(id: string, dir: -1 | 1, total: number) {
+  if (total < 2) return;
+  const next = (indexFor(id) + dir + total) % total;
+  photoIndex.value = { ...photoIndex.value, [id]: next };
+}
+
+function onTouchStart(event: TouchEvent) {
+  touchX = event.changedTouches[0]?.clientX ?? null;
+}
+
+function onTouchEnd(event: TouchEvent, id: string) {
+  if (touchX === null) return;
+  const endX = event.changedTouches[0]?.clientX ?? touchX;
+  const delta = endX - touchX;
+  touchX = null;
+  const hotel = featuredHotels.value.find(item => item.id === id);
+  if (!hotel || Math.abs(delta) < SWIPE_PX) return;
+  stepPhoto(id, delta < 0 ? 1 : -1, photosFor(hotel).length);
 }
 
 function locationName(hotel: Hotel) {
   return cms.getLocationById(hotel.locationId)?.name ?? "";
 }
 
-function hotelPath(hotel: Hotel) {
-  return `/hotels/${hotel.slug}`;
-}
-
-function galleryFor(hotel: Hotel) {
-  const seen = new Set<string>();
-  const photosOut: string[] = [];
-  for (const raw of [hotel.heroImage, ...hotel.gallery]) {
-    const src = raw?.trim();
-    if (!src || seen.has(src)) continue;
-    seen.add(src);
-    photosOut.push(src);
-  }
-  return photosOut;
-}
-
-function coverImage(hotel: Hotel) {
-  return galleryFor(hotel)[0] ?? "";
-}
-
-function metaChips(hotel: Hotel) {
-  const chips: string[] = [];
-  if (hotel.propertyType?.trim()) chips.push(hotel.propertyType.trim());
+function metaLine(hotel: Hotel) {
+  const parts: string[] = [];
+  const place = locationName(hotel);
+  if (place) parts.push(place);
+  if (hotel.propertyType?.trim()) parts.push(hotel.propertyType.trim());
   if (
     typeof hotel.starRating === "number" &&
     hotel.starRating >= 1 &&
     hotel.starRating <= 5
   ) {
-    chips.push(t("home.starClass", { n: hotel.starRating }));
+    parts.push(t("home.starClass", { n: hotel.starRating }));
   }
-  if (hotel.area?.trim()) chips.push(hotel.area.trim());
-  return chips;
+  if (hotel.area?.trim()) parts.push(hotel.area.trim());
+  return parts.join("  ·  ");
 }
 
 function hasTimes(hotel: Hotel) {
   return Boolean(hotel.checkInTime?.trim() || hotel.checkOutTime?.trim());
 }
 
-function stepPhoto(dir: -1 | 1) {
-  const total = photos.value.length;
-  if (total < 2) return;
-  photoIndex.value = (photoIndex.value + dir + total) % total;
+function hotelPath(hotel: Hotel) {
+  return `/hotels/${hotel.slug}`;
 }
 
-function onShotTouchStart(event: TouchEvent) {
-  touchX = event.changedTouches[0]?.clientX ?? null;
+function hotelForRoom(room: RoomType) {
+  return featuredHotels.value.find(hotel => hotel.id === room.hotelId);
 }
 
-function onShotTouchEnd(event: TouchEvent) {
-  if (touchX === null) return;
-  const endX = event.changedTouches[0]?.clientX ?? touchX;
-  const delta = endX - touchX;
-  touchX = null;
-  if (Math.abs(delta) < SWIPE_PX) return;
-  stepPhoto(delta < 0 ? 1 : -1);
-}
-
-function onFilterKey(event: KeyboardEvent) {
-  if (!["ArrowRight", "ArrowLeft", "Home", "End"].includes(event.key)) return;
-  const tabs = [
-    ...(filterTabs.value?.querySelectorAll<HTMLButtonElement>('[role="tab"]') ??
-      [])
-  ];
-  if (!tabs.length) return;
-  event.preventDefault();
-  const current = tabs.findIndex(tab => tab === document.activeElement);
-  const start = current >= 0 ? current : 0;
-  let next = start;
-  if (event.key === "Home") next = 0;
-  else if (event.key === "End") next = tabs.length - 1;
-  else if (event.key === "ArrowRight") next = (start + 1) % tabs.length;
-  else next = (start - 1 + tabs.length) % tabs.length;
-  tabs[next]?.focus();
-  tabs[next]?.click();
+function roomLink(room: RoomType) {
+  const hotel = hotelForRoom(room);
+  return hotel ? roomDetailPath(hotel, room) : "/hotels";
 }
 
 function roomImage(room: RoomType) {
   return room.images.find(src => src.trim())?.trim() ?? "";
 }
 
-function roomMeta(room: RoomType) {
-  return [room.bedType.trim(), room.roomSize.trim()]
-    .filter(Boolean)
-    .join(" · ");
+function roomDetail(room: RoomType) {
+  const hotel = hotelForRoom(room);
+  const bits = [room.bedType.trim(), room.roomSize.trim()].filter(Boolean);
+  if (featuredHotels.value.length > 1 && hotel) bits.unshift(hotel.name);
+  return bits.join("  ·  ");
 }
 
 function scrollRooms(dir: -1 | 1) {
   const track = roomTrack.value;
   if (!track) return;
-  const card = track.querySelector<HTMLElement>(".room-card");
-  const delta = (card?.offsetWidth ?? 220) + 14;
+  const card = track.querySelector<HTMLElement>(".room");
+  const delta = (card?.offsetWidth ?? 480) + 14;
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   track.scrollBy({ left: dir * delta, behavior: reduce ? "auto" : "smooth" });
 }
 </script>
 
 <style scoped>
-.featured-section {
-  background:
-    radial-gradient(
-      900px 320px at 100% 0%,
-      rgba(196, 163, 90, 0.14),
-      transparent 70%
-    ),
-    var(--gy-cream);
-}
-
-.section-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: 0.75rem 1.5rem;
-  flex-wrap: wrap;
-  margin-bottom: 1.5rem;
-}
-
-.section-kicker {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.7rem;
-}
-
-.section-kicker::after {
-  content: "";
-  width: 2.25rem;
-  height: 1px;
-  background: var(--gy-gold);
-}
-
-.section-title {
-  margin: 0;
-  font-size: clamp(2.15rem, 4.6vw, 3.35rem);
-  line-height: 0.98;
-  letter-spacing: -0.03em;
-}
-
-.filter-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 1.25rem;
-}
-
-.filter-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  min-height: 44px;
-  padding: 0.35rem 0.95rem;
-  border-radius: 999px;
-  border: 1px solid rgba(69, 76, 75, 0.16);
-  background: var(--gy-white);
+.featured {
+  --serif: "Cormorant Garamond", "Lora", Georgia, serif;
+  --sans: "Montserrat", system-ui, sans-serif;
+  background: var(--gy-cream);
   color: var(--gy-ink);
-  font-family: var(--font-display);
-  font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  cursor: pointer;
-  transition:
-    background 0.25s ease,
-    border-color 0.25s ease,
-    color 0.25s ease,
-    transform 0.25s ease;
 }
 
-.filter-chip__count {
-  display: inline-grid;
-  place-items: center;
-  min-width: 1.35rem;
-  height: 1.35rem;
-  padding: 0 0.3rem;
-  border-radius: 999px;
-  background: rgba(98, 112, 99, 0.12);
-  color: var(--gy-forest);
-  font-size: 0.7rem;
-}
-
-.filter-chip.is-active {
-  background: var(--gy-forest);
-  border-color: var(--gy-forest);
-  color: var(--gy-white);
-}
-
-.filter-chip.is-active .filter-chip__count {
-  background: rgba(255, 255, 255, 0.2);
-  color: var(--gy-white);
-}
-
-.filter-chip:hover {
-  transform: translateY(-1px);
-}
-
-.filter-chip:focus-visible {
-  outline: 2px solid var(--gy-gold);
-  outline-offset: 3px;
-}
-
-.spotlight {
-  display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
-  background: var(--gy-white);
-  border: 1px solid rgba(69, 76, 75, 0.08);
-  border-radius: 22px;
-  overflow: hidden;
-  box-shadow: 0 18px 50px rgba(69, 76, 75, 0.08);
-}
-
-.spotlight__media {
+.property__media {
   position: relative;
-  min-height: 360px;
-  background: var(--gy-sand);
+  height: min(88vh, 920px);
+  min-height: 560px;
+  overflow: hidden;
+  background: #2c312e;
+  color: #fff;
 }
 
-.spotlight__media img {
+.property__img {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 1.1s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: ken 24s ease-out forwards;
 }
 
-.spotlight:hover .spotlight__media img {
-  transform: scale(1.05);
-}
-
-.spotlight__shot {
+.property__veil {
   position: absolute;
   inset: 0;
-  z-index: 1;
-}
-
-.spotlight__loc,
-.stay-card__loc {
-  position: absolute;
-  left: 0.9rem;
-  bottom: 0.9rem;
-  z-index: 2;
-  padding: 0.35rem 0.7rem;
-  border-radius: 999px;
-  background: rgba(18, 16, 14, 0.45);
-  color: #fff;
-  font-family: var(--font-display);
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  backdrop-filter: blur(8px);
+  background: linear-gradient(
+    to top,
+    rgba(12, 11, 10, 0.78) 0%,
+    rgba(12, 11, 10, 0.18) 46%,
+    rgba(12, 11, 10, 0.28) 100%
+  );
   pointer-events: none;
-}
-
-.shot-nav,
-.round-btn {
-  display: inline-grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  border: 0;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.94);
-  color: var(--gy-ink);
-  cursor: pointer;
-  box-shadow: 0 8px 22px rgba(18, 16, 14, 0.16);
-  transition:
-    color 0.2s ease,
-    transform 0.2s ease;
 }
 
 .shot-nav {
   position: absolute;
-  top: 50%;
   z-index: 2;
-  transform: translateY(-50%);
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 999px;
+  background: rgba(12, 11, 10, 0.2);
+  color: #fff;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition:
+    background 0.3s ease,
+    transform 0.3s ease;
 }
 
 .shot-nav--prev {
-  left: 0.75rem;
+  top: 1.25rem;
+  left: 1.1rem;
 }
 
 .shot-nav--next {
-  right: 0.75rem;
+  top: 1.25rem;
+  right: 1.1rem;
 }
 
-.shot-nav:hover,
-.round-btn:hover {
-  color: var(--gy-forest);
+.shot-nav:hover {
+  background: rgba(255, 255, 255, 0.18);
 }
 
-.shot-nav:focus-visible,
-.round-btn:focus-visible {
+.shot-nav:focus-visible {
   outline: 2px solid var(--gy-gold);
   outline-offset: 3px;
 }
 
-.spotlight__count {
+.property__count {
   position: absolute;
-  right: 0.9rem;
-  bottom: 0.9rem;
+  top: 1.45rem;
+  left: 50%;
   z-index: 2;
   margin: 0;
-  padding: 0.3rem 0.65rem;
-  border-radius: 999px;
-  background: rgba(18, 16, 14, 0.5);
-  color: #fff;
-  font-family: var(--font-display);
+  transform: translateX(-50%);
+  font-family: var(--sans);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+}
+
+.property__copy {
+  position: absolute;
+  left: clamp(1.25rem, 5vw, 4.5rem);
+  right: clamp(1.25rem, 5vw, 4.5rem);
+  bottom: clamp(1.5rem, 5vw, 3.75rem);
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.property__meta {
+  margin: 0 0 0.65rem;
+  font-family: var(--sans);
   font-size: 0.72rem;
   font-weight: 600;
-  letter-spacing: 0.06em;
-  pointer-events: none;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.82);
 }
 
-.spotlight__body {
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
-  min-width: 0;
-  padding: clamp(1.25rem, 2.4vw, 2rem);
-}
-
-.spotlight__name {
+.property__name {
   margin: 0;
-  font-size: clamp(1.7rem, 2.4vw, 2.35rem);
-  line-height: 1.08;
+  max-width: 14ch;
+  font-family: var(--serif);
+  font-size: clamp(2.8rem, 6vw, 5.4rem);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 0.92;
 }
 
-.spotlight__name a:hover,
-.stay-card__body h3 a:hover {
-  color: var(--gy-gold-deep);
+.property__name a:hover {
+  color: var(--gy-gold);
 }
 
-.meta-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.meta-chips li {
-  display: inline-flex;
-  align-items: center;
-  max-width: 100%;
-  min-height: 1.7rem;
-  padding: 0.15rem 0.65rem;
-  border: 1px solid rgba(143, 115, 64, 0.45);
-  border-radius: 999px;
-  color: var(--gy-gold-deep);
-  font-family: var(--font-display);
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  line-height: 1.3;
-}
-
-.spotlight__desc,
-.stay-card__desc {
-  margin: 0;
-  color: var(--gy-muted);
-  font-size: 0.98rem;
-  line-height: 1.65;
-}
-
-.spotlight__times {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.4rem 0.5rem;
-  margin: 0;
-  color: var(--gy-ink);
-  font-family: var(--font-display);
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-}
-
-.spotlight__times .q-icon {
-  color: var(--gy-forest);
-}
-
-.spotlight__cta {
-  margin-top: auto;
-  padding-top: 0.35rem;
-}
-
-.spotlight__cta .gy-btn,
-.stay-card__cta {
+.property__cta {
+  flex-shrink: 0;
   min-height: 44px;
 }
 
-.stay-grid {
+.property__note {
   display: grid;
-  gap: 1.25rem;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: clamp(1.5rem, 4vw, 4rem);
+  align-items: start;
+  width: min(1180px, calc(100% - 2.5rem));
+  margin: 0 auto;
+  padding: clamp(2.75rem, 6vw, 4.5rem) 0;
 }
 
-.stay-grid__item {
-  min-width: 0;
-  height: 100%;
-}
-
-.stay-card {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  height: 100%;
-  padding: 0.7rem 0.7rem 1rem;
-  background: var(--gy-white);
-  border: 1px solid rgba(69, 76, 75, 0.08);
-  border-radius: 20px;
-  box-shadow: 0 12px 32px rgba(69, 76, 75, 0.06);
-  transition:
-    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.45s ease;
-}
-
-.stay-card__media {
-  position: relative;
-  aspect-ratio: 4 / 3;
-  border-radius: 14px;
-}
-
-.stay-card__media img {
-  transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.stay-card__body {
-  display: flex;
-  flex-direction: column;
-  gap: 0.7rem;
-  min-width: 0;
-  padding: 0.95rem 0.35rem 0.15rem;
-  flex: 1;
-}
-
-.stay-card__body h3 {
+.property__lead {
   margin: 0;
-  font-size: clamp(1.35rem, 2vw, 1.7rem);
-  line-height: 1.12;
+  font-family: var(--serif);
+  font-size: clamp(1.55rem, 2.5vw, 2.15rem);
+  font-style: italic;
+  font-weight: 500;
+  line-height: 1.35;
 }
 
-.stay-card__desc {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+.property__facts {
+  display: grid;
+  gap: 1rem;
 }
 
-.stay-card__cta {
-  align-self: flex-start;
-  margin-top: auto;
+.property__times {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.6rem;
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gy-gold-deep);
 }
 
 .rooms {
-  margin-top: 1.75rem;
+  padding: 0 0 clamp(3.5rem, 7vw, 5.5rem);
 }
 
-.rooms__bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin-bottom: 0.85rem;
+.rooms__head {
+  width: min(1180px, calc(100% - 2.5rem));
+  margin: 0 auto 1.25rem;
+}
+
+.eyebrow {
+  margin: 0 0 0.35rem;
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--gy-gold-deep);
 }
 
 .rooms__title {
   margin: 0;
-  font-size: 1.35rem;
+  font-family: var(--serif);
+  font-size: clamp(2.6rem, 5vw, 4.2rem);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
 }
 
-.rooms__nav {
-  display: flex;
-  gap: 0.45rem;
+.rooms__frame {
+  position: relative;
 }
 
-.rooms__nav .round-btn {
-  border: 1px solid rgba(69, 76, 75, 0.12);
-  box-shadow: none;
+.rooms__arrow {
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--gy-ink);
+  border-color: transparent;
+}
+
+.rooms__arrow.shot-nav--prev {
+  left: 1rem;
+}
+
+.rooms__arrow.shot-nav--next {
+  right: 1rem;
 }
 
 .rooms__track {
   display: flex;
-  gap: 0.9rem;
+  gap: 0.85rem;
   overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scroll-padding-inline: 0.15rem;
+  scroll-snap-type: x proximity;
   overscroll-behavior-x: contain;
-  padding: 0.2rem 0.15rem 0.85rem;
-  scrollbar-width: thin;
+  padding: 0 clamp(1rem, 4vw, 3rem) 0.4rem;
+  cursor: grab;
+  scrollbar-width: none;
 }
 
-.room-card {
+.rooms__track::-webkit-scrollbar {
+  display: none;
+}
+
+.rooms__track:active {
+  cursor: grabbing;
+}
+
+.room {
+  position: relative;
+  flex: 0 0 min(72vw, 34rem);
+  height: min(72vh, 560px);
+  min-height: 380px;
+  scroll-snap-align: start;
+  overflow: hidden;
+  background: #2c312e;
+  color: #fff;
+}
+
+.room__media,
+.room__media img,
+.room__shade {
+  position: absolute;
+  inset: 0;
+}
+
+.room__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1.15s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.room__shade {
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
-  flex: 0 0 min(78%, 230px);
-  scroll-snap-align: start;
-  min-width: 0;
-  padding: 0.45rem;
-  background: var(--gy-white);
-  border: 1px solid rgba(69, 76, 75, 0.08);
-  border-radius: 16px;
-  box-shadow: 0 8px 22px rgba(69, 76, 75, 0.05);
-  transition:
-    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.4s ease;
+  justify-content: flex-end;
+  gap: 0.35rem;
+  padding: 1.4rem 1.35rem 1.5rem;
+  background: linear-gradient(
+    to top,
+    rgba(12, 11, 10, 0.78) 0%,
+    rgba(12, 11, 10, 0.05) 58%
+  );
 }
 
-.room-card__media {
-  aspect-ratio: 4 / 3;
-  border-radius: 12px;
-  background: var(--gy-sand);
+.room__name {
+  font-family: var(--serif);
+  font-size: clamp(1.7rem, 2.4vw, 2.35rem);
+  font-weight: 500;
+  line-height: 1.05;
 }
 
-.room-card__media img {
-  transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.room-card__name {
-  font-family: var(--font-display);
-  font-size: 0.92rem;
-  font-weight: 700;
-  line-height: 1.3;
-  letter-spacing: -0.01em;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+.room__detail {
+  max-height: 0;
   overflow: hidden;
+  opacity: 0;
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition:
+    max-height 0.4s ease,
+    opacity 0.4s ease;
 }
 
-.room-card__meta {
-  color: var(--gy-muted);
-  font-size: 0.78rem;
-  line-height: 1.35;
-}
-
-.room-card:focus-visible {
+.room:focus-visible {
   outline: 2px solid var(--gy-gold);
-  outline-offset: 3px;
+  outline-offset: -4px;
+}
+
+@keyframes ken {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.08);
+  }
 }
 
 @media (hover: hover) {
-  .stay-card:hover {
-    transform: translateY(-7px);
-    box-shadow: 0 22px 46px rgba(69, 76, 75, 0.12);
+  .room:hover img {
+    transform: scale(1.07);
   }
 
-  .stay-card:hover .stay-card__media img,
-  .room-card:hover .room-card__media img {
-    transform: scale(1.06);
-  }
-
-  .room-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 16px 32px rgba(69, 76, 75, 0.1);
+  .room:hover .room__detail {
+    max-height: 3.5rem;
+    opacity: 1;
   }
 }
 
-@media (min-width: 800px) {
-  .stay-grid--two,
-  .stay-grid--many {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .room-card {
-    flex-basis: 240px;
+@media (hover: none) {
+  .room__detail {
+    max-height: 3.5rem;
+    opacity: 1;
   }
 }
 
-@media (min-width: 1100px) {
-  .stay-grid--many {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+@media (max-width: 800px) {
+  .property__media {
+    height: 78vh;
+    min-height: 520px;
   }
 
-  .room-card {
-    flex-basis: calc((100% - 2.7rem) / 4);
+  .property__copy {
+    flex-direction: column;
+    align-items: flex-start;
   }
-}
 
-@media (max-width: 860px) {
-  .spotlight {
+  .property__note {
     grid-template-columns: 1fr;
+    width: min(100% - 2.2rem, 1180px);
   }
 
-  .spotlight__media {
-    min-height: 0;
-    aspect-ratio: 4 / 3;
+  .room {
+    flex-basis: 86vw;
+    height: 68vh;
+    min-height: 420px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .spotlight__media img,
-  .stay-card,
-  .stay-card__media img,
-  .room-card,
-  .room-card__media img,
-  .filter-chip {
+  .property__img,
+  .room__media img,
+  .room__detail,
+  .shot-nav {
+    animation: none;
     transition: none;
   }
 }

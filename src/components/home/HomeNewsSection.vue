@@ -1,80 +1,73 @@
 <template>
   <section
     v-if="articles.length"
-    class="gy-section news-section"
+    id="home-news"
+    class="news"
     aria-labelledby="home-news-title"
   >
-    <div class="gy-container">
-      <header v-reveal class="section-head">
-        <div>
-          <p class="gy-eyebrow section-kicker">{{ $t("home.latestNews") }}</p>
-          <h2 id="home-news-title" class="gy-display section-title">
-            {{ $t("home.fromGreyon") }}
-          </h2>
-        </div>
-        <router-link to="/news" class="gy-link-arrow">
-          {{ $t("home.allNews") }}
-          <span aria-hidden="true">→</span>
-        </router-link>
-      </header>
-
-      <div
-        class="news-board"
-        :class="{
-          'news-board--single': articles.length === 1,
-          'news-board--multi': articles.length > 1
-        }"
-      >
-        <div
-          v-for="(item, i) in articles"
-          :key="item.id"
-          v-reveal="{ delay: `${i * 80}ms` }"
-          class="news-slot"
-          :class="{ 'is-lead': i === 0 && articles.length > 2 }"
-        >
-          <router-link :to="`/news/${item.slug}`" class="news-card">
-            <span class="news-card__media gy-card-media">
-              <img
-                v-if="item.coverImage"
-                :src="item.coverImage"
-                :alt="item.title"
-                loading="lazy"
-              />
-            </span>
-            <span class="news-card__body">
-              <span class="news-card__meta">
-                <time v-if="item.publishedAt" :datetime="item.publishedAt">{{
-                  dateLabel(item.publishedAt)
-                }}</time>
-                <span v-if="item.locationName" class="news-card__place">{{
-                  item.locationName
-                }}</span>
-              </span>
-              <span class="gy-display news-card__title">{{ item.title }}</span>
-              <span v-if="item.excerpt" class="news-card__excerpt">{{
-                item.excerpt
-              }}</span>
-              <span class="news-card__more" aria-hidden="true">
-                <q-icon name="arrow_forward" size="18px" />
-              </span>
-            </span>
-          </router-link>
-        </div>
+    <header v-reveal class="news__head">
+      <div>
+        <p class="eyebrow">{{ $t("home.latestNews") }}</p>
+        <h2 id="home-news-title" class="news__title">
+          {{ $t("home.fromGreyon") }}
+        </h2>
       </div>
+      <router-link to="/news" class="text-link">
+        {{ $t("home.allNews") }}
+        <span aria-hidden="true">→</span>
+      </router-link>
+    </header>
+
+    <router-link v-if="lead" :to="`/news/${lead.slug}`" class="news__lead">
+      <img v-if="lead.coverImage" :src="lead.coverImage" :alt="lead.title" />
+      <span class="news__shade">
+        <span class="news__meta">
+          <time v-if="lead.publishedAt" :datetime="lead.publishedAt">{{
+            dateLabel(lead.publishedAt)
+          }}</time>
+          <span v-if="lead.locationName">{{ lead.locationName }}</span>
+        </span>
+        <span class="news__lead-title">{{ lead.title }}</span>
+      </span>
+    </router-link>
+    <p v-if="lead?.excerpt" class="news__excerpt">{{ lead.excerpt }}</p>
+
+    <div v-if="rest.length" ref="restTrack" class="news__rest">
+      <router-link
+        v-for="item in rest"
+        :key="item.id"
+        :to="`/news/${item.slug}`"
+        class="news__card"
+      >
+        <span class="news__card-media">
+          <img
+            v-if="item.coverImage"
+            :src="item.coverImage"
+            :alt="item.title"
+            loading="lazy"
+          />
+        </span>
+        <span class="news__card-title">{{ item.title }}</span>
+      </router-link>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
+import { useDragScroll } from "@/components/home/useDragScroll";
 import { useCmsStore } from "@/stores/cms-store";
 import { formatDate } from "@/utils/datetime";
 
 const cms = useCmsStore();
 const { locale } = useI18n();
+const restTrack = ref<HTMLElement | null>(null);
+useDragScroll(restTrack);
 
 const articles = computed(() => cms.publishedNews.slice(0, 3));
+const lead = computed(() => articles.value[0] ?? null);
+const rest = computed(() => articles.value.slice(1));
 
 function dateLabel(value: string) {
   const loc = locale.value.startsWith("km") ? "km-KH" : "en-GB";
@@ -83,208 +76,202 @@ function dateLabel(value: string) {
 </script>
 
 <style scoped>
-.news-section {
-  background: var(--gy-white);
+.news {
+  --serif: "Cormorant Garamond", "Lora", Georgia, serif;
+  --sans: "Montserrat", system-ui, sans-serif;
+  padding: clamp(4.5rem, 9vw, 7rem) 0 clamp(3rem, 6vw, 4.5rem);
+  background: var(--gy-cream);
+  color: var(--gy-ink);
 }
 
-.section-head {
+.news__head {
   display: flex;
-  justify-content: space-between;
   align-items: flex-end;
-  gap: 0.75rem 1.5rem;
-  flex-wrap: wrap;
-  margin-bottom: 1.5rem;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+  width: min(1400px, calc(100% - 2.5rem));
+  margin: 0 auto 1.25rem;
 }
 
-.section-kicker {
+.eyebrow {
+  margin: 0 0 0.45rem;
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--gy-gold-deep);
+}
+
+.news__title {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: clamp(2.8rem, 6vw, 4.8rem);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 0.92;
+}
+
+.text-link {
   display: inline-flex;
   align-items: center;
-  gap: 0.7rem;
+  gap: 0.5rem;
+  min-height: 44px;
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gy-forest);
 }
 
-.section-kicker::after {
-  content: "";
-  width: 2.25rem;
-  height: 1px;
-  background: var(--gy-gold);
+.text-link span {
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.section-title {
-  margin: 0;
-  font-size: clamp(2.15rem, 4.6vw, 3.35rem);
-  line-height: 0.98;
-  letter-spacing: -0.03em;
+.text-link:hover span {
+  transform: translateX(6px);
 }
 
-.news-board {
-  display: grid;
-  gap: 1.15rem;
-}
-
-.news-card {
-  display: grid;
-  min-width: 0;
-  background: var(--gy-cream);
-  border: 1px solid rgba(69, 76, 75, 0.08);
-  border-radius: 20px;
+.news__lead {
+  position: relative;
+  display: block;
+  height: min(72vh, 760px);
+  min-height: 420px;
   overflow: hidden;
-  box-shadow: 0 12px 32px rgba(69, 76, 75, 0.05);
-  transition:
-    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.45s ease;
+  background: #2c312e;
+  color: #fff;
 }
 
-.news-card:focus-visible {
+.news__lead img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.news__shade {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.7rem;
+  padding: clamp(1.4rem, 4vw, 3.5rem);
+  background: linear-gradient(
+    to top,
+    rgba(12, 11, 10, 0.75) 0%,
+    rgba(12, 11, 10, 0.05) 52%
+  );
+}
+
+.news__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  font-family: var(--sans);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gy-gold);
+}
+
+.news__lead-title {
+  max-width: 16ch;
+  font-family: var(--serif);
+  font-size: clamp(2.6rem, 6vw, 5rem);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+}
+
+.news__excerpt {
+  width: min(720px, calc(100% - 2.5rem));
+  margin: clamp(1.5rem, 3vw, 2.25rem) auto 0;
+  font-family: var(--serif);
+  font-size: clamp(1.35rem, 2vw, 1.75rem);
+  font-style: italic;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.news__rest {
+  display: flex;
+  gap: 0.85rem;
+  overflow-x: auto;
+  margin-top: 1.75rem;
+  padding: 0 clamp(1rem, 4vw, 3rem);
+  scroll-snap-type: x proximity;
+  cursor: grab;
+  scrollbar-width: none;
+}
+
+.news__rest::-webkit-scrollbar {
+  display: none;
+}
+
+.news__card {
+  flex: 0 0 min(70vw, 28rem);
+  scroll-snap-align: start;
+  color: inherit;
+}
+
+.news__card-media {
+  display: block;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: #2c312e;
+}
+
+.news__card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.news__card-title {
+  display: block;
+  margin-top: 0.75rem;
+  font-family: var(--serif);
+  font-size: 1.7rem;
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+.news__lead:focus-visible,
+.news__card:focus-visible,
+.text-link:focus-visible {
   outline: 2px solid var(--gy-gold);
   outline-offset: 3px;
 }
 
-.news-card__media {
-  display: block;
-  aspect-ratio: 16 / 10;
-  min-height: 180px;
-  background: var(--gy-sand);
-}
-
-.news-card__media img {
-  transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.news-card__body {
-  display: flex;
-  flex-direction: column;
-  gap: 0.55rem;
-  min-width: 0;
-  padding: 1.15rem 1.2rem 1.25rem;
-}
-
-.news-card__meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-}
-
-.news-card__meta time,
-.news-card__place {
-  display: inline-flex;
-  align-items: center;
-  min-height: 1.7rem;
-  padding: 0.15rem 0.65rem;
-  border-radius: 999px;
-  font-family: var(--font-display);
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.news-card__meta time {
-  background: rgba(98, 112, 99, 0.14);
-  color: var(--gy-forest);
-}
-
-.news-card__place {
-  background: rgba(196, 163, 90, 0.2);
-  color: var(--gy-gold-deep);
-}
-
-.news-card__title {
-  font-size: clamp(1.35rem, 2vw, 1.85rem);
-  line-height: 1.15;
-}
-
-.news-card__excerpt {
-  color: var(--gy-muted);
-  font-size: 0.98rem;
-  line-height: 1.6;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.news-card__more {
-  display: inline-grid;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  margin-top: 0.35rem;
-  border-radius: 999px;
-  background: var(--gy-white);
-  color: var(--gy-forest);
-  transition:
-    transform 0.3s ease,
-    background 0.3s ease,
-    color 0.3s ease;
-}
-
-.news-board--single .news-card {
-  background: var(--gy-cream);
-}
-
-.news-slot {
-  min-width: 0;
-  height: 100%;
-}
-
-.news-slot .news-card {
-  height: 100%;
-}
-
-.news-board--multi {
-  grid-template-columns: 1fr;
-}
-
 @media (hover: hover) {
-  .news-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 22px 46px rgba(69, 76, 75, 0.12);
-  }
-
-  .news-card:hover .news-card__media img {
+  .news__lead:hover img,
+  .news__card:hover img {
     transform: scale(1.06);
   }
-
-  .news-card:hover .news-card__more {
-    transform: translateX(3px);
-    background: var(--gy-forest);
-    color: var(--gy-white);
-  }
 }
 
-@media (min-width: 800px) {
-  .news-board--single .news-card,
-  .news-slot.is-lead .news-card {
-    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
-    align-items: stretch;
+@media (max-width: 700px) {
+  .news__head {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
-  .news-board--single .news-card__media,
-  .news-slot.is-lead .news-card__media {
-    aspect-ratio: auto;
-    min-height: 100%;
-    height: 100%;
-  }
-
-  .news-board--single .news-card__body,
-  .news-slot.is-lead .news-card__body {
-    justify-content: center;
-    padding: 1.5rem 1.6rem;
-  }
-
-  .news-board--multi {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .news-slot.is-lead {
-    grid-column: 1 / -1;
+  .news__lead {
+    height: 78vh;
+    min-height: 460px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .news-card,
-  .news-card__media img,
-  .news-card__more {
+  .news__lead img,
+  .news__card-media img,
+  .text-link span {
     transition: none;
   }
 }

@@ -1,448 +1,295 @@
 <template>
   <section
     v-if="locations.length"
-    class="gy-section dest-section"
+    id="home-destinations"
+    class="dest"
     aria-labelledby="home-destinations-title"
   >
-    <div class="gy-container">
-      <header v-reveal class="section-head">
-        <div>
-          <p class="gy-eyebrow section-kicker">{{ $t("home.exploreBy") }}</p>
-          <h2 id="home-destinations-title" class="gy-display section-title">
-            {{ $t("home.destinationsCount", locations.length) }}
-          </h2>
-        </div>
-        <router-link to="/locations" class="gy-link-arrow">
-          {{ $t("home.allDestinations") }}
-          <span aria-hidden="true">→</span>
-        </router-link>
-      </header>
-
-      <div
-        ref="tablistEl"
-        class="dest-tabs"
-        role="tablist"
-        :aria-label="$t('home.exploreBy')"
-      >
-        <button
-          v-for="(loc, i) in locations"
-          :id="`dest-tab-${loc.id}`"
-          :key="loc.id"
-          type="button"
-          role="tab"
-          class="dest-tab"
-          :class="{ 'is-active': loc.id === activeId }"
-          :aria-selected="loc.id === activeId"
-          :aria-controls="`dest-panel-${loc.id}`"
-          :tabindex="loc.id === activeId ? 0 : -1"
-          @click="select(loc.id)"
-          @keydown="onTabKey($event, i)"
-        >
-          {{ loc.name }}
-        </button>
+    <header v-reveal class="dest__head">
+      <div>
+        <p class="eyebrow">{{ $t("home.exploreBy") }}</p>
+        <h2 id="home-destinations-title" class="dest__title">
+          {{ $t("home.destinationsCount", locations.length) }}
+        </h2>
       </div>
+      <router-link to="/locations" class="text-link">
+        {{ $t("home.allDestinations") }}
+        <span aria-hidden="true">→</span>
+      </router-link>
+    </header>
 
-      <div
-        v-if="active"
-        :id="`dest-panel-${active.id}`"
-        :key="active.id"
-        class="dest-panel"
-        role="tabpanel"
-        :aria-labelledby="`dest-tab-${active.id}`"
+    <div class="bento" :class="`bento--${Math.min(locations.length, 3)}`">
+      <router-link
+        v-for="(loc, i) in locations"
+        :key="loc.id"
+        v-reveal="{ delay: `${i * 90}ms` }"
+        :to="`/locations/${loc.slug}`"
+        class="bento__item"
       >
-        <router-link
-          :to="`/locations/${active.slug}`"
-          class="dest-panel__media gy-card-media"
-        >
-          <img
-            v-if="active.heroImage"
-            :src="active.heroImage"
-            :alt="active.name"
-          />
-        </router-link>
-
-        <div class="dest-panel__copy">
-          <p v-if="hotelsHere.length" class="count-chip">
-            {{ $t("home.hotelsCount", hotelsHere.length) }}
-          </p>
-          <h3 class="gy-display dest-panel__name">
-            <router-link :to="`/locations/${active.slug}`">{{
-              active.name
-            }}</router-link>
-          </h3>
-          <p v-if="active.description" class="dest-panel__desc">
-            {{ active.description }}
-          </p>
-          <ul v-if="active.highlights.length" class="highlights">
-            <li v-for="item in active.highlights" :key="item">{{ item }}</li>
-          </ul>
-
-          <ul v-if="hotelsHere.length" class="dest-hotels">
-            <li v-for="hotel in hotelsHere" :key="hotel.id">
-              <router-link :to="`/hotels/${hotel.slug}`" class="dest-hotel">
-                <span class="dest-hotel__media gy-card-media">
-                  <img
-                    v-if="hotel.heroImage"
-                    :src="hotel.heroImage"
-                    :alt="hotel.name"
-                    loading="lazy"
-                  />
-                </span>
-                <span class="dest-hotel__copy">
-                  <span class="dest-hotel__name">{{ hotel.name }}</span>
-                  <span v-if="hotel.area" class="dest-hotel__area">{{
-                    hotel.area
-                  }}</span>
-                </span>
-                <q-icon name="arrow_forward" size="18px" />
-              </router-link>
-            </li>
-          </ul>
-
-          <div class="dest-panel__actions">
-            <router-link
-              v-if="hotelsHere.length"
-              class="gy-btn gy-btn--light gy-btn--sm"
-              :to="{ path: '/hotels', query: { locationSlug: active.slug } }"
+        <img
+          v-if="loc.heroImage"
+          :src="loc.heroImage"
+          :alt="loc.name"
+          loading="lazy"
+        />
+        <span class="bento__shade">
+          <span class="bento__kicker" v-if="hotelCount(loc.id)">
+            {{ $t("home.hotelsCount", hotelCount(loc.id)) }}
+          </span>
+          <span class="bento__name">{{ loc.name }}</span>
+          <span class="bento__detail">
+            <span v-if="loc.description">{{ loc.description }}</span>
+            <span v-if="loc.highlights.length" class="bento__highlights">
+              {{ loc.highlights.join("  ·  ") }}
+            </span>
+            <span
+              v-for="hotel in hotelsFor(loc.id)"
+              :key="hotel.id"
+              class="bento__hotel"
             >
-              {{ $t("home.viewHotels") }}
-            </router-link>
-            <router-link
-              v-else
-              :to="`/locations/${active.slug}`"
-              class="gy-link-arrow"
-            >
-              {{ active.name }}
-              <span aria-hidden="true">→</span>
-            </router-link>
-          </div>
-        </div>
-      </div>
+              {{ hotel.name }}
+            </span>
+          </span>
+        </span>
+      </router-link>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed } from "vue";
 import { useCmsStore } from "@/stores/cms-store";
 
 const cms = useCmsStore();
-const activeId = ref("");
-const tablistEl = ref<HTMLElement | null>(null);
 
-const locations = computed(() => cms.publishedLocations);
-
-watch(
-  locations,
-  locs => {
-    if (!locs.length) {
-      activeId.value = "";
-      return;
-    }
-    if (!locs.some(loc => loc.id === activeId.value)) {
-      activeId.value = locs[0]?.id ?? "";
-    }
-  },
-  { immediate: true }
-);
-
-const active = computed(
-  () => locations.value.find(loc => loc.id === activeId.value) ?? null
-);
-
-const hotelsHere = computed(() => {
-  if (!active.value) return [];
-  return cms.publishedHotels.filter(
-    hotel => hotel.locationId === active.value?.id
-  );
+const locations = computed(() => {
+  const locs = cms.publishedLocations;
+  const rank = (id: string) =>
+    cms.publishedHotels.some(hotel => hotel.locationId === id) ? 0 : 1;
+  return [...locs].sort((a, b) => rank(a.id) - rank(b.id));
 });
 
-function select(id: string) {
-  activeId.value = id;
+function hotelCount(locationId: string) {
+  return cms.publishedHotels.filter(hotel => hotel.locationId === locationId)
+    .length;
 }
 
-function onTabKey(event: KeyboardEvent, index: number) {
-  if (!["ArrowRight", "ArrowLeft", "Home", "End"].includes(event.key)) return;
-  const total = locations.value.length;
-  if (!total) return;
-  event.preventDefault();
-  let next = index;
-  if (event.key === "Home") next = 0;
-  else if (event.key === "End") next = total - 1;
-  else if (event.key === "ArrowRight") next = (index + 1) % total;
-  else next = (index - 1 + total) % total;
-  const loc = locations.value[next];
-  if (!loc) return;
-  activeId.value = loc.id;
-  tablistEl.value
-    ?.querySelectorAll<HTMLButtonElement>('[role="tab"]')
-    [next]?.focus();
+function hotelsFor(locationId: string) {
+  return cms.publishedHotels.filter(hotel => hotel.locationId === locationId);
 }
 </script>
 
 <style scoped>
-.dest-section {
+.dest {
+  --serif: "Cormorant Garamond", "Lora", Georgia, serif;
+  --sans: "Montserrat", system-ui, sans-serif;
+  padding: clamp(4.5rem, 9vw, 7rem) clamp(0.65rem, 1.6vw, 1.1rem)
+    clamp(1rem, 2vw, 1.4rem);
   background: var(--gy-white);
+  color: var(--gy-ink);
 }
 
-.section-head {
+.dest__head {
   display: flex;
-  justify-content: space-between;
   align-items: flex-end;
-  gap: 0.75rem 1.5rem;
-  flex-wrap: wrap;
-  margin-bottom: 1.35rem;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+  width: min(1400px, 100%);
+  margin: 0 auto 1.35rem;
+  padding-inline: 0.35rem;
 }
 
-.section-kicker {
+.eyebrow {
+  margin: 0 0 0.45rem;
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--gy-gold-deep);
+}
+
+.dest__title {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: clamp(2.8rem, 6vw, 4.8rem);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 0.92;
+}
+
+.text-link {
   display: inline-flex;
   align-items: center;
-  gap: 0.7rem;
-}
-
-.section-kicker::after {
-  content: "";
-  width: 2.25rem;
-  height: 1px;
-  background: var(--gy-gold);
-}
-
-.section-title {
-  margin: 0;
-  font-size: clamp(2.15rem, 4.6vw, 3.35rem);
-  line-height: 0.98;
-  letter-spacing: -0.03em;
-}
-
-.dest-tabs {
-  display: flex;
-  flex-wrap: wrap;
   gap: 0.5rem;
-  margin-bottom: 1.15rem;
-}
-
-.dest-tab {
   min-height: 44px;
-  padding: 0.4rem 1.05rem;
-  border: 1px solid rgba(69, 76, 75, 0.16);
-  border-radius: 999px;
-  background: var(--gy-cream);
-  color: var(--gy-ink);
-  font-family: var(--font-display);
-  font-size: 0.82rem;
+  font-family: var(--sans);
+  font-size: 0.72rem;
   font-weight: 600;
-  letter-spacing: 0.02em;
-  cursor: pointer;
-  transition:
-    background 0.25s ease,
-    color 0.25s ease,
-    border-color 0.25s ease,
-    transform 0.25s ease;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gy-forest);
 }
 
-.dest-tab.is-active {
-  background: var(--gy-ink);
-  border-color: var(--gy-ink);
-  color: var(--gy-white);
+.text-link span {
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.dest-tab:hover {
-  transform: translateY(-1px);
+.text-link:hover span {
+  transform: translateX(6px);
 }
 
-.dest-tab:focus-visible {
-  outline: 2px solid var(--gy-gold);
-  outline-offset: 3px;
-}
-
-.dest-panel {
+.bento {
   display: grid;
-  grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
-  gap: clamp(1rem, 2vw, 1.5rem);
-  align-items: stretch;
-  animation: dest-in 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  gap: 0.65rem;
+  min-height: min(88vh, 860px);
 }
 
-.dest-panel__media {
+.bento--1 {
+  grid-template-columns: 1fr;
+}
+
+.bento--2 {
+  grid-template-columns: 1.15fr 0.85fr;
+}
+
+.bento--3,
+.bento:not(.bento--1):not(.bento--2) {
+  grid-template-columns: 1.35fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+
+.bento--3 .bento__item:first-child,
+.bento:not(.bento--1):not(.bento--2) .bento__item:first-child {
+  grid-row: 1 / span 2;
+}
+
+.bento__item {
   position: relative;
-  min-height: 380px;
-  border-radius: 22px;
-  background: var(--gy-sand);
+  display: block;
+  min-height: 240px;
+  overflow: hidden;
+  background: #2c312e;
+  color: #fff;
 }
 
-.dest-panel__media img {
+.bento__item img {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 1.05s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.dest-panel__media:hover img {
-  transform: scale(1.06);
-}
-
-.dest-panel__copy {
+.bento__shade {
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
-  min-width: 0;
-  padding: 0.35rem 0.15rem;
+  justify-content: flex-end;
+  gap: 0.35rem;
+  padding: clamp(1.1rem, 2vw, 1.8rem);
+  background: linear-gradient(
+    to top,
+    rgba(12, 11, 10, 0.78) 0%,
+    rgba(12, 11, 10, 0.08) 55%
+  );
 }
 
-.count-chip {
-  align-self: flex-start;
-  margin: 0;
-  padding: 0.3rem 0.7rem;
-  border-radius: 999px;
-  background: rgba(98, 112, 99, 0.12);
-  color: var(--gy-forest);
-  font-family: var(--font-display);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.dest-panel__name {
-  margin: 0;
-  font-size: clamp(1.7rem, 2.5vw, 2.3rem);
-  line-height: 1.08;
-}
-
-.dest-panel__name a:hover {
-  color: var(--gy-gold-deep);
-}
-
-.dest-panel__desc {
-  margin: 0;
-  color: var(--gy-muted);
-  font-size: 1.02rem;
-  line-height: 1.65;
-}
-
-.highlights {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.highlights li {
-  padding: 0.38rem 0.75rem;
-  border-radius: 999px;
-  background: var(--gy-sand);
-  color: var(--gy-ink);
-  font-family: var(--font-display);
-  font-size: 0.75rem;
+.bento__kicker {
+  font-family: var(--sans);
+  font-size: 0.68rem;
   font-weight: 600;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gy-gold);
 }
 
-.dest-hotels {
+.bento__name {
+  font-family: var(--serif);
+  font-size: clamp(2.2rem, 4vw, 3.6rem);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+}
+
+.bento__detail {
   display: grid;
-  gap: 0.55rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
+  gap: 0.25rem;
+  max-width: 36rem;
+  font-family: var(--sans);
+  font-size: 0.84rem;
+  font-weight: 500;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.88);
 }
 
-.dest-hotel {
-  display: grid;
-  grid-template-columns: 64px minmax(0, 1fr) auto;
-  gap: 0.75rem;
-  align-items: center;
-  padding: 0.45rem;
-  border-radius: 14px;
-  background: var(--gy-cream);
-  transition:
-    transform 0.3s ease,
-    background 0.3s ease,
-    box-shadow 0.3s ease;
+.bento__highlights,
+.bento__hotel {
+  letter-spacing: 0.04em;
 }
 
-.dest-hotel__media {
-  width: 64px;
-  height: 64px;
-  border-radius: 10px;
-  background: var(--gy-stone);
+.bento__item:focus-visible {
+  outline: 2px solid var(--gy-gold);
+  outline-offset: -4px;
 }
 
-.dest-hotel__copy {
-  display: grid;
-  gap: 0.15rem;
-  min-width: 0;
-}
-
-.dest-hotel__name {
-  font-family: var(--font-display);
-  font-size: 0.92rem;
-  font-weight: 700;
-  line-height: 1.3;
-}
-
-.dest-hotel__area {
-  color: var(--gy-muted);
-  font-size: 0.78rem;
-  line-height: 1.3;
-}
-
-.dest-hotel .q-icon {
-  color: var(--gy-forest);
-  margin-right: 0.35rem;
-}
-
-.dest-panel__actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.35rem 1rem;
-  margin-top: auto;
-}
-
-.dest-panel__actions .gy-btn {
-  min-height: 44px;
-}
-
-@keyframes dest-in {
-  from {
+@media (hover: hover) {
+  .bento__detail {
+    max-height: 0;
+    overflow: hidden;
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(10px);
+    transition:
+      max-height 0.45s ease,
+      opacity 0.45s ease,
+      transform 0.45s ease;
   }
-  to {
+
+  .bento__item:hover img {
+    transform: scale(1.08);
+  }
+
+  .bento__item:hover .bento__detail {
+    max-height: 8rem;
     opacity: 1;
     transform: none;
   }
 }
 
-@media (hover: hover) {
-  .dest-hotel:hover {
-    transform: translateY(-2px);
-    background: var(--gy-white);
-    box-shadow: 0 12px 28px rgba(69, 76, 75, 0.1);
-  }
-}
-
-@media (max-width: 860px) {
-  .dest-panel {
-    grid-template-columns: 1fr;
+@media (max-width: 800px) {
+  .dest__head {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
-  .dest-panel__media {
+  .bento,
+  .bento--2,
+  .bento--3,
+  .bento:not(.bento--1):not(.bento--2) {
+    display: flex;
+    flex-direction: column;
     min-height: 0;
-    aspect-ratio: 16 / 10;
+  }
+
+  .bento__item,
+  .bento--3 .bento__item:first-child,
+  .bento:not(.bento--1):not(.bento--2) .bento__item:first-child {
+    height: 78vw;
+    min-height: 280px;
+    grid-row: auto;
+  }
+
+  .bento__item:first-child {
+    height: 100vw;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dest-panel,
-  .dest-tab,
-  .dest-hotel,
-  .dest-panel__media img {
-    animation: none;
+  .bento__item img,
+  .bento__detail,
+  .text-link span {
     transition: none;
   }
 }

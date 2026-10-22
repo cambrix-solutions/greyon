@@ -49,7 +49,8 @@ export default {
     rooms: "Rooms",
     starClass: "{n}-star",
     checkIn: "Check-in",
-    checkOut: "Check-out"
+    checkOut: "Check-out",
+    amenities: "Amenities"
   },
   booking: {
     paymentNotice:

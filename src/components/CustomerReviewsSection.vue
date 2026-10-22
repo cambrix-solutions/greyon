@@ -1,9 +1,10 @@
 <template>
   <section
     v-if="reviews.length"
-    class="gy-section reviews-section"
+    id="home-reviews"
+    class="reviews-section"
     aria-roledescription="carousel"
-    aria-label="Guest reviews"
+    aria-labelledby="home-reviews-title"
     @mouseenter="pause"
     @mouseleave="resume"
     @focusin="pause"
@@ -13,7 +14,7 @@
       <header v-reveal class="section-head">
         <div>
           <p class="gy-eyebrow section-kicker">Guest voices</p>
-          <h2 class="gy-display section-title">What guests say</h2>
+          <h2 id="home-reviews-title" class="section-title">What guests say</h2>
         </div>
       </header>
 
@@ -210,42 +211,54 @@ onUnmounted(() => {
 
 <style scoped>
 .reviews-section {
-  background: linear-gradient(180deg, var(--gy-cream) 0%, var(--gy-white) 100%);
+  --serif: "Cormorant Garamond", "Lora", Georgia, serif;
+  --sans: "Montserrat", system-ui, sans-serif;
+  padding: clamp(5rem, 10vw, 8rem) 0;
+  background: var(--gy-cream);
+  color: var(--gy-ink);
 }
 
 .section-head {
-  margin-bottom: 1.5rem;
+  margin-bottom: clamp(2rem, 5vw, 3.5rem);
 }
 
 .section-kicker {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.7rem;
+  margin: 0 0 0.85rem;
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--gy-gold-deep);
 }
 
 .section-kicker::after {
   content: "";
-  width: 2.25rem;
+  display: block;
+  width: 2.5rem;
   height: 1px;
+  margin-top: 0.85rem;
   background: var(--gy-gold);
 }
 
 .section-title {
   margin: 0;
-  font-size: clamp(2.15rem, 4.6vw, 3.35rem);
-  line-height: 0.98;
+  font-family: var(--serif);
+  font-size: clamp(2.6rem, 5vw, 4.5rem);
+  font-weight: 500;
+  font-style: italic;
+  line-height: 0.95;
   letter-spacing: -0.03em;
 }
 
 .reviews-track {
   display: flex;
-  gap: 1rem;
+  gap: 0;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
   overscroll-behavior-x: contain;
   scrollbar-width: none;
-  padding-bottom: 0.35rem;
 }
 
 .reviews-track::-webkit-scrollbar {
@@ -254,73 +267,65 @@ onUnmounted(() => {
 
 .reviews-card {
   display: flex;
-  flex-direction: column;
-  gap: 0.9rem;
   flex: 0 0 100%;
-  scroll-snap-align: start;
+  flex-direction: column;
+  gap: 1.5rem;
   min-width: 0;
-  padding: clamp(1.25rem, 2.5vw, 1.75rem);
-  border-radius: 20px;
-  background: var(--gy-white);
-  border: 1px solid rgba(69, 76, 75, 0.08);
-  box-shadow: 0 16px 40px rgba(69, 76, 75, 0.07);
-  transition:
-    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.4s ease;
+  scroll-snap-align: start;
+  padding: 0.25rem 0 0;
+  background: transparent;
 }
 
 .reviews-card__stars {
   display: flex;
-  gap: 0.12rem;
+  gap: 0.15rem;
   color: var(--gy-gold-deep);
 }
 
 .reviews-card__quote {
   margin: 0;
-  flex: 1;
 }
 
 .reviews-card__quote p {
   margin: 0;
-  font-size: clamp(1.02rem, 1.6vw, 1.18rem);
-  line-height: 1.65;
+  max-width: 18em;
+  font-family: var(--serif);
+  font-size: clamp(1.85rem, 3.6vw, 3.15rem);
+  font-weight: 500;
+  font-style: italic;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
   color: var(--gy-ink);
 }
 
-.reviews-card__quote p::before {
-  content: "“";
-  margin-right: 0.15rem;
-  color: var(--gy-gold);
-  font-family: var(--font-display);
-  font-size: 1.6rem;
-  font-weight: 700;
-  line-height: 0;
-}
-
 .reviews-card__meta {
-  padding-top: 0.85rem;
-  border-top: 1px solid rgba(69, 76, 75, 0.1);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.85rem;
+  align-items: baseline;
 }
 
 .reviews-card__name {
   margin: 0;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 0.95rem;
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
 }
 
 .reviews-card__hotel {
-  margin: 0.2rem 0 0;
+  margin: 0;
   color: var(--gy-muted);
-  font-size: 0.88rem;
+  font-family: var(--sans);
+  font-size: 0.85rem;
 }
 
 .reviews-nav {
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 0.75rem;
-  margin-top: 1.1rem;
+  margin-top: 2rem;
 }
 
 .round-btn {
@@ -328,27 +333,28 @@ onUnmounted(() => {
   place-items: center;
   width: 44px;
   height: 44px;
-  border: 1px solid rgba(69, 76, 75, 0.14);
+  border: 1px solid rgba(69, 76, 75, 0.2);
   border-radius: 999px;
-  background: var(--gy-white);
+  background: transparent;
   color: var(--gy-ink);
   cursor: pointer;
   transition:
     border-color 0.2s ease,
-    color 0.2s ease;
+    color 0.2s ease,
+    background 0.2s ease;
 }
 
 .round-btn:hover,
 .round-btn:focus-visible {
   border-color: var(--gy-forest);
-  color: var(--gy-forest);
+  background: var(--gy-forest);
+  color: #fff;
   outline: none;
 }
 
 .reviews-dots {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
   gap: 0.4rem;
 }
 
@@ -381,48 +387,13 @@ onUnmounted(() => {
   background: var(--gy-gold-deep);
 }
 
-.reviews-track.is-single {
-  justify-content: center;
-}
-
-.reviews-track.is-single .reviews-card {
-  flex-basis: min(100%, 42rem);
-}
-
-@media (hover: hover) {
-  .reviews-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 20px 44px rgba(69, 76, 75, 0.11);
-  }
-}
-
-@media (min-width: 860px) {
-  .reviews-card {
-    flex-basis: calc((100% - 1rem) / 2);
-  }
-
-  .reviews-track.is-pair .reviews-card {
-    flex-basis: calc((100% - 1rem) / 2);
-  }
-}
-
-@media (min-width: 1200px) {
-  .reviews-card {
-    flex-basis: calc((100% - 2rem) / 3);
-  }
-
-  .reviews-track.is-pair .reviews-card {
-    flex-basis: calc((100% - 1rem) / 2);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .reviews-track {
     scroll-behavior: auto;
   }
 
-  .reviews-card,
-  .reviews-dots__dot {
+  .reviews-dots__dot,
+  .round-btn {
     transition: none;
   }
 }

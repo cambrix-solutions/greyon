@@ -90,11 +90,13 @@
       </div>
     </section>
 
-    <HomeFeaturedSection />
-    <CustomerReviewsSection />
-    <HomeDestinationsSection />
     <HomeStorySection />
+    <HomeFeaturedSection />
+    <HomeDestinationsSection />
+    <HomeAmenitiesBand />
+    <CustomerReviewsSection />
     <HomeNewsSection v-if="auth.featureEnabled('news_public')" />
+    <HomeCtaBand />
   </q-page>
 </template>
 
@@ -102,6 +104,8 @@
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import BookingSearchWidget from "@/components/BookingSearchWidget.vue";
 import CustomerReviewsSection from "@/components/CustomerReviewsSection.vue";
+import HomeAmenitiesBand from "@/components/home/HomeAmenitiesBand.vue";
+import HomeCtaBand from "@/components/home/HomeCtaBand.vue";
 import HomeDestinationsSection from "@/components/home/HomeDestinationsSection.vue";
 import HomeFeaturedSection from "@/components/home/HomeFeaturedSection.vue";
 import HomeNewsSection from "@/components/home/HomeNewsSection.vue";
