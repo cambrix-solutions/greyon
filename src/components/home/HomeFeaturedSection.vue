@@ -344,13 +344,16 @@ function scrollRooms(dir: -1 | 1) {
     transform 0.3s ease;
 }
 
+.property__media > .shot-nav {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
 .shot-nav--prev {
-  top: 1.25rem;
   left: 1.1rem;
 }
 
 .shot-nav--next {
-  top: 1.25rem;
   right: 1.1rem;
 }
 
@@ -365,7 +368,7 @@ function scrollRooms(dir: -1 | 1) {
 
 .property__count {
   position: absolute;
-  top: 1.45rem;
+  top: 6.5rem;
   left: 50%;
   z-index: 2;
   margin: 0;
