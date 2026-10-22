@@ -28,9 +28,13 @@
         <div class="gy-header__center">
           <!-- Desktop: nav links always stay visible (never swap for search). -->
           <nav class="gy-nav gt-sm">
-            <router-link to="/" class="gy-nav__link">{{
-              $t("nav.home")
-            }}</router-link>
+            <router-link
+              to="/"
+              class="gy-nav__link"
+              active-class="gy-nav__link--ancestor"
+              exact-active-class="is-current"
+              >{{ $t("nav.home") }}</router-link
+            >
             <router-link
               v-if="auth.featureEnabled('news_public')"
               to="/news"
@@ -39,26 +43,60 @@
             >
 
             <div
-              class="gy-nav__dropdown gy-nav__services"
-              :class="{ 'is-open': servicesOpen }"
-              @mouseenter="onServicesEnter"
-              @mouseleave="onServicesLeave"
+              class="gy-nav__dropdown"
+              :class="{ 'is-open': openNavMenu === 'services' }"
+              @mouseenter="onMenuEnter('services')"
+              @mouseleave="onMenuLeave"
             >
               <button
                 type="button"
                 class="gy-nav__link gy-nav__dropbtn"
                 aria-haspopup="true"
-                :aria-expanded="servicesOpen"
-                @click="toggleServices"
+                :aria-expanded="openNavMenu === 'services'"
+                @click="toggleMenu('services')"
               >
                 Services
               </button>
-              <div v-show="servicesOpen" class="gy-nav__mega-wrap">
+              <div
+                v-show="openNavMenu === 'services'"
+                class="gy-nav__mega-wrap"
+              >
                 <ServicesMegaMenu
-                  :sections="serviceSections"
+                  menu-label="Services"
+                  :sections="hotelMenuSections"
                   :loading="catalogLoading"
-                  @keep-open="onServicesEnter"
-                  @request-close="onServicesLeave"
+                  @keep-open="onMenuEnter('services')"
+                  @request-close="onMenuLeave"
+                  @navigate="closeAllNavMenus"
+                />
+              </div>
+            </div>
+
+            <div
+              class="gy-nav__dropdown"
+              :class="{ 'is-open': openNavMenu === 'apartments' }"
+              @mouseenter="onMenuEnter('apartments')"
+              @mouseleave="onMenuLeave"
+            >
+              <button
+                type="button"
+                class="gy-nav__link gy-nav__dropbtn"
+                aria-haspopup="true"
+                :aria-expanded="openNavMenu === 'apartments'"
+                @click="toggleMenu('apartments')"
+              >
+                Apartments
+              </button>
+              <div
+                v-show="openNavMenu === 'apartments'"
+                class="gy-nav__mega-wrap"
+              >
+                <ServicesMegaMenu
+                  menu-label="Apartments"
+                  :sections="apartmentMenuSections"
+                  :loading="catalogLoading"
+                  @keep-open="onMenuEnter('apartments')"
+                  @request-close="onMenuLeave"
                   @navigate="closeAllNavMenus"
                 />
               </div>
@@ -205,6 +243,14 @@
             :key="item.to"
             :to="item.to"
             class="gy-drawer__link"
+            :active-class="
+              item.to === '/'
+                ? 'gy-drawer__link--ancestor'
+                : 'router-link-active'
+            "
+            :exact-active-class="
+              item.to === '/' ? 'is-current' : 'router-link-exact-active'
+            "
             @click="drawerOpen = false"
           >
             <span class="gy-drawer__link-icon" aria-hidden="true">
@@ -216,139 +262,123 @@
           <div class="gy-drawer__divider" />
 
           <div class="gy-drawer__services">
-            <button
-              type="button"
-              class="gy-drawer__accordion-btn"
-              :aria-expanded="drawerServicesOpen"
-              @click="drawerServicesOpen = !drawerServicesOpen"
-            >
-              <span class="gy-drawer__link-icon" aria-hidden="true">
-                <q-icon name="apps" size="22px" />
-              </span>
-              <span class="gy-drawer__accordion-label">Services</span>
-              <q-icon
-                :name="drawerServicesOpen ? 'expand_less' : 'expand_more'"
-                size="22px"
-                class="gy-drawer__chevron"
-              />
-            </button>
-
-            <div v-show="drawerServicesOpen" class="gy-drawer__panels">
-              <!-- Hotels -->
-              <div class="gy-drawer__panel">
-                <button
-                  type="button"
-                  class="gy-drawer__panel-head"
-                  :aria-expanded="drawerHotelsOpen"
-                  @click="drawerHotelsOpen = !drawerHotelsOpen"
-                >
-                  <span class="gy-drawer__panel-thumb" aria-hidden="true">
-                    <q-icon name="hotel" size="22px" />
-                  </span>
-                  <span class="gy-drawer__panel-copy">
-                    <strong>Hotels</strong>
-                    <em>{{ hotelsSubtitle }}</em>
-                  </span>
-                  <q-icon
-                    :name="drawerHotelsOpen ? 'expand_less' : 'expand_more'"
-                    size="20px"
-                  />
-                </button>
-                <div v-show="drawerHotelsOpen" class="gy-drawer__panel-body">
-                  <div v-if="catalogLoading" class="gy-drawer__skels">
-                    <div v-for="n in 3" :key="n" class="gy-drawer__skel-row">
-                      <span class="gy-drawer__skel-thumb" />
-                      <span class="gy-drawer__skel-text">
-                        <span /><span />
-                      </span>
-                    </div>
+            <div class="gy-drawer__panel">
+              <button
+                type="button"
+                class="gy-drawer__panel-head"
+                :aria-expanded="drawerServicesOpen"
+                @click="drawerServicesOpen = !drawerServicesOpen"
+              >
+                <span class="gy-drawer__panel-thumb" aria-hidden="true">
+                  <q-icon name="hotel" size="22px" />
+                </span>
+                <span class="gy-drawer__panel-copy">
+                  <strong>Services</strong>
+                  <em>{{ hotelsSubtitle }}</em>
+                </span>
+                <q-icon
+                  :name="drawerServicesOpen ? 'expand_less' : 'expand_more'"
+                  size="20px"
+                />
+              </button>
+              <div v-show="drawerServicesOpen" class="gy-drawer__panel-body">
+                <div v-if="catalogLoading" class="gy-drawer__skels">
+                  <div v-for="n in 3" :key="n" class="gy-drawer__skel-row">
+                    <span class="gy-drawer__skel-thumb" />
+                    <span class="gy-drawer__skel-text"> <span /><span /> </span>
                   </div>
-                  <template v-else-if="hotelNavItems.length">
-                    <router-link
-                      v-for="item in hotelNavItems"
-                      :key="item.id"
-                      :to="`/hotels/${item.slug}`"
-                      class="gy-drawer__property"
-                      @click="drawerOpen = false"
-                    >
-                      <img
-                        :src="item.thumb"
-                        :alt="item.name"
-                        class="gy-drawer__property-thumb"
-                        loading="lazy"
-                      />
-                      <span class="gy-drawer__property-meta">
-                        <strong>{{ item.name }}</strong>
-                        <em>{{ item.city }}</em>
-                      </span>
-                    </router-link>
-                  </template>
-                  <p v-else class="gy-drawer__soon">Coming soon</p>
+                </div>
+                <template v-else-if="hotelNavItems.length">
                   <router-link
-                    to="/hotels"
-                    class="gy-drawer__view-all"
+                    v-for="item in hotelNavItems"
+                    :key="item.id"
+                    :to="`/hotels/${item.slug}`"
+                    class="gy-drawer__property"
                     @click="drawerOpen = false"
                   >
-                    View all hotels
-                    <q-icon name="arrow_forward" size="16px" />
+                    <img
+                      :src="item.thumb"
+                      :alt="item.name"
+                      class="gy-drawer__property-thumb"
+                      loading="lazy"
+                    />
+                    <span class="gy-drawer__property-meta">
+                      <strong>{{ item.name }}</strong>
+                      <em>{{ item.city }}</em>
+                    </span>
                   </router-link>
-                </div>
+                </template>
+                <p v-else class="gy-drawer__soon">Coming soon</p>
+                <router-link
+                  to="/hotels"
+                  class="gy-drawer__view-all"
+                  @click="drawerOpen = false"
+                >
+                  View all hotels
+                  <q-icon name="arrow_forward" size="16px" />
+                </router-link>
               </div>
+            </div>
 
-              <!-- Apartments -->
-              <div class="gy-drawer__panel">
-                <button
-                  type="button"
-                  class="gy-drawer__panel-head"
-                  :aria-expanded="drawerApartmentsOpen"
-                  @click="drawerApartmentsOpen = !drawerApartmentsOpen"
-                >
-                  <span class="gy-drawer__panel-thumb" aria-hidden="true">
-                    <q-icon name="apartment" size="22px" />
-                  </span>
-                  <span class="gy-drawer__panel-copy">
-                    <strong>Apartments</strong>
-                    <em>{{ apartmentsSubtitle }}</em>
-                  </span>
-                  <q-icon
-                    :name="drawerApartmentsOpen ? 'expand_less' : 'expand_more'"
-                    size="20px"
-                  />
-                </button>
-                <div
-                  v-show="drawerApartmentsOpen"
-                  class="gy-drawer__panel-body"
-                >
-                  <div v-if="catalogLoading" class="gy-drawer__skels">
-                    <div v-for="n in 2" :key="n" class="gy-drawer__skel-row">
-                      <span class="gy-drawer__skel-thumb" />
-                      <span class="gy-drawer__skel-text">
-                        <span /><span />
-                      </span>
-                    </div>
+            <div class="gy-drawer__panel">
+              <button
+                type="button"
+                class="gy-drawer__panel-head"
+                :aria-expanded="drawerApartmentsOpen"
+                @click="drawerApartmentsOpen = !drawerApartmentsOpen"
+              >
+                <span class="gy-drawer__panel-thumb" aria-hidden="true">
+                  <q-icon name="apartment" size="22px" />
+                </span>
+                <span class="gy-drawer__panel-copy">
+                  <strong>Apartments</strong>
+                  <em>{{ apartmentsSubtitle }}</em>
+                </span>
+                <q-icon
+                  :name="drawerApartmentsOpen ? 'expand_less' : 'expand_more'"
+                  size="20px"
+                />
+              </button>
+              <div v-show="drawerApartmentsOpen" class="gy-drawer__panel-body">
+                <div v-if="catalogLoading" class="gy-drawer__skels">
+                  <div
+                    v-for="n in 2"
+                    :key="`apt-${n}`"
+                    class="gy-drawer__skel-row"
+                  >
+                    <span class="gy-drawer__skel-thumb" />
+                    <span class="gy-drawer__skel-text"> <span /><span /> </span>
                   </div>
-                  <template v-else-if="apartmentNavItems.length">
-                    <router-link
-                      v-for="item in apartmentNavItems"
-                      :key="item.id"
-                      :to="`/hotels/${item.slug}`"
-                      class="gy-drawer__property"
-                      @click="drawerOpen = false"
-                    >
-                      <img
-                        :src="item.thumb"
-                        :alt="item.name"
-                        class="gy-drawer__property-thumb"
-                        loading="lazy"
-                      />
-                      <span class="gy-drawer__property-meta">
-                        <strong>{{ item.name }}</strong>
-                        <em>{{ item.city }}</em>
-                      </span>
-                    </router-link>
-                  </template>
-                  <p v-else class="gy-drawer__soon">Coming soon</p>
                 </div>
+                <template v-else-if="apartmentNavItems.length">
+                  <router-link
+                    v-for="item in apartmentNavItems"
+                    :key="item.id"
+                    :to="`/hotels/${item.slug}`"
+                    class="gy-drawer__property"
+                    @click="drawerOpen = false"
+                  >
+                    <img
+                      :src="item.thumb"
+                      :alt="item.name"
+                      class="gy-drawer__property-thumb"
+                      loading="lazy"
+                    />
+                    <span class="gy-drawer__property-meta">
+                      <strong>{{ item.name }}</strong>
+                      <em>{{ item.city }}</em>
+                    </span>
+                  </router-link>
+                </template>
+                <p v-else class="gy-drawer__soon">Coming soon</p>
+                <router-link
+                  to="/apartments"
+                  class="gy-drawer__view-all"
+                  @click="drawerOpen = false"
+                >
+                  View all apartments
+                  <q-icon name="arrow_forward" size="16px" />
+                </router-link>
               </div>
             </div>
           </div>
@@ -467,12 +497,13 @@ const { t } = useI18n();
 const route = useRoute();
 const { pageSearchInView } = usePageSearchVisibility();
 
+type NavMenuId = "services" | "apartments";
+
 const drawerOpen = ref(false);
-const drawerServicesOpen = ref(true);
-const drawerHotelsOpen = ref(false);
+const drawerServicesOpen = ref(false);
 const drawerApartmentsOpen = ref(false);
 const homePastHero = ref(false);
-const servicesOpen = ref(false);
+const openNavMenu = ref<NavMenuId | null>(null);
 const catalogLoading = ref(false);
 const headerSearchOpen = ref(false);
 
@@ -500,36 +531,39 @@ async function refreshCatalogIfNeeded(force = false) {
   }
 }
 
-function onServicesEnter() {
+function onMenuEnter(id: NavMenuId) {
   clearCloseServicesTimer();
-  servicesOpen.value = true;
+  openNavMenu.value = id;
   void refreshCatalogIfNeeded(false);
 }
 
-function onServicesLeave() {
+function onMenuLeave() {
   clearCloseServicesTimer();
   closeServicesTimer = setTimeout(() => {
-    servicesOpen.value = false;
+    openNavMenu.value = null;
     closeServicesTimer = null;
   }, CLOSE_DELAY_MS);
 }
 
-function toggleServices() {
+function toggleMenu(id: NavMenuId) {
   clearCloseServicesTimer();
-  servicesOpen.value = !servicesOpen.value;
-  if (servicesOpen.value) void refreshCatalogIfNeeded(false);
+  openNavMenu.value = openNavMenu.value === id ? null : id;
+  if (openNavMenu.value) void refreshCatalogIfNeeded(false);
 }
 
 function closeAllNavMenus() {
   clearCloseServicesTimer();
-  servicesOpen.value = false;
+  openNavMenu.value = null;
 }
 
 function onDocumentPointerDown(event: Event) {
-  if (!servicesOpen.value) return;
+  if (!openNavMenu.value) return;
   const target = event.target as Node | null;
-  const root = document.querySelector(".gy-nav__services");
-  if (root && target && !root.contains(target)) closeAllNavMenus();
+  const roots = document.querySelectorAll(".gy-nav__dropdown");
+  for (const root of roots) {
+    if (target && root.contains(target)) return;
+  }
+  closeAllNavMenus();
 }
 
 async function openDrawer() {
@@ -574,7 +608,7 @@ const apartmentsSubtitle = computed(() => {
   return n === 1 ? "1 property" : `${n} properties`;
 });
 
-const serviceSections = computed(() => [
+const hotelMenuSections = computed(() => [
   {
     id: "hotels",
     label: "Hotels",
@@ -583,15 +617,18 @@ const serviceSections = computed(() => [
     items: hotelNavItems.value,
     viewAllTo: "/hotels",
     viewAllLabel: "View all hotels"
-  },
+  }
+]);
+
+const apartmentMenuSections = computed(() => [
   {
     id: "apartments",
     label: "Apartments",
     subtitle: apartmentsSubtitle.value,
     icon: "apartment",
     items: apartmentNavItems.value,
-    viewAllTo: null,
-    viewAllLabel: undefined
+    viewAllTo: "/apartments",
+    viewAllLabel: "View all apartments"
   }
 ]);
 
@@ -1094,17 +1131,17 @@ onUnmounted(() => {
 /* Tighten nav + actions between md and xl so nothing wraps or overlaps. */
 @media (min-width: 1024px) and (max-width: 1439px) {
   .gy-header__bar {
-    gap: 0.55rem;
+    gap: 0.45rem;
   }
 
   .gy-nav {
-    gap: 0.45rem 0.65rem;
+    gap: 0.3rem 0.48rem;
   }
 
   .gy-nav__link,
   .gy-nav__dropbtn {
-    font-size: 0.7rem;
-    letter-spacing: 0.025em;
+    font-size: 0.66rem;
+    letter-spacing: 0.02em;
   }
 
   .gy-header__actions {
@@ -1127,6 +1164,18 @@ onUnmounted(() => {
   }
 }
 
+@media (min-width: 1200px) and (max-width: 1439px) {
+  .gy-nav {
+    gap: 0.35rem 0.58rem;
+  }
+
+  .gy-nav__link,
+  .gy-nav__dropbtn {
+    font-size: 0.72rem;
+    letter-spacing: 0.028em;
+  }
+}
+
 .gy-nav__link::after,
 .gy-nav__dropbtn::after {
   content: "";
@@ -1143,11 +1192,13 @@ onUnmounted(() => {
 }
 
 .gy-nav__link:hover::after,
+.gy-nav__link.is-current::after,
 .gy-nav__link.router-link-active::after,
 .gy-nav__dropdown.is-open .gy-nav__dropbtn::after {
   transform: scaleX(1);
 }
 
+.gy-nav__link.is-current,
 .gy-nav__link.router-link-active,
 .gy-nav__link:hover,
 .gy-nav__dropbtn:hover,
@@ -1156,6 +1207,7 @@ onUnmounted(() => {
   color: var(--gy-gold);
 }
 
+.gy-header--solid .gy-nav__link.is-current,
 .gy-header--solid .gy-nav__link.router-link-active,
 .gy-header--solid .gy-nav__link:hover,
 .gy-header--solid .gy-nav__dropbtn:hover,
@@ -1326,6 +1378,7 @@ onUnmounted(() => {
 }
 
 .gy-drawer__link:hover,
+.gy-drawer__link.is-current,
 .gy-drawer__link.router-link-active {
   background: var(--gy-sand);
 }

@@ -1,8 +1,9 @@
 <template>
   <div
     class="svc-mega"
+    :class="{ 'svc-mega--single': sections.length < 2 }"
     role="menu"
-    aria-label="Services"
+    :aria-label="menuLabel"
     @mouseenter="emit('keep-open')"
     @mouseleave="emit('request-close')"
   >
@@ -83,10 +84,14 @@ export type ServiceMenuSection = {
   viewAllLabel?: string;
 };
 
-defineProps<{
-  sections: ServiceMenuSection[];
-  loading?: boolean;
-}>();
+withDefaults(
+  defineProps<{
+    sections: ServiceMenuSection[];
+    loading?: boolean;
+    menuLabel?: string;
+  }>(),
+  { menuLabel: "Services" }
+);
 
 const emit = defineEmits<{
   (e: "keep-open"): void;
@@ -278,8 +283,14 @@ const emit = defineEmits<{
   }
 }
 
+.svc-mega--single {
+  grid-template-columns: minmax(16rem, 22rem);
+  min-width: min(22rem, calc(100vw - 2rem));
+}
+
 @media (max-width: 720px) {
-  .svc-mega {
+  .svc-mega,
+  .svc-mega--single {
     grid-template-columns: 1fr;
     min-width: min(20rem, calc(100vw - 2rem));
   }
