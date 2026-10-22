@@ -97,9 +97,7 @@
 
       <nav class="gy-footer__legal-row" aria-label="Site utilities">
         <router-link to="/map">Map</router-link>
-        <router-link
-          v-if="auth.featureEnabled('booking_public')"
-          to="/booking"
+        <router-link v-if="auth.featureEnabled('booking_public')" to="/booking"
           >Booking</router-link
         >
         <router-link to="/sitemap">Sitemap</router-link>

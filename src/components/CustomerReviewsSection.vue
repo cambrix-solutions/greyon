@@ -30,7 +30,10 @@
           <q-icon name="chevron_left" size="28px" />
         </button>
 
-        <div class="reviews-carousel__track" :aria-live="paused ? 'polite' : 'off'">
+        <div
+          class="reviews-carousel__track"
+          :aria-live="paused ? 'polite' : 'off'"
+        >
           <article
             v-for="(review, i) in reviews"
             :key="review.id"
@@ -144,7 +147,8 @@ function onFocusOut(event: FocusEvent) {
 
 function goTo(i: number) {
   if (!reviews.value.length) return;
-  index.value = ((i % reviews.value.length) + reviews.value.length) % reviews.value.length;
+  index.value =
+    ((i % reviews.value.length) + reviews.value.length) % reviews.value.length;
   startTimer();
 }
 
