@@ -5,6 +5,9 @@ export type SitemapEntry = {
   priority?: string;
 };
 
+/** Public origin for every sitemap URL and canonical. */
+export const SITEMAP_ORIGIN = "https://greyon.site";
+
 /** Which gated public surfaces are live and safe to advertise to crawlers. */
 export type SitemapPublicFlags = {
   booking?: boolean;
@@ -37,7 +40,8 @@ export function buildCmsSitemapEntries(input: {
     { loc: "/locations", changefreq: "weekly", priority: "0.8" },
     { loc: "/map", changefreq: "weekly", priority: "0.7" },
     { loc: "/privacy", changefreq: "yearly", priority: "0.3" },
-    { loc: "/terms", changefreq: "yearly", priority: "0.3" }
+    { loc: "/terms", changefreq: "yearly", priority: "0.3" },
+    { loc: "/sitemap", changefreq: "weekly", priority: "0.3" }
   ];
 
   if (enabled.news) {
