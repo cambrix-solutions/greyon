@@ -8,6 +8,7 @@ export {
 export * from "@/services/engine/auth";
 export * from "@/services/engine/frontAuth";
 export * from "@/services/engine/publicCatalog";
+export * from "@/services/engine/reviews";
 export * from "@/services/engine/adminCatalog";
 export * from "@/services/engine/adminCatalogEntities";
 export * from "@/services/engine/adminTeam";
