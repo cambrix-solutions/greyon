@@ -60,7 +60,7 @@
             v-for="(result, idx) in booking.results"
             :key="idx"
             variant="result"
-            :title="result.hotel.name"
+            :title="result.roomType.name"
             :subtitle="resultRoomSubtitle(result)"
             :images="result.roomType.images"
             :bed-type="result.roomType.bedType"
@@ -580,10 +580,10 @@ function roomFactsLine(room: RoomType) {
 }
 
 function resultRoomSubtitle(result: AvailabilityResult) {
-  const name = result.roomType.name?.trim() || "";
+  const hotel = result.hotel.name?.trim() || "";
   const rate = result.ratePlan.name?.trim() || "";
-  if (name && rate) return `${name} · ${rate}`;
-  return name || rate || "Available room";
+  if (hotel && rate) return `${hotel} · ${rate}`;
+  return hotel || rate || "Available room";
 }
 
 function resultUrgencyBadge(result: AvailabilityResult) {
