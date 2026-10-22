@@ -26,8 +26,8 @@
         </router-link>
 
         <div class="gy-header__center">
-          <!-- Desktop: nav links always stay visible (never swap for search). -->
-          <nav class="gy-nav gt-sm">
+          <!-- Desktop (≥1100): all eight links stay in their own track. -->
+          <nav class="gy-nav">
             <router-link
               to="/"
               class="gy-nav__link"
@@ -119,35 +119,14 @@
               >{{ $t("nav.contact") }}</router-link
             >
           </nav>
-
-          <!-- Mobile (<1024): compact search pill that opens the search sheet. -->
-          <div v-if="showCompactSearch" class="lt-md gy-header__search">
-            <button
-              type="button"
-              class="gy-header__search-pill"
-              aria-haspopup="dialog"
-              :aria-expanded="headerSearchOpen"
-              aria-label="Open search"
-              @click="headerSearchOpen = true"
-            >
-              <q-icon name="search" size="18px" class="gy-header__pill-icon" />
-              <span class="gy-header__pill-text">
-                <span class="gy-header__pill-title">{{
-                  headerSearchTitle
-                }}</span>
-                <span class="gy-header__pill-sub">{{ headerSearchSub }}</span>
-              </span>
-            </button>
-          </div>
         </div>
 
         <div class="gy-header__actions">
-          <!-- Desktop (≥1024): obvious search pill beside Sign in / Book now.
-               Always icon + “Search”; summary (dest · dates) when there’s room. -->
+          <!-- Icon + “Search” at every width. Destination and dates from 1440px. -->
           <button
             v-if="showCompactSearch"
             type="button"
-            class="gt-sm gy-header__search-trigger"
+            class="gy-header__search-trigger"
             aria-haspopup="dialog"
             :aria-expanded="headerSearchOpen"
             :aria-label="headerSearchAriaLabel"
@@ -193,7 +172,7 @@
             flat
             round
             icon="menu"
-            class="lt-md gy-menu-btn"
+            class="gy-menu-btn"
             aria-label="Open menu"
             size="md"
             padding="10px"
@@ -681,27 +660,9 @@ function dayMonthShort(ymd: string) {
     : "";
 }
 
-const headerSearchTitle = computed(() => {
-  const slug = booking.search.locationSlug;
-  if (!slug) return "Where to?";
-  return cms.publishedLocations.find(l => l.slug === slug)?.name || "Where to?";
-});
-
-const headerSearchSub = computed(() => {
-  const { checkIn, checkOut, rooms, adults, children } = booking.search;
-  const guests = adults + children;
-  const dates =
-    checkIn && checkOut
-      ? `${dayMonthShort(checkIn)}–${dayMonthShort(checkOut)}`
-      : "Add dates";
-  return `${dates} · ${rooms} room${rooms === 1 ? "" : "s"} · ${guests} guest${
-    guests === 1 ? "" : "s"
-  }`;
-});
-
 /**
- * Optional summary beside the always-visible “Search” label (shown when the
- * header has room). Empty when there is nothing useful beyond the label.
+ * Optional summary beside the always-visible “Search” label.
+ * Shown from 1440px up, when the header has room for destination and dates.
  */
 const headerSearchSummary = computed(() => {
   const slug = booking.search.locationSlug;
@@ -847,15 +808,20 @@ onUnmounted(() => {
 .gy-header__bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+  justify-content: flex-start;
+  /* Wider than the 1200px page column so logo, nav, and actions each fit. */
+  width: min(1680px, calc(100% - 1.5rem));
+  max-width: 1680px;
+  gap: clamp(0.45rem, 1vw, 1rem);
   min-height: 5.5rem;
+  min-width: 0;
 }
 
 .gy-logo {
   display: inline-flex;
   align-items: center;
-  flex-shrink: 0;
+  flex: 0 0 auto;
+  min-width: 0;
   color: inherit;
   transition: opacity 0.25s ease;
 }
@@ -866,14 +832,14 @@ onUnmounted(() => {
 
 .gy-logo__img {
   display: block;
-  height: clamp(3.1rem, 5.2vw, 4.6rem);
+  height: 2.85rem;
   width: auto;
-  max-width: min(42vw, 15rem);
+  max-width: 8.75rem;
   object-fit: contain;
 }
 
 .gy-header__center {
-  flex: 1;
+  flex: 1 1 auto;
   min-width: 0;
   display: flex;
   justify-content: center;
@@ -953,8 +919,8 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   gap: 0.4rem;
-  flex-shrink: 0;
-  max-width: min(100%, 16rem);
+  flex: 0 0 auto;
+  max-width: none;
   min-height: 2.5rem;
   padding: 0.35rem 0.85rem 0.35rem 0.65rem;
   border: 1.5px solid var(--gy-forest);
@@ -1012,6 +978,7 @@ onUnmounted(() => {
 .gy-header__search-trigger-label {
   flex-shrink: 0;
   line-height: 1;
+  white-space: nowrap;
 }
 
 .gy-header__search-trigger-summary {
@@ -1036,13 +1003,10 @@ onUnmounted(() => {
   border-left-color: rgba(18, 17, 16, 0.22);
 }
 
-@media (min-width: 1280px) {
-  .gy-header__search-trigger {
-    max-width: min(100%, 22rem);
-  }
-
+@media (min-width: 1440px) {
   .gy-header__search-trigger-summary {
     display: inline;
+    max-width: 14rem;
   }
 }
 
@@ -1103,17 +1067,19 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   flex-wrap: nowrap;
-  gap: 1.15rem 1.5rem;
+  gap: 0.28rem 0.42rem;
+  width: 100%;
+  max-width: 100%;
   min-width: 0;
 }
 
 .gy-nav__link,
 .gy-nav__dropbtn {
   position: relative;
-  flex-shrink: 0;
-  font-size: 0.82rem;
+  flex: 0 0 auto;
+  font-size: 0.66rem;
   font-weight: 500;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
   opacity: 0.9;
   color: inherit;
@@ -1128,51 +1094,83 @@ onUnmounted(() => {
     color 0.25s ease;
 }
 
-/* Tighten nav + actions between md and xl so nothing wraps or overlaps. */
-@media (min-width: 1024px) and (max-width: 1439px) {
-  .gy-header__bar {
-    gap: 0.45rem;
-  }
-
+/* Full nav from 1100px. Below that, the drawer takes over. */
+@media (max-width: 1099px) {
   .gy-nav {
-    gap: 0.3rem 0.48rem;
-  }
-
-  .gy-nav__link,
-  .gy-nav__dropbtn {
-    font-size: 0.66rem;
-    letter-spacing: 0.02em;
+    display: none !important;
   }
 
   .gy-header__actions {
+    margin-left: auto;
     gap: 0.4rem;
   }
 
   .gy-header__search-trigger {
-    padding: 0.32rem 0.75rem 0.32rem 0.55rem;
-    font-size: 0.72rem;
+    padding: 0.32rem 0.7rem 0.32rem 0.5rem;
+    font-size: 0.7rem;
   }
 
   .gy-signin-btn,
   .gy-header__actions .gy-btn--sm {
-    padding-inline: 0.65rem;
-    font-size: 0.7rem;
-  }
-
-  .gy-account-btn__label {
-    display: none;
+    padding-inline: 0.6rem;
+    font-size: 0.68rem;
   }
 }
 
-@media (min-width: 1200px) and (max-width: 1439px) {
+@media (min-width: 1100px) {
+  .gy-menu-btn {
+    display: none !important;
+  }
+}
+
+@media (min-width: 1280px) {
   .gy-nav {
-    gap: 0.35rem 0.58rem;
+    gap: 0.4rem 0.75rem;
   }
 
   .gy-nav__link,
   .gy-nav__dropbtn {
-    font-size: 0.72rem;
-    letter-spacing: 0.028em;
+    font-size: 0.76rem;
+    letter-spacing: 0.035em;
+  }
+
+  .gy-logo__img {
+    height: 3.35rem;
+    max-width: 10.5rem;
+  }
+}
+
+@media (min-width: 1440px) {
+  .gy-nav {
+    gap: 0.5rem 0.95rem;
+  }
+
+  .gy-nav__link,
+  .gy-nav__dropbtn {
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+  }
+
+  .gy-logo__img {
+    height: 4rem;
+    max-width: 13rem;
+  }
+}
+
+@media (min-width: 1680px) {
+  .gy-nav {
+    gap: 0.6rem 1.25rem;
+  }
+
+  .gy-nav__link,
+  .gy-nav__dropbtn {
+    font-size: 0.84rem;
+    letter-spacing: 0.045em;
+  }
+
+  .gy-logo__img {
+    height: 4.5rem;
+    max-width: 15rem;
   }
 }
 
@@ -1231,8 +1229,9 @@ onUnmounted(() => {
 .gy-header__actions {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  flex-shrink: 0;
+  gap: 0.65rem;
+  flex: 0 0 auto;
+  min-width: 0;
 }
 
 .gy-account-btn {
@@ -1645,11 +1644,12 @@ onUnmounted(() => {
 @media (max-width: 599px) {
   .gy-header__bar {
     min-height: 4.5rem;
+    width: calc(100% - 1rem);
   }
 
   .gy-logo__img {
-    height: 3.25rem;
-    max-width: 48vw;
+    height: 2.65rem;
+    max-width: 7.25rem;
   }
 }
 </style>
