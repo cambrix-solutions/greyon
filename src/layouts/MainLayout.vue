@@ -26,102 +26,107 @@
         </router-link>
 
         <div class="gy-header__center">
-          <transition name="gy-navswap" mode="out-in">
-            <div
-              v-if="showCompactSearch"
-              key="search"
-              class="gy-header__search"
+          <!-- Desktop: nav links always stay visible (never swap for search). -->
+          <nav class="gy-nav gt-sm">
+            <router-link to="/" class="gy-nav__link">{{
+              $t("nav.home")
+            }}</router-link>
+            <router-link
+              v-if="auth.featureEnabled('news_public')"
+              to="/news"
+              class="gy-nav__link"
+              >{{ $t("nav.news") }}</router-link
             >
-              <!-- md+ (≥1024): slim single-row pill (no Special rates).
-                   Quasar gt-sm = greater than sm breakpoint = md/lg/xl. -->
-              <BookingSearchWidget
-                class="gt-sm gy-header__search-widget"
-                compact
-                :show-special-rates="false"
-                :page-anchor="false"
-                :navigate="true"
-                submit-label="Search"
-              />
-              <!-- xs/sm (<1024): compact trigger that opens the full search. -->
+
+            <div
+              class="gy-nav__dropdown gy-nav__services"
+              :class="{ 'is-open': servicesOpen }"
+              @mouseenter="onServicesEnter"
+              @mouseleave="onServicesLeave"
+            >
               <button
                 type="button"
-                class="lt-md gy-header__search-pill"
-                aria-haspopup="dialog"
-                :aria-expanded="headerSearchOpen"
-                aria-label="Open search"
-                @click="headerSearchOpen = true"
+                class="gy-nav__link gy-nav__dropbtn"
+                aria-haspopup="true"
+                :aria-expanded="servicesOpen"
+                @click="toggleServices"
               >
-                <q-icon
-                  name="search"
-                  size="18px"
-                  class="gy-header__pill-icon"
-                />
-                <span class="gy-header__pill-text">
-                  <span class="gy-header__pill-title">{{
-                    headerSearchTitle
-                  }}</span>
-                  <span class="gy-header__pill-sub">{{ headerSearchSub }}</span>
-                </span>
+                Services
               </button>
-            </div>
-            <nav v-else key="nav" class="gy-nav gt-sm">
-              <router-link to="/" class="gy-nav__link">{{
-                $t("nav.home")
-              }}</router-link>
-              <router-link
-                v-if="auth.featureEnabled('news_public')"
-                to="/news"
-                class="gy-nav__link"
-                >{{ $t("nav.news") }}</router-link
-              >
-
-              <div
-                class="gy-nav__dropdown gy-nav__services"
-                :class="{ 'is-open': servicesOpen }"
-                @mouseenter="onServicesEnter"
-                @mouseleave="onServicesLeave"
-              >
-                <button
-                  type="button"
-                  class="gy-nav__link gy-nav__dropbtn"
-                  aria-haspopup="true"
-                  :aria-expanded="servicesOpen"
-                  @click="toggleServices"
-                >
-                  Services
-                </button>
-                <div v-show="servicesOpen" class="gy-nav__mega-wrap">
-                  <ServicesMegaMenu
-                    :sections="serviceSections"
-                    :loading="catalogLoading"
-                    @keep-open="onServicesEnter"
-                    @request-close="onServicesLeave"
-                    @navigate="closeAllNavMenus"
-                  />
-                </div>
+              <div v-show="servicesOpen" class="gy-nav__mega-wrap">
+                <ServicesMegaMenu
+                  :sections="serviceSections"
+                  :loading="catalogLoading"
+                  @keep-open="onServicesEnter"
+                  @request-close="onServicesLeave"
+                  @navigate="closeAllNavMenus"
+                />
               </div>
+            </div>
 
-              <router-link to="/locations" class="gy-nav__link">{{
-                $t("nav.location")
-              }}</router-link>
-              <router-link to="/map" class="gy-nav__link">Map</router-link>
-              <router-link
-                v-if="auth.featureEnabled('booking_public')"
-                to="/booking"
-                class="gy-nav__link"
-                >{{ $t("nav.booking") }}</router-link
-              >
-              <router-link
-                v-if="auth.featureEnabled('contact_public')"
-                to="/contact"
-                class="gy-nav__link"
-                >{{ $t("nav.contact") }}</router-link
-              >
-            </nav>
-          </transition>
+            <router-link to="/locations" class="gy-nav__link">{{
+              $t("nav.location")
+            }}</router-link>
+            <router-link to="/map" class="gy-nav__link">Map</router-link>
+            <router-link
+              v-if="auth.featureEnabled('booking_public')"
+              to="/booking"
+              class="gy-nav__link"
+              >{{ $t("nav.booking") }}</router-link
+            >
+            <router-link
+              v-if="auth.featureEnabled('contact_public')"
+              to="/contact"
+              class="gy-nav__link"
+              >{{ $t("nav.contact") }}</router-link
+            >
+          </nav>
+
+          <!-- Mobile (<1024): compact search pill that opens the search sheet. -->
+          <div v-if="showCompactSearch" class="lt-md gy-header__search">
+            <button
+              type="button"
+              class="gy-header__search-pill"
+              aria-haspopup="dialog"
+              :aria-expanded="headerSearchOpen"
+              aria-label="Open search"
+              @click="headerSearchOpen = true"
+            >
+              <q-icon name="search" size="18px" class="gy-header__pill-icon" />
+              <span class="gy-header__pill-text">
+                <span class="gy-header__pill-title">{{
+                  headerSearchTitle
+                }}</span>
+                <span class="gy-header__pill-sub">{{ headerSearchSub }}</span>
+              </span>
+            </button>
+          </div>
         </div>
 
         <div class="gy-header__actions">
+          <!-- Desktop (≥1024): obvious search pill beside Sign in / Book now.
+               Always icon + “Search”; summary (dest · dates) when there’s room. -->
+          <button
+            v-if="showCompactSearch"
+            type="button"
+            class="gt-sm gy-header__search-trigger"
+            aria-haspopup="dialog"
+            :aria-expanded="headerSearchOpen"
+            :aria-label="headerSearchAriaLabel"
+            @click="headerSearchOpen = true"
+          >
+            <q-icon
+              name="search"
+              size="18px"
+              class="gy-header__search-trigger-icon"
+            />
+            <span class="gy-header__search-trigger-label">Search</span>
+            <span
+              v-if="headerSearchSummary"
+              class="gy-header__search-trigger-summary"
+              >{{ headerSearchSummary }}</span
+            >
+          </button>
           <router-link
             v-if="customer.isAuthenticated"
             to="/account"
@@ -422,7 +427,9 @@
           </button>
         </header>
         <BookingSearchWidget
+          stacked
           :page-anchor="false"
+          :show-special-rates="false"
           :navigate="true"
           submit-label="Search availability"
         />
@@ -639,10 +646,8 @@ function dayMonthShort(ymd: string) {
 
 const headerSearchTitle = computed(() => {
   const slug = booking.search.locationSlug;
-  if (!slug) return "Search stays";
-  return (
-    cms.publishedLocations.find(l => l.slug === slug)?.name || "Search stays"
-  );
+  if (!slug) return "Where to?";
+  return cms.publishedLocations.find(l => l.slug === slug)?.name || "Where to?";
 });
 
 const headerSearchSub = computed(() => {
@@ -655,6 +660,31 @@ const headerSearchSub = computed(() => {
   return `${dates} · ${rooms} room${rooms === 1 ? "" : "s"} · ${guests} guest${
     guests === 1 ? "" : "s"
   }`;
+});
+
+/**
+ * Optional summary beside the always-visible “Search” label (shown when the
+ * header has room). Empty when there is nothing useful beyond the label.
+ */
+const headerSearchSummary = computed(() => {
+  const slug = booking.search.locationSlug;
+  const dest = slug
+    ? cms.publishedLocations.find(l => l.slug === slug)?.name
+    : "";
+  const { checkIn, checkOut } = booking.search;
+  const dates =
+    checkIn && checkOut
+      ? `${dayMonthShort(checkIn)}–${dayMonthShort(checkOut)}`
+      : "";
+  if (dest && dates) return `${dest} · ${dates}`;
+  if (dest) return dest;
+  if (dates) return dates;
+  return "";
+});
+
+const headerSearchAriaLabel = computed(() => {
+  const summary = headerSearchSummary.value;
+  return summary ? `Search — ${summary}` : "Search";
 });
 
 const solidHeader = computed(
@@ -810,20 +840,16 @@ onUnmounted(() => {
   min-width: 0;
   display: flex;
   justify-content: center;
+  align-items: center;
 }
 
 .gy-header__search {
   width: 100%;
-  max-width: min(52rem, 100%);
+  max-width: min(22rem, 100%);
   margin-inline: 0.35rem;
   display: flex;
   justify-content: center;
   align-items: center;
-  min-width: 0;
-}
-
-.gy-header__search-widget {
-  width: 100%;
   min-width: 0;
 }
 
@@ -884,14 +910,123 @@ onUnmounted(() => {
   text-overflow: ellipsis;
 }
 
+/* Desktop search: always an obvious pill (icon + “Search”), never icon-only. */
+.gy-header__search-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+  max-width: min(100%, 16rem);
+  min-height: 2.5rem;
+  padding: 0.35rem 0.85rem 0.35rem 0.65rem;
+  border: 1.5px solid var(--gy-forest);
+  border-radius: 999px;
+  background: var(--gy-forest);
+  color: var(--gy-white);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(69, 76, 75, 0.18);
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.15s ease;
+}
+
+.gy-header__search-trigger:hover {
+  background: var(--gy-ink);
+  border-color: var(--gy-ink);
+  box-shadow: 0 8px 20px rgba(28, 36, 33, 0.22);
+}
+
+.gy-header__search-trigger:active {
+  transform: scale(0.98);
+}
+
+.gy-header__search-trigger:focus-visible {
+  outline: 2px solid var(--gy-gold);
+  outline-offset: 2px;
+}
+
+.gy-header:not(.gy-header--solid) .gy-header__search-trigger {
+  border-color: var(--gy-gold);
+  background: var(--gy-gold);
+  color: var(--gy-ink);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.22);
+}
+
+.gy-header:not(.gy-header--solid) .gy-header__search-trigger:hover {
+  background: var(--gy-white);
+  border-color: var(--gy-white);
+  color: var(--gy-ink);
+}
+
+.gy-header__search-trigger-icon {
+  flex-shrink: 0;
+  color: inherit;
+}
+
+.gy-header__search-trigger-label {
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.gy-header__search-trigger-summary {
+  display: none;
+  min-width: 0;
+  max-width: 11rem;
+  margin-left: 0.15rem;
+  padding-left: 0.55rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.35);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0.92;
+}
+
+.gy-header:not(.gy-header--solid) .gy-header__search-trigger-summary {
+  border-left-color: rgba(18, 17, 16, 0.22);
+}
+
+@media (min-width: 1280px) {
+  .gy-header__search-trigger {
+    max-width: min(100%, 22rem);
+  }
+
+  .gy-header__search-trigger-summary {
+    display: inline;
+  }
+}
+
 .gy-header-search-sheet {
-  width: min(36rem, 100vw);
-  margin: 0.75rem;
+  width: min(35rem, calc(100vw - 1.5rem));
+  max-width: 560px;
+  margin: 0.75rem auto;
   padding: 1rem 1rem 1.15rem;
   border-radius: 18px;
   background: var(--gy-cream, #f7f4ef);
   color: var(--gy-ink);
   box-shadow: 0 18px 48px rgba(28, 36, 33, 0.18);
+}
+
+@media (max-width: 599px) {
+  .gy-header-search-sheet {
+    width: calc(100vw - 1rem);
+    max-width: none;
+    margin: 0.5rem;
+    border-radius: 16px;
+  }
 }
 
 .gy-header-search-sheet__head {
@@ -930,30 +1065,15 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 1.15rem 1.5rem;
-}
-
-.gy-navswap-enter-active,
-.gy-navswap-leave-active {
-  transition:
-    opacity 0.32s ease,
-    transform 0.32s ease;
-}
-
-.gy-navswap-enter-from {
-  opacity: 0;
-  transform: translateY(-0.45rem);
-}
-
-.gy-navswap-leave-to {
-  opacity: 0;
-  transform: translateY(0.35rem);
+  min-width: 0;
 }
 
 .gy-nav__link,
 .gy-nav__dropbtn {
   position: relative;
+  flex-shrink: 0;
   font-size: 0.82rem;
   font-weight: 500;
   letter-spacing: 0.04em;
@@ -965,9 +1085,46 @@ onUnmounted(() => {
   padding: 0.2rem 0;
   cursor: pointer;
   font-family: inherit;
+  white-space: nowrap;
   transition:
     opacity 0.25s ease,
     color 0.25s ease;
+}
+
+/* Tighten nav + actions between md and xl so nothing wraps or overlaps. */
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .gy-header__bar {
+    gap: 0.55rem;
+  }
+
+  .gy-nav {
+    gap: 0.45rem 0.65rem;
+  }
+
+  .gy-nav__link,
+  .gy-nav__dropbtn {
+    font-size: 0.7rem;
+    letter-spacing: 0.025em;
+  }
+
+  .gy-header__actions {
+    gap: 0.4rem;
+  }
+
+  .gy-header__search-trigger {
+    padding: 0.32rem 0.75rem 0.32rem 0.55rem;
+    font-size: 0.72rem;
+  }
+
+  .gy-signin-btn,
+  .gy-header__actions .gy-btn--sm {
+    padding-inline: 0.65rem;
+    font-size: 0.7rem;
+  }
+
+  .gy-account-btn__label {
+    display: none;
+  }
 }
 
 .gy-nav__link::after,
