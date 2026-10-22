@@ -1,13 +1,17 @@
 <script setup lang="ts">
-import { onMounted, watch } from "vue";
+import { onMounted, onUnmounted, watch } from "vue";
 import { useRoute } from "vue-router";
 
 const props = defineProps<{
   title?: string;
   description?: string;
   image?: string;
+  /** Absolute canonical URL. When set, og:url and the canonical link use it. */
+  url?: string;
   jsonLd?: Record<string, unknown> | null;
 }>();
+
+const CANONICAL_ID = "greyon-canonical";
 
 const route = useRoute();
 
@@ -32,7 +36,8 @@ function applySeo() {
   }
   upsertMeta("property", "og:title", title);
   upsertMeta("property", "og:type", "website");
-  upsertMeta("property", "og:url", window.location.href);
+  upsertMeta("property", "og:url", props.url || window.location.href);
+  setCanonical(props.url);
   if (props.image) {
     upsertMeta("property", "og:image", props.image);
   }
@@ -48,11 +53,27 @@ function applySeo() {
   }
 }
 
+function setCanonical(href: string | undefined) {
+  const existing = document.getElementById(CANONICAL_ID);
+  if (!href) {
+    existing?.remove();
+    return;
+  }
+  const el = existing ?? document.createElement("link");
+  el.id = CANONICAL_ID;
+  el.setAttribute("rel", "canonical");
+  el.setAttribute("href", href);
+  if (!existing) document.head.appendChild(el);
+}
+
 onMounted(applySeo);
 watch(
-  () => [props.title, props.description, props.image, props.jsonLd],
+  () => [props.title, props.description, props.image, props.url, props.jsonLd],
   applySeo
 );
+onUnmounted(() => {
+  if (props.url) document.getElementById(CANONICAL_ID)?.remove();
+});
 </script>
 
 <template>
