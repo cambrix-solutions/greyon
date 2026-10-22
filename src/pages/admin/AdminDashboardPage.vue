@@ -462,7 +462,7 @@ const quickActions = computed(() =>
       label: "Hero slides",
       to: "/admin/hero-slides",
       icon: "view_carousel",
-      perm: "settings"
+      perm: "hero_slides"
     },
     {
       label: "Site settings",

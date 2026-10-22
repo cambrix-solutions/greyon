@@ -71,6 +71,7 @@ import {
   fetchPublicHotelBySlug
 } from "@/services/engine/publicCatalog";
 import { useAuthStore } from "@/stores/auth-store";
+import { seedFeatures } from "@/data/seed-features";
 import type {
   AdminRole,
   AdminUser,
@@ -166,6 +167,13 @@ function omitUndefined(obj: Record<string, unknown>): Record<string, unknown> {
     if (value !== undefined) out[key] = value;
   }
   return out;
+}
+
+/** Keep Seat types tickable for features the live catalog has not shipped yet. */
+function mergeSeedFeatures(catalog: ProductFeature[]): ProductFeature[] {
+  const keys = new Set(catalog.map(feature => feature.key));
+  const missing = seedFeatures.filter(feature => !keys.has(feature.key));
+  return missing.length ? [...catalog, ...missing] : catalog;
 }
 
 function applyPackageKeys(
@@ -281,7 +289,7 @@ export const useCmsStore = defineStore("cms", () => {
       fetchDeveloperPackages(),
       fetchDeveloperAdmins()
     ]);
-    features.value = feat;
+    features.value = mergeSeedFeatures(feat);
     packages.value = pkgs;
     users.value = admins.users.map(normalizeUser);
     userPackages.value = admins.userPackages;
@@ -328,7 +336,7 @@ export const useCmsStore = defineStore("cms", () => {
 
   /** Refresh feature+permission catalog after developer CRUD (keeps Packages in sync). */
   async function refreshDeveloperFeatures() {
-    features.value = await fetchDeveloperFeatures();
+    features.value = mergeSeedFeatures(await fetchDeveloperFeatures());
     applyActivePackage();
   }
 

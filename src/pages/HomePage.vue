@@ -10,7 +10,7 @@
       <div class="home-hero__slides" aria-hidden="true">
         <img
           v-for="(slide, i) in heroSlides"
-          :key="`${i}-${slide.src}`"
+          :key="`${slide.id || i}-${slide.src}`"
           class="home-hero__image"
           :class="{ 'is-active': i === heroIndex }"
           :src="slide.src"
@@ -30,12 +30,32 @@
             />
           </h1>
           <p class="home-hero__tagline">Always on, always home</p>
-          <p class="home-hero__lead">{{ $t("home.subhead") }}</p>
+          <h2 v-if="activeSlide?.title" class="home-hero__slide-title">
+            {{ activeSlide.title }}
+          </h2>
+          <p class="home-hero__lead">
+            {{ activeSlide?.subtitle || $t("home.subhead") }}
+          </p>
           <div class="home-hero__cta">
+            <router-link
+              v-if="slideCtaInternal"
+              :to="activeSlide?.ctaUrl || '/'"
+              class="gy-btn gy-btn--light"
+              >{{ activeSlide?.ctaLabel }}</router-link
+            >
+            <a
+              v-else-if="activeSlide?.ctaLabel && activeSlide?.ctaUrl"
+              class="gy-btn gy-btn--light"
+              :href="activeSlide.ctaUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              >{{ activeSlide.ctaLabel }}</a
+            >
             <router-link
               v-if="auth.featureEnabled('booking_public')"
               to="/booking"
-              class="gy-btn gy-btn--light"
+              class="gy-btn"
+              :class="activeSlide?.ctaLabel ? 'gy-btn--ghost' : 'gy-btn--light'"
               >{{ $t("nav.bookNow") }}</router-link
             >
             <router-link to="/hotels" class="gy-btn gy-btn--ghost">{{
@@ -195,6 +215,10 @@ import BookingSearchWidget from "@/components/BookingSearchWidget.vue";
 import CustomerReviewsSection from "@/components/CustomerReviewsSection.vue";
 import HotelCard from "@/components/HotelCard.vue";
 import SeoHead from "@/components/SeoHead.vue";
+import {
+  fetchPublicHeroSlides,
+  type PublicHeroSlide
+} from "@/services/engine/heroSlides";
 import { useAuthStore } from "@/stores/auth-store";
 import { useCmsStore } from "@/stores/cms-store";
 
@@ -203,11 +227,63 @@ const FALLBACK_HERO =
 
 const cms = useCmsStore();
 const auth = useAuthStore();
+const publicSlides = ref<PublicHeroSlide[] | null>(null);
 
-const heroSlides = computed(() => {
-  const slides = cms.settings.heroSlides?.filter(s => s.src) ?? [];
-  if (slides.length) return slides;
-  return [{ src: FALLBACK_HERO, alt: "Greyon hotel stay" }];
+type HomeHeroSlide = {
+  id?: string;
+  src: string;
+  alt: string;
+  title: string;
+  subtitle: string;
+  ctaLabel: string;
+  ctaUrl: string;
+};
+
+const heroSlides = computed<HomeHeroSlide[]>(() => {
+  const published = publicSlides.value?.filter(slide => slide.image) ?? [];
+  if (published.length) {
+    return published.map(slide => ({
+      id: slide.id,
+      src: slide.image,
+      alt: slide.title || "Greyon hotel stay",
+      title: slide.title,
+      subtitle: slide.subtitle,
+      ctaLabel: slide.ctaLabel,
+      ctaUrl: slide.ctaUrl
+    }));
+  }
+  const fallback = cms.settings.heroSlides?.filter(slide => slide.src) ?? [];
+  if (fallback.length) {
+    return fallback.map(slide => ({
+      src: slide.src,
+      alt: slide.alt || "Greyon hotel stay",
+      title: "",
+      subtitle: "",
+      ctaLabel: "",
+      ctaUrl: ""
+    }));
+  }
+  return [
+    {
+      src: FALLBACK_HERO,
+      alt: "Greyon hotel stay",
+      title: "",
+      subtitle: "",
+      ctaLabel: "",
+      ctaUrl: ""
+    }
+  ];
+});
+
+const activeSlide = computed(
+  () => heroSlides.value[heroIndex.value] ?? heroSlides.value[0]
+);
+
+const slideCtaInternal = computed(() => {
+  const url = activeSlide.value?.ctaUrl?.trim() ?? "";
+  return Boolean(
+    activeSlide.value?.ctaLabel && url.startsWith("/") && !url.startsWith("//")
+  );
 });
 
 const heroImage = computed(() => heroSlides.value[0]?.src ?? FALLBACK_HERO);
@@ -246,8 +322,18 @@ watch(
 
 onMounted(() => {
   void cms.ensurePublicCatalog();
+  void loadPublicHero();
   startTimer();
 });
+
+async function loadPublicHero() {
+  try {
+    const slides = await fetchPublicHeroSlides();
+    if (slides && slides.length) publicSlides.value = slides;
+  } catch {
+    publicSlides.value = null;
+  }
+}
 
 onUnmounted(() => clearTimer());
 
@@ -384,6 +470,18 @@ const latestNews = computed(() => cms.publishedNews.slice(0, 3));
   width: auto;
   object-fit: contain;
   filter: drop-shadow(0 18px 48px rgba(0, 0, 0, 0.35));
+}
+
+.home-hero__slide-title {
+  margin: 0.85rem 0 0;
+  max-width: 18ch;
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 3.4vw, 2.6rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  color: #fff;
+  text-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
 }
 
 .home-hero__tagline {
