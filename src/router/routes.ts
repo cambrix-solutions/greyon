@@ -288,7 +288,7 @@ const routes: RouteRecordRaw[] = [
         path: "hero-slides",
         name: "admin-hero-slides",
         component: () => import("@/pages/admin/AdminHeroSlidesPage.vue"),
-        meta: { title: "Hero slides | Greyon Admin", perm: "settings" }
+        meta: { title: "Hero slides | Greyon Admin", perm: "hero_slides" }
       },
       {
         path: "settings",

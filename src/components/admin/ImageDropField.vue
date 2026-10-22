@@ -114,6 +114,7 @@
 import { computed, ref, watch } from "vue";
 import { ACCEPT_IMAGE_ATTR } from "@/utils/imageCompress";
 import { useImageUpload } from "@/composables/useImageUpload";
+import type { UploadResult } from "@/services/engine/uploads";
 
 const props = withDefaults(
   defineProps<{
@@ -140,6 +141,8 @@ const emit = defineEmits<{
   "update:modelValue": [value: string];
   /** Fired when one or more files finish uploading successfully. */
   uploaded: [urls: string[]];
+  /** Full upload payload so callers can store `path` rather than only the URL. */
+  resolved: [result: UploadResult];
   "update:busy": [busy: boolean];
 }>();
 
@@ -239,6 +242,7 @@ async function handleFiles(files: File[]) {
     }
     urls.push(result.url);
     localPreview.value = result.url;
+    emit("resolved", result);
   }
 
   pendingBatch.value = urls;

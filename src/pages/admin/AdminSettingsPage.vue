@@ -126,10 +126,7 @@ const auth = useAuthStore();
 const $q = useQuasar();
 
 function cloneSettings(s: SiteSettings): SiteSettings {
-  return {
-    ...s,
-    heroSlides: s.heroSlides.map(slide => ({ ...slide }))
-  };
+  return { ...s };
 }
 
 const form = reactive(cloneSettings(cms.settings));
@@ -151,17 +148,18 @@ async function save() {
     return;
   }
   try {
+    const { heroSlides: _heroSlides, ...editable } = form;
     await cms.saveSettings({
-      siteName: form.siteName.trim(),
-      siteUrl: form.siteUrl,
-      defaultTitle: form.defaultTitle,
-      defaultDescription: form.defaultDescription,
-      ogImage: form.ogImage,
-      analyticsId: form.analyticsId,
-      contactEmail: form.contactEmail,
-      contactPhone: form.contactPhone,
-      paymentEnabled: form.paymentEnabled,
-      paymentNote: form.paymentNote
+      siteName: editable.siteName.trim(),
+      siteUrl: editable.siteUrl,
+      defaultTitle: editable.defaultTitle,
+      defaultDescription: editable.defaultDescription,
+      ogImage: editable.ogImage,
+      analyticsId: editable.analyticsId,
+      contactEmail: editable.contactEmail,
+      contactPhone: editable.contactPhone,
+      paymentEnabled: editable.paymentEnabled,
+      paymentNote: editable.paymentNote
     });
     Object.assign(form, cloneSettings(cms.settings));
     $q.notify({ type: "positive", message: "Settings saved." });

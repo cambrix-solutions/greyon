@@ -532,7 +532,7 @@ const nav = computed<NavItem[]>(() => [
     label: "Hero slides",
     to: "/admin/hero-slides",
     icon: "view_carousel",
-    perm: "settings",
+    perm: "hero_slides",
     group: "publishing"
   },
   {
