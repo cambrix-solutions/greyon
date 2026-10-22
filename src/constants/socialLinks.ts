@@ -1,16 +1,15 @@
 /**
- * Official Greyon social profile URLs.
+ * Greyon social profile URLs for the site footer.
  *
- * TODO(client): Replace empty strings with the real Facebook, YouTube, and
- * TikTok profile URLs once the client confirms them. Do not invent URLs.
- * Icons whose URL is empty are hidden in the footer.
+ * Icons are always shown. Until the client confirms official profile URLs,
+ * each entry uses the platform home page as a TODO placeholder.
  */
 export type SocialNetwork = "facebook" | "youtube" | "tiktok";
 
 export type SocialLink = {
   id: SocialNetwork;
   label: string;
-  /** Absolute profile URL, or empty until confirmed by the client. */
+  /** Absolute URL opened in a new tab from the footer. */
   url: string;
 };
 
@@ -18,26 +17,19 @@ export const SOCIAL_LINKS: readonly SocialLink[] = [
   {
     id: "facebook",
     label: "Facebook",
-    // TODO(client): set official Facebook URL
-    url: ""
+    // TODO(client): replace with official Greyon Facebook profile URL
+    url: "https://www.facebook.com"
   },
   {
     id: "youtube",
     label: "YouTube",
-    // TODO(client): set official YouTube URL
-    url: ""
+    // TODO(client): replace with official Greyon YouTube channel URL
+    url: "https://www.youtube.com"
   },
   {
     id: "tiktok",
     label: "TikTok",
-    // TODO(client): set official TikTok URL
-    url: ""
+    // TODO(client): replace with official Greyon TikTok profile URL
+    url: "https://www.tiktok.com"
   }
 ] as const;
-
-/** Links that have a non-empty URL and should be shown. */
-export function visibleSocialLinks(
-  links: readonly SocialLink[] = SOCIAL_LINKS
-): SocialLink[] {
-  return links.filter(link => Boolean(link.url.trim()));
-}

@@ -15,11 +15,7 @@
           Always on, always home — stays across Cambodia’s cities, coast, and
           countryside.
         </p>
-        <nav
-          v-if="socialLinks.length"
-          class="gy-footer__social"
-          aria-label="Social media"
-        >
+        <nav class="gy-footer__social" aria-label="Social media">
           <a
             v-for="link in socialLinks"
             :key="link.id"
@@ -121,7 +117,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from "vue";
-import { visibleSocialLinks } from "@/constants/socialLinks";
+import { SOCIAL_LINKS } from "@/constants/socialLinks";
 import { useAuthStore } from "@/stores/auth-store";
 
 type FooterLink = {
@@ -138,7 +134,7 @@ type FooterColumn = {
 
 const auth = useAuthStore();
 const year = new Date().getFullYear();
-const socialLinks = computed(() => visibleSocialLinks());
+const socialLinks = SOCIAL_LINKS;
 
 const isMobile = ref(false);
 const openColumnId = ref<string | null>(null);
@@ -249,8 +245,10 @@ const columns = computed<FooterColumn[]>(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.65rem;
-  height: 2.65rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  min-width: 44px;
+  min-height: 44px;
   border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 999px;
   color: rgba(255, 255, 255, 0.85);
@@ -263,8 +261,8 @@ const columns = computed<FooterColumn[]>(() => {
 .gy-footer__social-link:hover,
 .gy-footer__social-link:focus-visible {
   color: var(--gy-gold);
-  border-color: var(--gy-gold);
-  background: rgba(196, 163, 90, 0.12);
+  border-color: rgba(196, 163, 90, 0.7);
+  background: rgba(255, 255, 255, 0.08);
   outline: none;
 }
 
