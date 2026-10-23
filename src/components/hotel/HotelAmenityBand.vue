@@ -2,7 +2,7 @@
   <section
     v-if="items.length"
     class="band"
-    data-sheet="Amenities"
+    :data-sheet="sheet"
     aria-labelledby="hotel-amenities-title"
   >
     <div
@@ -27,12 +27,12 @@
     </div>
 
     <div class="gy-container band__body">
-      <p v-reveal class="eyebrow">During your stay</p>
+      <p v-reveal class="eyebrow">{{ eyebrow }}</p>
       <h2 id="hotel-amenities-title" v-reveal="{ delay: '80ms' }">
-        Hotel features
+        {{ title }}
       </h2>
-      <p v-reveal="{ delay: '120ms' }" class="band__lead">
-        Amenities guests can expect during their stay.
+      <p v-if="lead" v-reveal="{ delay: '120ms' }" class="band__lead">
+        {{ lead }}
       </p>
       <FeatureChips :items="items" on-dark />
     </div>
@@ -43,7 +43,21 @@
 import { computed, ref } from "vue";
 import FeatureChips from "@/components/FeatureChips.vue";
 
-const props = defineProps<{ items: string[] }>();
+const props = withDefaults(
+  defineProps<{
+    items: string[];
+    eyebrow?: string;
+    title?: string;
+    lead?: string;
+    sheet?: string;
+  }>(),
+  {
+    eyebrow: "During your stay",
+    title: "Hotel features",
+    lead: "Amenities guests can expect during their stay.",
+    sheet: "Amenities"
+  }
+);
 
 const reduceMotion = ref(
   typeof window !== "undefined" &&

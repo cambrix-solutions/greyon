@@ -201,10 +201,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
+import { computed, ref } from "vue";
 import RevealWords from "@/components/home/RevealWords.vue";
-import { useDragScroll } from "@/components/home/useDragScroll";
 import { useParallax } from "@/components/home/useParallax";
+import { usePinnedRail } from "@/components/home/usePinnedRail";
 import SectionDivider from "@/components/hotel/SectionDivider.vue";
 import SeoHead from "@/components/SeoHead.vue";
 import { useCmsStore } from "@/stores/cms-store";
@@ -213,24 +213,23 @@ import type { Hotel } from "@/types/greyon";
 const cms = useCmsStore();
 
 const locations = computed(() => cms.publishedLocations);
-const canPin = ref(false);
-const spacer = ref(0);
-const activeIndex = ref(0);
-
-const pinRoot = ref<HTMLElement | null>(null);
+const {
+  canPin,
+  spacer,
+  activeIndex,
+  pinRoot,
+  railEl,
+  trackEl,
+  barEl,
+  goToPanel
+} = usePinnedRail(computed(() => locations.value.length));
 const stickyEl = ref<HTMLElement | null>(null);
-const railEl = ref<HTMLElement | null>(null);
-const trackEl = ref<HTMLElement | null>(null);
-const barEl = ref<HTMLElement | null>(null);
-const dragTarget = ref<HTMLElement | null>(null);
 const mastFrame = ref<HTMLElement | null>(null);
 
 const mastOffset = useParallax(mastFrame, 150);
 const mastStyle = computed(() => ({
   transform: `translate3d(0, ${mastOffset.value}px, 0)`
 }));
-
-useDragScroll(dragTarget, { momentum: true });
 
 const hotelsByLocation = computed(() => {
   const map = new Map<string, Hotel[]>();
@@ -283,99 +282,6 @@ function stackStyle(index: number) {
   };
 }
 
-function headerOffset() {
-  const header = document.querySelector(".gy-header");
-  if (header instanceof HTMLElement)
-    return header.getBoundingClientRect().height;
-  return 88;
-}
-
-function syncPinMode() {
-  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const wide = window.matchMedia("(min-width: 900px)").matches;
-  canPin.value = wide && !reduce && locations.value.length > 1;
-}
-
-function syncDrag() {
-  dragTarget.value = canPin.value ? null : railEl.value;
-}
-
-function paintProgress(progress: number, shiftPx: number) {
-  const track = trackEl.value;
-  if (track) {
-    track.style.transform = canPin.value
-      ? `translate3d(${(-shiftPx).toFixed(2)}px, 0, 0)`
-      : "";
-  }
-  if (barEl.value) {
-    const count = Math.max(locations.value.length, 1);
-    barEl.value.style.transform = `scaleX(${Math.max(progress, 1 / count)})`;
-  }
-  const count = locations.value.length;
-  const next =
-    count <= 1 ? 0 : Math.min(count - 1, Math.round(progress * (count - 1)));
-  if (activeIndex.value !== next) activeIndex.value = next;
-}
-
-function onScroll() {
-  const root = pinRoot.value;
-  const view = railEl.value;
-  const track = trackEl.value;
-  if (!canPin.value || !root || !view || !track) return;
-  const distance = Math.max(0, track.scrollWidth - view.clientWidth);
-  const scrolled = Math.min(
-    Math.max(headerOffset() - root.getBoundingClientRect().top, 0),
-    distance
-  );
-  const progress = distance > 0 ? scrolled / distance : 0;
-  paintProgress(progress, distance * progress);
-}
-
-function onRailScroll() {
-  if (canPin.value) return;
-  const view = railEl.value;
-  if (!view) return;
-  const max = view.scrollWidth - view.clientWidth;
-  const progress = max > 0 ? view.scrollLeft / max : 0;
-  paintProgress(progress, 0);
-}
-
-let ticking = false;
-function requestScroll() {
-  if (ticking) return;
-  ticking = true;
-  requestAnimationFrame(() => {
-    ticking = false;
-    onScroll();
-  });
-}
-
-function layoutPin() {
-  syncPinMode();
-  syncDrag();
-  const view = railEl.value;
-  const track = trackEl.value;
-  if (!view || !track || !canPin.value) {
-    spacer.value = 0;
-    paintProgress(0, 0);
-    if (!canPin.value) onRailScroll();
-    return;
-  }
-  const distance = Math.max(0, track.scrollWidth - view.clientWidth);
-  if (Math.abs(spacer.value - distance) > 1) spacer.value = distance;
-  onScroll();
-}
-
-async function scheduleLayout() {
-  syncPinMode();
-  await nextTick();
-  requestAnimationFrame(layoutPin);
-}
-
-function onResize() {
-  void scheduleLayout();
-}
-
 function scrollToJourney() {
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   document.getElementById("dest-journey")?.scrollIntoView({
@@ -383,83 +289,6 @@ function scrollToJourney() {
     block: "start"
   });
 }
-
-function goToPanel(index: number) {
-  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const root = pinRoot.value;
-  const track = trackEl.value;
-  const view = railEl.value;
-  if (!root || !track || !view) return;
-  if (!canPin.value) {
-    const panel = track.children.item(index);
-    if (panel instanceof HTMLElement) {
-      panel.scrollIntoView({
-        behavior: reduce ? "auto" : "smooth",
-        inline: "start",
-        block: "nearest"
-      });
-    }
-    return;
-  }
-  const distance = Math.max(0, track.scrollWidth - view.clientWidth);
-  const count = locations.value.length;
-  const portion = count <= 1 ? 0 : index / (count - 1);
-  const top =
-    window.scrollY +
-    root.getBoundingClientRect().top -
-    headerOffset() +
-    distance * portion;
-  window.scrollTo({ top, behavior: reduce ? "auto" : "smooth" });
-}
-
-let wideQuery: MediaQueryList | null = null;
-let reduceQuery: MediaQueryList | null = null;
-let resizeObserver: ResizeObserver | null = null;
-
-function observeRails() {
-  resizeObserver?.disconnect();
-  if (railEl.value) resizeObserver?.observe(railEl.value);
-  if (trackEl.value) resizeObserver?.observe(trackEl.value);
-}
-
-watch(
-  () => locations.value.map(loc => loc.id).join("|"),
-  () => {
-    void scheduleLayout();
-  }
-);
-
-watch(
-  railEl,
-  (node, prev) => {
-    prev?.removeEventListener("scroll", onRailScroll);
-    node?.addEventListener("scroll", onRailScroll, { passive: true });
-    syncDrag();
-    observeRails();
-  },
-  { flush: "post" }
-);
-
-onMounted(() => {
-  wideQuery = window.matchMedia("(min-width: 900px)");
-  reduceQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-  wideQuery.addEventListener("change", onResize);
-  reduceQuery.addEventListener("change", onResize);
-  window.addEventListener("scroll", requestScroll, { passive: true });
-  window.addEventListener("resize", onResize);
-  resizeObserver = new ResizeObserver(() => layoutPin());
-  observeRails();
-  void scheduleLayout();
-});
-
-onUnmounted(() => {
-  window.removeEventListener("scroll", requestScroll);
-  window.removeEventListener("resize", onResize);
-  wideQuery?.removeEventListener("change", onResize);
-  reduceQuery?.removeEventListener("change", onResize);
-  railEl.value?.removeEventListener("scroll", onRailScroll);
-  resizeObserver?.disconnect();
-});
 </script>
 
 <style src="@/components/home/home-motion.css"></style>

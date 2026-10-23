@@ -1,5 +1,11 @@
 <template>
-  <ul class="room-facts" :class="{ 'room-facts--compact': compact }">
+  <ul
+    class="room-facts"
+    :class="{
+      'room-facts--compact': compact,
+      'room-facts--light': tone === 'light'
+    }"
+  >
     <li v-if="bedType">
       <q-icon name="king_bed" size="16px" />
       <span>{{ bedType }}</span>
@@ -22,8 +28,10 @@ withDefaults(
     roomSize?: string;
     maxGuests?: number;
     compact?: boolean;
+    /** Light type for photographs and dark rails. */
+    tone?: "default" | "light";
   }>(),
-  { compact: false }
+  { compact: false, tone: "default" }
 );
 </script>
 
@@ -52,5 +60,14 @@ withDefaults(
 
 .room-facts .q-icon {
   color: var(--gy-gold-deep);
+}
+
+.room-facts--light li,
+.room-facts--compact.room-facts--light li {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.room-facts--light .q-icon {
+  color: var(--gy-gold);
 }
 </style>
