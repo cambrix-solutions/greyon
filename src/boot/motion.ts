@@ -85,7 +85,125 @@ function bindImageFallback() {
   );
 }
 
+/** Slight pull toward the pointer. Home-section buttons only. */
+const magnetic: Directive<HTMLElement> = {
+  mounted(el) {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (window.matchMedia("(hover: none)").matches) return;
+
+    const onMove = (event: PointerEvent) => {
+      const rect = el.getBoundingClientRect();
+      const dx = event.clientX - (rect.left + rect.width / 2);
+      const dy = event.clientY - (rect.top + rect.height / 2);
+      const x = Math.max(-12, Math.min(12, dx * 0.28));
+      const y = Math.max(-10, Math.min(6, dy * 0.22)) - 4;
+      el.style.transition = "transform 0.12s linear";
+      el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+    };
+    const onLeave = () => {
+      el.style.transition = "";
+      el.style.transform = "";
+    };
+    el.addEventListener("pointermove", onMove);
+    el.addEventListener("pointerleave", onLeave);
+    (
+      el as HTMLElement & {
+        __magnetic?: {
+          onMove: (event: PointerEvent) => void;
+          onLeave: () => void;
+        };
+      }
+    ).__magnetic = { onMove, onLeave };
+  },
+  unmounted(el) {
+    const node = el as HTMLElement & {
+      __magnetic?: {
+        onMove: (event: PointerEvent) => void;
+        onLeave: () => void;
+      };
+    };
+    if (!node.__magnetic) return;
+    el.removeEventListener("pointermove", node.__magnetic.onMove);
+    el.removeEventListener("pointerleave", node.__magnetic.onLeave);
+  }
+};
+
+type PointerHandlers = {
+  onMove: (event: PointerEvent) => void;
+  onLeave: () => void;
+};
+
+/** Subtle 3D tilt. No-ops for touch and reduced motion. */
+const tilt: Directive<HTMLElement, { max?: number } | undefined> = {
+  mounted(el, binding) {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (window.matchMedia("(hover: none)").matches) return;
+
+    const max = binding.value?.max ?? 8;
+    const onMove = (event: PointerEvent) => {
+      const rect = el.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      const px = (event.clientX - rect.left) / rect.width - 0.5;
+      const py = (event.clientY - rect.top) / rect.height - 0.5;
+      const rx = Math.max(-max, Math.min(max, -py * max * 2));
+      const ry = Math.max(-max, Math.min(max, px * max * 2));
+      el.style.transform = `perspective(900px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg)`;
+    };
+    const onLeave = () => {
+      el.style.transform = "";
+    };
+    el.addEventListener("pointermove", onMove);
+    el.addEventListener("pointerleave", onLeave);
+    (el as HTMLElement & { __tilt?: PointerHandlers }).__tilt = {
+      onMove,
+      onLeave
+    };
+  },
+  unmounted(el) {
+    const node = el as HTMLElement & { __tilt?: PointerHandlers };
+    if (!node.__tilt) return;
+    el.removeEventListener("pointermove", node.__tilt.onMove);
+    el.removeEventListener("pointerleave", node.__tilt.onLeave);
+  }
+};
+
+/** Writes --spot-x / --spot-y so a mask can follow the pointer. */
+const spot: Directive<HTMLElement> = {
+  mounted(el) {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (window.matchMedia("(hover: none)").matches) return;
+
+    const onMove = (event: PointerEvent) => {
+      const rect = el.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      const x = ((event.clientX - rect.left) / rect.width) * 100;
+      const y = ((event.clientY - rect.top) / rect.height) * 100;
+      el.style.setProperty("--spot-x", `${x}%`);
+      el.style.setProperty("--spot-y", `${y}%`);
+    };
+    const onLeave = () => {
+      el.style.removeProperty("--spot-x");
+      el.style.removeProperty("--spot-y");
+    };
+    el.addEventListener("pointermove", onMove);
+    el.addEventListener("pointerleave", onLeave);
+    (el as HTMLElement & { __spot?: PointerHandlers }).__spot = {
+      onMove,
+      onLeave
+    };
+  },
+  unmounted(el) {
+    const node = el as HTMLElement & { __spot?: PointerHandlers };
+    if (!node.__spot) return;
+    el.removeEventListener("pointermove", node.__spot.onMove);
+    el.removeEventListener("pointerleave", node.__spot.onLeave);
+  }
+};
+
 export default defineBoot(({ app }) => {
   app.directive("reveal", reveal);
+  app.directive("magnetic", magnetic);
+  app.directive("tilt", tilt);
+  app.directive("spot", spot);
   bindImageFallback();
 });

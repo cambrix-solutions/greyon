@@ -1,0 +1,59 @@
+/* Motion for sections below the hero. The hero, navbar, and footer do not use this class. */
+
+.home-motion .gy-reveal {
+  transform: translateY(72px);
+  transition-duration: 1.05s;
+}
+
+.home-motion .gy-reveal.gy-reveal--in {
+  transform: none;
+}
+
+.home-motion .text-link {
+  position: relative;
+}
+
+.home-motion .text-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0.6rem;
+  bottom: 0.45rem;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.home-motion .text-link:hover::after,
+.home-motion .text-link:focus-visible::after {
+  transform: scaleX(1);
+}
+
+.home-motion .text-link span {
+  display: inline-block;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.home-motion .text-link:hover span,
+.home-motion .text-link:focus-visible span {
+  transform: translateX(12px);
+}
+
+@media (hover: hover) {
+  .home-motion .gy-btn:hover {
+    transform: translateY(-6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-motion .gy-reveal,
+  .home-motion .text-link::after,
+  .home-motion .text-link span,
+  .home-motion .gy-btn {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+  }
+}
