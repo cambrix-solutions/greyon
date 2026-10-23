@@ -2,35 +2,51 @@
   <section
     v-if="articles.length"
     id="home-news"
-    class="news"
+    class="news home-motion"
     aria-labelledby="home-news-title"
   >
-    <header v-reveal class="news__head">
+    <header class="news__head">
       <div>
-        <p class="eyebrow">{{ $t("home.latestNews") }}</p>
-        <h2 id="home-news-title" class="news__title">
-          {{ $t("home.fromGreyon") }}
-        </h2>
+        <p v-reveal class="eyebrow">{{ $t("home.latestNews") }}</p>
+        <RevealWords
+          id="home-news-title"
+          class="news__title"
+          :text="$t('home.fromGreyon')"
+        />
       </div>
-      <router-link to="/news" class="text-link">
+      <router-link v-reveal="{ delay: '120ms' }" to="/news" class="text-link">
         {{ $t("home.allNews") }}
         <span aria-hidden="true">→</span>
       </router-link>
     </header>
 
-    <router-link v-if="lead" :to="`/news/${lead.slug}`" class="news__lead">
-      <img v-if="lead.coverImage" :src="lead.coverImage" :alt="lead.title" />
-      <span class="news__shade">
+    <router-link
+      v-if="lead"
+      v-reveal
+      :to="`/news/${lead.slug}`"
+      class="news__lead"
+    >
+      <span
+        v-if="lead.coverImage"
+        ref="leadFrame"
+        class="news__parallax"
+        :style="leadStyle"
+      >
+        <img :src="lead.coverImage" :alt="lead.title" />
+      </span>
+      <span v-reveal="{ delay: '160ms' }" class="news__shade">
         <span class="news__meta">
           <time v-if="lead.publishedAt" :datetime="lead.publishedAt">{{
             dateLabel(lead.publishedAt)
           }}</time>
           <span v-if="lead.locationName">{{ lead.locationName }}</span>
         </span>
-        <span class="news__lead-title">{{ lead.title }}</span>
+        <RevealWords tag="span" class="news__lead-title" :text="lead.title" />
       </span>
     </router-link>
-    <p v-if="lead?.excerpt" class="news__excerpt">{{ lead.excerpt }}</p>
+    <p v-if="lead?.excerpt" v-reveal="{ delay: '80ms' }" class="news__excerpt">
+      {{ lead.excerpt }}
+    </p>
 
     <div v-if="rest.length" ref="restTrack" class="news__rest">
       <router-link
@@ -56,14 +72,22 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
+import RevealWords from "@/components/home/RevealWords.vue";
 import { useDragScroll } from "@/components/home/useDragScroll";
+import { useParallax } from "@/components/home/useParallax";
 import { useCmsStore } from "@/stores/cms-store";
 import { formatDate } from "@/utils/datetime";
 
 const cms = useCmsStore();
 const { locale } = useI18n();
 const restTrack = ref<HTMLElement | null>(null);
+const leadFrame = ref<HTMLElement | null>(null);
+const leadOffset = useParallax(leadFrame, 240);
 useDragScroll(restTrack);
+
+const leadStyle = computed(() => ({
+  transform: `translate3d(0, ${leadOffset.value}px, 0)`
+}));
 
 const articles = computed(() => cms.publishedNews.slice(0, 3));
 const lead = computed(() => articles.value[0] ?? null);
@@ -126,11 +150,12 @@ function dateLabel(value: string) {
 }
 
 .text-link span {
-  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.text-link:hover span {
-  transform: translateX(6px);
+.text-link:hover span,
+.text-link:focus-visible span {
+  transform: translateX(12px);
 }
 
 .news__lead {
@@ -143,9 +168,12 @@ function dateLabel(value: string) {
   color: #fff;
 }
 
-.news__lead img {
+.news__parallax {
   position: absolute;
-  inset: 0;
+  inset: -22% 0;
+}
+
+.news__lead img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -160,6 +188,7 @@ function dateLabel(value: string) {
   justify-content: flex-end;
   gap: 0.7rem;
   padding: clamp(1.4rem, 4vw, 3.5rem);
+  transition: background 0.5s ease;
   background: linear-gradient(
     to top,
     rgba(12, 11, 10, 0.75) 0%,
@@ -252,7 +281,15 @@ function dateLabel(value: string) {
 @media (hover: hover) {
   .news__lead:hover img,
   .news__card:hover img {
-    transform: scale(1.06);
+    transform: scale(1.1);
+  }
+
+  .news__lead:hover .news__shade {
+    background: linear-gradient(
+      to top,
+      rgba(12, 11, 10, 0.88) 0%,
+      rgba(12, 11, 10, 0.2) 62%
+    );
   }
 }
 
@@ -269,10 +306,12 @@ function dateLabel(value: string) {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .news__parallax,
   .news__lead img,
   .news__card-media img,
   .text-link span {
-    transition: none;
+    transition: none !important;
+    transform: none !important;
   }
 }
 </style>

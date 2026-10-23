@@ -2,7 +2,7 @@
   <section
     v-if="featuredHotels.length"
     id="home-featured"
-    class="featured"
+    class="featured home-motion"
     aria-labelledby="home-featured-title"
   >
     <article
@@ -15,13 +15,19 @@
         @touchstart.passive="onTouchStart"
         @touchend.passive="onTouchEnd($event, hotel.id)"
       >
-        <img
-          v-if="photoFor(hotel)"
-          :key="photoFor(hotel)"
-          class="property__img"
-          :src="photoFor(hotel)"
-          :alt="hotel.name"
-        />
+        <div
+          class="property__frame"
+          :ref="el => setFrame(hotel.id, el)"
+          :style="frameStyle(hotel.id)"
+        >
+          <img
+            v-if="photoFor(hotel)"
+            :key="photoFor(hotel)"
+            class="property__img"
+            :src="photoFor(hotel)"
+            :alt="hotel.name"
+          />
+        </div>
         <div class="property__veil" />
         <template v-if="photosFor(hotel).length > 1">
           <button
@@ -46,21 +52,21 @@
         </template>
         <div class="property__copy">
           <div>
-            <p v-if="metaLine(hotel)" class="property__meta">
+            <p v-if="metaLine(hotel)" v-reveal class="property__meta">
               {{ metaLine(hotel) }}
             </p>
             <h2
-              v-if="hotelIndex === 0"
-              id="home-featured-title"
+              :id="hotelIndex === 0 ? 'home-featured-title' : undefined"
               class="property__name"
             >
-              <router-link :to="hotelPath(hotel)">{{ hotel.name }}</router-link>
-            </h2>
-            <h2 v-else class="property__name">
-              <router-link :to="hotelPath(hotel)">{{ hotel.name }}</router-link>
+              <router-link :to="hotelPath(hotel)">
+                <RevealWords tag="span" :text="hotel.name" />
+              </router-link>
             </h2>
           </div>
           <router-link
+            v-reveal="{ delay: '160ms' }"
+            v-magnetic
             class="gy-btn gy-btn--ghost property__cta"
             :to="hotelPath(hotel)"
           >
@@ -70,10 +76,10 @@
       </div>
 
       <div class="property__note">
-        <p v-if="hotel.shortDescription" class="property__lead">
+        <p v-if="hotel.shortDescription" v-reveal class="property__lead">
           {{ hotel.shortDescription }}
         </p>
-        <div class="property__facts">
+        <div v-reveal="{ delay: '140ms' }" class="property__facts">
           <FeatureChips
             v-if="hotel.amenities.length"
             :items="hotel.amenities"
@@ -106,10 +112,12 @@
       :aria-label="$t('home.rooms')"
     >
       <div class="rooms__head">
-        <p class="eyebrow">{{ $t("home.featured") }}</p>
-        <h2 id="home-rooms-title" class="rooms__title">{{
-          $t("home.rooms")
-        }}</h2>
+        <p v-reveal class="eyebrow">{{ $t("home.featured") }}</p>
+        <RevealWords
+          id="home-rooms-title"
+          class="rooms__title"
+          :text="$t('home.rooms')"
+        />
       </div>
       <div class="rooms__frame">
         <button
@@ -121,26 +129,29 @@
         >
           <q-icon name="chevron_left" size="26px" />
         </button>
-        <div ref="roomTrack" class="rooms__track">
+        <div ref="roomTrack" class="rooms__track" :class="{ 'is-in': roomsIn }">
           <router-link
-            v-for="room in rooms"
+            v-for="(room, roomIndex) in rooms"
             :key="room.id"
             :to="roomLink(room)"
             class="room"
+            :style="{ '--i': Math.min(roomIndex, 8) }"
           >
-            <span class="room__media">
-              <img
-                v-if="roomImage(room)"
-                :src="roomImage(room)"
-                :alt="room.name"
-                loading="lazy"
-              />
-            </span>
-            <span class="room__shade">
-              <span class="room__name">{{ room.name }}</span>
-              <span v-if="roomDetail(room)" class="room__detail">{{
-                roomDetail(room)
-              }}</span>
+            <span class="room__rise">
+              <span class="room__media">
+                <img
+                  v-if="roomImage(room)"
+                  :src="roomImage(room)"
+                  :alt="room.name"
+                  loading="lazy"
+                />
+              </span>
+              <span class="room__shade">
+                <span class="room__name">{{ room.name }}</span>
+                <span v-if="roomDetail(room)" class="room__detail">{{
+                  roomDetail(room)
+                }}</span>
+              </span>
             </span>
           </router-link>
         </div>
@@ -162,7 +173,10 @@
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import FeatureChips from "@/components/FeatureChips.vue";
+import RevealWords from "@/components/home/RevealWords.vue";
 import { useDragScroll } from "@/components/home/useDragScroll";
+import { useInView } from "@/components/home/useInView";
+import { useParallaxGroup } from "@/components/home/useParallax";
 import { useCmsStore } from "@/stores/cms-store";
 import type { Hotel, RoomType } from "@/types/greyon";
 import { formatTime } from "@/utils/datetime";
@@ -174,9 +188,16 @@ const cms = useCmsStore();
 const { t } = useI18n();
 const photoIndex = ref<Record<string, number>>({});
 const roomTrack = ref<HTMLElement | null>(null);
+const roomsIn = useInView(roomTrack);
+const { setFrame, offsets } = useParallaxGroup(180);
 let touchX: number | null = null;
 
-useDragScroll(roomTrack);
+useDragScroll(roomTrack, { momentum: true });
+
+function frameStyle(id: string) {
+  const y = offsets.value[id] ?? 0;
+  return { transform: `translate3d(0, ${y}px, 0)` };
+}
 
 const featuredHotels = computed(() =>
   cms.publishedHotels.filter(hotel => hotel.featured)
@@ -305,13 +326,17 @@ function scrollRooms(dir: -1 | 1) {
   color: #fff;
 }
 
-.property__img {
+.property__frame {
   position: absolute;
-  inset: 0;
+  inset: -20% 0;
+}
+
+.property__img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  animation: ken 24s ease-out forwards;
+  transform-origin: center center;
+  animation: ken 16s ease-in-out infinite alternate;
 }
 
 .property__veil {
@@ -341,12 +366,20 @@ function scrollRooms(dir: -1 | 1) {
   backdrop-filter: blur(8px);
   transition:
     background 0.3s ease,
-    transform 0.3s ease;
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .property__media > .shot-nav {
   top: 50%;
   transform: translateY(-50%);
+  transition:
+    background 0.3s ease,
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.property__media > .shot-nav:hover {
+  transform: translateY(-50%) scale(1.08);
+  background: rgba(255, 255, 255, 0.22);
 }
 
 .shot-nav--prev {
@@ -411,8 +444,20 @@ function scrollRooms(dir: -1 | 1) {
   line-height: 0.92;
 }
 
-.property__name a:hover {
+.property__name a {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 92%;
+  background-size: 0 1px;
+  transition:
+    color 0.3s ease,
+    background-size 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.property__name a:hover,
+.property__name a:focus-visible {
   color: var(--gy-gold);
+  background-size: 100% 1px;
 }
 
 .property__cta {
@@ -505,15 +550,25 @@ function scrollRooms(dir: -1 | 1) {
   right: 1rem;
 }
 
+.rooms__arrow:hover {
+  transform: translateY(-50%) scale(1.08);
+}
+
 .rooms__track {
   display: flex;
   gap: 0.85rem;
   overflow-x: auto;
   scroll-snap-type: x proximity;
   overscroll-behavior-x: contain;
-  padding: 0 clamp(1rem, 4vw, 3rem) 0.4rem;
+  padding: 0.6rem clamp(1rem, 4vw, 3rem) 0.8rem;
   cursor: grab;
   scrollbar-width: none;
+}
+
+.rooms__track.is-dragging,
+.rooms__track.is-coasting {
+  scroll-snap-type: none;
+  cursor: grabbing;
 }
 
 .rooms__track::-webkit-scrollbar {
@@ -533,6 +588,23 @@ function scrollRooms(dir: -1 | 1) {
   overflow: hidden;
   background: #2c312e;
   color: #fff;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.room__rise {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: translateY(56px);
+  transition:
+    opacity 0.95s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.95s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: calc(var(--i) * 90ms);
+}
+
+.rooms__track.is-in .room__rise {
+  opacity: 1;
+  transform: none;
 }
 
 .room__media,
@@ -578,9 +650,11 @@ function scrollRooms(dir: -1 | 1) {
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+  transform: translateY(10px);
   transition:
-    max-height 0.4s ease,
-    opacity 0.4s ease;
+    max-height 0.5s ease,
+    opacity 0.5s ease,
+    transform 0.5s ease;
 }
 
 .room:focus-visible {
@@ -593,18 +667,31 @@ function scrollRooms(dir: -1 | 1) {
     transform: scale(1);
   }
   to {
-    transform: scale(1.08);
+    transform: scale(1.12);
   }
 }
 
 @media (hover: hover) {
+  .room:hover {
+    transform: translateY(-10px);
+  }
+
   .room:hover img {
-    transform: scale(1.07);
+    transform: scale(1.14);
+  }
+
+  .room:hover .room__shade {
+    background: linear-gradient(
+      to top,
+      rgba(12, 11, 10, 0.9) 0%,
+      rgba(12, 11, 10, 0.22) 68%
+    );
   }
 
   .room:hover .room__detail {
-    max-height: 3.5rem;
+    max-height: 4rem;
     opacity: 1;
+    transform: none;
   }
 }
 
@@ -612,6 +699,7 @@ function scrollRooms(dir: -1 | 1) {
   .room__detail {
     max-height: 3.5rem;
     opacity: 1;
+    transform: none;
   }
 }
 
@@ -639,12 +727,25 @@ function scrollRooms(dir: -1 | 1) {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .property__frame,
   .property__img,
+  .room__rise,
+  .room,
   .room__media img,
   .room__detail,
   .shot-nav {
-    animation: none;
-    transition: none;
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+
+  .room__rise {
+    opacity: 1;
+  }
+
+  .property__media > .shot-nav,
+  .rooms__arrow {
+    transform: translateY(-50%) !important;
   }
 }
 </style>

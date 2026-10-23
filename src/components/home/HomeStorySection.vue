@@ -1,13 +1,19 @@
 <template>
-  <section id="home-story" class="story" aria-labelledby="home-story-title">
+  <section
+    id="home-story"
+    class="story home-motion"
+    aria-labelledby="home-story-title"
+  >
     <div class="story__grid">
-      <div v-reveal>
-        <p class="eyebrow">{{ $t("home.storyEyebrow") }}</p>
-        <h2 id="home-story-title" class="story__title">
-          {{ $t("home.storyTitle") }}
-        </h2>
+      <div>
+        <p v-reveal class="eyebrow">{{ $t("home.storyEyebrow") }}</p>
+        <RevealWords
+          id="home-story-title"
+          class="story__title"
+          :text="$t('home.storyTitle')"
+        />
       </div>
-      <div v-reveal="{ delay: '140ms' }" class="story__aside">
+      <div v-reveal="{ delay: '180ms' }" class="story__aside">
         <p class="story__body">{{ $t("home.storyBody") }}</p>
         <p class="story__note">{{ $t("home.laterPhase") }}</p>
         <router-link
@@ -24,6 +30,7 @@
 </template>
 
 <script setup lang="ts">
+import RevealWords from "@/components/home/RevealWords.vue";
 import { useAuthStore } from "@/stores/auth-store";
 
 const auth = useAuthStore();
@@ -63,10 +70,15 @@ const auth = useAuthStore();
 .eyebrow::after {
   content: "";
   display: block;
-  width: 2.5rem;
+  width: 0;
   height: 1px;
   margin-top: 0.85rem;
   background: var(--gy-gold);
+  transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.15s;
+}
+
+.eyebrow.gy-reveal--in::after {
+  width: 2.5rem;
 }
 
 .story__title {
@@ -113,11 +125,12 @@ const auth = useAuthStore();
 }
 
 .text-link span {
-  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.text-link:hover span {
-  transform: translateX(6px);
+.text-link:hover span,
+.text-link:focus-visible span {
+  transform: translateX(12px);
 }
 
 .text-link:focus-visible {
@@ -143,6 +156,11 @@ const auth = useAuthStore();
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .eyebrow::after {
+    width: 2.5rem;
+    transition: none;
+  }
+
   .text-link span {
     transition: none;
   }

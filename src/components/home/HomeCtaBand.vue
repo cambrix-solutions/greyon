@@ -2,23 +2,26 @@
   <section
     v-if="image"
     id="home-cta"
-    class="cta"
+    class="cta home-motion"
     aria-labelledby="home-cta-title"
   >
     <div ref="frame" class="cta__frame">
       <img class="cta__img" :src="image" alt="" :style="imageStyle" />
     </div>
     <div class="cta__veil" />
-    <div v-reveal class="cta__copy">
-      <p class="eyebrow">Greyon</p>
-      <h2 id="home-cta-title">{{ $t("home.stayWith") }}</h2>
-      <p class="cta__lead">{{ $t("home.subhead") }}</p>
-      <div class="cta__actions">
-        <router-link to="/hotels" class="gy-btn gy-btn--light">
+    <div class="cta__copy">
+      <p v-reveal class="eyebrow">Greyon</p>
+      <RevealWords id="home-cta-title" :text="$t('home.stayWith')" />
+      <p v-reveal="{ delay: '140ms' }" class="cta__lead">{{
+        $t("home.subhead")
+      }}</p>
+      <div v-reveal="{ delay: '240ms' }" class="cta__actions">
+        <router-link v-magnetic to="/hotels" class="gy-btn gy-btn--light">
           {{ $t("home.viewHotels") }}
         </router-link>
         <router-link
           v-if="auth.featureEnabled('contact_public')"
+          v-magnetic
           to="/contact"
           class="gy-btn gy-btn--ghost"
         >
@@ -31,6 +34,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from "vue";
+import RevealWords from "@/components/home/RevealWords.vue";
 import { useParallax } from "@/components/home/useParallax";
 import { useAuthStore } from "@/stores/auth-store";
 import { useCmsStore } from "@/stores/cms-store";
@@ -38,10 +42,10 @@ import { useCmsStore } from "@/stores/cms-store";
 const cms = useCmsStore();
 const auth = useAuthStore();
 const frame = ref<HTMLElement | null>(null);
-const offset = useParallax(frame);
+const offset = useParallax(frame, 260);
 
 const imageStyle = computed(() => ({
-  transform: `translate3d(0, ${offset.value}px, 0) scale(1.12)`
+  transform: `translate3d(0, ${offset.value}px, 0) scale(1.2)`
 }));
 
 const image = computed(() => {
@@ -75,7 +79,7 @@ const image = computed(() => {
 
 .cta__frame {
   position: absolute;
-  inset: -14% 0;
+  inset: -24% 0;
 }
 
 .cta__img {

@@ -478,3 +478,5 @@ onUnmounted(() => clearTimer());
   }
 }
 </style>
+
+<style src="@/components/home/home-motion.css"></style>

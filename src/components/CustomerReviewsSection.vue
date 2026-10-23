@@ -2,7 +2,7 @@
   <section
     v-if="reviews.length"
     id="home-reviews"
-    class="reviews-section"
+    class="reviews-section home-motion"
     aria-roledescription="carousel"
     aria-labelledby="home-reviews-title"
     @mouseenter="pause"
@@ -11,15 +11,20 @@
     @focusout="onFocusOut"
   >
     <div class="gy-container">
-      <header v-reveal class="section-head">
+      <header class="section-head">
         <div>
-          <p class="gy-eyebrow section-kicker">Guest voices</p>
-          <h2 id="home-reviews-title" class="section-title">What guests say</h2>
+          <p v-reveal class="gy-eyebrow section-kicker">Guest voices</p>
+          <RevealWords
+            id="home-reviews-title"
+            class="section-title"
+            text="What guests say"
+          />
         </div>
       </header>
 
       <div
         ref="trackEl"
+        v-reveal
         class="reviews-track"
         :class="{
           'is-single': reviews.length === 1,
@@ -93,6 +98,7 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from "vue";
+import RevealWords from "@/components/home/RevealWords.vue";
 import {
   fetchPublicReviews,
   type GuestReview

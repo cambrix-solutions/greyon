@@ -2,17 +2,23 @@
   <section
     v-if="locations.length"
     id="home-destinations"
-    class="dest"
+    class="dest home-motion"
     aria-labelledby="home-destinations-title"
   >
-    <header v-reveal class="dest__head">
+    <header class="dest__head">
       <div>
-        <p class="eyebrow">{{ $t("home.exploreBy") }}</p>
-        <h2 id="home-destinations-title" class="dest__title">
-          {{ $t("home.destinationsCount", locations.length) }}
-        </h2>
+        <p v-reveal class="eyebrow">{{ $t("home.exploreBy") }}</p>
+        <RevealWords
+          id="home-destinations-title"
+          class="dest__title"
+          :text="$t('home.destinationsCount', locations.length)"
+        />
       </div>
-      <router-link to="/locations" class="text-link">
+      <router-link
+        v-reveal="{ delay: '140ms' }"
+        to="/locations"
+        class="text-link"
+      >
         {{ $t("home.allDestinations") }}
         <span aria-hidden="true">→</span>
       </router-link>
@@ -22,16 +28,18 @@
       <router-link
         v-for="(loc, i) in locations"
         :key="loc.id"
-        v-reveal="{ delay: `${i * 90}ms` }"
+        v-reveal="{ delay: `${i * 140}ms` }"
         :to="`/locations/${loc.slug}`"
         class="bento__item"
       >
-        <img
+        <span
           v-if="loc.heroImage"
-          :src="loc.heroImage"
-          :alt="loc.name"
-          loading="lazy"
-        />
+          class="bento__parallax"
+          :ref="el => setFrame(loc.id, el)"
+          :style="frameStyle(loc.id)"
+        >
+          <img :src="loc.heroImage" :alt="loc.name" loading="lazy" />
+        </span>
         <span class="bento__shade">
           <span class="bento__kicker" v-if="hotelCount(loc.id)">
             {{ $t("home.hotelsCount", hotelCount(loc.id)) }}
@@ -58,9 +66,17 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
+import RevealWords from "@/components/home/RevealWords.vue";
+import { useParallaxGroup } from "@/components/home/useParallax";
 import { useCmsStore } from "@/stores/cms-store";
 
 const cms = useCmsStore();
+const { setFrame, offsets } = useParallaxGroup(140);
+
+function frameStyle(id: string) {
+  const y = offsets.value[id] ?? 0;
+  return { transform: `translate3d(0, ${y}px, 0)` };
+}
 
 const locations = computed(() => {
   const locs = cms.publishedLocations;
@@ -132,11 +148,12 @@ function hotelsFor(locationId: string) {
 }
 
 .text-link span {
-  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.text-link:hover span {
-  transform: translateX(6px);
+.text-link:hover span,
+.text-link:focus-visible span {
+  transform: translateX(12px);
 }
 
 .bento {
@@ -173,18 +190,22 @@ function hotelsFor(locationId: string) {
   color: #fff;
 }
 
-.bento__item img {
+.bento__parallax {
   position: absolute;
-  inset: 0;
+  inset: -16% 0;
+}
+
+.bento__item img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 1.15s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .bento__shade {
   position: absolute;
   inset: 0;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -192,9 +213,10 @@ function hotelsFor(locationId: string) {
   padding: clamp(1.1rem, 2vw, 1.8rem);
   background: linear-gradient(
     to top,
-    rgba(12, 11, 10, 0.78) 0%,
-    rgba(12, 11, 10, 0.08) 55%
+    rgba(12, 11, 10, 0.72) 0%,
+    rgba(12, 11, 10, 0.05) 58%
   );
+  transition: background 0.5s ease;
 }
 
 .bento__kicker {
@@ -240,19 +262,31 @@ function hotelsFor(locationId: string) {
     max-height: 0;
     overflow: hidden;
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(18px);
     transition:
-      max-height 0.45s ease,
-      opacity 0.45s ease,
-      transform 0.45s ease;
+      max-height 0.55s ease,
+      opacity 0.55s ease,
+      transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .bento__item.gy-reveal--in:hover {
+    transform: translateY(-8px);
   }
 
   .bento__item:hover img {
-    transform: scale(1.08);
+    transform: scale(1.14);
+  }
+
+  .bento__item:hover .bento__shade {
+    background: linear-gradient(
+      to top,
+      rgba(12, 11, 10, 0.9) 0%,
+      rgba(12, 11, 10, 0.28) 64%
+    );
   }
 
   .bento__item:hover .bento__detail {
-    max-height: 8rem;
+    max-height: 9rem;
     opacity: 1;
     transform: none;
   }
@@ -287,10 +321,13 @@ function hotelsFor(locationId: string) {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .bento__parallax,
+  .bento__item,
   .bento__item img,
   .bento__detail,
   .text-link span {
-    transition: none;
+    transition: none !important;
+    transform: none !important;
   }
 }
 </style>

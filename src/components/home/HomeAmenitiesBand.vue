@@ -2,7 +2,7 @@
   <section
     v-if="image && (words.length || amenities.length)"
     id="home-amenities"
-    class="band"
+    class="band home-motion"
     :aria-label="amenities.length ? $t('home.amenities') : $t('home.exploreBy')"
   >
     <div ref="frame" class="band__frame">
@@ -10,22 +10,35 @@
     </div>
     <div class="band__veil" />
     <div class="band__content">
-      <div v-if="words.length" ref="wordTrack" class="word-row">
+      <div
+        v-if="words.length"
+        ref="wordTrack"
+        class="word-row"
+        :class="{ 'is-in': wordsIn }"
+      >
         <router-link
-          v-for="word in words"
+          v-for="(word, wordIndex) in words"
           :key="word.key"
           :to="`/locations/${word.slug}`"
           class="word"
+          :style="{ '--i': Math.min(wordIndex, 10) }"
         >
           {{ word.label }}
         </router-link>
       </div>
       <div v-if="amenities.length" class="amenity-block">
-        <h2 id="home-amenities-title" class="amenity-block__title">
-          {{ $t("home.amenities") }}
-        </h2>
-        <ul ref="iconTrack" class="icon-row">
-          <li v-for="item in amenities" :key="item">
+        <RevealWords
+          id="home-amenities-title"
+          tag="h2"
+          class="amenity-block__title"
+          :text="$t('home.amenities')"
+        />
+        <ul ref="iconTrack" class="icon-row" :class="{ 'is-in': iconsIn }">
+          <li
+            v-for="(item, itemIndex) in amenities"
+            :key="item"
+            :style="{ '--i': Math.min(itemIndex, 12) }"
+          >
             <q-icon :name="iconFor(item)" size="30px" />
             <span>{{ item }}</span>
           </li>
@@ -37,7 +50,9 @@
 
 <script setup lang="ts">
 import { computed, ref } from "vue";
+import RevealWords from "@/components/home/RevealWords.vue";
 import { useDragScroll } from "@/components/home/useDragScroll";
+import { useInView } from "@/components/home/useInView";
 import { useParallax } from "@/components/home/useParallax";
 import { useCmsStore } from "@/stores/cms-store";
 
@@ -45,12 +60,14 @@ const cms = useCmsStore();
 const frame = ref<HTMLElement | null>(null);
 const wordTrack = ref<HTMLElement | null>(null);
 const iconTrack = ref<HTMLElement | null>(null);
-const offset = useParallax(frame);
+const offset = useParallax(frame, 280);
+const wordsIn = useInView(wordTrack);
+const iconsIn = useInView(iconTrack);
 useDragScroll(wordTrack);
 useDragScroll(iconTrack);
 
 const imageStyle = computed(() => ({
-  transform: `translate3d(0, ${offset.value}px, 0) scale(1.12)`
+  transform: `translate3d(0, ${offset.value}px, 0) scale(1.2)`
 }));
 
 const featured = computed(() =>
@@ -135,7 +152,7 @@ function iconFor(label: string) {
 
 .band__frame {
   position: absolute;
-  inset: -14% 0;
+  inset: -24% 0;
 }
 
 .band__img {
@@ -197,10 +214,24 @@ function iconFor(label: string) {
   line-height: 1;
   color: #fff;
   white-space: nowrap;
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+    color 0.3s ease;
+  transition-delay: calc(var(--i) * 70ms), calc(var(--i) * 70ms), 0s;
 }
 
-.word:hover {
+.word-row.is-in .word {
+  opacity: 1;
+  transform: none;
+}
+
+.word-row.is-in .word:hover,
+.word-row.is-in .word:focus-visible {
   color: var(--gy-gold);
+  transform: translateY(-6px);
 }
 
 .word:focus-visible {
@@ -238,6 +269,21 @@ function iconFor(label: string) {
   max-width: 9rem;
   scroll-snap-align: start;
   text-align: center;
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: calc(var(--i) * 60ms);
+}
+
+.icon-row.is-in li {
+  opacity: 1;
+  transform: none;
+}
+
+.icon-row.is-in li:hover {
+  transform: translateY(-4px);
 }
 
 .icon-row .q-icon {
@@ -256,6 +302,13 @@ function iconFor(label: string) {
 @media (prefers-reduced-motion: reduce) {
   .band__img {
     transform: none !important;
+  }
+
+  .word,
+  .icon-row li {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 }
 </style>
