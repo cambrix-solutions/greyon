@@ -180,7 +180,7 @@ function hotelsFor(locationId: string) {
 
 .stack__pin {
   position: sticky;
-  top: calc(5.2rem + var(--i) * 1.35rem);
+  top: calc(5.4rem + var(--i) * 4.6rem);
   height: min(70vh, 640px);
   margin-bottom: 14vh;
   perspective: 1400px;
@@ -288,6 +288,7 @@ function hotelsFor(locationId: string) {
   }
 
   .stack__pin {
+    top: calc(4.4rem + var(--i) * 2.6rem);
     height: 78vw;
     min-height: 420px;
     margin-bottom: 3.5rem;

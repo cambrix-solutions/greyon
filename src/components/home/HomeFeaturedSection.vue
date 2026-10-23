@@ -344,7 +344,7 @@ function roomDetail(room: RoomType) {
   z-index: 3;
   left: clamp(1.2rem, 5vw, 4rem);
   right: 28%;
-  bottom: 18%;
+  bottom: 36%;
   margin: 0;
   font-family: var(--serif);
   font-size: clamp(3.4rem, 7vw, 7rem);
@@ -362,7 +362,7 @@ function roomDetail(room: RoomType) {
   position: relative;
   z-index: 4;
   width: min(760px, calc(100% - 2rem));
-  margin: -7.5rem auto 0;
+  margin: -13rem auto 0;
   padding-bottom: 1rem;
 }
 
@@ -538,12 +538,12 @@ function roomDetail(room: RoomType) {
 
   .property__name {
     right: 1.1rem;
-    bottom: 28%;
+    bottom: 38%;
     font-size: clamp(2.8rem, 12vw, 3.8rem);
   }
 
   .property__float {
-    margin-top: -4.5rem;
+    margin-top: -7.5rem;
   }
 
   .room {

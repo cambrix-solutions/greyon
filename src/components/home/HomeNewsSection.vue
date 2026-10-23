@@ -182,7 +182,7 @@ function dateLabel(value: string) {
   z-index: 2;
   top: 8%;
   left: 0;
-  max-width: min(16ch, 46%);
+  width: min(62%, 680px);
 }
 
 .stage__meta {
@@ -200,14 +200,17 @@ function dateLabel(value: string) {
   letter-spacing: -0.045em;
   line-height: 0.86;
   color: #1c1f1e;
+  text-shadow:
+    0 0 18px rgba(247, 243, 236, 0.95),
+    0 0 2px #f7f3ec;
 }
 
 .stage__card {
   position: absolute;
   z-index: 3;
-  left: 2%;
-  bottom: 8%;
-  width: min(420px, 42%);
+  left: 30%;
+  bottom: 9%;
+  width: min(440px, 46%);
   transform: rotate(-3deg);
 }
 
@@ -293,7 +296,7 @@ function dateLabel(value: string) {
 
   .stage__copy {
     position: static;
-    max-width: none;
+    width: auto;
     order: 1;
   }
 
@@ -306,7 +309,7 @@ function dateLabel(value: string) {
     width: 100%;
     order: 3;
     transform: none;
-    margin-top: -3.5rem;
+    margin-top: -4.5rem;
   }
 }
 
