@@ -1,6 +1,6 @@
 <template>
-  <div class="dest-map">
-    <div class="dest-map__toolbar">
+  <div class="dest-map" :class="{ 'dest-map--canvas': canvasOnly }">
+    <div v-if="!canvasOnly" class="dest-map__toolbar">
       <p class="dest-map__label">Destination</p>
       <div class="dest-map__chips" role="listbox" aria-label="Destinations">
         <button
@@ -50,7 +50,7 @@
     <p v-else-if="!markers.length" class="dest-map__hint gy-muted">
       No mapped properties for this destination yet.
     </p>
-    <ul v-else class="dest-map__list">
+    <ul v-else-if="!canvasOnly" class="dest-map__list">
       <li v-for="hotel in markers" :key="hotel.id">
         <router-link :to="`/hotels/${hotel.slug}`" class="dest-map__card">
           <strong>{{ hotel.name }}</strong>
@@ -68,10 +68,23 @@ import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from "vue";
 import { useCmsStore } from "@/stores/cms-store";
 import type { Hotel } from "@/types/greyon";
 
-const props = defineProps<{
-  /** Pre-select a destination slug from the route. */
-  initialSlug?: string;
-}>();
+const props = withDefaults(
+  defineProps<{
+    /** Pre-select a destination slug from the route. */
+    initialSlug?: string;
+    /**
+     * When set, these hotels are the only markers.
+     * The listing page passes its filtered results.
+     */
+    hotels?: Hotel[];
+    /** Map canvas only — the parent owns filters and the card list. */
+    canvasOnly?: boolean;
+  }>(),
+  {
+    initialSlug: "",
+    canvasOnly: false
+  }
+);
 
 const cms = useCmsStore();
 const mapEl = ref<HTMLElement | null>(null);
@@ -79,6 +92,7 @@ const map = shallowRef<L.Map | null>(null);
 const layer = shallowRef<L.LayerGroup | null>(null);
 const selectedSlug = ref(props.initialSlug ?? "");
 const mapError = ref("");
+let resizeTimer = 0;
 
 const locations = computed(() => cms.publishedLocations);
 
@@ -90,8 +104,12 @@ function hasCoords(hotel: Hotel) {
 }
 
 const markers = computed(() => {
-  const loc = locations.value.find(l => l.slug === selectedSlug.value);
-  return cms.publishedHotels.filter(h => {
+  const source = props.hotels ?? cms.publishedHotels;
+  const loc =
+    props.hotels === undefined
+      ? locations.value.find(l => l.slug === selectedSlug.value)
+      : undefined;
+  return source.filter(h => {
     if (!hasCoords(h)) return false;
     if (loc && h.locationId !== loc.id) return false;
     return true;
@@ -168,8 +186,12 @@ onMounted(() => {
     map.value = m;
     layer.value = group;
     renderMarkers();
-    // Leaflet needs a size recalc after layout.
-    requestAnimationFrame(() => m.invalidateSize());
+    // Leaflet needs a size recalc after layout (and after a view transition).
+    const fit = () => {
+      if (map.value) map.value.invalidateSize();
+    };
+    requestAnimationFrame(fit);
+    resizeTimer = window.setTimeout(fit, 360);
   } catch {
     mapError.value =
       "We couldn’t load the map just now. Please refresh and try again.";
@@ -177,6 +199,7 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
+  window.clearTimeout(resizeTimer);
   map.value?.remove();
   map.value = null;
   layer.value = null;
@@ -263,6 +286,12 @@ watch(
   border: 1px solid rgba(69, 76, 75, 0.1);
   background: var(--gy-sand);
   z-index: 0;
+}
+
+.dest-map--canvas .dest-map__canvas {
+  min-height: min(72vh, 680px);
+  border: 0;
+  border-radius: 22px;
 }
 
 .dest-map__error {
