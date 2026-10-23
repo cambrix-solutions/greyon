@@ -70,7 +70,10 @@ function placeMarker(animate: boolean) {
   marker.value.bindPopup(`<strong>${escapeHtml(props.label)}</strong>`, {
     closeButton: false
   });
-  if (animate) {
+  const reduceMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)"
+  ).matches;
+  if (animate && !reduceMotion) {
     current.flyTo(at, 16, { duration: 0.9, easeLinearity: 0.2 });
   } else {
     current.setView(at, 16, { animate: false });
