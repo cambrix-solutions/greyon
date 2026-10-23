@@ -10,12 +10,18 @@
       <h2 id="hotel-gallery-title" v-reveal="{ delay: '70ms' }">Gallery</h2>
     </div>
 
-    <div ref="track" class="gallery__track">
+    <div
+      ref="track"
+      class="gallery__track"
+      @pointerdown="onTrackDown"
+      @pointerup="onTrackUp"
+    >
       <button
         v-for="(src, index) in images"
         :key="src"
         type="button"
         class="shot"
+        :data-shot="index"
         :class="{ 'is-pinned': pinned === index }"
         :aria-label="`Open photo ${index + 1} of ${images.length}`"
         @mouseenter="pinned = index"
@@ -91,11 +97,31 @@ useDragScroll(track, { momentum: true });
 const pinned = ref(0);
 const open = ref(false);
 const active = ref(0);
+let pressX = 0;
+let pressY = 0;
 
 function openAt(index: number) {
+  if (!Number.isFinite(index) || index < 0 || index >= props.images.length) {
+    return;
+  }
   active.value = index;
   pinned.value = index;
   open.value = true;
+}
+
+function onTrackDown(event: PointerEvent) {
+  pressX = event.clientX;
+  pressY = event.clientY;
+}
+
+function onTrackUp(event: PointerEvent) {
+  const dx = Math.abs(event.clientX - pressX);
+  const dy = Math.abs(event.clientY - pressY);
+  if (dx > 8 || dy > 8) return;
+  const el = document.elementFromPoint(event.clientX, event.clientY);
+  const shot = el?.closest<HTMLElement>("[data-shot]");
+  if (!shot) return;
+  openAt(Number(shot.dataset.shot));
 }
 
 function step(dir: -1 | 1) {
