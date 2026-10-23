@@ -1,5 +1,5 @@
 <template>
-  <q-page v-if="hotel">
+  <q-page v-if="hotel" class="hotel-luxe home-motion">
     <SeoHead
       :title="`${hotel.name} | Greyon`"
       :description="hotel.shortDescription"
@@ -7,103 +7,140 @@
       :json-ld="jsonLd"
     />
 
-    <section class="detail-hero gy-card-media">
-      <img v-if="coverImage" :src="coverImage" :alt="hotel.name" />
-      <div class="detail-hero__veil" />
-      <div class="gy-container detail-hero__content">
-        <p v-reveal class="gy-eyebrow">{{ locationName }}</p>
-        <h1 v-reveal="{ delay: '80ms' }" class="gy-display">{{
-          hotel.name
-        }}</h1>
+    <section v-spot class="hero" data-sheet="Hero">
+      <div class="hero__media">
+        <img v-if="coverImage" class="hero__img" :src="coverImage" alt="" />
+        <div class="hero__veil" />
+        <div class="hero__spot" />
+      </div>
+
+      <div class="gy-container hero__content">
+        <p v-reveal class="eyebrow eyebrow--light">{{ locationName }}</p>
+        <h1 v-reveal="{ delay: '80ms' }">{{ hotel.name }}</h1>
         <div
           v-if="hotel.propertyType || starLabel"
-          v-reveal="{ delay: '110ms' }"
-          class="detail-hero__badges"
+          v-reveal="{ delay: '120ms' }"
+          class="hero__badges"
         >
-          <span v-if="hotel.propertyType" class="hero-badge">{{
+          <span v-if="hotel.propertyType" class="pill">{{
             hotel.propertyType
           }}</span>
-          <span v-if="starLabel" class="hero-badge hero-badge--stars">{{
-            starLabel
-          }}</span>
+          <span v-if="starLabel" class="pill pill--stars">{{ starLabel }}</span>
         </div>
-        <p v-reveal="{ delay: '140ms' }" class="detail-hero__lead">{{
+        <p v-reveal="{ delay: '150ms' }" class="hero__lead">{{
           hotel.shortDescription
         }}</p>
-      </div>
-    </section>
-
-    <div class="gy-container gy-section detail-wrap">
-      <div v-reveal="{ delay: '60ms' }" class="detail-top">
-        <div>
-          <p class="lead">{{ hotel.description }}</p>
-          <div class="meta-grid">
-            <div>
-              <span class="meta-label">Address</span>
-              <p v-if="hotel.area" class="meta-area">{{ hotel.area }}</p>
-              <p>{{ hotel.address }}</p>
-            </div>
-            <div>
-              <span class="meta-label">Contact</span>
-              <p>{{ hotel.phone || "—" }}</p>
-              <p>{{ hotel.email || "—" }}</p>
-            </div>
-            <div>
-              <span class="meta-label">Stay times</span>
-              <p>Check-in {{ hotel.checkInTime || "—" }}</p>
-              <p>Check-out {{ hotel.checkOutTime || "—" }}</p>
-            </div>
-          </div>
-        </div>
-        <div class="actions">
+        <div v-reveal="{ delay: '190ms' }" class="hero__actions">
           <button
+            v-magnetic
             class="gy-btn gy-btn--light"
             type="button"
             @click="scrollToRooms"
           >
             View rooms
           </button>
-          <router-link to="/hotels" class="gy-btn gy-btn--outline"
-            >All hotels</router-link
-          >
         </div>
       </div>
 
-      <section v-reveal class="block">
-        <div class="block-head">
-          <h2 class="gy-display">Hotel features</h2>
-          <p class="gy-muted">Amenities guests can expect during their stay.</p>
-        </div>
-        <FeatureChips :items="hotel.amenities" />
-      </section>
+      <div class="gy-container hero__facts">
+        <article class="fact glass-edge">
+          <span class="fact__label">Address</span>
+          <p v-if="hotel.area" class="fact__area">{{ hotel.area }}</p>
+          <p>{{ hotel.address }}</p>
+        </article>
+        <article class="fact glass-edge">
+          <span class="fact__label">Contact</span>
+          <p v-if="hotel.phone">
+            <a :href="`tel:${hotel.phone}`">{{ hotel.phone }}</a>
+          </p>
+          <p v-if="hotel.email">
+            <a :href="`mailto:${hotel.email}`">{{ hotel.email }}</a>
+          </p>
+          <p v-if="!hotel.phone && !hotel.email">—</p>
+        </article>
+        <article class="fact glass-edge">
+          <span class="fact__label">Stay times</span>
+          <p>Check-in {{ hotel.checkInTime || "—" }}</p>
+          <p>Check-out {{ hotel.checkOutTime || "—" }}</p>
+        </article>
+      </div>
+      <SectionDivider />
+    </section>
 
-      <section v-if="hotelServices.length" v-reveal class="block">
-        <div class="block-head">
-          <h2 class="gy-display">Services</h2>
-          <p class="gy-muted"
-            >Experiences and facilities available at this property.</p
-          >
+    <section class="story" data-sheet="Overview">
+      <div class="gy-container story__grid">
+        <div class="story__copy">
+          <p v-reveal class="eyebrow">Overview</p>
+          <p v-reveal="{ delay: '80ms' }" class="story__body">{{
+            hotel.description
+          }}</p>
+          <div v-reveal="{ delay: '140ms' }" class="story__actions">
+            <button
+              v-magnetic
+              class="gy-btn gy-btn--light"
+              type="button"
+              @click="scrollToRooms"
+            >
+              View rooms
+            </button>
+            <router-link to="/hotels" class="gy-btn gy-btn--outline">
+              All hotels
+            </router-link>
+          </div>
         </div>
-        <ul class="service-chips">
-          <li v-for="svc in hotelServices" :key="svc.id">
-            <q-icon :name="svc.icon || 'spa'" size="14px" />
-            <span>{{ svc.name }}</span>
+        <figure
+          v-if="portraitImage"
+          v-tilt="{ max: 7 }"
+          class="portrait hd-tilt"
+        >
+          <div ref="portraitFrame" class="portrait__frame">
+            <img
+              :src="portraitImage"
+              :alt="hotel.name"
+              :style="portraitStyle"
+            />
+          </div>
+        </figure>
+      </div>
+    </section>
+
+    <HotelAmenityBand :items="hotel.amenities" />
+
+    <section v-if="hotelServices.length" class="panel" data-sheet="Services">
+      <div class="gy-container">
+        <p v-reveal class="eyebrow">On site</p>
+        <h2 v-reveal="{ delay: '60ms' }">Services</h2>
+        <p v-reveal="{ delay: '100ms' }" class="panel__lead">
+          Experiences and facilities available at this property.
+        </p>
+        <ul class="card-grid">
+          <li
+            v-for="svc in hotelServices"
+            :key="svc.id"
+            v-tilt="{ max: 6 }"
+            class="info-card hd-tilt glass-edge"
+          >
+            <q-icon :name="svc.icon || 'spa'" size="22px" />
+            <h3>{{ svc.name }}</h3>
+            <p v-if="svc.description">{{ svc.description }}</p>
           </li>
         </ul>
-      </section>
+      </div>
+    </section>
 
-      <section v-if="hotelProducts.length" v-reveal class="block">
-        <div class="block-head">
-          <h2 class="gy-display">Products</h2>
-          <p class="gy-muted"
-            >Add-ons and items you can request with your stay.</p
-          >
-        </div>
+    <section v-if="hotelProducts.length" class="panel" data-sheet="Products">
+      <div class="gy-container">
+        <p v-reveal class="eyebrow">With your stay</p>
+        <h2 v-reveal="{ delay: '60ms' }">Products</h2>
+        <p v-reveal="{ delay: '100ms' }" class="panel__lead">
+          Add-ons and items you can request with your stay.
+        </p>
         <div class="product-grid">
           <article
             v-for="product in hotelProducts"
             :key="product.id"
-            class="product-card"
+            v-tilt="{ max: 6 }"
+            class="product-card hd-tilt"
           >
             <div
               class="product-card__media"
@@ -120,192 +157,245 @@
               </div>
             </div>
             <div class="product-card__body">
-              <h3 class="product-card__title">{{ product.name }}</h3>
-              <p v-if="product.description" class="product-card__desc">
-                {{ product.description }}
-              </p>
+              <h3>{{ product.name }}</h3>
+              <p v-if="product.description">{{ product.description }}</p>
               <p v-if="productPriceLabel(product)" class="product-card__price">
                 {{ productPriceLabel(product) }}
               </p>
             </div>
           </article>
         </div>
-      </section>
+      </div>
+    </section>
 
-      <section v-if="landmarks.length" v-reveal class="block">
-        <div class="block-head">
-          <h2 class="gy-display">Nearby landmarks</h2>
-          <p class="gy-muted">
-            Distances from the property to places guests ask about most.
-          </p>
-        </div>
-        <ul class="landmark-list">
-          <li v-for="item in landmarks" :key="`${item.place}-${item.distance}`">
-            <span class="landmark-list__place">{{ item.place }}</span>
-            <span class="landmark-list__distance">{{ item.distance }}</span>
-          </li>
-        </ul>
-      </section>
+    <section v-if="landmarks.length" class="landmarks" data-sheet="Landmarks">
+      <div class="gy-container">
+        <p v-reveal class="eyebrow">{{ locationName }}</p>
+        <h2 v-reveal="{ delay: '60ms' }">Nearby landmarks</h2>
+        <p v-reveal="{ delay: '100ms' }" class="panel__lead">
+          Distances from the property to places guests ask about most.
+        </p>
+      </div>
+      <ul ref="landmarkTrack" class="landmark-rail">
+        <li
+          v-for="(item, index) in landmarks"
+          :key="`${item.place}-${item.distance}`"
+          v-tilt="{ max: 6 }"
+          class="landmark hd-tilt glass-edge"
+        >
+          <span class="landmark__index">{{
+            String(index + 1).padStart(2, "0")
+          }}</span>
+          <span class="landmark__place">{{ item.place }}</span>
+          <span class="landmark__distance">{{ item.distance }}</span>
+        </li>
+      </ul>
+    </section>
 
-      <section v-if="gallery.length" v-reveal class="block">
-        <div class="block-head">
-          <h2 class="gy-display">Gallery</h2>
-        </div>
-        <div class="gallery">
-          <div
-            v-for="(img, idx) in gallery"
-            :key="idx"
-            v-reveal="{ delay: `${Math.min(idx, 5) * 70}ms` }"
-            class="gy-card-media gallery__item"
-          >
-            <img
-              :src="img"
-              :alt="`${hotel.name} gallery ${idx + 1}`"
-              loading="lazy"
-            />
-          </div>
-        </div>
-      </section>
+    <HotelGallery :images="gallery" :name="hotel.name" />
 
-      <section id="rooms" v-reveal class="block">
-        <div class="block-head">
-          <h2 class="gy-display">Rooms & features</h2>
-          <p class="gy-muted">
+    <section id="rooms" class="rooms" data-sheet="Rooms">
+      <div class="rooms__wrap">
+        <header class="rooms__head">
+          <p v-reveal class="eyebrow">Stay</p>
+          <h2 v-reveal="{ delay: '60ms' }">Rooms & features</h2>
+          <p v-reveal="{ delay: '100ms' }" class="panel__lead">
             Select dates to see live rates, then open room details before
             booking.
           </p>
-        </div>
+        </header>
         <BookingSearchWidget
           :navigate="false"
           submit-label="Check availability"
         />
-        <p v-if="!hasSearchedDates" class="gy-muted room-price-hint">
+        <p v-if="!hasSearchedDates" class="room-price-hint">
           Prices appear after you choose check-in and check-out dates.
         </p>
-        <div v-if="roomsLoading" class="room-list">
-          <RoomCardSkeleton
-            v-for="n in 2"
-            :key="`skel-${n}`"
-            variant="detail"
-          />
-        </div>
-        <div v-else class="room-list">
-          <RoomOfferCard
-            v-for="room in rooms"
-            :key="room.id"
-            variant="detail"
-            :title="room.name"
-            :subtitle="roomSubtitle(room)"
-            :images="room.images"
-            :bed-type="room.bedType"
-            :room-size="room.roomSize"
-            :max-guests="room.maxGuests"
-            :amenities="room.amenities"
-            :amenity-limit="5"
-            :badge="roomBadge(room.id, room)"
-            :meta="pricedRoom(room.id)?.ratePlan.mealBenefit || ''"
-            :price-text="roomPriceText(room.id)"
-            :price-per-night="roomPricePerNight(room.id)"
-            :price-hint="
-              pricedRoom(room.id) ? 'incl. taxes & fees for your dates' : ''
-            "
-            :detail-to="roomDetailPath(hotel, room)"
-            :show-view-details="true"
-            :cta-label="
-              hasSearchedDates && pricedRoom(room.id)
-                ? 'Book'
-                : 'Check availability'
-            "
-            :cta-outline="!(hasSearchedDates && pricedRoom(room.id))"
-            @cta="
-              hasSearchedDates && pricedRoom(room.id)
-                ? openRoom(room.id)
-                : focusSearch()
-            "
-          />
-        </div>
-      </section>
 
-      <div
-        v-if="stickyBarVisible"
-        class="room-sticky"
-        role="region"
-        aria-label="Room booking summary"
-      >
-        <div class="room-sticky__price">
-          <template v-if="stickyPriced">
-            <strong>${{ stickyPriced.total.toFixed(0) }}</strong>
-            <span
-              >incl. taxes · {{ stickyPriced.nights }} night{{
-                stickyPriced.nights === 1 ? "" : "s"
-              }}</span
+        <div class="rooms__layout">
+          <aside class="summary glass-edge" aria-label="Room booking summary">
+            <p class="eyebrow">Your stay</p>
+            <h3>{{ hotel.name }}</h3>
+            <p class="summary__where">{{ locationName }}</p>
+            <p
+              v-if="booking.search.checkIn && booking.search.checkOut"
+              class="summary__dates"
             >
-          </template>
-          <template v-else>
-            <strong>Check dates</strong>
-            <span>See live rates for this stay</span>
-          </template>
+              {{ formatStay(booking.search.checkIn) }} –
+              {{ formatStay(booking.search.checkOut) }}
+            </p>
+            <p class="summary__times">
+              Check-in {{ hotel.checkInTime || "—" }} · Check-out
+              {{ hotel.checkOutTime || "—" }}
+            </p>
+            <div v-if="stickyPriced" class="summary__price">
+              <strong>${{ stickyPriced.total.toFixed(0) }}</strong>
+              <span>
+                {{ stickyPriced.roomType.name }} · incl. taxes ·
+                {{ stickyPriced.nights }} night{{
+                  stickyPriced.nights === 1 ? "" : "s"
+                }}
+              </span>
+            </div>
+            <p v-else class="summary__pending">
+              Choose dates to see live rates.
+            </p>
+            <button
+              v-magnetic
+              class="gy-btn gy-btn--light summary__cta"
+              type="button"
+              @click="
+                stickyPriced
+                  ? openRoom(stickyPriced.roomType.id)
+                  : focusSearch()
+              "
+            >
+              {{ stickyPriced ? "Book" : "Check availability" }}
+            </button>
+          </aside>
+
+          <div>
+            <div v-if="roomsLoading" class="room-list">
+              <RoomCardSkeleton
+                v-for="n in 2"
+                :key="`skel-${n}`"
+                variant="detail"
+              />
+            </div>
+            <div v-else class="room-list">
+              <div
+                v-for="room in rooms"
+                :key="room.id"
+                v-tilt="{ max: 4 }"
+                class="room-tilt hd-tilt"
+              >
+                <RoomOfferCard
+                  variant="detail"
+                  :title="room.name"
+                  :subtitle="roomSubtitle(room)"
+                  :images="room.images"
+                  :bed-type="room.bedType"
+                  :room-size="room.roomSize"
+                  :max-guests="room.maxGuests"
+                  :amenities="room.amenities"
+                  :amenity-limit="5"
+                  :badge="roomBadge(room.id, room)"
+                  :meta="pricedRoom(room.id)?.ratePlan.mealBenefit || ''"
+                  :price-text="roomPriceText(room.id)"
+                  :price-per-night="roomPricePerNight(room.id)"
+                  :price-hint="
+                    pricedRoom(room.id)
+                      ? 'incl. taxes & fees for your dates'
+                      : ''
+                  "
+                  :detail-to="roomDetailPath(hotel, room)"
+                  :show-view-details="true"
+                  :cta-label="
+                    hasSearchedDates && pricedRoom(room.id)
+                      ? 'Book'
+                      : 'Check availability'
+                  "
+                  :cta-outline="!(hasSearchedDates && pricedRoom(room.id))"
+                  @cta="
+                    hasSearchedDates && pricedRoom(room.id)
+                      ? openRoom(room.id)
+                      : focusSearch()
+                  "
+                />
+              </div>
+            </div>
+          </div>
         </div>
-        <button
-          class="gy-btn gy-btn--light room-sticky__cta"
-          type="button"
-          @click="
-            stickyPriced ? openRoom(stickyPriced.roomType.id) : focusSearch()
-          "
-        >
-          {{ stickyPriced ? "Book" : "Check availability" }}
-        </button>
       </div>
+    </section>
 
-      <section class="block policies-block">
-        <div>
-          <h2 class="gy-display">Stay policies</h2>
-          <FeatureChips
-            v-if="hotel.policies.length"
-            :items="hotel.policies"
-            :show-icons="false"
-            wrap
-            :limit="4"
-            sheet-title="Stay policies"
-          />
-          <p v-else class="gy-muted">Policies will appear here when set.</p>
-        </div>
-        <div>
-          <h2 class="gy-display">Destination</h2>
-          <p v-if="hotel.area" class="meta-area">{{ hotel.area }}</p>
-          <p class="gy-muted">{{ hotel.address }}</p>
-          <MapEmbed
-            class="q-mt-md"
-            :lat="hotel.coordinates.lat"
-            :lng="hotel.coordinates.lng"
-            :embed-url="hotel.mapEmbedUrl"
-          />
-        </div>
-      </section>
+    <section class="place" data-sheet="Stay & destination">
+      <div class="place__copy">
+        <p v-reveal class="eyebrow">Good to know</p>
+        <h2 v-reveal="{ delay: '60ms' }">Stay policies</h2>
+        <FeatureChips
+          v-if="hotel.policies.length"
+          :items="hotel.policies"
+          :show-icons="false"
+          wrap
+          :limit="4"
+          sheet-title="Stay policies"
+        />
+        <p v-else class="panel__lead">Policies will appear here when set.</p>
+        <span class="place__slash" aria-hidden="true" />
+      </div>
+      <div class="place__map">
+        <p class="eyebrow eyebrow--light">{{ locationName }}</p>
+        <h2>Destination</h2>
+        <p v-if="hotel.area" class="place__area">{{ hotel.area }}</p>
+        <p class="place__address">{{ hotel.address }}</p>
+        <MapEmbed
+          :lat="hotel.coordinates.lat"
+          :lng="hotel.coordinates.lng"
+          :embed-url="hotel.mapEmbedUrl"
+        />
+      </div>
+    </section>
 
-      <section v-if="related.length" class="block">
-        <div class="block-head">
-          <h2 class="gy-display">Nearby Greyon hotels</h2>
-        </div>
+    <section v-if="related.length" class="related" data-sheet="Nearby hotels">
+      <div class="gy-container">
+        <p v-reveal class="eyebrow">{{ locationName }}</p>
+        <h2 v-reveal="{ delay: '60ms' }">Nearby Greyon hotels</h2>
         <div class="gy-grid-3">
           <HotelCard v-for="item in related" :key="item.id" :hotel="item" />
         </div>
-      </section>
+      </div>
+    </section>
+
+    <div
+      v-if="stickyBarVisible"
+      class="room-sticky"
+      role="region"
+      aria-label="Room booking summary"
+    >
+      <div class="room-sticky__price">
+        <template v-if="stickyPriced">
+          <strong>${{ stickyPriced.total.toFixed(0) }}</strong>
+          <span>
+            incl. taxes · {{ stickyPriced.nights }} night{{
+              stickyPriced.nights === 1 ? "" : "s"
+            }}
+          </span>
+        </template>
+        <template v-else>
+          <strong>Check dates</strong>
+          <span>See live rates for this stay</span>
+        </template>
+      </div>
+      <button
+        class="gy-btn gy-btn--light room-sticky__cta"
+        type="button"
+        @click="
+          stickyPriced ? openRoom(stickyPriced.roomType.id) : focusSearch()
+        "
+      >
+        {{ stickyPriced ? "Book" : "Check availability" }}
+      </button>
     </div>
   </q-page>
-  <q-page v-else class="gy-section gy-container">
-    <h1 class="gy-display">Hotel not found</h1>
+  <q-page v-else class="hotel-missing gy-section gy-container">
+    <h1>Hotel not found</h1>
     <router-link to="/hotels" class="gy-btn">Back to hotels</router-link>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { computed, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { useQuasar } from "quasar";
 import { useRoute, useRouter } from "vue-router";
 import BookingSearchWidget from "@/components/BookingSearchWidget.vue";
 import FeatureChips from "@/components/FeatureChips.vue";
 import HotelCard from "@/components/HotelCard.vue";
+import { useDragScroll } from "@/components/home/useDragScroll";
+import { useParallax } from "@/components/home/useParallax";
+import HotelAmenityBand from "@/components/hotel/HotelAmenityBand.vue";
+import HotelGallery from "@/components/hotel/HotelGallery.vue";
+import SectionDivider from "@/components/hotel/SectionDivider.vue";
 import MapEmbed from "@/components/MapEmbed.vue";
 import RoomCardSkeleton from "@/components/RoomCardSkeleton.vue";
 import RoomOfferCard from "@/components/RoomOfferCard.vue";
@@ -320,6 +410,15 @@ const router = useRouter();
 const $q = useQuasar();
 const booking = useBookingStore();
 const cms = useCmsStore();
+
+const portraitFrame = ref<HTMLElement | null>(null);
+const portraitOffset = useParallax(portraitFrame, 110);
+const landmarkTrack = ref<HTMLElement | null>(null);
+useDragScroll(landmarkTrack, { momentum: true });
+
+const portraitStyle = computed(() => ({
+  transform: `translate3d(0, ${portraitOffset.value}px, 0)`
+}));
 
 const hotel = computed(() => cms.getHotelBySlug(String(route.params.slug)));
 
@@ -404,6 +503,9 @@ const gallery = computed(() => {
     .filter(Boolean);
   return [...new Set(urls)];
 });
+const portraitImage = computed(
+  () => gallery.value.find(src => src !== coverImage.value) ?? ""
+);
 const landmarks = computed(() => hotel.value?.nearbyLandmarks ?? []);
 const starLabel = computed(() => {
   const n = hotel.value?.starRating;
@@ -510,8 +612,20 @@ function roomPricePerNight(roomTypeId: string) {
   return `$${per.toFixed(0)} per night`;
 }
 
+function formatStay(ymd: string) {
+  const [year, month, day] = ymd.split("-").map(Number);
+  if (!year || !month || !day) return ymd;
+  return new Date(year, month - 1, day).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short"
+  });
+}
+
 function scrollToRooms() {
-  document.getElementById("rooms")?.scrollIntoView({ behavior: "smooth" });
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  document.getElementById("rooms")?.scrollIntoView({
+    behavior: reduce ? "auto" : "smooth"
+  });
 }
 
 function focusSearch() {
@@ -538,169 +652,676 @@ async function openRoom(roomTypeId: string) {
 }
 </script>
 
+<style src="@/components/home/home-motion.css"></style>
+
 <style scoped>
-.detail-hero {
+.hotel-luxe {
+  --serif: "Cormorant Garamond", "Lora", Georgia, serif;
+  --sans: "Montserrat", system-ui, sans-serif;
   position: relative;
-  height: min(68vh, 620px);
-  color: var(--gy-white);
+  background:
+    radial-gradient(
+      ellipse at 100% 0%,
+      rgba(196, 163, 90, 0.09),
+      transparent 32%
+    ),
+    var(--gy-cream);
+  color: var(--gy-ink);
 }
 
-.detail-hero__veil {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(18, 24, 22, 0.15) 0%,
-    rgba(18, 24, 22, 0.72) 100%
-  );
+.hotel-luxe h1,
+.hotel-luxe h2,
+.hotel-luxe h3 {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-style: italic;
+  letter-spacing: -0.03em;
 }
 
-.detail-hero__content {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 2.25rem;
-  z-index: 1;
+.eyebrow {
+  margin: 0 0 0.85rem;
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--gy-gold-deep);
 }
 
-.detail-hero__content .gy-eyebrow {
+.eyebrow::after {
+  content: "";
+  display: block;
+  width: 0;
+  height: 1px;
+  margin-top: 0.8rem;
+  background: linear-gradient(90deg, var(--gy-gold), var(--gy-forest));
+  transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.eyebrow.gy-reveal--in::after {
+  width: 3.25rem;
+}
+
+.eyebrow--light {
   color: var(--gy-gold);
 }
 
-.detail-hero h1 {
-  margin: 0 0 0.55rem;
-  font-size: clamp(2.5rem, 5.5vw, 4rem);
-  line-height: 1.05;
-}
-
-.detail-hero__lead {
-  margin: 0;
-  max-width: 36rem;
-  font-size: 1.08rem;
-  line-height: 1.55;
-  color: rgba(255, 255, 255, 0.9);
-}
-
-.detail-hero__badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
-  margin: 0 0 0.85rem;
-}
-
-.hero-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.28rem 0.65rem;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--gy-ink);
-  background: rgba(255, 255, 255, 0.92);
-  border-radius: 4px;
-}
-
-.hero-badge--stars {
-  letter-spacing: 0.04em;
-  text-transform: none;
-  color: var(--gy-gold-deep);
-}
-
-.meta-area {
-  margin: 0 0 0.2rem !important;
-  font-weight: 600;
-  color: var(--gy-gold-deep);
-}
-
-.detail-top {
-  display: grid;
-  grid-template-columns: 1.5fr auto;
-  gap: 1.5rem 2rem;
-  align-items: start;
-}
-
-.lead {
-  max-width: 48rem;
-  margin: 0 0 1.5rem;
-  font-size: 1.08rem;
-  line-height: 1.75;
-  color: var(--gy-ink);
-}
-
-.meta-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1rem 1.25rem;
-}
-
-.meta-label {
-  display: block;
-  margin-bottom: 0.35rem;
-  font-size: 0.7rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--gy-muted);
-}
-
-.meta-grid p {
-  margin: 0;
-  font-size: 0.95rem;
-  line-height: 1.45;
-}
-
-.meta-price {
-  font-family: var(--font-display);
-  font-size: 1.45rem !important;
-  color: var(--gy-forest);
-}
-
-.actions {
+.hero {
+  --spot-x: 68%;
+  --spot-y: 34%;
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
-  min-width: 11rem;
+  justify-content: flex-end;
+  min-height: calc(100vh - 5.5rem);
+  min-height: calc(100svh - 5.5rem);
+  color: #fff;
+  background: #1c1916;
+  isolation: isolate;
 }
 
-.block {
-  margin-top: 3rem;
+.hero__media {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
 }
 
-.block-head {
-  margin-bottom: 1.15rem;
+.hero__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform-origin: 50% 40%;
+  animation: hero-ken 22s ease-in-out infinite alternate;
 }
 
-.block-head h2,
-.block h2 {
-  margin: 0 0 0.4rem;
-  font-size: clamp(1.85rem, 3vw, 2.25rem);
+.hero__veil,
+.hero__spot {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
 }
 
-.block-head .gy-muted {
+.hero__veil {
+  background: linear-gradient(
+    180deg,
+    rgba(12, 11, 10, 0.28) 0%,
+    rgba(12, 11, 10, 0.08) 34%,
+    rgba(12, 11, 10, 0.62) 72%,
+    rgba(12, 11, 10, 0.84) 100%
+  );
+}
+
+.hero__spot {
+  background: radial-gradient(
+    circle 10rem at var(--spot-x) var(--spot-y),
+    rgba(196, 163, 90, 0.34),
+    transparent 70%
+  );
+  mix-blend-mode: soft-light;
+  opacity: 0;
+}
+
+.hero__content,
+.hero__facts {
+  position: relative;
+  z-index: 2;
+}
+
+.hero__content {
+  padding-top: clamp(3rem, 8vh, 6rem);
+}
+
+.hero h1 {
+  max-width: 12em;
   margin: 0;
-  max-width: 36rem;
+  font-size: clamp(2.7rem, 7.2vw, 6.5rem);
+  line-height: 0.88;
 }
 
-.gallery {
+.hero__lead {
+  max-width: 38rem;
+  margin: 1rem 0 0;
+  font-family: var(--sans);
+  font-size: 1.02rem;
+  font-weight: 500;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.hero__badges,
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 1rem;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0.3rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(12px);
+  font-family: var(--sans);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.pill--stars {
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: #f3e6c4;
+}
+
+.hero__facts {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.85rem;
+  margin-top: 1.75rem;
 }
 
-.gallery__item {
+.fact {
+  min-width: 0;
+  padding: 1rem 1.05rem 0.95rem;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.86);
+  color: var(--gy-ink);
+  box-shadow: 0 18px 40px rgba(12, 11, 10, 0.16);
+  backdrop-filter: blur(16px) saturate(1.15);
+}
+
+.fact p,
+.summary p,
+.place__address,
+.place__area {
+  margin: 0;
+}
+
+.fact p {
+  font-size: 0.92rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.fact__label,
+.summary__times,
+.summary__where {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-family: var(--sans);
+  font-size: 0.68rem;
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gy-gold-deep);
+}
+
+.fact__area,
+.place__area,
+.summary__where {
+  margin-bottom: 0.2rem !important;
+  color: var(--gy-gold-deep);
+  font-weight: 600;
+}
+
+.fact a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.16em;
+}
+
+.glass-edge {
+  position: relative;
+}
+
+.glass-edge::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  background: linear-gradient(
+    145deg,
+    var(--gy-gold),
+    var(--gy-forest) 55%,
+    rgba(255, 255, 255, 0.65)
+  );
+  pointer-events: none;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+
+.story {
+  position: relative;
+  z-index: 2;
+  padding: clamp(2.5rem, 6vw, 4.5rem) 0 clamp(3.5rem, 7vw, 5.5rem);
+  background: var(--gy-cream);
+}
+
+.story__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+  gap: clamp(1.5rem, 4vw, 4rem);
+  align-items: start;
+}
+
+.story__body {
+  margin: 0;
+  max-width: 38rem;
+  font-family: var(--serif);
+  font-size: clamp(1.55rem, 2.5vw, 2.2rem);
+  font-style: italic;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.story__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin-top: 1.75rem;
+}
+
+.portrait {
+  margin-top: -5.5rem;
+  margin-right: calc(-1 * clamp(0rem, 3vw, 2.5rem));
+  padding: 0.7rem;
+  background: linear-gradient(
+    145deg,
+    rgba(196, 163, 90, 0.95),
+    rgba(98, 112, 99, 0.9) 58%,
+    rgba(255, 255, 255, 0.45)
+  );
+  box-shadow: 0 28px 60px rgba(22, 21, 19, 0.18);
+}
+
+.portrait__frame {
+  overflow: hidden;
+  aspect-ratio: 3 / 4;
+  background: #2c312e;
+}
+
+.portrait__frame img {
+  width: 100%;
+  height: 130%;
+  object-fit: cover;
+}
+
+.panel {
+  padding: clamp(3rem, 6vw, 5rem) 0;
+}
+
+.panel h2,
+.landmarks h2,
+.rooms h2,
+.place h2,
+.related h2 {
+  margin: 0 0 0.75rem;
+  font-size: clamp(2.8rem, 6vw, 5rem);
+  line-height: 0.92;
+}
+
+.panel__lead {
+  max-width: 38rem;
+  margin: 0 0 1.4rem;
+  font-family: var(--sans);
+  font-size: 0.98rem;
+  font-weight: 500;
+  line-height: 1.65;
+  color: var(--gy-muted);
+}
+
+.card-grid,
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.9rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.info-card,
+.product-card {
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 16px 40px rgba(36, 48, 42, 0.08);
+  backdrop-filter: blur(12px);
+}
+
+.info-card {
+  display: grid;
+  align-content: start;
+  gap: 0.55rem;
+  min-height: 11rem;
+  padding: 1.15rem 1.1rem 1.2rem;
+}
+
+.info-card .q-icon {
+  color: var(--gy-forest);
+}
+
+.info-card h3,
+.product-card h3 {
+  margin: 0;
+  font-size: 1.7rem;
+  line-height: 1.05;
+}
+
+.info-card p,
+.product-card__body p {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 0.88rem;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--gy-muted);
+}
+
+.product-card {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  overflow: hidden;
+}
+
+.product-card__media {
   aspect-ratio: 4 / 3;
-  border-radius: var(--gy-radius-media);
+  overflow: hidden;
+  background: var(--gy-sand);
+}
+
+.product-card__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1.1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.product-card__placeholder {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: var(--gy-forest);
+}
+
+.product-card__body {
+  display: grid;
+  align-content: start;
+  gap: 0.4rem;
+  padding: 0.95rem 1rem 1.1rem;
+}
+
+.product-card__price {
+  color: var(--gy-ink) !important;
+  font-weight: 650;
+}
+
+.landmarks {
+  padding: clamp(2rem, 5vw, 3.5rem) 0 0.5rem;
+  overflow: hidden;
+}
+
+.landmark-rail {
+  display: flex;
+  gap: 0.85rem;
+  margin: 0.4rem 0 0;
+  padding: 0.75rem clamp(1rem, 4vw, 3rem) 1.6rem;
+  list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  cursor: grab;
+}
+
+.landmark-rail::-webkit-scrollbar {
+  display: none;
+}
+
+.landmark-rail.is-dragging,
+.landmark-rail.is-coasting {
+  cursor: grabbing;
+  scroll-snap-type: none;
+}
+
+.landmark {
+  display: flex;
+  flex: 0 0 min(72vw, 18.5rem);
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1.4rem;
+  min-height: 15rem;
+  padding: 1.15rem 1.15rem 1.1rem;
+  scroll-snap-align: start;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 18px 40px rgba(36, 48, 42, 0.08);
+  backdrop-filter: blur(10px);
+}
+
+.landmark__index {
+  font-family: var(--serif);
+  font-size: 2rem;
+  font-style: italic;
+  line-height: 1;
+  color: var(--gy-gold-deep);
+}
+
+.landmark__place {
+  font-family: var(--serif);
+  font-size: clamp(1.55rem, 2vw, 1.9rem);
+  font-style: italic;
+  line-height: 1.05;
+}
+
+.landmark__distance {
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gy-forest);
+}
+
+.rooms {
+  scroll-margin-top: 6.5rem;
+  padding: clamp(3.5rem, 7vw, 5.5rem) 0 clamp(3rem, 6vw, 5rem);
+  background:
+    linear-gradient(180deg, rgba(98, 112, 99, 0.1), transparent 9rem),
+    var(--gy-white);
+}
+
+.rooms__wrap {
+  width: min(1280px, calc(100% - 2.5rem));
+  margin-inline: auto;
+}
+
+.rooms__head {
+  margin-bottom: 1.25rem;
+}
+
+.room-price-hint {
+  margin: 0.85rem 0 0;
+  font-family: var(--sans);
+  font-size: 0.9rem;
+  color: var(--gy-muted);
+}
+
+.rooms__layout {
+  display: grid;
+  grid-template-columns: minmax(240px, 280px) minmax(0, 1fr);
+  gap: 1.15rem;
+  align-items: start;
+  margin-top: 1.25rem;
+}
+
+.summary {
+  position: sticky;
+  top: 6.5rem;
+  display: grid;
+  gap: 0.45rem;
+  padding: 1.2rem 1.15rem 1.15rem;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 22px 50px rgba(36, 48, 42, 0.1);
+  backdrop-filter: blur(16px) saturate(1.1);
+}
+
+.summary h3 {
+  margin: 0;
+  font-size: 2rem;
+  line-height: 0.95;
+}
+
+.summary__dates {
+  margin: 0.2rem 0 0;
+  font-family: var(--serif);
+  font-size: 1.35rem;
+  font-style: italic;
+}
+
+.summary__times,
+.summary__pending,
+.summary__price span {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  font-style: normal;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  line-height: 1.45;
+  text-transform: none;
+  color: var(--gy-muted);
+}
+
+.summary__price {
+  display: grid;
+  gap: 0.15rem;
+  margin-top: 0.35rem;
+}
+
+.summary__price strong {
+  font-family: var(--serif);
+  font-size: 2.6rem;
+  font-weight: 500;
+  font-style: italic;
+  line-height: 0.9;
+}
+
+.summary__cta {
+  width: 100%;
+  margin-top: 0.45rem;
 }
 
 .room-list {
   display: grid;
   gap: 1rem;
-  margin-top: 1rem;
 }
 
-.room-price-hint {
-  margin: 0.75rem 0 0;
-  font-size: 0.9rem;
+.room-tilt {
+  min-width: 0;
+}
+
+.rooms :deep(.room-offer__title) {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-style: italic;
+  font-size: clamp(1.55rem, 2vw, 2rem);
+}
+
+.place {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  background: linear-gradient(120deg, #24302a 0%, #1a1816 58%, #3a3228 100%);
+  color: #fff;
+}
+
+.place__copy {
+  position: relative;
+  z-index: 1;
+  padding: clamp(3rem, 6vw, 5rem) clamp(1.4rem, 4vw, 3.5rem);
+  background: var(--gy-cream);
+  color: var(--gy-ink);
+}
+
+.place__slash {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: min(18%, 7rem);
+  height: 100%;
+  background: var(--gy-cream);
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+  transform: translateX(99%);
+}
+
+.place__map {
+  display: grid;
+  align-content: center;
+  gap: 0.45rem;
+  padding: clamp(2.5rem, 5vw, 4rem) clamp(1.4rem, 4vw, 3rem)
+    clamp(2.5rem, 5vw, 4rem) clamp(3rem, 7vw, 5.5rem);
+}
+
+.place__map h2 {
+  color: #fff;
+}
+
+.place__area {
+  color: var(--gy-gold);
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.place__address {
+  max-width: 34rem;
+  margin-bottom: 0.85rem;
+  font-family: var(--sans);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.place__map :deep(.map-embed) {
+  padding: 0.7rem;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.94);
+}
+
+.place__map :deep(.map-embed__frame) {
+  min-height: 320px;
+  border-radius: 12px;
+}
+
+.related {
+  padding: clamp(3.5rem, 7vw, 5.5rem) 0;
+}
+
+.related .gy-grid-3 {
+  margin-top: 1.25rem;
+}
+
+.hd-tilt {
+  transition: transform 0.18s linear;
 }
 
 .room-sticky {
@@ -714,10 +1335,10 @@ async function openRoom(roomTypeId: string) {
   justify-content: space-between;
   gap: 0.85rem;
   padding: 0.85rem 1rem calc(0.85rem + env(safe-area-inset-bottom));
-  background: rgba(255, 255, 255, 0.96);
-  border-top: 1px solid rgba(69, 76, 75, 0.1);
-  box-shadow: 0 -12px 28px rgba(69, 76, 75, 0.1);
-  backdrop-filter: blur(10px);
+  background: rgba(20, 18, 16, 0.94);
+  color: #fff;
+  box-shadow: 0 -16px 40px rgba(12, 11, 10, 0.28);
+  backdrop-filter: blur(16px);
 }
 
 .room-sticky__price {
@@ -727,195 +1348,144 @@ async function openRoom(roomTypeId: string) {
 }
 
 .room-sticky__price strong {
-  font-family: var(--font-display);
-  font-size: 1.25rem;
-  font-weight: 600;
-  line-height: 1.1;
-  color: var(--gy-ink);
+  font-family: var(--serif);
+  font-size: 1.45rem;
+  font-weight: 500;
+  font-style: italic;
+  line-height: 1;
 }
 
 .room-sticky__price span {
+  font-family: var(--sans);
   font-size: 0.72rem;
-  color: var(--gy-muted);
+  color: rgba(255, 255, 255, 0.72);
 }
 
 .room-sticky__cta {
   flex-shrink: 0;
-  min-height: 2.65rem;
+  min-height: 2.75rem;
   padding-inline: 1rem;
   font-size: 0.72rem;
 }
 
-.policies-block {
-  display: grid;
-  grid-template-columns: 1fr 1.1fr;
-  gap: 2rem;
+.hotel-missing h1 {
+  margin: 0 0 1rem;
+  font-family: var(--serif, "Cormorant Garamond", Georgia, serif);
+  font-size: clamp(2.6rem, 6vw, 4rem);
+  font-weight: 500;
+  font-style: italic;
 }
 
-.policy-list {
-  margin: 0.75rem 0 0;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  gap: 0.55rem;
+@keyframes hero-ken {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.12);
+  }
 }
 
-.policy-list li {
-  padding: 0.75rem 0.9rem;
-  background: var(--gy-sand);
-  border-left: 2px solid var(--gy-gold);
-  line-height: 1.5;
-}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .hero:hover .hero__veil {
+    -webkit-mask-image: radial-gradient(
+      circle 11rem at var(--spot-x) var(--spot-y),
+      transparent 0%,
+      rgba(0, 0, 0, 0.25) 46%,
+      #000 74%
+    );
+    mask-image: radial-gradient(
+      circle 11rem at var(--spot-x) var(--spot-y),
+      transparent 0%,
+      rgba(0, 0, 0, 0.25) 46%,
+      #000 74%
+    );
+  }
 
-.landmark-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  gap: 0.55rem;
-}
+  .hero:hover .hero__spot {
+    opacity: 1;
+  }
 
-.landmark-list li {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  align-items: baseline;
-  padding: 0.75rem 0.9rem;
-  background: var(--gy-sand);
-  border-left: 2px solid var(--gy-gold);
-}
-
-.landmark-list__place {
-  font-size: 0.95rem;
-  line-height: 1.45;
-}
-
-.landmark-list__distance {
-  flex-shrink: 0;
-  font-size: 0.82rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  color: var(--gy-gold-deep);
-  white-space: nowrap;
-}
-
-.service-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.service-chips li {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  max-width: 100%;
-  padding: 0.38rem 0.78rem;
-  border-radius: 999px;
-  font-size: 0.78rem;
-  line-height: 1.25;
-  color: var(--gy-ink);
-  background: var(--gy-sand);
-}
-
-.service-chips li .q-icon {
-  flex-shrink: 0;
-  color: var(--gy-forest);
-}
-
-.product-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1rem;
-}
-
-.product-card {
-  display: grid;
-  grid-template-rows: auto 1fr;
-  background: #fff;
-  border: 1px solid rgba(18, 17, 16, 0.08);
-  border-radius: 14px;
-  overflow: hidden;
-}
-
-.product-card__media {
-  aspect-ratio: 4 / 3;
-  background: var(--gy-sand);
-}
-
-.product-card__media img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.product-card__placeholder {
-  display: grid;
-  place-items: center;
-  height: 100%;
-  color: var(--gy-forest);
-}
-
-.product-card__body {
-  display: grid;
-  gap: 0.35rem;
-  padding: 0.85rem 0.95rem 1rem;
-  align-content: start;
-}
-
-.product-card__title {
-  margin: 0;
-  font-size: 1.05rem;
-  font-weight: 650;
-  line-height: 1.25;
-}
-
-.product-card__desc {
-  margin: 0;
-  font-size: 0.85rem;
-  color: var(--gy-muted);
-  line-height: 1.45;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.product-card__price {
-  margin: 0.15rem 0 0;
-  font-size: 0.95rem;
-  font-weight: 650;
-  color: var(--gy-ink);
+  .product-card:hover img {
+    transform: scale(1.08);
+  }
 }
 
 @media (max-width: 960px) {
-  .detail-top,
-  .meta-grid,
-  .policies-block {
+  .hero__facts,
+  .story__grid,
+  .rooms__layout,
+  .place {
     grid-template-columns: 1fr;
   }
 
-  .actions {
-    flex-direction: row;
-    flex-wrap: wrap;
+  .portrait {
+    margin: 1.5rem 0 0;
   }
 
-  .gallery {
-    grid-template-columns: 1fr 1fr;
+  .summary {
+    position: static;
+  }
+
+  .place__slash {
+    display: none;
+  }
+
+  .place__map {
+    padding: 2rem 1.25rem 2.5rem;
   }
 }
 
-@media (max-width: 600px) {
-  .gallery {
-    grid-template-columns: 1fr;
+@media (max-width: 720px) {
+  .hero__facts {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    padding-bottom: 0.2rem;
   }
 
-  .detail-wrap {
-    padding-bottom: 5.5rem;
+  .hero__facts::-webkit-scrollbar {
+    display: none;
+  }
+
+  .fact {
+    flex: 0 0 min(78vw, 18rem);
+    scroll-snap-align: start;
+  }
+
+  .portrait__frame {
+    aspect-ratio: 4 / 5;
+    max-height: 72vh;
+  }
+}
+
+@media (max-width: 599px) {
+  .hotel-luxe {
+    padding-bottom: 5.75rem;
+  }
+
+  .summary {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__img,
+  .product-card__media img,
+  .hd-tilt,
+  .eyebrow::after {
+    animation: none;
+    transition: none;
+  }
+
+  .eyebrow::after {
+    width: 3.25rem;
+  }
+
+  .portrait__frame img {
+    height: 100%;
+    transform: none !important;
   }
 }
 </style>
