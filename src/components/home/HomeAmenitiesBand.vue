@@ -10,39 +10,40 @@
     </div>
     <div class="band__veil" />
     <div class="band__content">
+      <p class="eyebrow">Greyon</p>
+      <h2 id="home-amenities-title" class="band__title">
+        {{ $t("home.amenities") }}
+      </h2>
       <div
-        v-if="words.length"
-        ref="wordTrack"
-        class="word-row"
-        :class="{ 'is-in': wordsIn }"
+        v-if="amenities.length"
+        class="marquee"
+        :aria-label="$t('home.amenities')"
       >
+        <div class="marquee__track">
+          <span v-for="item in amenities" :key="item" class="chip">
+            <q-icon :name="iconFor(item)" size="22px" />
+            {{ item }}
+          </span>
+          <span
+            v-for="item in amenities"
+            :key="`loop-${item}`"
+            class="chip marquee__clone"
+            aria-hidden="true"
+          >
+            <q-icon :name="iconFor(item)" size="22px" />
+            {{ item }}
+          </span>
+        </div>
+      </div>
+      <div v-if="words.length" class="places">
         <router-link
-          v-for="(word, wordIndex) in words"
+          v-for="word in words"
           :key="word.key"
           :to="`/locations/${word.slug}`"
-          class="word"
-          :style="{ '--i': Math.min(wordIndex, 10) }"
+          class="places__link"
         >
           {{ word.label }}
         </router-link>
-      </div>
-      <div v-if="amenities.length" class="amenity-block">
-        <RevealWords
-          id="home-amenities-title"
-          tag="h2"
-          class="amenity-block__title"
-          :text="$t('home.amenities')"
-        />
-        <ul ref="iconTrack" class="icon-row" :class="{ 'is-in': iconsIn }">
-          <li
-            v-for="(item, itemIndex) in amenities"
-            :key="item"
-            :style="{ '--i': Math.min(itemIndex, 12) }"
-          >
-            <q-icon :name="iconFor(item)" size="30px" />
-            <span>{{ item }}</span>
-          </li>
-        </ul>
       </div>
     </div>
   </section>
@@ -50,24 +51,15 @@
 
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import RevealWords from "@/components/home/RevealWords.vue";
-import { useDragScroll } from "@/components/home/useDragScroll";
-import { useInView } from "@/components/home/useInView";
 import { useParallax } from "@/components/home/useParallax";
 import { useCmsStore } from "@/stores/cms-store";
 
 const cms = useCmsStore();
 const frame = ref<HTMLElement | null>(null);
-const wordTrack = ref<HTMLElement | null>(null);
-const iconTrack = ref<HTMLElement | null>(null);
-const offset = useParallax(frame, 280);
-const wordsIn = useInView(wordTrack);
-const iconsIn = useInView(iconTrack);
-useDragScroll(wordTrack);
-useDragScroll(iconTrack);
+const offset = useParallax(frame, 180);
 
 const imageStyle = computed(() => ({
-  transform: `translate3d(0, ${offset.value}px, 0) scale(1.2)`
+  transform: `translate3d(0, ${offset.value}px, 0) scale(1.15)`
 }));
 
 const featured = computed(() =>
@@ -147,12 +139,12 @@ function iconFor(label: string) {
   min-height: 100vh;
   overflow: hidden;
   color: #fff;
-  background: #2c312e;
+  background: #0c0e0d;
 }
 
 .band__frame {
   position: absolute;
-  inset: -24% 0;
+  inset: -20% 0;
 }
 
 .band__img {
@@ -165,138 +157,118 @@ function iconFor(label: string) {
 .band__veil {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    to top,
-    rgba(12, 11, 10, 0.78) 0%,
-    rgba(12, 11, 10, 0.28) 48%,
-    rgba(12, 11, 10, 0.35) 100%
-  );
+  background:
+    linear-gradient(
+      to top,
+      rgba(8, 9, 8, 0.82) 0%,
+      rgba(8, 9, 8, 0.28) 46%,
+      rgba(8, 9, 8, 0.45) 100%
+    ),
+    radial-gradient(
+      600px 240px at 20% 80%,
+      rgba(196, 163, 90, 0.22),
+      transparent 70%
+    );
+}
+
+.band::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  z-index: 2;
+  height: 74px;
+  background: #f7f3ec;
+  clip-path: ellipse(72% 100% at 50% 100%);
+  pointer-events: none;
 }
 
 .band__content {
   position: relative;
   z-index: 1;
   width: 100%;
-  padding: 12vh 0 7vh;
+  padding: 18vh 0 11vh;
 }
 
-.word-row,
-.icon-row {
-  display: flex;
-  gap: clamp(1.5rem, 4vw, 3.25rem);
-  overflow-x: auto;
-  max-width: 100%;
-  overscroll-behavior-x: contain;
-  scroll-snap-type: x proximity;
-  padding: 0 clamp(1.25rem, 6vw, 5rem);
-  scrollbar-width: none;
-  cursor: grab;
-}
-
-.word-row::-webkit-scrollbar,
-.icon-row::-webkit-scrollbar {
-  display: none;
-}
-
-.word-row:active,
-.icon-row:active {
-  cursor: grabbing;
-}
-
-.word {
-  flex: 0 0 auto;
-  scroll-snap-align: start;
-  font-family: var(--serif);
-  font-size: clamp(2.1rem, 4.6vw, 3.8rem);
-  font-weight: 500;
-  font-style: italic;
-  letter-spacing: -0.03em;
-  line-height: 1;
-  color: #fff;
-  white-space: nowrap;
-  opacity: 0;
-  transform: translateY(28px);
-  transition:
-    opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.8s cubic-bezier(0.22, 1, 0.36, 1),
-    color 0.3s ease;
-  transition-delay: calc(var(--i) * 70ms), calc(var(--i) * 70ms), 0s;
-}
-
-.word-row.is-in .word {
-  opacity: 1;
-  transform: none;
-}
-
-.word-row.is-in .word:hover,
-.word-row.is-in .word:focus-visible {
-  color: var(--gy-gold);
-  transform: translateY(-6px);
-}
-
-.word:focus-visible {
-  outline: 2px solid var(--gy-gold);
-  outline-offset: 4px;
-}
-
-.amenity-block {
-  margin-top: clamp(2.5rem, 6vw, 4.5rem);
-}
-
-.amenity-block__title {
-  margin: 0 0 1.25rem;
+.eyebrow {
+  margin: 0 0 0.6rem;
   padding-inline: clamp(1.25rem, 6vw, 5rem);
   font-family: var(--sans);
   font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.28em;
   text-transform: uppercase;
-  color: var(--gy-gold);
+  color: #e4d2a4;
 }
 
-.icon-row {
-  list-style: none;
-  margin: 0;
-  padding-bottom: 0.4rem;
+.band__title {
+  margin: 0 0 1.6rem;
+  padding-inline: clamp(1.25rem, 6vw, 5rem);
+  font-family: var(--serif);
+  font-size: clamp(4.4rem, 12vw, 9rem);
+  font-weight: 500;
+  font-style: italic;
+  letter-spacing: -0.045em;
+  line-height: 0.82;
+  background: linear-gradient(100deg, #f6f1e7 10%, #c4a35a 55%, #9aaf9c 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
-.icon-row li {
-  display: grid;
-  justify-items: center;
-  gap: 0.65rem;
+.band .marquee__track {
+  gap: 0;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
   flex: 0 0 auto;
-  min-width: 6.5rem;
-  max-width: 9rem;
-  scroll-snap-align: start;
-  text-align: center;
-  opacity: 0;
-  transform: translateY(22px);
-  transition:
-    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
-  transition-delay: calc(var(--i) * 60ms);
-}
-
-.icon-row.is-in li {
-  opacity: 1;
-  transform: none;
-}
-
-.icon-row.is-in li:hover {
-  transform: translateY(-4px);
-}
-
-.icon-row .q-icon {
-  color: var(--gy-gold);
-}
-
-.icon-row span {
+  margin-right: 1.15rem;
+  padding: 0.7rem 1.15rem;
+  border: 1px solid rgba(246, 241, 231, 0.28);
+  border-radius: 999px;
+  background: rgba(16, 18, 16, 0.4);
+  backdrop-filter: blur(10px);
   font-family: var(--sans);
-  font-size: 0.68rem;
+  font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  line-height: 1.35;
+  white-space: nowrap;
+}
+
+.chip .q-icon {
+  color: #e4d2a4;
+}
+
+.places {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  margin-top: clamp(2rem, 5vw, 3.4rem);
+  padding-inline: clamp(1.25rem, 6vw, 5rem);
+}
+
+.places__link {
+  font-family: var(--serif);
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  font-style: italic;
+  font-weight: 500;
+  line-height: 1.1;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.places__link:hover,
+.places__link:focus-visible {
+  color: #e4d2a4;
+}
+
+.places__link:focus-visible {
+  outline: 2px solid #c4a35a;
+  outline-offset: 4px;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -304,11 +276,21 @@ function iconFor(label: string) {
     transform: none !important;
   }
 
-  .word,
-  .icon-row li {
-    opacity: 1;
-    transform: none;
-    transition: none;
+  .band .marquee {
+    overflow: visible;
+    mask-image: none;
+    padding-inline: clamp(1.25rem, 6vw, 5rem);
+  }
+
+  .band .marquee__track {
+    flex-wrap: wrap;
+    width: auto;
+    max-width: 100%;
+    animation: none;
+  }
+
+  .marquee__clone {
+    display: none;
   }
 }
 </style>

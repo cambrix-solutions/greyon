@@ -3,6 +3,8 @@
     id="home-story"
     class="story home-motion"
     aria-labelledby="home-story-title"
+    @pointermove="onMove"
+    @pointerleave="onLeave"
   >
     <div class="story__grid">
       <div>
@@ -13,7 +15,7 @@
           :text="$t('home.storyTitle')"
         />
       </div>
-      <div v-reveal="{ delay: '180ms' }" class="story__aside">
+      <div v-reveal="{ delay: '160ms' }" class="story__aside">
         <p class="story__body">{{ $t("home.storyBody") }}</p>
         <p class="story__note">{{ $t("home.laterPhase") }}</p>
         <router-link
@@ -26,143 +28,231 @@
         </router-link>
       </div>
     </div>
+    <div
+      v-if="image"
+      class="lens"
+      :class="{ 'is-on': lensOn }"
+      :style="lensStyle"
+      aria-hidden="true"
+    >
+      <img :src="image" alt="" />
+    </div>
   </section>
 </template>
 
 <script setup lang="ts">
+import { computed, onMounted, ref } from "vue";
 import RevealWords from "@/components/home/RevealWords.vue";
 import { useAuthStore } from "@/stores/auth-store";
+import { useCmsStore } from "@/stores/cms-store";
 
 const auth = useAuthStore();
+const cms = useCmsStore();
+const lensOn = ref(false);
+const lensX = ref(0);
+const lensY = ref(0);
+const allowLens = ref(false);
+
+const image = computed(() => {
+  const loc = cms.publishedLocations.find(item => item.heroImage?.trim());
+  return (
+    loc?.heroImage ||
+    cms.publishedHotels.find(hotel => hotel.heroImage?.trim())?.heroImage ||
+    ""
+  );
+});
+
+const lensStyle = computed(() => ({
+  left: `${lensX.value}px`,
+  top: `${lensY.value}px`
+}));
+
+onMounted(() => {
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const hover = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+  allowLens.value = hover && !reduce;
+});
+
+function onMove(event: PointerEvent) {
+  if (!allowLens.value || event.pointerType !== "mouse") return;
+  const root = event.currentTarget;
+  if (!(root instanceof HTMLElement)) return;
+  const rect = root.getBoundingClientRect();
+  lensX.value = event.clientX - rect.left;
+  lensY.value = event.clientY - rect.top;
+  lensOn.value = true;
+}
+
+function onLeave() {
+  lensOn.value = false;
+}
 </script>
 
 <style scoped>
 .story {
   --serif: "Cormorant Garamond", "Lora", Georgia, serif;
   --sans: "Montserrat", system-ui, sans-serif;
-  display: flex;
-  align-items: center;
-  min-height: 78vh;
-  padding: clamp(6rem, 13vw, 10rem) clamp(1.25rem, 6vw, 6.5rem);
-  background: var(--gy-white);
-  color: var(--gy-ink);
+  position: relative;
+  overflow: hidden;
+  min-height: 88vh;
+  padding: clamp(5.5rem, 12vw, 9rem) clamp(1.25rem, 6vw, 6rem)
+    clamp(7rem, 12vw, 9rem);
+  background:
+    radial-gradient(
+      900px 420px at 12% -10%,
+      rgba(196, 163, 90, 0.28),
+      transparent 60%
+    ),
+    radial-gradient(
+      700px 380px at 100% 0%,
+      rgba(98, 112, 99, 0.22),
+      transparent 55%
+    ),
+    #f7f3ec;
+  color: #1c1f1e;
+}
+
+.story::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  z-index: 2;
+  height: 84px;
+  background: #121413;
+  clip-path: ellipse(72% 100% at 50% 100%);
+  pointer-events: none;
 }
 
 .story__grid {
+  position: relative;
+  z-index: 1;
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
-  gap: clamp(2rem, 6vw, 6rem);
+  grid-template-columns: minmax(0, 1.2fr) minmax(16rem, 0.7fr);
+  gap: clamp(2rem, 5vw, 4rem);
   align-items: end;
-  width: min(1240px, 100%);
+  width: min(1280px, 100%);
   margin-inline: auto;
 }
 
 .eyebrow {
-  margin: 0 0 1.25rem;
+  margin: 0 0 1rem;
   font-family: var(--sans);
   font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.28em;
   text-transform: uppercase;
-  color: var(--gy-gold-deep);
-}
-
-.eyebrow::after {
-  content: "";
-  display: block;
-  width: 0;
-  height: 1px;
-  margin-top: 0.85rem;
-  background: var(--gy-gold);
-  transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.15s;
-}
-
-.eyebrow.gy-reveal--in::after {
-  width: 2.5rem;
+  color: #8f7340;
 }
 
 .story__title {
   margin: 0;
-  max-width: 11ch;
+  max-width: 9ch;
   font-family: var(--serif);
-  font-size: clamp(3.1rem, 7.4vw, 6.75rem);
+  font-size: clamp(4.2rem, 9vw, 8.4rem);
   font-weight: 500;
   font-style: italic;
-  letter-spacing: -0.03em;
-  line-height: 0.9;
+  letter-spacing: -0.045em;
+  line-height: 0.84;
+  background: linear-gradient(115deg, #1c1f1e 10%, #8f7340 55%, #627063 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
-.story__body {
+.story__aside {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 1rem;
+  padding: 1.4rem 1.4rem 1.2rem;
+  border: 1px solid rgba(28, 31, 30, 0.08);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: 0 18px 50px rgba(28, 31, 30, 0.06);
+  backdrop-filter: blur(10px);
+}
+
+.story__body,
+.story__note {
   margin: 0;
   font-family: var(--sans);
-  font-size: clamp(0.95rem, 1.2vw, 1.05rem);
+  font-size: 0.98rem;
   font-weight: 500;
-  line-height: 1.75;
-  color: var(--gy-ink);
+  line-height: 1.7;
 }
 
 .story__note {
-  margin: 1.25rem 0 0;
-  font-family: var(--sans);
+  margin-top: 0.9rem;
+  color: #6d675f;
   font-size: 0.88rem;
-  font-weight: 500;
-  line-height: 1.6;
-  color: var(--gy-muted);
 }
 
 .text-link {
   display: inline-flex;
   align-items: center;
-  gap: 0.55rem;
+  gap: 0.5rem;
   min-height: 44px;
-  margin-top: 1.75rem;
+  margin-top: 1rem;
   font-family: var(--sans);
   font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--gy-forest);
+  color: #3e4a40;
 }
 
-.text-link span {
-  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+.lens {
+  position: absolute;
+  z-index: 4;
+  width: min(42vw, 320px);
+  height: min(42vw, 320px);
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid rgba(196, 163, 90, 0.9);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.28);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(0.82);
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
 }
 
-.text-link:hover span,
-.text-link:focus-visible span {
-  transform: translateX(12px);
+.lens.is-on {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
 }
 
-.text-link:focus-visible {
-  outline: 2px solid var(--gy-gold);
-  outline-offset: 4px;
+.lens img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 @media (max-width: 860px) {
   .story {
-    display: block;
     min-height: 0;
-    padding: clamp(4.5rem, 14vw, 6rem) 1.25rem;
+    padding: 4.2rem 1.15rem 5.5rem;
   }
 
   .story__grid {
     grid-template-columns: 1fr;
-    gap: 1.75rem;
   }
 
   .story__title {
     max-width: none;
+    font-size: clamp(3.3rem, 16vw, 4.6rem);
+  }
+
+  .lens {
+    display: none;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .eyebrow::after {
-    width: 2.5rem;
-    transition: none;
-  }
-
-  .text-link span {
-    transition: none;
+  .lens {
+    display: none;
   }
 }
 </style>

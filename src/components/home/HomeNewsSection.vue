@@ -20,35 +20,34 @@
       </router-link>
     </header>
 
-    <router-link
-      v-if="lead"
-      v-reveal
-      :to="`/news/${lead.slug}`"
-      class="news__lead"
-    >
-      <span
-        v-if="lead.coverImage"
-        ref="leadFrame"
-        class="news__parallax"
-        :style="leadStyle"
+    <div v-if="lead" class="stage">
+      <router-link
+        :to="`/news/${lead.slug}`"
+        class="stage__photo"
+        @pointermove="onMove"
+        @pointerleave="onLeave"
       >
-        <img :src="lead.coverImage" :alt="lead.title" />
-      </span>
-      <span v-reveal="{ delay: '160ms' }" class="news__shade">
-        <span class="news__meta">
+        <img v-if="lead.coverImage" :src="lead.coverImage" :alt="lead.title" />
+      </router-link>
+      <div class="stage__copy">
+        <p class="stage__meta">
           <time v-if="lead.publishedAt" :datetime="lead.publishedAt">{{
             dateLabel(lead.publishedAt)
           }}</time>
           <span v-if="lead.locationName">{{ lead.locationName }}</span>
-        </span>
-        <RevealWords tag="span" class="news__lead-title" :text="lead.title" />
-      </span>
-    </router-link>
-    <p v-if="lead?.excerpt" v-reveal="{ delay: '80ms' }" class="news__excerpt">
-      {{ lead.excerpt }}
-    </p>
+        </p>
+        <router-link :to="`/news/${lead.slug}`" class="stage__headline">
+          {{ lead.title }}
+        </router-link>
+      </div>
+      <div v-if="lead.excerpt" class="glass-frame stage__card">
+        <div class="glass-frame__in stage__card-in">
+          <p>{{ lead.excerpt }}</p>
+        </div>
+      </div>
+    </div>
 
-    <div v-if="rest.length" ref="restTrack" class="news__rest">
+    <div v-if="rest.length" class="news__rest">
       <router-link
         v-for="item in rest"
         :key="item.id"
@@ -70,24 +69,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import RevealWords from "@/components/home/RevealWords.vue";
-import { useDragScroll } from "@/components/home/useDragScroll";
-import { useParallax } from "@/components/home/useParallax";
+import { useTilt } from "@/components/home/useTilt";
 import { useCmsStore } from "@/stores/cms-store";
 import { formatDate } from "@/utils/datetime";
 
 const cms = useCmsStore();
 const { locale } = useI18n();
-const restTrack = ref<HTMLElement | null>(null);
-const leadFrame = ref<HTMLElement | null>(null);
-const leadOffset = useParallax(leadFrame, 240);
-useDragScroll(restTrack);
-
-const leadStyle = computed(() => ({
-  transform: `translate3d(0, ${leadOffset.value}px, 0)`
-}));
+const { onMove, onLeave } = useTilt();
 
 const articles = computed(() => cms.publishedNews.slice(0, 3));
 const lead = computed(() => articles.value[0] ?? null);
@@ -103,9 +94,17 @@ function dateLabel(value: string) {
 .news {
   --serif: "Cormorant Garamond", "Lora", Georgia, serif;
   --sans: "Montserrat", system-ui, sans-serif;
-  padding: clamp(4.5rem, 9vw, 7rem) 0 clamp(3rem, 6vw, 4.5rem);
-  background: var(--gy-cream);
-  color: var(--gy-ink);
+  position: relative;
+  padding: clamp(4.5rem, 8vw, 6.5rem) 0 clamp(4rem, 8vw, 6rem);
+  background:
+    radial-gradient(
+      640px 280px at 0% 20%,
+      rgba(196, 163, 90, 0.16),
+      transparent 60%
+    ),
+    #f7f3ec;
+  color: #1c1f1e;
+  overflow-x: clip;
 }
 
 .news__head {
@@ -113,27 +112,29 @@ function dateLabel(value: string) {
   align-items: flex-end;
   justify-content: space-between;
   gap: 1rem 2rem;
-  width: min(1400px, calc(100% - 2.5rem));
-  margin: 0 auto 1.25rem;
+  width: min(1200px, calc(100% - 2.5rem));
+  margin: 0 auto 1.5rem;
 }
 
-.eyebrow {
+.eyebrow,
+.stage__meta {
   margin: 0 0 0.45rem;
   font-family: var(--sans);
   font-size: 0.72rem;
   font-weight: 600;
-  letter-spacing: 0.28em;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: var(--gy-gold-deep);
+  color: #8f7340;
 }
 
 .news__title {
   margin: 0;
   font-family: var(--serif);
-  font-size: clamp(2.8rem, 6vw, 4.8rem);
+  font-size: clamp(3.2rem, 6vw, 5.4rem);
   font-weight: 500;
-  letter-spacing: -0.03em;
-  line-height: 0.92;
+  font-style: italic;
+  letter-spacing: -0.04em;
+  line-height: 0.88;
 }
 
 .text-link {
@@ -146,105 +147,94 @@ function dateLabel(value: string) {
   font-weight: 600;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--gy-forest);
+  color: #3e4a40;
 }
 
-.text-link span {
-  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.text-link:hover span,
-.text-link:focus-visible span {
-  transform: translateX(12px);
-}
-
-.news__lead {
+.stage {
   position: relative;
+  width: min(1200px, calc(100% - 2rem));
+  margin: 1.5rem auto 0;
+  min-height: 640px;
+}
+
+.stage__photo {
   display: block;
-  height: min(72vh, 760px);
-  min-height: 420px;
+  width: min(62%, 740px);
+  margin-left: auto;
+  margin-right: -2vw;
+  aspect-ratio: 4 / 5;
+  max-height: 760px;
   overflow: hidden;
-  background: #2c312e;
-  color: #fff;
+  border-radius: 36px 36px 140px 36px;
+  background: #2a2e2c;
+  transform-style: preserve-3d;
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.news__parallax {
-  position: absolute;
-  inset: -22% 0;
-}
-
-.news__lead img {
+.stage__photo img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.news__shade {
+.stage__copy {
   position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  gap: 0.7rem;
-  padding: clamp(1.4rem, 4vw, 3.5rem);
-  transition: background 0.5s ease;
-  background: linear-gradient(
-    to top,
-    rgba(12, 11, 10, 0.75) 0%,
-    rgba(12, 11, 10, 0.05) 52%
-  );
+  z-index: 2;
+  top: 8%;
+  left: 0;
+  max-width: min(16ch, 46%);
 }
 
-.news__meta {
+.stage__meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem 1.25rem;
-  font-family: var(--sans);
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--gy-gold);
+  gap: 0.55rem 1rem;
 }
 
-.news__lead-title {
-  max-width: 16ch;
+.stage__headline {
+  display: block;
   font-family: var(--serif);
-  font-size: clamp(2.6rem, 6vw, 5rem);
+  font-size: clamp(3.4rem, 6.4vw, 6.6rem);
   font-weight: 500;
-  letter-spacing: -0.03em;
-  line-height: 0.95;
+  font-style: italic;
+  letter-spacing: -0.045em;
+  line-height: 0.86;
+  color: #1c1f1e;
 }
 
-.news__excerpt {
-  width: min(720px, calc(100% - 2.5rem));
-  margin: clamp(1.5rem, 3vw, 2.25rem) auto 0;
+.stage__card {
+  position: absolute;
+  z-index: 3;
+  left: 2%;
+  bottom: 8%;
+  width: min(420px, 42%);
+  transform: rotate(-3deg);
+}
+
+.stage__card-in {
+  padding: 1.25rem 1.35rem;
+  color: #f6f1e7;
+}
+
+.stage__card-in p {
+  margin: 0;
   font-family: var(--serif);
-  font-size: clamp(1.35rem, 2vw, 1.75rem);
+  font-size: clamp(1.25rem, 2vw, 1.6rem);
   font-style: italic;
   font-weight: 500;
-  line-height: 1.4;
+  line-height: 1.35;
 }
 
 .news__rest {
   display: flex;
   gap: 0.85rem;
-  overflow-x: auto;
-  margin-top: 1.75rem;
+  margin-top: 2.5rem;
   padding: 0 clamp(1rem, 4vw, 3rem);
-  scroll-snap-type: x proximity;
-  cursor: grab;
-  scrollbar-width: none;
-}
-
-.news__rest::-webkit-scrollbar {
-  display: none;
+  overflow-x: auto;
 }
 
 .news__card {
-  flex: 0 0 min(70vw, 28rem);
-  scroll-snap-align: start;
+  flex: 0 0 min(70vw, 24rem);
   color: inherit;
 }
 
@@ -252,14 +242,14 @@ function dateLabel(value: string) {
   display: block;
   aspect-ratio: 16 / 10;
   overflow: hidden;
-  background: #2c312e;
+  border-radius: 18px;
+  background: #2a2e2c;
 }
 
 .news__card-media img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .news__card-title {
@@ -267,51 +257,64 @@ function dateLabel(value: string) {
   margin-top: 0.75rem;
   font-family: var(--serif);
   font-size: 1.7rem;
+  font-style: italic;
   font-weight: 500;
   line-height: 1.1;
 }
 
-.news__lead:focus-visible,
+.stage__photo:focus-visible,
+.stage__headline:focus-visible,
 .news__card:focus-visible,
 .text-link:focus-visible {
-  outline: 2px solid var(--gy-gold);
+  outline: 2px solid #c4a35a;
   outline-offset: 3px;
 }
 
-@media (hover: hover) {
-  .news__lead:hover img,
-  .news__card:hover img {
-    transform: scale(1.1);
-  }
-
-  .news__lead:hover .news__shade {
-    background: linear-gradient(
-      to top,
-      rgba(12, 11, 10, 0.88) 0%,
-      rgba(12, 11, 10, 0.2) 62%
-    );
-  }
-}
-
-@media (max-width: 700px) {
+@media (max-width: 860px) {
   .news__head {
     flex-direction: column;
     align-items: flex-start;
   }
 
-  .news__lead {
-    height: 78vh;
-    min-height: 460px;
+  .stage {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-height: 0;
+  }
+
+  .stage__photo {
+    width: 100%;
+    margin: 0;
+    aspect-ratio: 4 / 5;
+    max-height: none;
+    order: 2;
+  }
+
+  .stage__copy {
+    position: static;
+    max-width: none;
+    order: 1;
+  }
+
+  .stage__headline {
+    font-size: clamp(2.8rem, 12vw, 3.8rem);
+  }
+
+  .stage__card {
+    position: static;
+    width: 100%;
+    order: 3;
+    transform: none;
+    margin-top: -3.5rem;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .news__parallax,
-  .news__lead img,
-  .news__card-media img,
-  .text-link span {
-    transition: none !important;
-    transform: none !important;
+  .stage__photo,
+  .stage__card {
+    transition: none;
+    transform: none;
   }
 }
 </style>

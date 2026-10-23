@@ -11,22 +11,24 @@
     <div class="cta__veil" />
     <div class="cta__copy">
       <p v-reveal class="eyebrow">Greyon</p>
-      <RevealWords id="home-cta-title" :text="$t('home.stayWith')" />
+      <h2 id="home-cta-title" class="cta__title">{{ $t("home.stayWith") }}</h2>
       <p v-reveal="{ delay: '140ms' }" class="cta__lead">{{
         $t("home.subhead")
       }}</p>
-      <div v-reveal="{ delay: '240ms' }" class="cta__actions">
-        <router-link v-magnetic to="/hotels" class="gy-btn gy-btn--light">
-          {{ $t("home.viewHotels") }}
-        </router-link>
-        <router-link
-          v-if="auth.featureEnabled('contact_public')"
-          v-magnetic
-          to="/contact"
-          class="gy-btn gy-btn--ghost"
-        >
-          {{ $t("home.enquire") }}
-        </router-link>
+      <div v-reveal="{ delay: '220ms' }" class="glass-frame cta__glass">
+        <div class="glass-frame__in cta__actions">
+          <router-link v-magnetic to="/hotels" class="gy-btn gy-btn--light">
+            {{ $t("home.viewHotels") }}
+          </router-link>
+          <router-link
+            v-if="auth.featureEnabled('contact_public')"
+            v-magnetic
+            to="/contact"
+            class="gy-btn gy-btn--ghost"
+          >
+            {{ $t("home.enquire") }}
+          </router-link>
+        </div>
       </div>
     </div>
   </section>
@@ -34,7 +36,6 @@
 
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import RevealWords from "@/components/home/RevealWords.vue";
 import { useParallax } from "@/components/home/useParallax";
 import { useAuthStore } from "@/stores/auth-store";
 import { useCmsStore } from "@/stores/cms-store";
@@ -42,10 +43,10 @@ import { useCmsStore } from "@/stores/cms-store";
 const cms = useCmsStore();
 const auth = useAuthStore();
 const frame = ref<HTMLElement | null>(null);
-const offset = useParallax(frame, 260);
+const offset = useParallax(frame, 200);
 
 const imageStyle = computed(() => ({
-  transform: `translate3d(0, ${offset.value}px, 0) scale(1.2)`
+  transform: `translate3d(0, ${offset.value}px, 0) scale(1.18)`
 }));
 
 const image = computed(() => {
@@ -71,15 +72,17 @@ const image = computed(() => {
   position: relative;
   display: flex;
   align-items: flex-end;
-  min-height: min(78vh, 760px);
+  min-height: min(88vh, 820px);
+  margin-top: -1px;
   overflow: hidden;
+  border-radius: 50% 50% 0 0 / 90px 90px 0 0;
   color: #fff;
-  background: #2c312e;
+  background: #121413;
 }
 
 .cta__frame {
   position: absolute;
-  inset: -24% 0;
+  inset: -22% 0;
 }
 
 .cta__img {
@@ -92,20 +95,26 @@ const image = computed(() => {
 .cta__veil {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    100deg,
-    rgba(12, 11, 10, 0.72) 0%,
-    rgba(12, 11, 10, 0.28) 60%,
-    rgba(12, 11, 10, 0.45) 100%
-  );
+  background:
+    linear-gradient(
+      115deg,
+      rgba(8, 9, 8, 0.78) 0%,
+      rgba(8, 9, 8, 0.35) 55%,
+      rgba(8, 9, 8, 0.62) 100%
+    ),
+    radial-gradient(
+      500px 220px at 80% 20%,
+      rgba(154, 175, 156, 0.28),
+      transparent 70%
+    );
 }
 
 .cta__copy {
   position: relative;
   z-index: 1;
-  width: min(820px, calc(100% - 2.5rem));
+  width: min(980px, calc(100% - 2.5rem));
   margin: 0 auto;
-  padding: clamp(4rem, 10vw, 7rem) 0 clamp(3.5rem, 8vw, 5.5rem);
+  padding: clamp(6rem, 12vw, 8rem) 0 clamp(3.5rem, 8vw, 5.5rem);
 }
 
 .eyebrow {
@@ -115,38 +124,59 @@ const image = computed(() => {
   font-weight: 600;
   letter-spacing: 0.28em;
   text-transform: uppercase;
-  color: var(--gy-gold);
+  color: #e4d2a4;
 }
 
-.cta h2 {
+.cta__title {
   margin: 0;
+  max-width: 10ch;
   font-family: var(--serif);
-  font-size: clamp(3.2rem, 8vw, 6.4rem);
+  font-size: clamp(4.2rem, 11vw, 8.6rem);
   font-weight: 500;
   font-style: italic;
-  letter-spacing: -0.03em;
-  line-height: 0.9;
+  letter-spacing: -0.045em;
+  line-height: 0.84;
+  background: linear-gradient(105deg, #f7f3ec 8%, #c4a35a 48%, #9aaf9c 92%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .cta__lead {
   max-width: 34rem;
-  margin: 1.15rem 0 0;
+  margin: 1.2rem 0 0;
   font-family: var(--sans);
-  font-size: 1rem;
+  font-size: 1.02rem;
   font-weight: 500;
   line-height: 1.65;
-  color: rgba(255, 255, 255, 0.86);
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.cta__glass {
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 1.8rem;
 }
 
 .cta__actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
-  margin-top: 1.75rem;
+  padding: 0.7rem;
 }
 
 .cta__actions .gy-btn {
   min-height: 44px;
+}
+
+@media (max-width: 700px) {
+  .cta {
+    border-radius: 40px 40px 0 0;
+  }
+
+  .cta__title {
+    max-width: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

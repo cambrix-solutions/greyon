@@ -15,19 +15,13 @@
         @touchstart.passive="onTouchStart"
         @touchend.passive="onTouchEnd($event, hotel.id)"
       >
-        <div
-          class="property__frame"
-          :ref="el => setFrame(hotel.id, el)"
-          :style="frameStyle(hotel.id)"
-        >
-          <img
-            v-if="photoFor(hotel)"
-            :key="photoFor(hotel)"
-            class="property__img"
-            :src="photoFor(hotel)"
-            :alt="hotel.name"
-          />
-        </div>
+        <img
+          v-if="photoFor(hotel)"
+          :key="photoFor(hotel)"
+          class="property__img"
+          :src="photoFor(hotel)"
+          :alt="hotel.name"
+        />
         <div class="property__veil" />
         <template v-if="photosFor(hotel).length > 1">
           <button
@@ -50,56 +44,48 @@
             {{ indexFor(hotel.id) + 1 }} / {{ photosFor(hotel).length }}
           </p>
         </template>
-        <div class="property__copy">
-          <div>
-            <p v-if="metaLine(hotel)" v-reveal class="property__meta">
-              {{ metaLine(hotel) }}
-            </p>
-            <h2
-              :id="hotelIndex === 0 ? 'home-featured-title' : undefined"
-              class="property__name"
-            >
-              <router-link :to="hotelPath(hotel)">
-                <RevealWords tag="span" :text="hotel.name" />
-              </router-link>
-            </h2>
-          </div>
-          <router-link
-            v-reveal="{ delay: '160ms' }"
-            v-magnetic
-            class="gy-btn gy-btn--ghost property__cta"
-            :to="hotelPath(hotel)"
-          >
-            View Hotel
-          </router-link>
-        </div>
+        <h2
+          :id="hotelIndex === 0 ? 'home-featured-title' : undefined"
+          class="property__name"
+        >
+          <router-link :to="hotelPath(hotel)">{{ hotel.name }}</router-link>
+        </h2>
       </div>
 
-      <div class="property__note">
-        <p v-if="hotel.shortDescription" v-reveal class="property__lead">
-          {{ hotel.shortDescription }}
-        </p>
-        <div v-reveal="{ delay: '140ms' }" class="property__facts">
-          <FeatureChips
-            v-if="hotel.amenities.length"
-            :items="hotel.amenities"
-            :limit="6"
-            size="sm"
-            sheet-title="Amenities"
-          />
-          <p v-if="hasTimes(hotel)" class="property__times">
-            <span v-if="hotel.checkInTime">
-              {{ $t("home.checkIn") }} {{ formatTime(hotel.checkInTime) }}
-            </span>
-            <span
-              v-if="hotel.checkInTime && hotel.checkOutTime"
-              aria-hidden="true"
-              >·</span
-            >
-            <span v-if="hotel.checkOutTime">
-              {{ $t("home.checkOut") }} {{ formatTime(hotel.checkOutTime) }}
-            </span>
-          </p>
+      <div class="property__float">
+        <div class="glass-frame">
+          <div class="glass-frame__in property__card">
+            <p v-if="metaLine(hotel)" class="property__meta">
+              {{ metaLine(hotel) }}
+            </p>
+            <p v-if="hotel.shortDescription" class="property__lead">
+              {{ hotel.shortDescription }}
+            </p>
+            <FeatureChips
+              v-if="hotel.amenities.length"
+              :items="hotel.amenities"
+              :limit="6"
+              size="sm"
+              on-dark
+              sheet-title="Amenities"
+            />
+            <p v-if="hasTimes(hotel)" class="property__times">
+              <span v-if="hotel.checkInTime">
+                {{ $t("home.checkIn") }} {{ formatTime(hotel.checkInTime) }}
+              </span>
+              <span
+                v-if="hotel.checkInTime && hotel.checkOutTime"
+                aria-hidden="true"
+                >·</span
+              >
+              <span v-if="hotel.checkOutTime">
+                {{ $t("home.checkOut") }} {{ formatTime(hotel.checkOutTime) }}
+              </span>
+            </p>
+            <router-link class="gy-btn gy-btn--light" :to="hotelPath(hotel)">
+              View Hotel
+            </router-link>
+          </div>
         </div>
       </div>
     </article>
@@ -107,63 +93,42 @@
     <div
       v-if="rooms.length"
       id="home-rooms"
+      ref="pinSection"
       class="rooms"
+      :class="{ 'is-pinned': pinned }"
       aria-roledescription="carousel"
       :aria-label="$t('home.rooms')"
     >
-      <div class="rooms__head">
-        <p v-reveal class="eyebrow">{{ $t("home.featured") }}</p>
-        <RevealWords
-          id="home-rooms-title"
-          class="rooms__title"
-          :text="$t('home.rooms')"
-        />
-      </div>
-      <div class="rooms__frame">
-        <button
-          v-if="rooms.length > 1"
-          type="button"
-          class="shot-nav shot-nav--prev rooms__arrow"
-          aria-label="Previous rooms"
-          @click="scrollRooms(-1)"
-        >
-          <q-icon name="chevron_left" size="26px" />
-        </button>
-        <div ref="roomTrack" class="rooms__track" :class="{ 'is-in': roomsIn }">
+      <div class="rooms__sticky">
+        <div class="rooms__head">
+          <p class="eyebrow">{{ $t("home.featured") }}</p>
+          <h2 id="home-rooms-title" class="rooms__title">{{
+            $t("home.rooms")
+          }}</h2>
+        </div>
+        <div ref="roomTrack" class="rooms__track" :style="trackStyle">
           <router-link
-            v-for="(room, roomIndex) in rooms"
+            v-for="room in rooms"
             :key="room.id"
             :to="roomLink(room)"
             class="room"
-            :style="{ '--i': Math.min(roomIndex, 8) }"
           >
-            <span class="room__rise">
-              <span class="room__media">
-                <img
-                  v-if="roomImage(room)"
-                  :src="roomImage(room)"
-                  :alt="room.name"
-                  loading="lazy"
-                />
-              </span>
-              <span class="room__shade">
-                <span class="room__name">{{ room.name }}</span>
-                <span v-if="roomDetail(room)" class="room__detail">{{
-                  roomDetail(room)
-                }}</span>
-              </span>
+            <span class="room__media">
+              <img
+                v-if="roomImage(room)"
+                :src="roomImage(room)"
+                :alt="room.name"
+                loading="lazy"
+              />
+            </span>
+            <span class="room__shade">
+              <span class="room__name">{{ room.name }}</span>
+              <span v-if="roomDetail(room)" class="room__detail">{{
+                roomDetail(room)
+              }}</span>
             </span>
           </router-link>
         </div>
-        <button
-          v-if="rooms.length > 1"
-          type="button"
-          class="shot-nav shot-nav--next rooms__arrow"
-          aria-label="Next rooms"
-          @click="scrollRooms(1)"
-        >
-          <q-icon name="chevron_right" size="26px" />
-        </button>
       </div>
     </div>
   </section>
@@ -173,10 +138,8 @@
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import FeatureChips from "@/components/FeatureChips.vue";
-import RevealWords from "@/components/home/RevealWords.vue";
 import { useDragScroll } from "@/components/home/useDragScroll";
-import { useInView } from "@/components/home/useInView";
-import { useParallaxGroup } from "@/components/home/useParallax";
+import { usePinScroll } from "@/components/home/usePinScroll";
 import { useCmsStore } from "@/stores/cms-store";
 import type { Hotel, RoomType } from "@/types/greyon";
 import { formatTime } from "@/utils/datetime";
@@ -187,17 +150,18 @@ const SWIPE_PX = 48;
 const cms = useCmsStore();
 const { t } = useI18n();
 const photoIndex = ref<Record<string, number>>({});
+const pinSection = ref<HTMLElement | null>(null);
 const roomTrack = ref<HTMLElement | null>(null);
-const roomsIn = useInView(roomTrack);
-const { setFrame, offsets } = useParallaxGroup(180);
+const { shift, pinned } = usePinScroll(pinSection, roomTrack);
 let touchX: number | null = null;
 
 useDragScroll(roomTrack, { momentum: true });
 
-function frameStyle(id: string) {
-  const y = offsets.value[id] ?? 0;
-  return { transform: `translate3d(0, ${y}px, 0)` };
-}
+const trackStyle = computed(() =>
+  pinned.value
+    ? { transform: `translate3d(${shift.value}px, 0, 0)` }
+    : undefined
+);
 
 const featuredHotels = computed(() =>
   cms.publishedHotels.filter(hotel => hotel.featured)
@@ -298,217 +262,167 @@ function roomDetail(room: RoomType) {
   if (featuredHotels.value.length > 1 && hotel) bits.unshift(hotel.name);
   return bits.join("  ·  ");
 }
-
-function scrollRooms(dir: -1 | 1) {
-  const track = roomTrack.value;
-  if (!track) return;
-  const card = track.querySelector<HTMLElement>(".room");
-  const delta = (card?.offsetWidth ?? 480) + 14;
-  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  track.scrollBy({ left: dir * delta, behavior: reduce ? "auto" : "smooth" });
-}
 </script>
 
 <style scoped>
 .featured {
   --serif: "Cormorant Garamond", "Lora", Georgia, serif;
   --sans: "Montserrat", system-ui, sans-serif;
-  background: var(--gy-cream);
-  color: var(--gy-ink);
+  background: #121413;
+  color: #f6f1e7;
 }
 
 .property__media {
   position: relative;
-  height: min(88vh, 920px);
+  height: min(92vh, 920px);
   min-height: 560px;
   overflow: hidden;
-  background: #2c312e;
-  color: #fff;
-}
-
-.property__frame {
-  position: absolute;
-  inset: -20% 0;
+  background: #1a1c1b;
 }
 
 .property__img {
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  inset: -8%;
+  width: 116%;
+  height: 116%;
   object-fit: cover;
-  transform-origin: center center;
-  animation: ken 16s ease-in-out infinite alternate;
+  animation: ken 18s ease-in-out infinite alternate;
 }
 
 .property__veil {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    to top,
-    rgba(12, 11, 10, 0.78) 0%,
-    rgba(12, 11, 10, 0.18) 46%,
-    rgba(12, 11, 10, 0.28) 100%
-  );
-  pointer-events: none;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(12, 12, 11, 0.15),
+      rgba(12, 12, 11, 0.2) 40%,
+      #121413 100%
+    ),
+    linear-gradient(90deg, rgba(12, 12, 11, 0.45), transparent 55%);
 }
 
 .shot-nav {
   position: absolute;
-  z-index: 2;
-  display: inline-grid;
+  z-index: 3;
+  top: 50%;
+  display: grid;
   place-items: center;
   width: 44px;
   height: 44px;
-  border: 1px solid rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.45);
   border-radius: 999px;
-  background: rgba(12, 11, 10, 0.2);
+  background: rgba(12, 12, 11, 0.28);
   color: #fff;
   cursor: pointer;
-  backdrop-filter: blur(8px);
-  transition:
-    background 0.3s ease,
-    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.property__media > .shot-nav {
-  top: 50%;
   transform: translateY(-50%);
-  transition:
-    background 0.3s ease,
-    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.property__media > .shot-nav:hover {
-  transform: translateY(-50%) scale(1.08);
-  background: rgba(255, 255, 255, 0.22);
 }
 
 .shot-nav--prev {
-  left: 1.1rem;
+  left: 1rem;
 }
 
 .shot-nav--next {
-  right: 1.1rem;
-}
-
-.shot-nav:hover {
-  background: rgba(255, 255, 255, 0.18);
-}
-
-.shot-nav:focus-visible {
-  outline: 2px solid var(--gy-gold);
-  outline-offset: 3px;
+  right: 1rem;
 }
 
 .property__count {
   position: absolute;
-  top: 6.5rem;
+  z-index: 3;
+  top: 6.2rem;
   left: 50%;
-  z-index: 2;
   margin: 0;
   transform: translateX(-50%);
-  font-family: var(--sans);
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.18em;
-}
-
-.property__copy {
-  position: absolute;
-  left: clamp(1.25rem, 5vw, 4.5rem);
-  right: clamp(1.25rem, 5vw, 4.5rem);
-  bottom: clamp(1.5rem, 5vw, 3.75rem);
-  z-index: 2;
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 1.5rem;
-}
-
-.property__meta {
-  margin: 0 0 0.65rem;
   font-family: var(--sans);
   font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.82);
 }
 
 .property__name {
+  position: absolute;
+  z-index: 3;
+  left: clamp(1.2rem, 5vw, 4rem);
+  right: 28%;
+  bottom: 18%;
   margin: 0;
-  max-width: 14ch;
   font-family: var(--serif);
-  font-size: clamp(2.8rem, 6vw, 5.4rem);
+  font-size: clamp(3.4rem, 7vw, 7rem);
   font-weight: 500;
-  letter-spacing: -0.03em;
-  line-height: 0.92;
+  font-style: italic;
+  letter-spacing: -0.04em;
+  line-height: 0.86;
 }
 
 .property__name a {
-  background-image: linear-gradient(currentColor, currentColor);
-  background-repeat: no-repeat;
-  background-position: 0 92%;
-  background-size: 0 1px;
-  transition:
-    color 0.3s ease,
-    background-size 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  color: #fff;
 }
 
-.property__name a:hover,
-.property__name a:focus-visible {
-  color: var(--gy-gold);
-  background-size: 100% 1px;
+.property__float {
+  position: relative;
+  z-index: 4;
+  width: min(760px, calc(100% - 2rem));
+  margin: -7.5rem auto 0;
+  padding-bottom: 1rem;
 }
 
-.property__cta {
-  flex-shrink: 0;
-  min-height: 44px;
-}
-
-.property__note {
+.property__card {
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
-  gap: clamp(1.5rem, 4vw, 4rem);
-  align-items: start;
-  width: min(1180px, calc(100% - 2.5rem));
-  margin: 0 auto;
-  padding: clamp(2.75rem, 6vw, 4.5rem) 0;
+  gap: 1rem;
+  padding: clamp(1.3rem, 2.5vw, 1.8rem);
+  color: #f6f1e7;
+}
+
+.property__meta,
+.property__times {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #e4d2a4;
 }
 
 .property__lead {
   margin: 0;
   font-family: var(--serif);
-  font-size: clamp(1.55rem, 2.5vw, 2.15rem);
+  font-size: clamp(1.45rem, 2.4vw, 2rem);
   font-style: italic;
-  font-weight: 500;
-  line-height: 1.35;
-}
-
-.property__facts {
-  display: grid;
-  gap: 1rem;
+  line-height: 1.25;
 }
 
 .property__times {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.45rem 0.6rem;
-  margin: 0;
-  font-family: var(--sans);
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--gy-gold-deep);
+  gap: 0.45rem 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: none;
+  color: rgba(246, 241, 231, 0.82);
+}
+
+.property__card .gy-btn {
+  justify-self: start;
 }
 
 .rooms {
-  padding: 0 0 clamp(3.5rem, 7vw, 5.5rem);
+  position: relative;
+  background: #f4efe6;
+  color: #1c1f1e;
+}
+
+.rooms.is-pinned .rooms__sticky {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .rooms__head {
-  width: min(1180px, calc(100% - 2.5rem));
-  margin: 0 auto 1.25rem;
+  padding: 1.5rem clamp(1.2rem, 4vw, 3rem) 0.6rem;
 }
 
 .eyebrow {
@@ -518,93 +432,50 @@ function scrollRooms(dir: -1 | 1) {
   font-weight: 600;
   letter-spacing: 0.28em;
   text-transform: uppercase;
-  color: var(--gy-gold-deep);
+  color: #8f7340;
 }
 
 .rooms__title {
   margin: 0;
   font-family: var(--serif);
-  font-size: clamp(2.6rem, 5vw, 4.2rem);
+  font-size: clamp(3rem, 6vw, 5.4rem);
   font-weight: 500;
-  letter-spacing: -0.03em;
-  line-height: 0.95;
-}
-
-.rooms__frame {
-  position: relative;
-}
-
-.rooms__arrow {
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(255, 255, 255, 0.92);
-  color: var(--gy-ink);
-  border-color: transparent;
-}
-
-.rooms__arrow.shot-nav--prev {
-  left: 1rem;
-}
-
-.rooms__arrow.shot-nav--next {
-  right: 1rem;
-}
-
-.rooms__arrow:hover {
-  transform: translateY(-50%) scale(1.08);
+  font-style: italic;
+  letter-spacing: -0.04em;
+  line-height: 0.9;
 }
 
 .rooms__track {
   display: flex;
-  gap: 0.85rem;
-  overflow-x: auto;
-  scroll-snap-type: x proximity;
-  overscroll-behavior-x: contain;
-  padding: 0.6rem clamp(1rem, 4vw, 3rem) 0.8rem;
-  cursor: grab;
-  scrollbar-width: none;
+  gap: 1rem;
+  padding: 0.6rem clamp(1.2rem, 4vw, 3rem) 1.4rem;
 }
 
-.rooms__track.is-dragging,
-.rooms__track.is-coasting {
-  scroll-snap-type: none;
-  cursor: grabbing;
+.rooms.is-pinned .rooms__track {
+  width: max-content;
+  overflow: visible;
+}
+
+.rooms:not(.is-pinned) .rooms__track {
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
 }
 
 .rooms__track::-webkit-scrollbar {
   display: none;
 }
 
-.rooms__track:active {
-  cursor: grabbing;
-}
-
 .room {
   position: relative;
-  flex: 0 0 min(72vw, 34rem);
-  height: min(72vh, 560px);
-  min-height: 380px;
-  scroll-snap-align: start;
+  flex: 0 0 min(68vw, 28rem);
+  height: min(58vh, 460px);
+  min-height: 280px;
   overflow: hidden;
-  background: #2c312e;
+  border-radius: 22px;
   color: #fff;
-  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.room__rise {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  transform: translateY(56px);
-  transition:
-    opacity 0.95s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.95s cubic-bezier(0.22, 1, 0.36, 1);
-  transition-delay: calc(var(--i) * 90ms);
-}
-
-.rooms__track.is-in .room__rise {
-  opacity: 1;
-  transform: none;
+  background: #2a2e2c;
+  scroll-snap-align: start;
 }
 
 .room__media,
@@ -618,7 +489,7 @@ function scrollRooms(dir: -1 | 1) {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 1.15s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 0.8s ease;
 }
 
 .room__shade {
@@ -626,40 +497,28 @@ function scrollRooms(dir: -1 | 1) {
   flex-direction: column;
   justify-content: flex-end;
   gap: 0.35rem;
-  padding: 1.4rem 1.35rem 1.5rem;
-  background: linear-gradient(
-    to top,
-    rgba(12, 11, 10, 0.78) 0%,
-    rgba(12, 11, 10, 0.05) 58%
-  );
+  padding: 1.2rem;
+  background: linear-gradient(to top, rgba(8, 8, 7, 0.82), transparent 62%);
 }
 
 .room__name {
   font-family: var(--serif);
-  font-size: clamp(1.7rem, 2.4vw, 2.35rem);
-  font-weight: 500;
-  line-height: 1.05;
+  font-size: clamp(1.6rem, 2vw, 2.2rem);
+  line-height: 1;
 }
 
 .room__detail {
-  max-height: 0;
-  overflow: hidden;
-  opacity: 0;
   font-family: var(--sans);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  transform: translateY(10px);
-  transition:
-    max-height 0.5s ease,
-    opacity 0.5s ease,
-    transform 0.5s ease;
 }
 
-.room:focus-visible {
-  outline: 2px solid var(--gy-gold);
-  outline-offset: -4px;
+@media (hover: hover) {
+  .room:hover img {
+    transform: scale(1.08);
+  }
 }
 
 @keyframes ken {
@@ -667,85 +526,38 @@ function scrollRooms(dir: -1 | 1) {
     transform: scale(1);
   }
   to {
-    transform: scale(1.12);
+    transform: scale(1.1);
   }
 }
 
-@media (hover: hover) {
-  .room:hover {
-    transform: translateY(-10px);
-  }
-
-  .room:hover img {
-    transform: scale(1.14);
-  }
-
-  .room:hover .room__shade {
-    background: linear-gradient(
-      to top,
-      rgba(12, 11, 10, 0.9) 0%,
-      rgba(12, 11, 10, 0.22) 68%
-    );
-  }
-
-  .room:hover .room__detail {
-    max-height: 4rem;
-    opacity: 1;
-    transform: none;
-  }
-}
-
-@media (hover: none) {
-  .room__detail {
-    max-height: 3.5rem;
-    opacity: 1;
-    transform: none;
-  }
-}
-
-@media (max-width: 800px) {
+@media (max-width: 860px) {
   .property__media {
     height: 78vh;
     min-height: 520px;
   }
 
-  .property__copy {
-    flex-direction: column;
-    align-items: flex-start;
+  .property__name {
+    right: 1.1rem;
+    bottom: 28%;
+    font-size: clamp(2.8rem, 12vw, 3.8rem);
   }
 
-  .property__note {
-    grid-template-columns: 1fr;
-    width: min(100% - 2.2rem, 1180px);
+  .property__float {
+    margin-top: -4.5rem;
   }
 
   .room {
-    flex-basis: 86vw;
-    height: 68vh;
-    min-height: 420px;
+    flex-basis: 82vw;
+    height: 58vh;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .property__frame,
   .property__img,
-  .room__rise,
-  .room,
-  .room__media img,
-  .room__detail,
-  .shot-nav {
+  .room__media img {
     animation: none !important;
     transition: none !important;
     transform: none !important;
-  }
-
-  .room__rise {
-    opacity: 1;
-  }
-
-  .property__media > .shot-nav,
-  .rooms__arrow {
-    transform: translateY(-50%) !important;
   }
 }
 </style>
