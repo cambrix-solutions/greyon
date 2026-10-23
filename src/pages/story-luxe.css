@@ -37,13 +37,22 @@
 
 .story-luxe .read-bar .sheet-label {
   top: 10px;
-  left: 12px;
+  right: auto;
+  left: 50%;
   z-index: 41;
   display: inline-block;
   width: auto;
   height: auto;
   background: #161311;
-  transform: none;
+  transform: translateX(-50%);
+}
+
+.story-luxe .map-card:has(.sheet-label) {
+  padding-top: 2.8rem;
+}
+
+.story-luxe .enquiry:has(.sheet-label) {
+  padding-top: 2.9rem;
 }
 
 /* ---- Text-mask story ---- */
@@ -116,6 +125,12 @@
 
 .story-luxe .stage__content {
   padding-bottom: clamp(1.2rem, 3vh, 2.2rem);
+}
+
+.story-luxe.contact-luxe .stage h1,
+.story-luxe .arrive-plain h1 {
+  font-size: clamp(4.6rem, 12vw, 8.5rem);
+  line-height: 0.82;
 }
 
 .story-luxe .stage h2 {
@@ -755,7 +770,7 @@
   }
 
   .story-luxe .read-bar .sheet-label {
-    transform: none;
+    transform: translateX(-50%);
   }
 }
 
