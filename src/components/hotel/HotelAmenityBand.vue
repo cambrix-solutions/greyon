@@ -1,9 +1,12 @@
 <template>
   <section
     v-if="items.length"
+    :id="id"
     class="band"
+    :class="{ 'band--strip': !showCopy }"
     :data-sheet="sheet"
-    aria-labelledby="hotel-amenities-title"
+    :aria-labelledby="showCopy ? 'hotel-amenities-title' : undefined"
+    :aria-hidden="showCopy ? undefined : true"
   >
     <div
       class="marquee"
@@ -26,7 +29,7 @@
       </div>
     </div>
 
-    <div class="gy-container band__body">
+    <div v-if="showCopy" class="gy-container band__body">
       <p v-reveal class="eyebrow">{{ eyebrow }}</p>
       <h2 id="hotel-amenities-title" v-reveal="{ delay: '80ms' }">
         {{ title }}
@@ -50,12 +53,17 @@ const props = withDefaults(
     title?: string;
     lead?: string;
     sheet?: string;
+    /** False keeps only the scrolling title band. */
+    showCopy?: boolean;
+    id?: string;
   }>(),
   {
     eyebrow: "During your stay",
     title: "Hotel features",
     lead: "Amenities guests can expect during their stay.",
-    sheet: "Amenities"
+    sheet: "Amenities",
+    showCopy: true,
+    id: undefined
   }
 );
 
@@ -105,6 +113,21 @@ const trackStyle = computed(() => {
   clip-path: polygon(0 0, 100% 0, 100% calc(100% - 4rem), 0 100%);
   padding: clamp(3.5rem, 7vw, 5.5rem) 0 clamp(5.5rem, 9vw, 7.5rem);
   overflow: hidden;
+}
+
+.band.band--strip {
+  clip-path: none;
+  padding: 1.35rem 0 1.5rem;
+  overflow: visible;
+}
+
+.band.band--strip .marquee {
+  margin-bottom: 0;
+  padding-block: 0.2rem;
+}
+
+.band.band--strip .marquee__item em {
+  line-height: 1.25;
 }
 
 .marquee {
