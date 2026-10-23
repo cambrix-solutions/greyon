@@ -1,185 +1,291 @@
 <template>
-  <q-page class="gy-section contact-page">
+  <q-page
+    class="dest-luxe home-motion rooms-luxe news-luxe story-luxe contact-luxe"
+  >
     <SeoHead
       title="Contact | Greyon"
       description="Contact Greyon hotels and send an enquiry."
+      :image="heroImage || undefined"
     />
-    <div class="gy-container contact-grid">
-      <div v-reveal class="contact-intro">
-        <p class="gy-eyebrow">Get in touch</p>
-        <h1 class="gy-display page-title">Contact</h1>
-        <p class="gy-muted contact-address">
-          {{ addressLine }}<br />
-          hello@greyon.com.kh · +855 23 000 000<br />
-          Business hours: Mon–Sat 08:30–17:30
-        </p>
-        <p class="gy-muted contact-social">
-          Social:
-          <a href="https://www.facebook.com" target="_blank" rel="noopener"
-            >Facebook</a
-          >
-          ·
-          <a href="https://www.instagram.com" target="_blank" rel="noopener"
-            >Instagram</a
-          >
-        </p>
 
-        <div class="map-card">
-          <div class="map-chips" role="tablist" aria-label="Branch locations">
-            <button
-              v-for="choice in mapChoices"
-              :key="choice.id"
-              type="button"
-              role="tab"
-              class="map-chip"
-              :class="{ 'is-active': choice.id === activeChipId }"
-              :aria-selected="choice.id === activeChipId"
-              @click="selectChoice(choice)"
-            >
-              {{ choice.label }}
-            </button>
-          </div>
-
-          <div class="map-frame">
-            <ContactBranchMap
-              v-if="activeBranch"
-              :lat="activeBranch.lat"
-              :lng="activeBranch.lng"
-              :label="activeBranch.placeName"
-            />
-            <p v-else class="map-empty">
-              We don’t have a map pin for this destination yet.
-            </p>
-          </div>
-
-          <a
-            v-if="activeBranch"
-            class="map-link"
-            :href="activeBranch.mapsUrl"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Open in Google Maps
-            <q-icon name="open_in_new" size="16px" />
-          </a>
-        </div>
+    <div ref="pageEl">
+      <div
+        class="read-bar"
+        data-sheet="Progress"
+        role="progressbar"
+        aria-label="Reading progress"
+        :aria-valuenow="readPercent"
+        aria-valuemin="0"
+        aria-valuemax="100"
+      >
+        <span :style="barStyle" />
+        <span v-if="showSheets" class="sheet-label">Progress</span>
       </div>
 
-      <q-form
-        v-reveal="{ delay: '120ms' }"
-        class="contact-form"
-        greedy
-        @submit.prevent="onSubmit"
+      <section
+        v-if="heroImage"
+        v-spot
+        class="stage stage--short"
+        data-sheet="Arrive"
+        aria-labelledby="contact-title"
       >
-        <h2 class="gy-display">Enquiry</h2>
-        <p class="form-lead">
-          Tell us where you’d like to stay and we’ll write back by email.
-        </p>
+        <span v-if="showSheets" class="sheet-label">Arrive</span>
+        <div ref="heroFrame" class="stage__media">
+          <img
+            class="stage__img"
+            :src="heroImage"
+            alt=""
+            :style="heroStyle"
+            fetchpriority="high"
+          />
+          <div class="stage__veil" />
+          <img class="stage__lens" :src="heroImage" alt="" :style="heroStyle" />
+          <div class="stage__spot" />
+        </div>
+        <p class="stage__hint">Move across the photograph</p>
+        <div class="dest-wrap stage__content">
+          <p v-reveal class="eyebrow eyebrow--light">Get in touch</p>
+          <h1 id="contact-title" v-reveal="{ delay: '70ms' }">Contact</h1>
+          <p v-reveal="{ delay: '120ms' }" class="stage__lead">{{
+            addressLine
+          }}</p>
+        </div>
+        <SectionDivider fill="var(--gy-cream)" />
+      </section>
 
-        <div class="field">
-          <span>Full name</span>
-          <q-input
-            v-model="form.name"
-            class="contact-field"
-            outlined
-            hide-bottom-space
-            autocomplete="name"
-            :rules="[
-              val =>
-                !!String(val ?? '').trim() || 'Please enter your full name.'
-            ]"
-          />
+      <section
+        v-else
+        class="arrive-plain"
+        data-sheet="Arrive"
+        aria-labelledby="contact-title"
+      >
+        <span v-if="showSheets" class="sheet-label">Arrive</span>
+        <div class="dest-wrap">
+          <p v-reveal class="eyebrow">Get in touch</p>
+          <h1 id="contact-title">Contact</h1>
+          <p>{{ addressLine }}</p>
         </div>
-        <div class="field">
-          <span>Email</span>
-          <q-input
-            v-model="form.email"
-            class="contact-field"
-            type="email"
-            outlined
-            hide-bottom-space
-            autocomplete="email"
-            :rules="[
-              val => emailOk(String(val ?? '')) || 'Please enter a valid email.'
-            ]"
-          />
+      </section>
+
+      <section
+        v-if="reachCards.length"
+        id="contact-reach"
+        class="reach"
+        data-sheet="Reach"
+        aria-labelledby="reach-title"
+      >
+        <span v-if="showSheets" class="sheet-label">Reach</span>
+        <div class="dest-wrap reach__head">
+          <p id="reach-title" v-reveal class="eyebrow">Stay connected</p>
         </div>
-        <div class="field">
-          <span>Phone</span>
-          <q-input
-            v-model="form.phone"
-            class="contact-field"
-            type="tel"
-            outlined
-            hide-bottom-space
-            autocomplete="tel"
-            :rules="[
-              val =>
-                !!String(val ?? '').trim() || 'Please enter a phone number.'
-            ]"
-          />
-        </div>
-        <div class="field">
-          <span>Destination</span>
-          <q-select
-            v-model="form.locationId"
-            class="contact-field contact-select"
-            outlined
-            emit-value
-            map-options
-            behavior="menu"
-            hide-bottom-space
-            dropdown-icon="expand_more"
-            popup-content-class="contact-select-menu"
-            :options="destinationOptions"
-            option-value="id"
-            option-label="name"
-            :rules="[val => !!val || 'Please select a destination.']"
+        <div class="dest-wrap reach__grid">
+          <article
+            v-for="card in reachCards"
+            :key="card.id"
+            v-tilt="{ max: 7 }"
+            class="reach-card rooms-tilt glass-edge"
           >
-            <template v-if="!form.locationId" #selected>
-              <span class="select-placeholder">Select a destination</span>
-            </template>
-          </q-select>
+            <h3>{{ card.title }}</h3>
+            <p v-if="card.note" class="reach-card__note">{{ card.note }}</p>
+            <p
+              v-for="line in card.lines"
+              :key="`${card.id}-${line.label}-${line.value}`"
+              class="reach-card__line"
+            >
+              <span>{{ line.label }}</span>
+              <a v-if="line.href" :href="line.href">{{ line.value }}</a>
+              <template v-else>{{ line.value }}</template>
+            </p>
+            <a
+              v-if="card.mapsUrl"
+              class="text-link"
+              :href="card.mapsUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span>Open in Google Maps</span>
+            </a>
+          </article>
         </div>
-        <div class="field">
-          <span>Message</span>
-          <q-input
-            v-model="form.message"
-            class="contact-field contact-field--area"
-            type="textarea"
-            outlined
-            hide-bottom-space
-            autogrow
-            :rules="[
-              val => !!String(val ?? '').trim() || 'Please enter a message.'
-            ]"
-          />
+      </section>
+
+      <section class="contact-band" aria-label="Enquiry">
+        <div class="dest-wrap contact-grid">
+          <div v-spot class="map-card glass-edge" data-sheet="Map">
+            <span v-if="showSheets" class="sheet-label">Map</span>
+            <span class="map-glow" aria-hidden="true" />
+            <div class="map-chips" role="tablist" aria-label="Branch locations">
+              <button
+                v-for="choice in mapChoices"
+                :key="choice.id"
+                type="button"
+                role="tab"
+                class="map-chip"
+                :class="{ 'is-active': choice.id === activeChipId }"
+                :aria-selected="choice.id === activeChipId"
+                @click="selectChoice(choice)"
+              >
+                {{ choice.label }}
+              </button>
+            </div>
+
+            <div class="map-frame">
+              <ContactBranchMap
+                v-if="activeBranch"
+                :lat="activeBranch.lat"
+                :lng="activeBranch.lng"
+                :label="activeBranch.placeName"
+              />
+              <p v-else class="map-empty">
+                We don’t have a map pin for this destination yet.
+              </p>
+            </div>
+
+            <a
+              v-if="activeBranch"
+              class="map-link"
+              :href="activeBranch.mapsUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Open in Google Maps
+              <q-icon name="open_in_new" size="16px" />
+            </a>
+          </div>
+
+          <q-form
+            v-reveal="{ delay: '120ms' }"
+            class="enquiry spin-edge"
+            data-sheet="Enquiry"
+            greedy
+            @submit.prevent="onSubmit"
+          >
+            <span v-if="showSheets" class="sheet-label">Enquiry</span>
+            <h2>Enquiry</h2>
+            <p class="enquiry__lead">
+              Tell us where you’d like to stay and we’ll write back by email.
+            </p>
+
+            <div class="enquiry__field">
+              <span>Full name</span>
+              <q-input
+                v-model="form.name"
+                class="contact-field"
+                outlined
+                hide-bottom-space
+                autocomplete="name"
+                :rules="[
+                  val =>
+                    !!String(val ?? '').trim() || 'Please enter your full name.'
+                ]"
+              />
+            </div>
+            <div class="enquiry__field">
+              <span>Email</span>
+              <q-input
+                v-model="form.email"
+                class="contact-field"
+                type="email"
+                outlined
+                hide-bottom-space
+                autocomplete="email"
+                :rules="[
+                  val =>
+                    emailOk(String(val ?? '')) || 'Please enter a valid email.'
+                ]"
+              />
+            </div>
+            <div class="enquiry__field">
+              <span>Phone</span>
+              <q-input
+                v-model="form.phone"
+                class="contact-field"
+                type="tel"
+                outlined
+                hide-bottom-space
+                autocomplete="tel"
+                :rules="[
+                  val =>
+                    !!String(val ?? '').trim() || 'Please enter a phone number.'
+                ]"
+              />
+            </div>
+            <div class="enquiry__field">
+              <span>Destination</span>
+              <q-select
+                v-model="form.locationId"
+                class="contact-field contact-select"
+                outlined
+                emit-value
+                map-options
+                behavior="menu"
+                hide-bottom-space
+                dropdown-icon="expand_more"
+                popup-content-class="contact-select-menu"
+                :options="destinationOptions"
+                option-value="id"
+                option-label="name"
+                :rules="[val => !!val || 'Please select a destination.']"
+              >
+                <template v-if="!form.locationId" #selected>
+                  <span class="select-placeholder">Select a destination</span>
+                </template>
+              </q-select>
+            </div>
+            <div class="enquiry__field">
+              <span>Message</span>
+              <q-input
+                v-model="form.message"
+                class="contact-field contact-field--area"
+                type="textarea"
+                outlined
+                hide-bottom-space
+                autogrow
+                :rules="[
+                  val => !!String(val ?? '').trim() || 'Please enter a message.'
+                ]"
+              />
+            </div>
+
+            <q-checkbox
+              v-model="form.consent"
+              class="consent"
+              label="I consent to Greyon contacting me about this enquiry."
+            />
+
+            <p v-if="error" class="form-alert form-alert--error" role="alert">
+              {{ error }}
+            </p>
+            <p
+              v-if="success"
+              class="form-alert form-alert--success"
+              role="status"
+            >
+              {{ success }}
+            </p>
+
+            <button
+              v-magnetic
+              class="gy-btn contact-submit"
+              type="submit"
+              :disabled="sending"
+            >
+              {{ sending ? "Sending…" : "Send enquiry" }}
+            </button>
+          </q-form>
         </div>
-
-        <q-checkbox
-          v-model="form.consent"
-          class="consent"
-          label="I consent to Greyon contacting me about this enquiry."
-        />
-
-        <p v-if="error" class="form-alert form-alert--error" role="alert">
-          {{ error }}
-        </p>
-        <p v-if="success" class="form-alert form-alert--success" role="status">
-          {{ success }}
-        </p>
-
-        <button class="gy-btn contact-submit" type="submit" :disabled="sending">
-          {{ sending ? "Sending…" : "Send enquiry" }}
-        </button>
-      </q-form>
+      </section>
     </div>
   </q-page>
 </template>
 
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from "vue";
+import { useRoute } from "vue-router";
 import ContactBranchMap from "@/components/ContactBranchMap.vue";
+import { useParallax } from "@/components/home/useParallax";
+import { useReadProgress } from "@/components/home/useReadProgress";
+import SectionDivider from "@/components/hotel/SectionDivider.vue";
 import SeoHead from "@/components/SeoHead.vue";
 import {
   BRANCH_LOCATIONS,
@@ -190,6 +296,7 @@ import {
 import { createEnquiry } from "@/services/bookingService";
 import { useCmsStore } from "@/stores/cms-store";
 import type { Location } from "@/types/greyon";
+import { hostedImage } from "@/utils/hostedImage";
 
 type MapChoice = {
   id: string;
@@ -198,8 +305,37 @@ type MapChoice = {
   locationId: string | null;
 };
 
+type ReachLine = {
+  label: string;
+  value: string;
+  href?: string;
+};
+
+type ReachCard = {
+  id: string;
+  title: string;
+  note: string;
+  lines: ReachLine[];
+  mapsUrl: string;
+};
+
 const cms = useCmsStore();
+const route = useRoute();
 const destinations = computed(() => cms.publishedLocations);
+
+const pageEl = ref<HTMLElement | null>(null);
+const { progress } = useReadProgress(pageEl);
+const readPercent = computed(() => Math.round(progress.value * 100));
+const barStyle = computed(() => ({
+  transform: `scaleX(${progress.value})`
+}));
+const showSheets = computed(() => String(route.query.sheets ?? "") === "1");
+
+const heroFrame = ref<HTMLElement | null>(null);
+const heroOffset = useParallax(heroFrame, 140);
+const heroStyle = computed(() => ({
+  transform: `translate3d(0, ${heroOffset.value}px, 0)`
+}));
 
 const form = reactive({
   name: "",
@@ -283,6 +419,16 @@ const addressLine = computed(() => {
   return `${fallback.placeName} · ${fallback.city}, Cambodia`;
 });
 
+const heroImage = computed(() => imageForBranch(activeBranch.value));
+
+const reachCards = computed(() => {
+  const cards: ReachCard[] = [];
+  const site = siteCard();
+  if (site) cards.push(site);
+  for (const choice of mapChoices.value) cards.push(branchCard(choice));
+  return cards.filter(card => card.title.trim() || card.lines.length);
+});
+
 function selectChoice(choice: MapChoice) {
   pinnedKey.value = choice.branch.key;
   error.value = "";
@@ -291,6 +437,78 @@ function selectChoice(choice: MapChoice) {
 
 function emailOk(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+}
+
+function telHref(value: string) {
+  const digits = value.replace(/[^\d+]/g, "");
+  return digits ? `tel:${digits}` : "";
+}
+
+function line(label: string, value: string, href = ""): ReachLine {
+  const next: ReachLine = { label, value };
+  if (href) next.href = href;
+  return next;
+}
+
+function siteCard(): ReachCard | null {
+  const email = cms.settings.contactEmail.trim();
+  const phone = cms.settings.contactPhone.trim();
+  const lines: ReachLine[] = [];
+  if (email) lines.push(line("Email", email, `mailto:${email}`));
+  if (phone) lines.push(line("Phone", phone, telHref(phone)));
+  if (!lines.length) return null;
+  return {
+    id: "site",
+    title: cms.settings.siteName.trim() || "Greyon",
+    note: "",
+    lines,
+    mapsUrl: ""
+  };
+}
+
+function branchCard(choice: MapChoice): ReachCard {
+  const loc = choice.locationId
+    ? cms.getLocationById(choice.locationId)
+    : cms.publishedLocations.find(
+        item =>
+          matchBranchLocation(item.name, item.slug)?.key === choice.branch.key
+      );
+  const hotel = loc
+    ? cms.publishedHotels.find(item => item.locationId === loc.id)
+    : undefined;
+  const lines: ReachLine[] = [];
+  const address = hotel?.address?.trim() ?? "";
+  if (address) lines.push(line("Address", address));
+  const email = hotel?.email?.trim() || loc?.email?.trim() || "";
+  if (email) lines.push(line("Email", email, `mailto:${email}`));
+  const phone = hotel?.phone?.trim() || loc?.phone?.trim() || "";
+  if (phone) lines.push(line("Phone", phone, telHref(phone)));
+  const locPhone = loc?.phone?.trim() ?? "";
+  if (locPhone && locPhone !== phone) {
+    lines.push(line("Phone", locPhone, telHref(locPhone)));
+  }
+  return {
+    id: choice.id,
+    title: choice.branch.placeName,
+    note: `${choice.branch.city}, Cambodia`,
+    lines,
+    mapsUrl: choice.branch.mapsUrl
+  };
+}
+
+function imageForBranch(branch: BranchLocation | null) {
+  if (!branch) return "";
+  const loc = cms.publishedLocations.find(
+    item => matchBranchLocation(item.name, item.slug)?.key === branch.key
+  );
+  const hotel = loc
+    ? cms.publishedHotels.find(item => item.locationId === loc.id)
+    : undefined;
+  return (
+    hostedImage(hotel?.heroImage) ||
+    hostedImage(loc?.heroImage) ||
+    hostedImage(loc?.gallery[0])
+  );
 }
 
 watch(
@@ -357,356 +575,11 @@ async function onSubmit() {
 }
 </script>
 
-<style scoped>
-.contact-page {
-  padding-top: clamp(1.5rem, 3vw, 2.75rem);
-  padding-bottom: clamp(2.5rem, 6vw, 4.5rem);
-}
-
-.page-title {
-  margin: 0 0 0.85rem;
-  font-size: clamp(2.4rem, 5vw, 3.4rem);
-}
-
-.contact-address,
-.contact-social {
-  margin: 0;
-  line-height: 1.65;
-  font-size: 1.02rem;
-}
-
-.contact-social {
-  margin-top: 0.85rem;
-}
-
-.contact-social a {
-  color: var(--gy-forest);
-  text-decoration: underline;
-  text-underline-offset: 0.15em;
-}
-
-.contact-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
-  gap: clamp(1.5rem, 3vw, 2.75rem);
-  align-items: start;
-}
-
-.map-card {
-  margin-top: 1.35rem;
-  padding: 0.85rem;
-  border-radius: 22px;
-  background: #fff;
-  border: 1px solid rgba(69, 76, 75, 0.08);
-  box-shadow:
-    0 1px 2px rgba(69, 76, 75, 0.04),
-    0 18px 44px rgba(69, 76, 75, 0.1);
-}
-
-.map-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
-  margin-bottom: 0.75rem;
-}
-
-.map-chip {
-  min-height: 2.25rem;
-  padding: 0.35rem 0.85rem;
-  border: 1px solid rgba(69, 76, 75, 0.16);
-  border-radius: 999px;
-  background: var(--gy-cream);
-  color: var(--gy-ink);
-  font-family: var(--font-display);
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition:
-    background 0.2s ease,
-    border-color 0.2s ease,
-    color 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.map-chip:hover {
-  border-color: var(--gy-forest);
-}
-
-.map-chip.is-active {
-  background: var(--gy-forest);
-  border-color: var(--gy-forest);
-  color: #fff;
-  box-shadow: 0 6px 14px rgba(98, 112, 99, 0.28);
-}
-
-.map-chip:focus-visible {
-  outline: 2px solid var(--gy-gold);
-  outline-offset: 2px;
-}
-
-.map-frame {
-  overflow: hidden;
-  border-radius: 16px;
-  min-height: 18.5rem;
-  background: var(--gy-sand);
-}
-
-.map-frame :deep(.branch-map),
-.map-frame :deep(.branch-map__canvas) {
-  min-height: 18.5rem;
-  height: 20.5rem;
-}
-
-.map-empty {
-  display: grid;
-  place-items: center;
-  min-height: 18.5rem;
-  margin: 0;
-  padding: 1.25rem;
-  text-align: center;
-  color: var(--gy-muted);
-}
-
-.map-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  min-height: 2.75rem;
-  margin-top: 0.35rem;
-  padding: 0.35rem 0.15rem;
-  color: var(--gy-forest);
-  font-family: var(--font-display);
-  font-size: 0.92rem;
-  font-weight: 600;
-  text-decoration: underline;
-  text-underline-offset: 0.16em;
-}
-
-.map-link:focus-visible {
-  outline: 2px solid var(--gy-gold);
-  outline-offset: 3px;
-  border-radius: 6px;
-}
-
-.contact-form {
-  display: grid;
-  gap: 0.95rem;
-  padding: clamp(1.25rem, 2vw, 1.85rem);
-  border-radius: 24px;
-  background: #fff;
-  border: 1px solid rgba(69, 76, 75, 0.08);
-  box-shadow:
-    0 1px 2px rgba(69, 76, 75, 0.04),
-    0 18px 48px rgba(69, 76, 75, 0.1);
-}
-
-.contact-form h2 {
-  margin: 0;
-  font-size: 1.85rem;
-}
-
-.form-lead {
-  margin: -0.35rem 0 0.15rem;
-  color: var(--gy-muted);
-  font-size: 0.98rem;
-  line-height: 1.5;
-}
-
-.field {
-  display: grid;
-  gap: 0.4rem;
-}
-
-.field > span {
-  font-family: var(--font-display);
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--gy-muted);
-}
-
-.contact-field :deep(.q-field__control) {
-  min-height: 3.25rem;
-  border-radius: 12px;
-  background: #fff;
-}
-
-.contact-field :deep(.q-field__control:before) {
-  border-color: rgba(69, 76, 75, 0.22);
-  border-radius: 12px;
-}
-
-.contact-field :deep(.q-field__native),
-.contact-field :deep(.q-field__input) {
-  font-family: var(--font-body);
-  font-size: 1.02rem;
-  letter-spacing: 0;
-  text-transform: none;
-  color: var(--gy-ink);
-  min-height: 3.25rem;
-}
-
-.contact-field :deep(.q-field__marginal) {
-  height: 3.25rem;
-  color: var(--gy-forest);
-}
-
-.contact-field.q-field--focused :deep(.q-field__control) {
-  box-shadow: 0 0 0 3px rgba(98, 112, 99, 0.2);
-}
-
-.contact-field.q-field--focused :deep(.q-field__control:before),
-.contact-field.q-field--focused :deep(.q-field__control:after) {
-  border-color: var(--gy-forest) !important;
-  border-width: 2px;
-}
-
-.contact-field--area :deep(.q-field__control),
-.contact-field--area :deep(.q-field__native) {
-  min-height: 7.5rem;
-}
-
-.contact-field--area :deep(textarea) {
-  padding-top: 0.75rem;
-  line-height: 1.5;
-}
-
-.select-placeholder {
-  color: var(--gy-muted);
-}
-
-.consent {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.15rem;
-  margin-top: 0.15rem;
-  color: var(--gy-ink);
-  font-size: 0.95rem;
-  line-height: 1.45;
-  cursor: pointer;
-}
-
-.consent :deep(.q-checkbox__label) {
-  font-size: 0.95rem;
-  line-height: 1.45;
-  color: var(--gy-ink);
-  padding-left: 0.15rem;
-}
-
-.consent :deep(.q-checkbox__inner) {
-  font-size: 2.35rem;
-  color: var(--gy-forest);
-}
-
-.consent :deep(.q-checkbox__bg) {
-  border-radius: 6px;
-  border-width: 2px;
-  border-color: rgba(69, 76, 75, 0.35);
-}
-
-.consent :deep(.q-checkbox__inner--truthy),
-.consent :deep(.q-checkbox__inner--indet) {
-  color: var(--gy-forest);
-}
-
-.consent :deep(.q-checkbox__inner--truthy .q-checkbox__bg),
-.consent :deep(.q-checkbox__inner--indet .q-checkbox__bg) {
-  background: var(--gy-forest);
-  border-color: var(--gy-forest);
-}
-
-.consent :deep(.q-checkbox:focus-visible .q-checkbox__bg),
-.consent :deep(.q-checkbox__inner:focus-visible) {
-  outline: 2px solid var(--gy-gold);
-  outline-offset: 2px;
-}
-
-.form-alert {
-  margin: 0;
-  padding: 0.7rem 0.85rem;
-  border-radius: 12px;
-  font-size: 0.92rem;
-  line-height: 1.45;
-}
-
-.form-alert--error {
-  background: rgba(139, 46, 46, 0.08);
-  color: var(--q-negative);
-}
-
-.form-alert--success {
-  background: rgba(98, 112, 99, 0.12);
-  color: var(--gy-forest);
-}
-
-.contact-submit {
-  width: 100%;
-  min-height: 3.25rem;
-  border-radius: 12px;
-  background: var(--gy-forest);
-  letter-spacing: 0.14em;
-}
-
-.contact-submit:disabled {
-  opacity: 0.7;
-  cursor: progress;
-  transform: none;
-  box-shadow: none;
-}
-
-@media (max-width: 1023px) {
-  .contact-grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-
-  .map-frame,
-  .map-frame :deep(.branch-map),
-  .map-frame :deep(.branch-map__canvas),
-  .map-empty {
-    min-height: 16rem;
-    height: 16.5rem;
-  }
-}
-
-@media (max-width: 599px) {
-  .contact-page {
-    padding-top: 1.15rem;
-  }
-
-  .page-title {
-    font-size: 2.15rem;
-  }
-
-  .contact-form,
-  .map-card {
-    border-radius: 18px;
-    padding: 0.95rem;
-  }
-
-  .contact-form {
-    padding: 1.1rem 1rem 1.15rem;
-  }
-
-  .map-chip {
-    min-height: 2.5rem;
-  }
-}
-
-@media (min-width: 1024px) and (max-width: 1279px) {
-  .contact-grid {
-    gap: 1.35rem;
-  }
-
-  .map-frame,
-  .map-frame :deep(.branch-map),
-  .map-frame :deep(.branch-map__canvas) {
-    height: 18rem;
-    min-height: 18rem;
-  }
-}
-</style>
+<style src="@/components/home/home-motion.css"></style>
+<style src="./destination-luxe.css"></style>
+<style src="./rooms-luxe.css"></style>
+<style src="./news-luxe.css"></style>
+<style src="./story-luxe.css"></style>
 
 <style>
 .contact-select-menu {
