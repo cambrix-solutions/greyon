@@ -6,10 +6,9 @@
 }
 
 .rooms-luxe h3 {
-  font-family: var(--serif);
-  font-weight: 500;
-  font-style: italic;
-  letter-spacing: -0.03em;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .rooms-luxe .rooms-tilt {
@@ -61,7 +60,7 @@
       rgba(196, 163, 90, 0.4),
       transparent 42%
     ),
-    linear-gradient(160deg, #627063, #1c2420 70%);
+    linear-gradient(160deg, var(--gy-forest), #1c2420 70%);
 }
 
 .rooms-luxe .photo-reveal img {
@@ -179,10 +178,10 @@
   right: max(1.25rem, calc((100% - 1240px) / 2));
   z-index: 4;
   margin: 0;
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.16em;
+  font-weight: 700;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.82);
 }
@@ -199,7 +198,7 @@
 
 .rooms-luxe .mast__chip {
   margin: 0 0 0.85rem;
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.2em;
@@ -212,15 +211,15 @@
   max-width: 12em;
   margin: 0;
   color: #fff;
-  font-size: clamp(3.4rem, 9vw, 7.4rem);
-  line-height: 0.86;
+  font-size: clamp(2.58rem, 6.84vw, 5.62rem);
+  line-height: 1;
 }
 
 .rooms-luxe .mast__lead,
 .rooms-luxe .stage__lead {
   max-width: 32rem;
   margin: 1rem 0 0;
-  font-family: var(--sans);
+  font-family: var(--font-body);
   font-size: 1.02rem;
   font-weight: 500;
   line-height: 1.6;
@@ -254,19 +253,19 @@
 }
 
 .rooms-luxe .mast__fact span {
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.16em;
+  font-weight: 700;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--gy-gold);
 }
 
 .rooms-luxe .mast__fact strong {
-  font-family: var(--serif);
+  font-family: var(--font-display);
   font-size: clamp(1.35rem, 2vw, 1.8rem);
-  font-weight: 500;
-  font-style: italic;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   line-height: 1.05;
 }
 
@@ -294,7 +293,7 @@
   margin: 0;
   color: #fff;
   font-size: clamp(2.6rem, 5vw, 4.4rem);
-  line-height: 0.9;
+  line-height: 1;
 }
 
 .rooms-luxe .rail__sticky {
@@ -326,9 +325,10 @@
 
 .rooms-luxe .rail__count {
   margin: 0.35rem 0 0;
-  font-family: var(--serif);
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
   font-size: 1.35rem;
-  font-style: italic;
   color: var(--gy-gold);
 }
 
@@ -358,9 +358,9 @@
   border-radius: 999px;
   background: transparent;
   color: rgba(255, 255, 255, 0.82);
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.68rem;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   white-space: nowrap;
@@ -486,7 +486,7 @@
       rgba(196, 163, 90, 0.4),
       transparent 42%
     ),
-    linear-gradient(160deg, #627063, #1c2420 70%);
+    linear-gradient(160deg, var(--gy-forest), #1c2420 70%);
 }
 
 .rooms-luxe .room-panel__media img {
@@ -509,19 +509,20 @@
 }
 
 .rooms-luxe .room-panel__index {
-  font-family: var(--serif);
-  font-size: clamp(2.8rem, 5vw, 4.6rem);
-  font-style: italic;
-  line-height: 0.8;
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  font-size: clamp(2.35rem, 6vw, 3.86rem);
+  line-height: 1;
   color: var(--gy-gold);
 }
 
 .rooms-luxe .room-panel__where {
   margin: 0;
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.68rem;
   font-weight: 700;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.72);
 }
@@ -530,7 +531,7 @@
   margin: 0;
   color: #fff;
   font-size: clamp(2rem, 3vw, 3.2rem);
-  line-height: 0.95;
+  line-height: 1;
 }
 
 .rooms-luxe .room-panel__price {
@@ -540,18 +541,18 @@
 }
 
 .rooms-luxe .room-panel__price strong {
-  font-family: var(--serif);
+  font-family: var(--font-display);
   font-size: 2rem;
-  font-weight: 500;
-  font-style: italic;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .rooms-luxe .room-panel__price span,
 .rooms-luxe .room-panel .text-link {
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  font-weight: 700;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.78);
 }
@@ -571,8 +572,8 @@
 .rooms-luxe .residences h2,
 .rooms-luxe .dossier h2 {
   margin: 0;
-  font-size: clamp(2.6rem, 6vw, 4.6rem);
-  line-height: 0.9;
+  font-size: clamp(2.18rem, 6vw, 3.86rem);
+  line-height: 1;
 }
 
 .rooms-luxe .filters__bar {
@@ -588,10 +589,10 @@
   display: grid;
   gap: 0.4rem;
   min-width: 0;
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.68rem;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--gy-gold-deep);
 }
@@ -605,7 +606,7 @@
   border-radius: 12px;
   background: #fff;
   color: var(--gy-ink);
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.95rem;
   font-weight: 500;
   letter-spacing: 0;
@@ -617,10 +618,10 @@
   min-height: 48px;
   display: flex;
   align-items: center;
-  font-family: var(--serif);
+  font-family: var(--font-display);
+  font-weight: 700;
   font-size: 1.45rem;
-  font-style: italic;
-  letter-spacing: 0;
+  letter-spacing: -0.02em;
   text-transform: none;
   color: var(--gy-ink);
 }
@@ -665,9 +666,9 @@
 
 .rooms-luxe .stack-card__bar span,
 .rooms-luxe .stack-card__bar strong {
-  font-family: var(--serif);
-  font-weight: 500;
-  font-style: italic;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .rooms-luxe .stack-card__bar span {
@@ -691,7 +692,7 @@
 
 .rooms-luxe .empty {
   margin: 1.5rem 0 0;
-  font-family: var(--sans);
+  font-family: var(--font-display);
   color: var(--gy-muted);
 }
 
@@ -751,7 +752,7 @@
   align-items: center;
   gap: 0.35rem 0.45rem;
   margin: 0;
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.78rem;
   color: rgba(255, 255, 255, 0.78);
 }
@@ -798,9 +799,10 @@
 
 .rooms-luxe .stage__pos {
   margin: 0;
-  font-family: var(--serif);
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
   font-size: 1.4rem;
-  font-style: italic;
 }
 
 .rooms-luxe .stage__film {
@@ -883,9 +885,10 @@
   bottom: 1rem;
   margin: 0;
   text-align: center;
-  font-family: var(--serif);
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
   font-size: 1.3rem;
-  font-style: italic;
   color: #fff;
 }
 
@@ -918,7 +921,7 @@
 .rooms-luxe .story__body {
   margin: 0;
   max-width: 42rem;
-  font-family: var(--sans);
+  font-family: var(--font-body);
   font-size: 1.02rem;
   font-weight: 500;
   line-height: 1.7;
@@ -970,7 +973,7 @@
 
 .rooms-luxe .policy-card p {
   margin: 0;
-  font-family: var(--sans);
+  font-family: var(--font-body);
   font-size: 0.92rem;
   font-weight: 500;
   line-height: 1.55;
@@ -1009,9 +1012,10 @@
 
 .rooms-luxe .other-card__price {
   margin: 0;
-  font-family: var(--serif);
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
   font-size: 1.45rem;
-  font-style: italic;
 }
 
 .rooms-luxe .other-card__actions {
@@ -1030,10 +1034,10 @@
   min-height: 44px;
   margin-top: 1.6rem;
   color: var(--gy-forest);
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.82rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   text-decoration: none;
 }
@@ -1053,7 +1057,7 @@
 .rooms-luxe .price-card h2 {
   margin: 0;
   font-size: clamp(2.2rem, 3vw, 3rem);
-  line-height: 0.95;
+  line-height: 1;
 }
 
 .rooms-luxe .price-card__hint,
@@ -1061,7 +1065,7 @@
 .rooms-luxe .price-card__policy,
 .rooms-luxe .price-card__units {
   margin: 0;
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.82rem;
   font-weight: 500;
   line-height: 1.45;
@@ -1089,17 +1093,17 @@
 
 .rooms-luxe .price-card dt {
   margin: 0;
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.68rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--gy-gold-deep);
 }
 
 .rooms-luxe .price-card dd {
   margin: 0;
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.88rem;
   font-weight: 600;
   text-align: right;
@@ -1113,7 +1117,7 @@
 .rooms-luxe .price-card__error {
   margin: 0;
   color: #9a3b2f;
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.85rem;
 }
 
@@ -1139,15 +1143,15 @@
 }
 
 .rooms-luxe .book-bar strong {
-  font-family: var(--serif);
+  font-family: var(--font-display);
   font-size: 1.45rem;
-  font-weight: 500;
-  font-style: italic;
-  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
 }
 
 .rooms-luxe .book-bar span {
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.72rem;
   color: var(--gy-muted);
 }
@@ -1168,12 +1172,12 @@
 .rooms-luxe .room-state h1 {
   margin: 0 0 0.75rem;
   font-size: clamp(2.4rem, 6vw, 4rem);
-  line-height: 0.95;
+  line-height: 1;
 }
 
 .rooms-luxe .room-state p {
   max-width: 36rem;
-  font-family: var(--sans);
+  font-family: var(--font-display);
 }
 
 .rooms-luxe .room-state__actions {
