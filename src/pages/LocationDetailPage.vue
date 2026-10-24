@@ -555,10 +555,10 @@ function bookHere() {
   right: max(1.25rem, calc((100% - 1240px) / 2));
   z-index: 4;
   margin: 0;
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.16em;
+  font-weight: 700;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.82);
 }
@@ -572,8 +572,8 @@ function bookHere() {
 .detail :deep(h1) {
   max-width: 9em;
   margin: 0;
-  font-size: clamp(3.5rem, 10vw, 8.2rem);
-  line-height: 0.84;
+  font-size: clamp(2.5rem, 6.8vw, 5.58rem);
+  line-height: 1;
   overflow-wrap: break-word;
 }
 
@@ -694,12 +694,11 @@ function bookHere() {
 }
 
 .marquee__item em {
-  font-family: var(--serif);
-  font-size: clamp(2.6rem, 6vw, 5rem);
-  font-style: italic;
-  font-weight: 500;
-  letter-spacing: -0.03em;
-  line-height: 0.95;
+  font-family: var(--font-display);
+  font-size: clamp(2.18rem, 6vw, 4.2rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1;
   white-space: nowrap;
 }
 
@@ -729,8 +728,8 @@ function bookHere() {
 
 .highlights h2 {
   margin: 0;
-  font-size: clamp(3rem, 7vw, 5.6rem);
-  line-height: 0.88;
+  font-size: clamp(2.52rem, 6vw, 4.7rem);
+  line-height: 1;
 }
 
 .highlights__copy {
@@ -748,8 +747,8 @@ function bookHere() {
 .visit h2,
 .elsewhere h2 {
   margin: 0;
-  font-size: clamp(2.8rem, 6vw, 5rem);
-  line-height: 0.9;
+  font-size: clamp(2.35rem, 6vw, 4.2rem);
+  line-height: 1;
 }
 
 .gallery__head,
@@ -810,10 +809,10 @@ function bookHere() {
   background: rgba(22, 21, 19, 0.55);
   color: #fff;
   backdrop-filter: blur(12px);
-  font-family: var(--serif);
+  font-family: var(--font-display);
   font-size: 1.25rem;
-  font-style: italic;
-  font-weight: 500;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .stays {
@@ -883,19 +882,19 @@ function bookHere() {
 }
 
 .visit-card span {
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.68rem;
   font-weight: 700;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--gy-gold-deep);
 }
 
 .visit-card a {
-  font-family: var(--serif);
+  font-family: var(--font-display);
   font-size: clamp(1.8rem, 3vw, 2.6rem);
-  font-style: italic;
-  font-weight: 500;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   line-height: 1.05;
   color: var(--gy-ink);
   text-decoration: underline;
@@ -913,10 +912,10 @@ function bookHere() {
 
 .visit__map h3 {
   margin: 0 0 0.75rem;
-  font-family: var(--serif);
+  font-family: var(--font-display);
   font-size: clamp(2rem, 3vw, 2.8rem);
-  font-weight: 500;
-  font-style: italic;
+  font-weight: 800;
+  letter-spacing: -0.035em;
 }
 
 .visit__map :deep(.map-embed) {
@@ -1009,17 +1008,17 @@ function bookHere() {
 
 .else-card__name {
   padding-top: 0.9rem;
-  font-family: var(--serif);
+  font-family: var(--font-display);
   font-size: clamp(1.8rem, 3vw, 2.4rem);
-  font-style: italic;
-  font-weight: 500;
-  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
 }
 
 .else-card__desc {
   padding-top: 0.45rem;
   padding-bottom: 1rem;
-  font-family: var(--sans);
+  font-family: var(--font-body);
   font-size: 0.88rem;
   font-weight: 500;
   line-height: 1.45;
@@ -1036,14 +1035,14 @@ function bookHere() {
 
 .dest-missing h1 {
   margin: 0 0 0.85rem;
-  font-size: clamp(3.2rem, 8vw, 6rem);
-  line-height: 0.9;
+  font-size: clamp(2.43rem, 6.08vw, 4.56rem);
+  line-height: 1;
 }
 
 .dest-missing p {
   margin: 0 0 1.4rem;
   max-width: 36rem;
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-weight: 500;
   color: var(--gy-muted);
 }
