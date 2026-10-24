@@ -42,7 +42,15 @@ export default {
     enquire: "Enquire",
     latestNews: "Latest news",
     fromGreyon: "From Greyon",
-    allNews: "All news"
+    allNews: "All news",
+    allFeatured: "All",
+    allDestinations: "All destinations",
+    hotelsCount: "0 hotels | 1 hotel | {n} hotels",
+    rooms: "Rooms",
+    starClass: "{n}-star",
+    checkIn: "Check-in",
+    checkOut: "Check-out",
+    amenities: "Amenities"
   },
   booking: {
     paymentNotice:

@@ -39,7 +39,15 @@ export default {
     enquire: "សួរព័ត៌មាន",
     latestNews: "ព័ត៌មានថ្មីៗ",
     fromGreyon: "ពី Greyon",
-    allNews: "ព័ត៌មានទាំងអស់"
+    allNews: "ព័ត៌មានទាំងអស់",
+    allFeatured: "ទាំងអស់",
+    allDestinations: "គ្រប់ទិសដៅ",
+    hotelsCount: "គ្មានសណ្ឋាគារ | សណ្ឋាគារ ១ | សណ្ឋាគារ {n}",
+    rooms: "បន្ទប់",
+    starClass: "{n} ផ្កាយ",
+    checkIn: "ម៉ោងចូល",
+    checkOut: "ម៉ោងចេញ",
+    amenities: "គ្រឿងបរិក្ខារ"
   },
   booking: {
     paymentNotice:

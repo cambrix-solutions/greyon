@@ -985,7 +985,7 @@ function resetData() {
 
 .dash-status--cancelledled {
   background: rgba(139, 46, 46, 0.12);
-  color: #8b2e2e;
+  color: var(--q-negative);
 }
 
 .dash-status--in_progress {

@@ -1007,7 +1007,7 @@ textarea:focus {
 }
 
 .error {
-  color: #8b2e2e;
+  color: var(--q-negative);
   margin-bottom: 1rem;
 }
 

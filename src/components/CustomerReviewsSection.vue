@@ -1,94 +1,96 @@
 <template>
   <section
     v-if="reviews.length"
-    class="gy-section reviews-section"
+    id="home-reviews"
+    class="reviews-section home-motion"
     aria-roledescription="carousel"
-    aria-label="Guest reviews"
+    aria-labelledby="home-reviews-title"
     @mouseenter="pause"
     @mouseleave="resume"
     @focusin="pause"
     @focusout="onFocusOut"
   >
     <div class="gy-container">
-      <header v-reveal class="reviews-section__intro">
-        <p class="gy-eyebrow">Guest voices</p>
-        <h2 class="gy-display reviews-section__title">What guests say</h2>
+      <header class="section-head">
+        <div>
+          <p v-reveal class="gy-eyebrow section-kicker">Guest voices</p>
+          <RevealWords
+            id="home-reviews-title"
+            class="section-title"
+            text="What guests say"
+          />
+        </div>
       </header>
 
       <div
-        ref="viewportEl"
-        class="reviews-carousel"
-        @touchstart.passive="onTouchStart"
-        @touchend.passive="onTouchEnd"
+        ref="trackEl"
+        v-reveal
+        class="reviews-track"
+        :class="{
+          'is-single': reviews.length === 1,
+          'is-pair': reviews.length === 2
+        }"
+        :aria-live="paused ? 'polite' : 'off'"
+        @scroll.passive="onTrackScroll"
+        @touchstart.passive="pause"
+        @touchend.passive="resume"
       >
+        <article
+          v-for="review in reviews"
+          :key="review.id"
+          class="reviews-card"
+        >
+          <div
+            class="reviews-card__stars"
+            :aria-label="`${review.rating} out of 5 stars`"
+          >
+            <q-icon
+              v-for="star in 5"
+              :key="star"
+              :name="star <= review.rating ? 'star' : 'star_border'"
+              size="18px"
+            />
+          </div>
+          <blockquote class="reviews-card__quote">
+            <p>{{ review.text }}</p>
+          </blockquote>
+          <footer class="reviews-card__meta">
+            <p class="reviews-card__name">{{ review.reviewerName }}</p>
+            <p class="reviews-card__hotel">{{ review.hotelName }}</p>
+          </footer>
+        </article>
+      </div>
+
+      <div v-if="reviews.length > 1" class="reviews-nav">
         <button
           type="button"
-          class="reviews-carousel__arrow reviews-carousel__arrow--prev"
+          class="round-btn"
           aria-label="Previous review"
           @click="goPrev"
         >
-          <q-icon name="chevron_left" size="28px" />
+          <q-icon name="chevron_left" size="24px" />
         </button>
-
-        <div
-          class="reviews-carousel__track"
-          :aria-live="paused ? 'polite' : 'off'"
-        >
-          <article
+        <div class="reviews-dots" role="tablist" aria-label="Review slides">
+          <button
             v-for="(review, i) in reviews"
-            :key="review.id"
-            class="reviews-card"
+            :key="`dot-${review.id}`"
+            type="button"
+            class="reviews-dots__dot"
             :class="{ 'is-active': i === index }"
-            :aria-hidden="i !== index"
-          >
-            <div
-              class="reviews-card__stars"
-              :aria-label="`${review.rating} out of 5 stars`"
-            >
-              <q-icon
-                v-for="star in 5"
-                :key="star"
-                :name="star <= review.rating ? 'star' : 'star_border'"
-                size="20px"
-              />
-            </div>
-            <blockquote class="reviews-card__quote">
-              <p>{{ review.text }}</p>
-            </blockquote>
-            <footer class="reviews-card__meta">
-              <p class="reviews-card__name">{{ review.reviewerName }}</p>
-              <p class="reviews-card__hotel">{{ review.hotelName }}</p>
-            </footer>
-          </article>
+            role="tab"
+            :aria-selected="i === index"
+            :aria-label="`Show review ${i + 1}`"
+            @click="goTo(i)"
+          />
         </div>
-
         <button
           type="button"
-          class="reviews-carousel__arrow reviews-carousel__arrow--next"
+          class="round-btn"
           aria-label="Next review"
           @click="goNext"
         >
-          <q-icon name="chevron_right" size="28px" />
+          <q-icon name="chevron_right" size="24px" />
         </button>
-      </div>
-
-      <div
-        v-if="reviews.length > 1"
-        class="reviews-carousel__dots"
-        role="tablist"
-        aria-label="Review slides"
-      >
-        <button
-          v-for="(review, i) in reviews"
-          :key="`dot-${review.id}`"
-          type="button"
-          class="reviews-carousel__dot"
-          :class="{ 'is-active': i === index }"
-          role="tab"
-          :aria-selected="i === index"
-          :aria-label="`Show review ${i + 1}`"
-          @click="goTo(i)"
-        />
       </div>
     </div>
   </section>
@@ -96,21 +98,22 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from "vue";
+import RevealWords from "@/components/home/RevealWords.vue";
 import {
   fetchPublicReviews,
   type GuestReview
 } from "@/services/engine/reviews";
 
 const AUTO_MS = 6000;
-const SWIPE_PX = 48;
 
 const reviews = ref<GuestReview[]>([]);
 const index = ref(0);
 const paused = ref(false);
-const viewportEl = ref<HTMLElement | null>(null);
+const trackEl = ref<HTMLElement | null>(null);
 
 let timer: ReturnType<typeof setInterval> | null = null;
-let touchX: number | null = null;
+let scrollTimer: ReturnType<typeof setTimeout> | null = null;
+let programmatic = false;
 let reduceMotion = false;
 
 function clearTimer() {
@@ -124,7 +127,7 @@ function startTimer() {
   clearTimer();
   if (reduceMotion || paused.value || reviews.value.length < 2) return;
   timer = setInterval(() => {
-    index.value = (index.value + 1) % reviews.value.length;
+    goTo(index.value + 1, false);
   }, AUTO_MS);
 }
 
@@ -139,17 +142,26 @@ function resume() {
 }
 
 function onFocusOut(event: FocusEvent) {
-  const root = viewportEl.value?.closest(".reviews-section");
+  const root = trackEl.value?.closest(".reviews-section");
   const next = event.relatedTarget as Node | null;
   if (root && next && root.contains(next)) return;
   resume();
 }
 
-function goTo(i: number) {
+function scrollToIndex(i: number) {
+  const track = trackEl.value;
+  const card = track?.querySelectorAll<HTMLElement>(".reviews-card")[i];
+  if (!track || !card) return;
+  programmatic = true;
+  track.scrollTo({ left: card.offsetLeft });
+}
+
+function goTo(i: number, restart = true) {
   if (!reviews.value.length) return;
   index.value =
     ((i % reviews.value.length) + reviews.value.length) % reviews.value.length;
-  startTimer();
+  scrollToIndex(index.value);
+  if (restart) startTimer();
 }
 
 function goNext() {
@@ -160,18 +172,31 @@ function goPrev() {
   goTo(index.value - 1);
 }
 
-function onTouchStart(event: TouchEvent) {
-  touchX = event.changedTouches[0]?.clientX ?? null;
+function syncIndex() {
+  const track = trackEl.value;
+  if (!track) return;
+  const cards = [...track.querySelectorAll<HTMLElement>(".reviews-card")];
+  let best = 0;
+  let bestDist = Number.POSITIVE_INFINITY;
+  cards.forEach((card, i) => {
+    const dist = Math.abs(card.offsetLeft - track.scrollLeft);
+    if (dist < bestDist) {
+      bestDist = dist;
+      best = i;
+    }
+  });
+  index.value = best;
 }
 
-function onTouchEnd(event: TouchEvent) {
-  if (touchX === null) return;
-  const endX = event.changedTouches[0]?.clientX ?? touchX;
-  const delta = endX - touchX;
-  touchX = null;
-  if (Math.abs(delta) < SWIPE_PX) return;
-  if (delta < 0) goNext();
-  else goPrev();
+function onTrackScroll() {
+  if (scrollTimer) clearTimeout(scrollTimer);
+  scrollTimer = setTimeout(() => {
+    if (programmatic) {
+      programmatic = false;
+      return;
+    }
+    syncIndex();
+  }, 120);
 }
 
 onMounted(async () => {
@@ -184,67 +209,74 @@ onMounted(async () => {
   if (reviews.value.length) startTimer();
 });
 
-onUnmounted(() => clearTimer());
+onUnmounted(() => {
+  clearTimer();
+  if (scrollTimer) clearTimeout(scrollTimer);
+});
 </script>
 
 <style scoped>
 .reviews-section {
-  background: linear-gradient(180deg, #f7f6f3 0%, var(--gy-white) 100%);
+  padding: clamp(5rem, 10vw, 8rem) 0;
+  background: var(--gy-cream);
+  color: var(--gy-ink);
 }
 
-.reviews-section__intro {
-  text-align: center;
-  margin-bottom: 2rem;
+.section-head {
+  margin-bottom: clamp(2rem, 5vw, 3.5rem);
 }
 
-.reviews-section__title {
+.section-kicker {
+  margin: 0 0 0.85rem;
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--gy-gold-deep);
+}
+
+.section-kicker::after {
+  content: "";
+  display: block;
+  width: 2.5rem;
+  height: 1px;
+  margin-top: 0.85rem;
+  background: var(--gy-gold);
+}
+
+.section-title {
   margin: 0;
-  font-size: clamp(2.2rem, 4.5vw, 3.2rem);
+  font-family: var(--font-display);
+  font-size: clamp(2.18rem, 6vw, 3.78rem);
+  font-weight: 800;
   line-height: 1;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.035em;
 }
 
-.reviews-carousel {
-  position: relative;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 0.75rem;
-  max-width: 52rem;
-  margin: 0 auto;
+.reviews-track {
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
 }
 
-.reviews-carousel__track {
-  position: relative;
-  min-height: 16rem;
+.reviews-track::-webkit-scrollbar {
+  display: none;
 }
 
 .reviews-card {
-  position: absolute;
-  inset: 0;
   display: flex;
+  flex: 0 0 100%;
   flex-direction: column;
-  justify-content: center;
-  gap: 1rem;
-  padding: clamp(1.5rem, 3vw, 2.25rem);
-  border-radius: var(--gy-radius-card);
-  background: var(--gy-white);
-  box-shadow: var(--gy-shadow);
-  border: 1px solid rgba(26, 24, 20, 0.06);
-  opacity: 0;
-  transform: translateY(12px);
-  pointer-events: none;
-  transition:
-    opacity 0.45s ease,
-    transform 0.45s ease;
-}
-
-.reviews-card.is-active {
-  position: relative;
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-  z-index: 1;
+  gap: 1.5rem;
+  min-width: 0;
+  scroll-snap-align: start;
+  padding: 0.25rem 0 0;
+  background: transparent;
 }
 
 .reviews-card__stars {
@@ -259,39 +291,53 @@ onUnmounted(() => clearTimer());
 
 .reviews-card__quote p {
   margin: 0;
-  font-family: var(--font-body);
-  font-size: clamp(1.05rem, 2vw, 1.25rem);
-  line-height: 1.65;
+  max-width: 18em;
+  font-family: var(--font-display);
+  font-size: clamp(1.85rem, 3.6vw, 3.15rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.035em;
   color: var(--gy-ink);
 }
 
 .reviews-card__meta {
-  margin-top: 0.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.85rem;
+  align-items: baseline;
 }
 
 .reviews-card__name {
   margin: 0;
   font-family: var(--font-display);
+  font-size: 0.78rem;
   font-weight: 700;
-  font-size: 0.95rem;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
 }
 
 .reviews-card__hotel {
-  margin: 0.2rem 0 0;
-  font-size: 0.88rem;
+  margin: 0;
   color: var(--gy-muted);
+  font-family: var(--font-display);
+  font-size: 0.85rem;
 }
 
-.reviews-carousel__arrow {
-  display: inline-flex;
+.reviews-nav {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  border: 1px solid rgba(26, 24, 20, 0.12);
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+
+.round-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(69, 76, 75, 0.2);
   border-radius: 999px;
-  background: var(--gy-white);
+  background: transparent;
   color: var(--gy-ink);
   cursor: pointer;
   transition:
@@ -300,21 +346,21 @@ onUnmounted(() => clearTimer());
     background 0.2s ease;
 }
 
-.reviews-carousel__arrow:hover,
-.reviews-carousel__arrow:focus-visible {
-  border-color: var(--gy-gold-deep);
-  color: var(--gy-gold-deep);
+.round-btn:hover,
+.round-btn:focus-visible {
+  border-color: var(--gy-forest);
+  background: var(--gy-forest);
+  color: #fff;
   outline: none;
 }
 
-.reviews-carousel__dots {
+.reviews-dots {
   display: flex;
-  justify-content: center;
-  gap: 0.45rem;
-  margin-top: 1.35rem;
+  flex-wrap: wrap;
+  gap: 0.4rem;
 }
 
-.reviews-carousel__dot {
+.reviews-dots__dot {
   position: relative;
   width: 0.55rem;
   height: 0.55rem;
@@ -328,7 +374,7 @@ onUnmounted(() => clearTimer());
     width 0.2s ease;
 }
 
-.reviews-carousel__dot::before {
+.reviews-dots__dot::before {
   content: "";
   position: absolute;
   left: 50%;
@@ -338,46 +384,18 @@ onUnmounted(() => clearTimer());
   transform: translate(-50%, -50%);
 }
 
-.reviews-carousel__dot.is-active {
+.reviews-dots__dot.is-active {
   width: 1.35rem;
   background: var(--gy-gold-deep);
 }
 
-@media (max-width: 700px) {
-  .reviews-carousel {
-    grid-template-columns: 1fr;
-    gap: 0.85rem;
-  }
-
-  .reviews-carousel__arrow {
-    position: absolute;
-    top: 50%;
-    z-index: 2;
-    transform: translateY(-50%);
-    width: 2.4rem;
-    height: 2.4rem;
-    background: rgba(255, 255, 255, 0.92);
-  }
-
-  .reviews-carousel__arrow--prev {
-    left: 0.35rem;
-  }
-
-  .reviews-carousel__arrow--next {
-    right: 0.35rem;
-  }
-
-  .reviews-carousel__track {
-    min-height: 18rem;
-  }
-
-  .reviews-card {
-    padding-inline: 2.75rem;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .reviews-card {
+  .reviews-track {
+    scroll-behavior: auto;
+  }
+
+  .reviews-dots__dot,
+  .round-btn {
     transition: none;
   }
 }

@@ -343,7 +343,7 @@ watch(
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: var(--gy-forest, #627063);
+  background: var(--gy-forest);
   border: 2px solid #fff;
   box-shadow: 0 2px 8px rgba(28, 36, 33, 0.35);
 }

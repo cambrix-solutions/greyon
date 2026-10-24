@@ -153,7 +153,7 @@ onUnmounted(() => {
   height: 28px;
   margin: 0 auto;
   border-radius: 50% 50% 50% 0;
-  background: #627063;
+  background: var(--gy-forest);
   border: 2px solid #fff;
   box-shadow: 0 8px 18px rgba(69, 76, 75, 0.35);
   transform: rotate(-45deg);
