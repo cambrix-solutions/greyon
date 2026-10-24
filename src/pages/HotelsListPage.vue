@@ -424,8 +424,6 @@ const showError = computed(
 
 <style scoped>
 .listing-luxe {
-  --serif: "Cormorant Garamond", "Lora", Georgia, serif;
-  --sans: "Montserrat", system-ui, sans-serif;
   background:
     radial-gradient(
       ellipse at 100% 0%,
@@ -439,10 +437,9 @@ const showError = computed(
 .listing-luxe h1,
 .listing-luxe h2,
 .listing-luxe :deep(h1) {
-  font-family: var(--serif);
-  font-weight: 500;
-  font-style: italic;
-  letter-spacing: -0.03em;
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.035em;
 }
 
 .listing-wrap {
@@ -452,10 +449,10 @@ const showError = computed(
 
 .eyebrow {
   margin: 0 0 0.85rem;
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.72rem;
   font-style: normal;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.28em;
   text-transform: uppercase;
   color: var(--gy-gold-deep);
@@ -483,7 +480,7 @@ const showError = computed(
 .mast__lead {
   max-width: 36rem;
   margin: 0.9rem 0 0;
-  font-family: var(--sans);
+  font-family: var(--font-body);
   font-size: 1rem;
   font-weight: 500;
   line-height: 1.6;
@@ -556,8 +553,8 @@ const showError = computed(
 .listing-luxe :deep(h1) {
   max-width: 9em;
   margin: 0;
-  font-size: clamp(4.1rem, 11vw, 8.6rem);
-  line-height: 0.84;
+  font-size: clamp(2.79rem, 7.48vw, 5.85rem);
+  line-height: 1;
 }
 
 .mast__lead {
@@ -578,8 +575,8 @@ const showError = computed(
 .destinations h2,
 .results-head h2 {
   margin: 0;
-  font-size: clamp(2.8rem, 6vw, 5rem);
-  line-height: 0.92;
+  font-size: clamp(2.35rem, 6vw, 4.2rem);
+  line-height: 1;
 }
 
 .section-lead {
@@ -661,7 +658,7 @@ const showError = computed(
       rgba(196, 163, 90, 0.7),
       transparent 42%
     ),
-    linear-gradient(160deg, #627063, #1c2420 70%);
+    linear-gradient(160deg, var(--gy-forest), #1c2420 70%);
 }
 
 .dest-card__name {
@@ -669,10 +666,11 @@ const showError = computed(
   left: 0.9rem;
   right: 0.9rem;
   bottom: 0.95rem;
-  font-family: var(--serif);
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
   font-size: clamp(1.7rem, 2.4vw, 2.15rem);
-  font-style: italic;
-  line-height: 0.95;
+  line-height: 1.05;
   text-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
 }
 
@@ -744,10 +742,10 @@ const showError = computed(
   display: grid;
   gap: 0.35rem;
   min-width: 0;
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
+  font-weight: 700;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--gy-gold-deep);
 }
@@ -794,10 +792,10 @@ const showError = computed(
   border-radius: 999px;
   background: transparent;
   color: var(--gy-ink);
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   cursor: pointer;
 }
@@ -826,7 +824,7 @@ const showError = computed(
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.8);
   color: var(--gy-ink);
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
@@ -840,10 +838,11 @@ const showError = computed(
 
 .filters__count {
   margin: 0;
-  font-family: var(--serif);
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
   font-size: clamp(1.55rem, 2.4vw, 2.15rem);
-  font-style: italic;
-  line-height: 1;
+  line-height: 1.05;
 }
 
 .results-head {
@@ -875,7 +874,7 @@ const showError = computed(
 .empty {
   margin: 0.5rem 0 0;
   color: var(--gy-muted);
-  font-family: var(--sans);
+  font-family: var(--font-display);
 }
 
 .swap-enter-active,

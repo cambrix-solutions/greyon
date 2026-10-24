@@ -193,7 +193,6 @@ const metaLine = computed(() => {
 }
 
 .hotel-card--live {
-  --serif: "Cormorant Garamond", "Lora", Georgia, serif;
   position: relative;
   isolation: isolate;
   border-radius: 22px;
@@ -239,9 +238,9 @@ const metaLine = computed(() => {
 }
 
 .hotel-card--live h3 {
-  font-family: var(--serif);
-  font-weight: 500;
-  font-style: italic;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
   font-size: clamp(2rem, 2.6vw, 2.75rem);
 }
 
