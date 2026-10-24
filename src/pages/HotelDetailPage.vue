@@ -656,8 +656,6 @@ async function openRoom(roomTypeId: string) {
 
 <style scoped>
 .hotel-luxe {
-  --serif: "Cormorant Garamond", "Lora", Georgia, serif;
-  --sans: "Montserrat", system-ui, sans-serif;
   position: relative;
   background:
     radial-gradient(
@@ -672,18 +670,17 @@ async function openRoom(roomTypeId: string) {
 .hotel-luxe h1,
 .hotel-luxe h2,
 .hotel-luxe h3 {
-  font-family: var(--serif);
-  font-weight: 500;
-  font-style: italic;
-  letter-spacing: -0.03em;
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.035em;
 }
 
 .eyebrow {
   margin: 0 0 0.85rem;
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.72rem;
   font-style: normal;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.28em;
   text-transform: uppercase;
   color: var(--gy-gold-deep);
@@ -776,14 +773,14 @@ async function openRoom(roomTypeId: string) {
 .hero h1 {
   max-width: 12em;
   margin: 0;
-  font-size: clamp(2.7rem, 7.2vw, 6.5rem);
-  line-height: 0.88;
+  font-size: clamp(2.35rem, 6vw, 4.94rem);
+  line-height: 1;
 }
 
 .hero__lead {
   max-width: 38rem;
   margin: 1rem 0 0;
-  font-family: var(--sans);
+  font-family: var(--font-body);
   font-size: 1.02rem;
   font-weight: 500;
   line-height: 1.6;
@@ -807,10 +804,10 @@ async function openRoom(roomTypeId: string) {
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.14);
   backdrop-filter: blur(12px);
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
+  font-weight: 700;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
 }
 
@@ -855,11 +852,11 @@ async function openRoom(roomTypeId: string) {
 .summary__where {
   display: block;
   margin-bottom: 0.4rem;
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.68rem;
   font-style: normal;
-  font-weight: 600;
-  letter-spacing: 0.16em;
+  font-weight: 700;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--gy-gold-deep);
 }
@@ -922,10 +919,10 @@ async function openRoom(roomTypeId: string) {
 .story__body {
   margin: 0;
   max-width: 38rem;
-  font-family: var(--serif);
+  font-family: var(--font-display);
   font-size: clamp(1.55rem, 2.5vw, 2.2rem);
-  font-style: italic;
-  font-weight: 500;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   line-height: 1.35;
 }
 
@@ -971,14 +968,14 @@ async function openRoom(roomTypeId: string) {
 .place h2,
 .related h2 {
   margin: 0 0 0.75rem;
-  font-size: clamp(2.8rem, 6vw, 5rem);
-  line-height: 0.92;
+  font-size: clamp(2.35rem, 6vw, 4.2rem);
+  line-height: 1;
 }
 
 .panel__lead {
   max-width: 38rem;
   margin: 0 0 1.4rem;
-  font-family: var(--sans);
+  font-family: var(--font-body);
   font-size: 0.98rem;
   font-weight: 500;
   line-height: 1.65;
@@ -1025,7 +1022,7 @@ async function openRoom(roomTypeId: string) {
 .info-card p,
 .product-card__body p {
   margin: 0;
-  font-family: var(--sans);
+  font-family: var(--font-body);
   font-size: 0.88rem;
   font-style: normal;
   font-weight: 500;
@@ -1115,26 +1112,28 @@ async function openRoom(roomTypeId: string) {
 }
 
 .landmark__index {
-  font-family: var(--serif);
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
   font-size: 2rem;
-  font-style: italic;
-  line-height: 1;
+  line-height: 1.05;
   color: var(--gy-gold-deep);
 }
 
 .landmark__place {
-  font-family: var(--serif);
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
   font-size: clamp(1.55rem, 2vw, 1.9rem);
-  font-style: italic;
   line-height: 1.05;
 }
 
 .landmark__distance {
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.72rem;
   font-style: normal;
-  font-weight: 600;
-  letter-spacing: 0.14em;
+  font-weight: 700;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--gy-forest);
 }
@@ -1158,7 +1157,7 @@ async function openRoom(roomTypeId: string) {
 
 .room-price-hint {
   margin: 0.85rem 0 0;
-  font-family: var(--sans);
+  font-family: var(--font-body);
   font-size: 0.9rem;
   color: var(--gy-muted);
 }
@@ -1191,16 +1190,17 @@ async function openRoom(roomTypeId: string) {
 
 .summary__dates {
   margin: 0.2rem 0 0;
-  font-family: var(--serif);
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
   font-size: 1.35rem;
-  font-style: italic;
 }
 
 .summary__times,
 .summary__pending,
 .summary__price span {
   margin: 0;
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.78rem;
   font-style: normal;
   font-weight: 500;
@@ -1217,11 +1217,11 @@ async function openRoom(roomTypeId: string) {
 }
 
 .summary__price strong {
-  font-family: var(--serif);
+  font-family: var(--font-display);
   font-size: 2.6rem;
-  font-weight: 500;
-  font-style: italic;
-  line-height: 0.9;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
 }
 
 .summary__cta {
@@ -1239,9 +1239,9 @@ async function openRoom(roomTypeId: string) {
 }
 
 .rooms :deep(.room-offer__title) {
-  font-family: var(--serif);
-  font-weight: 500;
-  font-style: italic;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
   font-size: clamp(1.55rem, 2vw, 2rem);
 }
 
@@ -1285,17 +1285,17 @@ async function openRoom(roomTypeId: string) {
 
 .place__area {
   color: var(--gy-gold);
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
+  font-weight: 700;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
 }
 
 .place__address {
   max-width: 34rem;
   margin-bottom: 0.85rem;
-  font-family: var(--sans);
+  font-family: var(--font-body);
   font-size: 0.95rem;
   line-height: 1.5;
   color: rgba(255, 255, 255, 0.82);
@@ -1348,15 +1348,15 @@ async function openRoom(roomTypeId: string) {
 }
 
 .room-sticky__price strong {
-  font-family: var(--serif);
+  font-family: var(--font-display);
   font-size: 1.45rem;
-  font-weight: 500;
-  font-style: italic;
-  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
 }
 
 .room-sticky__price span {
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.72rem;
   color: rgba(255, 255, 255, 0.72);
 }
@@ -1370,10 +1370,10 @@ async function openRoom(roomTypeId: string) {
 
 .hotel-missing h1 {
   margin: 0 0 1rem;
-  font-family: var(--serif, "Cormorant Garamond", Georgia, serif);
+  font-family: var(--font-display);
   font-size: clamp(2.6rem, 6vw, 4rem);
-  font-weight: 500;
-  font-style: italic;
+  font-weight: 800;
+  letter-spacing: -0.035em;
 }
 
 @keyframes hero-ken {

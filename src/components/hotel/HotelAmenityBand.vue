@@ -74,8 +74,6 @@ const trackStyle = computed(() => {
 
 <style scoped>
 .band {
-  --serif: "Cormorant Garamond", "Lora", Georgia, serif;
-  --sans: "Montserrat", system-ui, sans-serif;
   position: relative;
   color: #fff;
   background:
@@ -133,11 +131,10 @@ const trackStyle = computed(() => {
 }
 
 .marquee__item em {
-  font-family: var(--serif);
-  font-size: clamp(2.4rem, 5.4vw, 4.6rem);
-  font-style: italic;
-  font-weight: 500;
-  letter-spacing: -0.03em;
+  font-family: var(--font-display);
+  font-size: clamp(2.15rem, 6vw, 3.86rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
   line-height: 1;
   white-space: nowrap;
   transition: color 0.3s ease;
@@ -174,9 +171,9 @@ const trackStyle = computed(() => {
 
 .eyebrow {
   margin: 0 0 0.85rem;
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.72rem;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.28em;
   text-transform: uppercase;
   color: var(--gy-gold);
@@ -198,19 +195,18 @@ const trackStyle = computed(() => {
 
 .band h2 {
   margin: 0 0 0.7rem;
-  max-width: 10ch;
-  font-family: var(--serif);
-  font-size: clamp(3rem, 6.5vw, 5.4rem);
-  font-weight: 500;
-  font-style: italic;
-  letter-spacing: -0.03em;
-  line-height: 0.9;
+  max-width: 12ch;
+  font-family: var(--font-display);
+  font-size: clamp(2.52rem, 6vw, 4.54rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1;
 }
 
 .band__lead {
   max-width: 34rem;
   margin: 0 0 1.35rem;
-  font-family: var(--sans);
+  font-family: var(--font-body);
   font-size: 0.95rem;
   font-weight: 500;
   line-height: 1.6;
