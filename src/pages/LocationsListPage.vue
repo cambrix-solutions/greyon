@@ -552,10 +552,10 @@ onUnmounted(() => {
   right: max(1.25rem, calc((100% - 1240px) / 2));
   z-index: 4;
   margin: 0;
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.16em;
+  font-weight: 700;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.82);
 }
@@ -568,7 +568,7 @@ onUnmounted(() => {
 
 .mast__chip {
   margin: 0 0 0.9rem;
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.2em;
@@ -579,14 +579,14 @@ onUnmounted(() => {
 .places :deep(h1) {
   max-width: 8em;
   margin: 0;
-  font-size: clamp(3.4rem, 11vw, 8.6rem);
-  line-height: 0.84;
+  font-size: clamp(2.5rem, 7.48vw, 5.85rem);
+  line-height: 1;
 }
 
 .mast__lead {
   max-width: 28rem;
   margin: 1rem 0 0;
-  font-family: var(--sans);
+  font-family: var(--font-body);
   font-size: 1.02rem;
   font-weight: 500;
   line-height: 1.6;
@@ -640,7 +640,7 @@ onUnmounted(() => {
 .journey h2 {
   margin: 0;
   font-size: clamp(2.6rem, 5vw, 4.4rem);
-  line-height: 0.9;
+  line-height: 1;
 }
 
 .journey__nav {
@@ -661,19 +661,18 @@ onUnmounted(() => {
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.08);
   color: rgba(255, 255, 255, 0.86);
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  font-weight: 700;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   cursor: pointer;
 }
 
 .journey__nav button span {
-  font-family: var(--serif);
-  font-style: italic;
-  font-weight: 500;
-  letter-spacing: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
   text-transform: none;
 }
 
@@ -791,7 +790,7 @@ onUnmounted(() => {
       rgba(196, 163, 90, 0.45),
       transparent 42%
     ),
-    linear-gradient(160deg, #627063, #1c2420 70%);
+    linear-gradient(160deg, var(--gy-forest), #1c2420 70%);
 }
 
 .journey__media img {
@@ -814,27 +813,27 @@ onUnmounted(() => {
 }
 
 .journey__index {
-  font-family: var(--serif);
-  font-size: clamp(3.2rem, 6vw, 5.5rem);
-  font-style: italic;
-  line-height: 0.8;
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  font-size: clamp(2.69rem, 6vw, 4.62rem);
+  line-height: 1;
   color: var(--gy-gold);
 }
 
 .journey__copy h3 {
   margin: 0;
-  font-family: var(--serif);
+  font-family: var(--font-display);
   font-size: clamp(2.6rem, 4vw, 4.4rem);
-  font-weight: 500;
-  font-style: italic;
-  letter-spacing: -0.03em;
-  line-height: 0.9;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1;
 }
 
 .journey__copy p {
   margin: 0;
   max-width: 28rem;
-  font-family: var(--sans);
+  font-family: var(--font-body);
   font-size: 0.98rem;
   font-weight: 500;
   line-height: 1.55;
@@ -847,10 +846,10 @@ onUnmounted(() => {
 
 .journey__copy .text-link {
   margin-top: 0.35rem;
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
 }
 
@@ -867,7 +866,7 @@ onUnmounted(() => {
 .state {
   padding: clamp(3rem, 8vw, 5rem) 0;
   color: var(--gy-muted);
-  font-family: var(--sans);
+  font-family: var(--font-display);
 }
 
 .index {
@@ -878,8 +877,8 @@ onUnmounted(() => {
 
 .index h2 {
   margin: 0;
-  font-size: clamp(2.8rem, 6vw, 5rem);
-  line-height: 0.9;
+  font-size: clamp(2.35rem, 6vw, 4.2rem);
+  line-height: 1;
 }
 
 .index__head {
@@ -916,9 +915,9 @@ onUnmounted(() => {
 
 .index-card__bar span,
 .index-card__bar strong {
-  font-family: var(--serif);
-  font-weight: 500;
-  font-style: italic;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .index-card__bar span {
@@ -966,17 +965,16 @@ onUnmounted(() => {
 
 .index-card__body h3 {
   margin: 0;
-  font-family: var(--serif);
+  font-family: var(--font-display);
   font-size: clamp(2.4rem, 4vw, 3.8rem);
-  font-weight: 500;
-  font-style: italic;
-  letter-spacing: -0.03em;
-  line-height: 0.92;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1;
 }
 
 .index-card__body p {
   margin: 0;
-  font-family: var(--sans);
+  font-family: var(--font-body);
   font-size: 0.98rem;
   font-weight: 500;
   line-height: 1.6;
@@ -999,10 +997,10 @@ onUnmounted(() => {
 }
 
 .index-card__notes li {
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.7rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--gy-gold-deep);
 }
@@ -1015,7 +1013,7 @@ onUnmounted(() => {
 
 .index-card__stays a {
   color: var(--gy-forest);
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.82rem;
   font-weight: 600;
   text-decoration: underline;
@@ -1093,7 +1091,7 @@ onUnmounted(() => {
   }
 
   .places :deep(h1) {
-    font-size: clamp(3.1rem, 16vw, 4.6rem);
+    font-size: clamp(2.6rem, 9.28vw, 3.86rem);
   }
 }
 
