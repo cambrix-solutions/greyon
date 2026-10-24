@@ -142,8 +142,6 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 
 <style scoped>
 .gallery {
-  --serif: "Cormorant Garamond", "Lora", Georgia, serif;
-  --sans: "Montserrat", system-ui, sans-serif;
   color: #fff;
   background:
     radial-gradient(
@@ -162,9 +160,9 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 
 .eyebrow {
   margin: 0 0 0.75rem;
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.72rem;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.28em;
   text-transform: uppercase;
   color: var(--gy-gold);
@@ -186,12 +184,11 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 
 .gallery h2 {
   margin: 0;
-  font-family: var(--serif);
-  font-size: clamp(3rem, 6.5vw, 5.4rem);
-  font-weight: 500;
-  font-style: italic;
-  letter-spacing: -0.03em;
-  line-height: 0.9;
+  font-family: var(--font-display);
+  font-size: clamp(2.52rem, 6vw, 4.54rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1;
 }
 
 .gallery__track {
@@ -258,20 +255,19 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
   gap: 0.75rem;
   padding: 2.5rem 1rem 1rem;
   background: linear-gradient(to top, rgba(12, 11, 10, 0.78), transparent);
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
+  font-weight: 700;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
 }
 
 .shot__meta em {
   flex-shrink: 0;
-  font-family: var(--serif);
+  font-family: var(--font-display);
   font-size: 1.35rem;
-  font-style: italic;
-  font-weight: 500;
-  letter-spacing: 0;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   text-transform: none;
   color: var(--gy-gold);
 }
@@ -289,8 +285,6 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 }
 
 .lb {
-  --serif: "Cormorant Garamond", "Lora", Georgia, serif;
-  --sans: "Montserrat", system-ui, sans-serif;
   position: relative;
   display: grid;
   place-items: center;
@@ -363,7 +357,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
   bottom: 1.25rem;
   margin: 0;
   transform: translateX(-50%);
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.18em;
