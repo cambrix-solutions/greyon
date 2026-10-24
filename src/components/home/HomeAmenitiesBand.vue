@@ -131,8 +131,6 @@ function iconFor(label: string) {
 
 <style scoped>
 .band {
-  --serif: "Cormorant Garamond", "Lora", Georgia, serif;
-  --sans: "Montserrat", system-ui, sans-serif;
   position: relative;
   display: flex;
   align-items: flex-end;
@@ -194,9 +192,9 @@ function iconFor(label: string) {
 .eyebrow {
   margin: 0 0 0.6rem;
   padding-inline: clamp(1.25rem, 6vw, 5rem);
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.72rem;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.28em;
   text-transform: uppercase;
   color: #e4d2a4;
@@ -205,13 +203,17 @@ function iconFor(label: string) {
 .band__title {
   margin: 0 0 1.6rem;
   padding-inline: clamp(1.25rem, 6vw, 5rem);
-  font-family: var(--serif);
-  font-size: clamp(4.4rem, 12vw, 9rem);
-  font-weight: 500;
-  font-style: italic;
-  letter-spacing: -0.045em;
-  line-height: 0.82;
-  background: linear-gradient(100deg, #f6f1e7 10%, #c4a35a 55%, #9aaf9c 100%);
+  font-family: var(--font-display);
+  font-size: clamp(2.99rem, 6.96vw, 6.12rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1;
+  background: linear-gradient(
+    100deg,
+    #f6f1e7 10%,
+    var(--gy-gold) 55%,
+    #9aaf9c 100%
+  );
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -232,10 +234,10 @@ function iconFor(label: string) {
   border-radius: 999px;
   background: rgba(16, 18, 16, 0.4);
   backdrop-filter: blur(10px);
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
+  font-weight: 700;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   white-space: nowrap;
 }
@@ -253,10 +255,10 @@ function iconFor(label: string) {
 }
 
 .places__link {
-  font-family: var(--serif);
+  font-family: var(--font-display);
   font-size: clamp(1.6rem, 3vw, 2.4rem);
-  font-style: italic;
-  font-weight: 500;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   line-height: 1.1;
   color: rgba(255, 255, 255, 0.92);
 }
@@ -267,7 +269,7 @@ function iconFor(label: string) {
 }
 
 .places__link:focus-visible {
-  outline: 2px solid #c4a35a;
+  outline: 2px solid var(--gy-gold);
   outline-offset: 4px;
 }
 

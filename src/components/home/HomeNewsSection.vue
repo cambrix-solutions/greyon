@@ -92,8 +92,6 @@ function dateLabel(value: string) {
 
 <style scoped>
 .news {
-  --serif: "Cormorant Garamond", "Lora", Georgia, serif;
-  --sans: "Montserrat", system-ui, sans-serif;
   position: relative;
   padding: clamp(4.5rem, 8vw, 6.5rem) 0 clamp(4rem, 8vw, 6rem);
   background:
@@ -119,22 +117,21 @@ function dateLabel(value: string) {
 .eyebrow,
 .stage__meta {
   margin: 0 0 0.45rem;
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.72rem;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: #8f7340;
+  color: var(--gy-gold-deep);
 }
 
 .news__title {
   margin: 0;
-  font-family: var(--serif);
-  font-size: clamp(3.2rem, 6vw, 5.4rem);
-  font-weight: 500;
-  font-style: italic;
-  letter-spacing: -0.04em;
-  line-height: 0.88;
+  font-family: var(--font-display);
+  font-size: clamp(2.69rem, 6vw, 4.54rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1;
 }
 
 .text-link {
@@ -142,9 +139,9 @@ function dateLabel(value: string) {
   align-items: center;
   gap: 0.5rem;
   min-height: 44px;
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.72rem;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: #3e4a40;
@@ -193,12 +190,11 @@ function dateLabel(value: string) {
 
 .stage__headline {
   display: block;
-  font-family: var(--serif);
-  font-size: clamp(3.4rem, 6.4vw, 6.6rem);
-  font-weight: 500;
-  font-style: italic;
-  letter-spacing: -0.045em;
-  line-height: 0.86;
+  font-family: var(--font-display);
+  font-size: clamp(2.58rem, 6vw, 5.02rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1;
   color: #1c1f1e;
   text-shadow:
     0 0 18px rgba(247, 243, 236, 0.95),
@@ -221,10 +217,10 @@ function dateLabel(value: string) {
 
 .stage__card-in p {
   margin: 0;
-  font-family: var(--serif);
+  font-family: var(--font-display);
   font-size: clamp(1.25rem, 2vw, 1.6rem);
-  font-style: italic;
-  font-weight: 500;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   line-height: 1.35;
 }
 
@@ -258,10 +254,10 @@ function dateLabel(value: string) {
 .news__card-title {
   display: block;
   margin-top: 0.75rem;
-  font-family: var(--serif);
+  font-family: var(--font-display);
   font-size: 1.7rem;
-  font-style: italic;
-  font-weight: 500;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   line-height: 1.1;
 }
 
@@ -269,7 +265,7 @@ function dateLabel(value: string) {
 .stage__headline:focus-visible,
 .news__card:focus-visible,
 .text-link:focus-visible {
-  outline: 2px solid #c4a35a;
+  outline: 2px solid var(--gy-gold);
   outline-offset: 3px;
 }
 

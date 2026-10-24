@@ -58,12 +58,12 @@
   padding: 2px;
   background: conic-gradient(
     from var(--wow-spin),
-    #c4a35a,
+    var(--gy-gold),
     #9aaf9c,
     #f6f1e7,
-    #8f7340,
-    #627063,
-    #c4a35a
+    var(--gy-gold-deep),
+    var(--gy-forest),
+    var(--gy-gold)
   );
   animation: wow-spin 7s linear infinite;
 }

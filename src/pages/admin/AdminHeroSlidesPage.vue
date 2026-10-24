@@ -40,11 +40,11 @@
             fill="#f4efe8"
             stroke="#d9d0c3"
           />
-          <circle cx="36" cy="34" r="8" fill="#c4a35a" />
+          <circle cx="36" cy="34" r="8" fill="var(--gy-gold)" />
           <path
             d="M18 66l22-18 14 12 16-20 32 26"
             fill="none"
-            stroke="#627063"
+            stroke="var(--gy-forest)"
             stroke-width="3"
             stroke-linejoin="round"
             stroke-linecap="round"
@@ -685,7 +685,7 @@ async function onDragEnd() {
   padding: 0.75rem 0.9rem;
   border-radius: 12px;
   background: rgba(139, 46, 46, 0.08);
-  color: #8b2e2e;
+  color: var(--q-negative);
 }
 
 .slide-grid {
@@ -942,7 +942,7 @@ async function onDragEnd() {
 
 .field-error {
   margin: -0.35rem 0 0;
-  color: #8b2e2e;
+  color: var(--q-negative);
   font-size: 0.82rem;
 }
 

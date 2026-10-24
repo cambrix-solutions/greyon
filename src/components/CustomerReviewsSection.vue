@@ -217,8 +217,6 @@ onUnmounted(() => {
 
 <style scoped>
 .reviews-section {
-  --serif: "Cormorant Garamond", "Lora", Georgia, serif;
-  --sans: "Montserrat", system-ui, sans-serif;
   padding: clamp(5rem, 10vw, 8rem) 0;
   background: var(--gy-cream);
   color: var(--gy-ink);
@@ -230,9 +228,9 @@ onUnmounted(() => {
 
 .section-kicker {
   margin: 0 0 0.85rem;
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.72rem;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.28em;
   text-transform: uppercase;
   color: var(--gy-gold-deep);
@@ -249,12 +247,11 @@ onUnmounted(() => {
 
 .section-title {
   margin: 0;
-  font-family: var(--serif);
-  font-size: clamp(2.6rem, 5vw, 4.5rem);
-  font-weight: 500;
-  font-style: italic;
-  line-height: 0.95;
-  letter-spacing: -0.03em;
+  font-family: var(--font-display);
+  font-size: clamp(2.18rem, 6vw, 3.78rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.035em;
 }
 
 .reviews-track {
@@ -295,12 +292,11 @@ onUnmounted(() => {
 .reviews-card__quote p {
   margin: 0;
   max-width: 18em;
-  font-family: var(--serif);
+  font-family: var(--font-display);
   font-size: clamp(1.85rem, 3.6vw, 3.15rem);
-  font-weight: 500;
-  font-style: italic;
+  font-weight: 800;
   line-height: 1.15;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.035em;
   color: var(--gy-ink);
 }
 
@@ -313,17 +309,17 @@ onUnmounted(() => {
 
 .reviews-card__name {
   margin: 0;
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.16em;
+  font-weight: 700;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
 }
 
 .reviews-card__hotel {
   margin: 0;
   color: var(--gy-muted);
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.85rem;
 }
 

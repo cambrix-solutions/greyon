@@ -90,8 +90,6 @@ function onLeave() {
 
 <style scoped>
 .story {
-  --serif: "Cormorant Garamond", "Lora", Georgia, serif;
-  --sans: "Montserrat", system-ui, sans-serif;
   position: relative;
   overflow: hidden;
   min-height: 88vh;
@@ -138,24 +136,28 @@ function onLeave() {
 
 .eyebrow {
   margin: 0 0 1rem;
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.72rem;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.28em;
   text-transform: uppercase;
-  color: #8f7340;
+  color: var(--gy-gold-deep);
 }
 
 .story__title {
   margin: 0;
-  max-width: 9ch;
-  font-family: var(--serif);
-  font-size: clamp(4.2rem, 9vw, 8.4rem);
-  font-weight: 500;
-  font-style: italic;
-  letter-spacing: -0.045em;
-  line-height: 0.84;
-  background: linear-gradient(115deg, #1c1f1e 10%, #8f7340 55%, #627063 100%);
+  max-width: 12ch;
+  font-family: var(--font-display);
+  font-size: clamp(2.86rem, 6.12vw, 5.71rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1;
+  background: linear-gradient(
+    115deg,
+    #1c1f1e 10%,
+    var(--gy-gold-deep) 55%,
+    var(--gy-forest) 100%
+  );
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -176,7 +178,7 @@ function onLeave() {
 .story__body,
 .story__note {
   margin: 0;
-  font-family: var(--sans);
+  font-family: var(--font-body);
   font-size: 0.98rem;
   font-weight: 500;
   line-height: 1.7;
@@ -194,9 +196,9 @@ function onLeave() {
   gap: 0.5rem;
   min-height: 44px;
   margin-top: 1rem;
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.72rem;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: #3e4a40;
@@ -242,7 +244,7 @@ function onLeave() {
 
   .story__title {
     max-width: none;
-    font-size: clamp(3.3rem, 16vw, 4.6rem);
+    font-size: clamp(2.77rem, 9.28vw, 3.86rem);
   }
 
   .lens {

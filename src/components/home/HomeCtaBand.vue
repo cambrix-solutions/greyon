@@ -67,8 +67,6 @@ const image = computed(() => {
 
 <style scoped>
 .cta {
-  --serif: "Cormorant Garamond", "Lora", Georgia, serif;
-  --sans: "Montserrat", system-ui, sans-serif;
   position: relative;
   display: flex;
   align-items: flex-end;
@@ -119,9 +117,9 @@ const image = computed(() => {
 
 .eyebrow {
   margin: 0 0 0.85rem;
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.72rem;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.28em;
   text-transform: uppercase;
   color: #e4d2a4;
@@ -129,14 +127,18 @@ const image = computed(() => {
 
 .cta__title {
   margin: 0;
-  max-width: 10ch;
-  font-family: var(--serif);
-  font-size: clamp(4.2rem, 11vw, 8.6rem);
-  font-weight: 500;
-  font-style: italic;
-  letter-spacing: -0.045em;
-  line-height: 0.84;
-  background: linear-gradient(105deg, #f7f3ec 8%, #c4a35a 48%, #9aaf9c 92%);
+  max-width: 12ch;
+  font-family: var(--font-display);
+  font-size: clamp(2.86rem, 7.48vw, 5.85rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1;
+  background: linear-gradient(
+    105deg,
+    #f7f3ec 8%,
+    var(--gy-gold) 48%,
+    #9aaf9c 92%
+  );
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -145,7 +147,7 @@ const image = computed(() => {
 .cta__lead {
   max-width: 34rem;
   margin: 1.2rem 0 0;
-  font-family: var(--sans);
+  font-family: var(--font-body);
   font-size: 1.02rem;
   font-weight: 500;
   line-height: 1.65;

@@ -103,8 +103,6 @@ function hotelsFor(locationId: string) {
 
 <style scoped>
 .dest {
-  --serif: "Cormorant Garamond", "Lora", Georgia, serif;
-  --sans: "Montserrat", system-ui, sans-serif;
   position: relative;
   padding: clamp(4.5rem, 9vw, 7rem) 0 6rem;
   background:
@@ -142,9 +140,9 @@ function hotelsFor(locationId: string) {
 
 .eyebrow {
   margin: 0 0 0.55rem;
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.72rem;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.28em;
   text-transform: uppercase;
   color: #e4d2a4;
@@ -152,12 +150,11 @@ function hotelsFor(locationId: string) {
 
 .dest__title {
   margin: 0;
-  font-family: var(--serif);
-  font-size: clamp(3.4rem, 7vw, 6.4rem);
-  font-weight: 500;
-  font-style: italic;
-  letter-spacing: -0.04em;
-  line-height: 0.86;
+  font-family: var(--font-display);
+  font-size: clamp(2.58rem, 6vw, 4.86rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1;
 }
 
 .text-link {
@@ -165,9 +162,9 @@ function hotelsFor(locationId: string) {
   align-items: center;
   gap: 0.5rem;
   min-height: 44px;
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.72rem;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: #e4d2a4;
@@ -219,11 +216,11 @@ function hotelsFor(locationId: string) {
   top: -0.35rem;
   left: 1.1rem;
   z-index: 2;
-  font-family: var(--serif);
-  font-size: clamp(5rem, 10vw, 8rem);
-  font-weight: 500;
-  font-style: italic;
-  line-height: 0.8;
+  font-family: var(--font-display);
+  font-size: clamp(3.4rem, 6.8vw, 5.44rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1;
   color: rgba(246, 241, 231, 0.92);
   text-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
   pointer-events: none;
@@ -248,25 +245,24 @@ function hotelsFor(locationId: string) {
 .stack__kicker,
 .stack__hotel,
 .stack__highlights {
-  font-family: var(--sans);
+  font-family: var(--font-display);
   font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
+  font-weight: 700;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: #e4d2a4;
 }
 
 .stack__name {
-  font-family: var(--serif);
+  font-family: var(--font-display);
   font-size: clamp(2.2rem, 4vw, 3.2rem);
-  font-weight: 500;
-  font-style: italic;
-  letter-spacing: -0.03em;
-  line-height: 0.95;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1;
 }
 
 .stack__desc {
-  font-family: var(--sans);
+  font-family: var(--font-body);
   font-size: 0.88rem;
   font-weight: 500;
   line-height: 1.45;
@@ -277,7 +273,7 @@ function hotelsFor(locationId: string) {
 }
 
 .stack__tilt:focus-visible {
-  outline: 2px solid #c4a35a;
+  outline: 2px solid var(--gy-gold);
   outline-offset: 4px;
 }
 

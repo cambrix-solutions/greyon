@@ -276,7 +276,7 @@ function onPrimaryClick() {
 }
 
 .entity-actions__icon:hover {
-  color: var(--gy-gold-deep, #8f7340) !important;
+  color: var(--gy-gold-deep) !important;
   background: rgba(84, 88, 89, 0.1) !important;
 }
 
