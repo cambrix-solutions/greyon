@@ -1,5 +1,8 @@
 <template>
-  <q-page v-if="hotel && room" class="room-detail">
+  <q-page
+    v-if="hotel && room"
+    class="dest-luxe home-motion rooms-luxe room-page"
+  >
     <SeoHead
       :title="seoTitle"
       :description="seoDescription"
@@ -7,199 +10,307 @@
       :json-ld="jsonLd"
     />
 
-    <div class="gy-container room-detail__inner">
-      <nav v-reveal class="room-crumb" aria-label="Breadcrumb">
-        <router-link to="/hotels">Hotels</router-link>
-        <span class="room-crumb__sep" aria-hidden="true">›</span>
-        <router-link :to="`/hotels/${hotel.slug}`">{{
-          hotel.name
-        }}</router-link>
-        <span class="room-crumb__sep" aria-hidden="true">›</span>
-        <span class="room-crumb__current" aria-current="page">{{
-          room.name
-        }}</span>
-      </nav>
+    <section
+      v-spot
+      class="stage"
+      data-sheet="Gallery"
+      tabindex="0"
+      aria-labelledby="room-title"
+      @keydown="onStageKey"
+    >
+      <div ref="stageFrame" class="stage__media">
+        <img
+          v-if="activeSrc"
+          :key="activeSrc"
+          class="stage__img"
+          :src="activeSrc"
+          :alt="`${room.name} photo ${activePhoto + 1}`"
+          :style="stageStyle"
+        />
+        <div class="stage__veil" />
+        <img
+          v-if="lensSrc"
+          class="stage__lens"
+          :src="lensSrc"
+          alt=""
+          :style="stageStyle"
+        />
+        <div class="stage__spot" />
+        <button
+          v-if="photos.length"
+          type="button"
+          class="stage__open"
+          :aria-label="`Open photo ${activePhoto + 1} of ${photos.length}`"
+          @click="galleryOpen = true"
+        />
+      </div>
+      <p v-if="lensSrc" class="stage__hint">Move across the photograph</p>
 
-      <div class="room-detail__layout">
-        <div class="room-detail__main">
-          <section v-reveal class="room-gallery-block">
-            <RoomMediaCarousel
-              class="room-gallery-block__carousel"
-              :images="room.images"
-              :alt="room.name"
-              :badge="galleryBadge"
-            />
-          </section>
+      <div class="dest-wrap stage__content">
+        <nav class="crumb" aria-label="Breadcrumb">
+          <router-link to="/hotels">Hotels</router-link>
+          <span aria-hidden="true">/</span>
+          <router-link :to="`/hotels/${hotel.slug}`">{{
+            hotel.name
+          }}</router-link>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">{{ room.name }}</span>
+        </nav>
+        <p v-reveal class="eyebrow eyebrow--light">{{ hotel.name }}</p>
+        <RevealWords id="room-title" tag="h1" :text="room.name" />
+        <RoomFacts
+          tone="light"
+          :bed-type="room.bedType"
+          :room-size="room.roomSize"
+          :max-guests="room.maxGuests"
+        />
+        <div v-if="photos.length > 1" class="stage__tools">
+          <p class="stage__pos" aria-live="polite">
+            {{ pad(activePhoto + 1) }} / {{ pad(photos.length) }}
+          </p>
+          <div class="stage__nav">
+            <button
+              type="button"
+              aria-label="Previous photo"
+              @click="stepPhoto(-1)"
+            >
+              <q-icon name="chevron_left" size="22px" />
+            </button>
+            <button type="button" aria-label="Next photo" @click="stepPhoto(1)">
+              <q-icon name="chevron_right" size="22px" />
+            </button>
+          </div>
+        </div>
+        <ul
+          v-if="photos.length > 1"
+          ref="filmstrip"
+          class="stage__film"
+          aria-label="Room photographs"
+        >
+          <li v-for="(src, index) in photos" :key="`${src}-${index}`">
+            <button
+              type="button"
+              :class="{ 'is-active': activePhoto === index }"
+              :aria-label="`Show photo ${index + 1}`"
+              :aria-current="activePhoto === index ? 'true' : undefined"
+              @click="activePhoto = index"
+            >
+              <img :src="src" alt="" />
+            </button>
+          </li>
+        </ul>
+      </div>
+      <SectionDivider
+        :fill="room.amenities.length ? '#1a211e' : 'var(--gy-cream)'"
+      />
+    </section>
 
-          <header v-reveal="{ delay: '60ms' }" class="room-header">
-            <p class="gy-eyebrow">{{ hotel.name }}</p>
-            <h1 class="gy-display">{{ room.name }}</h1>
+    <HotelAmenityBand
+      v-if="room.amenities.length"
+      :items="room.amenities"
+      eyebrow="In the room"
+      title="Amenities"
+      lead="Everything included with this room type."
+      sheet="Amenities"
+    />
+
+    <section class="dossier">
+      <div class="dest-wrap dossier__grid">
+        <div>
+          <article class="story spin-edge" data-sheet="The room">
+            <p v-reveal class="eyebrow">The room</p>
+            <h2 v-reveal="{ delay: '60ms' }">{{ room.name }}</h2>
+            <p v-if="roomDescription" class="story__body">{{
+              roomDescription
+            }}</p>
             <RoomFacts
               :bed-type="room.bedType"
               :room-size="room.roomSize"
               :max-guests="room.maxGuests"
             />
-            <p v-if="roomDescription" class="room-header__desc">
-              {{ roomDescription }}
-            </p>
-          </header>
+          </article>
 
-          <section
-            v-if="room.amenities.length"
-            v-reveal="{ delay: '90ms' }"
-            class="room-block"
-          >
-            <div class="room-block__head">
-              <h2 class="gy-display">Amenities</h2>
-              <p class="gy-muted">Everything included with this room type.</p>
-            </div>
-            <FeatureChips
-              :items="room.amenities"
-              :limit="room.amenities.length"
-              :expandable="false"
-              size="md"
-              sheet-title="Room amenities"
+          <div class="dates-block">
+            <p v-reveal class="eyebrow">Dates</p>
+            <h2 v-reveal="{ delay: '60ms' }">Check availability</h2>
+            <BookingSearchWidget
+              :navigate="false"
+              submit-label="Check availability"
             />
-          </section>
+          </div>
 
           <section
-            v-if="hotel.policies.length"
-            v-reveal="{ delay: '110ms' }"
-            class="room-block"
+            v-if="policies.length"
+            class="policies"
+            data-sheet="Policies"
+            aria-labelledby="policy-title"
           >
-            <div class="room-block__head">
-              <h2 class="gy-display">Stay policies</h2>
-              <p class="gy-muted"
-                >House rules for your stay at this property.</p
+            <p v-reveal class="eyebrow">House rules</p>
+            <h2 id="policy-title" v-reveal="{ delay: '60ms' }"
+              >Stay policies</h2
+            >
+            <ul ref="policyRail" class="policy-grid">
+              <li
+                v-for="(policy, index) in policies"
+                :key="`${index}-${policy}`"
+                v-tilt="{ max: 6 }"
+                class="policy-card rooms-tilt glass-edge"
               >
-            </div>
-            <FeatureChips
-              :items="hotel.policies"
-              :show-icons="false"
-              wrap
-              :limit="hotel.policies.length"
-              :expandable="false"
-              sheet-title="Stay policies"
-            />
+                <p>{{ policy }}</p>
+              </li>
+            </ul>
           </section>
 
           <section
             v-if="otherRooms.length"
-            v-reveal
-            class="room-block room-block--others"
+            class="others"
+            data-sheet="Other rooms"
+            aria-labelledby="others-title"
           >
-            <div class="room-block__head">
-              <h2 class="gy-display">Other rooms at this hotel</h2>
-              <p class="gy-muted"
-                >Compare similar options at {{ hotel.name }}.</p
-              >
-            </div>
-            <div class="room-others">
-              <RoomOfferCard
+            <p v-reveal class="eyebrow">Also here</p>
+            <h2 id="others-title" v-reveal="{ delay: '60ms' }">
+              Other rooms at this hotel
+            </h2>
+            <ul ref="otherRail" class="other-rail">
+              <li
                 v-for="other in otherRooms"
                 :key="other.id"
-                variant="detail"
-                :title="other.name"
-                :subtitle="roomSubtitle(other)"
-                :images="other.images"
-                :bed-type="other.bedType"
-                :room-size="other.roomSize"
-                :max-guests="other.maxGuests"
-                :amenities="other.amenities"
-                :amenity-limit="4"
-                :detail-to="roomDetailPath(hotel, other)"
-                :show-view-details="true"
-                :price-text="roomPriceText(other.id)"
-                :price-per-night="roomPricePerNight(other.id)"
-                :cta-label="
-                  hasSearchedDates && pricedRoom(other.id)
-                    ? 'Book'
-                    : 'Check availability'
-                "
-                :cta-outline="!(hasSearchedDates && pricedRoom(other.id))"
-                @cta="bookRoom(other.id)"
-              />
-            </div>
+                v-tilt="{ max: 7 }"
+                class="other-card rooms-tilt"
+              >
+                <router-link
+                  class="other-card__media photo-reveal"
+                  :to="roomDetailPath(hotel, other)"
+                  :aria-label="`View ${other.name}`"
+                >
+                  <img
+                    v-if="coverOf(other)"
+                    :src="coverOf(other)"
+                    :alt="other.name"
+                    loading="lazy"
+                  />
+                  <img
+                    v-if="revealOf(other)"
+                    class="photo-reveal__alt"
+                    :src="revealOf(other)"
+                    alt=""
+                    loading="lazy"
+                  />
+                </router-link>
+                <div class="other-card__body">
+                  <h3>
+                    <router-link :to="roomDetailPath(hotel, other)">
+                      {{ other.name }}
+                    </router-link>
+                  </h3>
+                  <RoomFacts
+                    compact
+                    :bed-type="other.bedType"
+                    :room-size="other.roomSize"
+                    :max-guests="other.maxGuests"
+                  />
+                  <p v-if="roomPriceText(other.id)" class="other-card__price">
+                    {{ roomPriceText(other.id) }}
+                  </p>
+                  <div class="other-card__actions">
+                    <button
+                      class="gy-btn gy-btn--sm"
+                      :class="
+                        hasSearchedDates && pricedRoom(other.id)
+                          ? 'gy-btn--light'
+                          : 'gy-btn--outline'
+                      "
+                      type="button"
+                      @click="bookRoom(other.id)"
+                    >
+                      {{
+                        hasSearchedDates && pricedRoom(other.id)
+                          ? "Book"
+                          : "Check availability"
+                      }}
+                    </button>
+                    <router-link
+                      class="gy-btn gy-btn--outline gy-btn--sm"
+                      :to="roomDetailPath(hotel, other)"
+                    >
+                      View details
+                    </router-link>
+                  </div>
+                </div>
+              </li>
+            </ul>
           </section>
 
-          <p v-reveal class="room-back">
-            <router-link :to="`/hotels/${hotel.slug}`" class="room-back__link">
-              ← Back to {{ hotel.name }}
-            </router-link>
-          </p>
+          <router-link class="back-link" :to="`/hotels/${hotel.slug}`">
+            Back to {{ hotel.name }}
+          </router-link>
         </div>
 
-        <aside
-          v-reveal="{ delay: '80ms' }"
-          class="room-book"
-          aria-label="Book this room"
-        >
-          <div class="room-book__card">
-            <div class="room-book__price">
-              <template v-if="priced">
-                <span class="room-book__from">Total for your dates</span>
-                <strong>${{ priced.total.toFixed(0) }}</strong>
-                <span class="room-book__hint">
-                  ${{ perNightLabel }} / night · {{ priced.nights }} night{{
-                    priced.nights === 1 ? "" : "s"
-                  }}
-                  · incl. taxes &amp; fees
-                </span>
-              </template>
-              <template v-else-if="fromPrice">
-                <span class="room-book__from">From</span>
-                <strong>${{ fromPrice.toFixed(0) }}</strong>
-                <span class="room-book__hint">per night · before taxes</span>
-              </template>
-              <template v-else>
-                <span class="room-book__from">Rates</span>
-                <strong>On request</strong>
-                <span class="room-book__hint"
-                  >Choose dates to see live availability</span
-                >
-              </template>
-            </div>
-
-            <dl class="room-book__meta">
-              <div>
-                <dt>Check-in</dt>
-                <dd>{{ formatStayDate(booking.search.checkIn) }}</dd>
-              </div>
-              <div>
-                <dt>Check-out</dt>
-                <dd>{{ formatStayDate(booking.search.checkOut) }}</dd>
-              </div>
-              <div>
-                <dt>Guests</dt>
-                <dd>{{ guestsLabel }}</dd>
-              </div>
-            </dl>
-
-            <button
-              class="gy-btn gy-btn--light room-book__cta"
-              type="button"
-              :disabled="booking.searching"
-              @click="bookThisRoom"
-            >
-              {{ bookCtaLabel }}
-            </button>
-            <p v-if="booking.errorMessage" class="room-book__error">
-              {{ booking.errorMessage }}
+        <aside class="price-card glass-edge" data-sheet="Availability">
+          <p class="eyebrow">Your stay</p>
+          <template v-if="priced">
+            <h2>${{ priced.total.toFixed(0) }}</h2>
+            <p class="price-card__hint">
+              ${{ perNightLabel }} / night · {{ priced.nights }} night{{
+                priced.nights === 1 ? "" : "s"
+              }}
+              · incl. taxes &amp; fees
             </p>
-          </div>
+            <p v-if="priced.availableUnits > 0" class="price-card__units">
+              {{ priced.availableUnits }} available
+            </p>
+          </template>
+          <template v-else-if="fromPrice">
+            <h2>${{ fromPrice.toFixed(0) }}</h2>
+            <p class="price-card__hint">per night · before taxes</p>
+          </template>
+          <template v-else>
+            <h2>On request</h2>
+            <p class="price-card__hint"
+              >Choose dates to see live availability</p
+            >
+          </template>
+          <p v-if="planLabel" class="price-card__plan">{{ planLabel }}</p>
+          <p v-if="planPolicy" class="price-card__policy">{{ planPolicy }}</p>
+          <dl>
+            <div>
+              <dt>Check-in</dt>
+              <dd>{{ formatStayDate(booking.search.checkIn) }}</dd>
+            </div>
+            <div>
+              <dt>Check-out</dt>
+              <dd>{{ formatStayDate(booking.search.checkOut) }}</dd>
+            </div>
+            <div>
+              <dt>Guests</dt>
+              <dd>{{ guestsLabel }}</dd>
+            </div>
+          </dl>
+          <button
+            v-magnetic
+            class="gy-btn gy-btn--light price-card__cta"
+            type="button"
+            :disabled="booking.searching"
+            @click="bookThisRoom"
+          >
+            {{ bookCtaLabel }}
+          </button>
+          <p v-if="booking.errorMessage" class="price-card__error">
+            {{ booking.errorMessage }}
+          </p>
         </aside>
       </div>
-    </div>
+    </section>
 
-    <div class="room-book-bar" role="region" aria-label="Book this room">
-      <div class="room-book-bar__price">
+    <div class="book-bar" role="region" aria-label="Book this room">
+      <div class="book-bar__price">
         <template v-if="priced">
           <strong>${{ priced.total.toFixed(0) }}</strong>
-          <span
-            >total · {{ priced.nights }} night{{
+          <span>
+            total · {{ priced.nights }} night{{
               priced.nights === 1 ? "" : "s"
-            }}</span
-          >
+            }}
+          </span>
         </template>
         <template v-else-if="fromPrice">
           <strong>From ${{ fromPrice.toFixed(0) }}</strong>
@@ -211,7 +322,7 @@
         </template>
       </div>
       <button
-        class="gy-btn gy-btn--light room-book-bar__cta"
+        class="gy-btn gy-btn--light"
         type="button"
         :disabled="booking.searching"
         @click="bookThisRoom"
@@ -219,46 +330,102 @@
         {{ bookCtaLabel }}
       </button>
     </div>
+
+    <q-dialog
+      v-model="galleryOpen"
+      maximized
+      transition-show="fade"
+      transition-hide="fade"
+    >
+      <div
+        class="lb"
+        role="dialog"
+        aria-label="Room photo gallery"
+        @keydown="onStageKey"
+      >
+        <button
+          type="button"
+          class="lb__close"
+          aria-label="Close gallery"
+          @click="galleryOpen = false"
+        >
+          <q-icon name="close" size="22px" />
+        </button>
+        <button
+          v-if="photos.length > 1"
+          type="button"
+          class="lb__nav"
+          aria-label="Previous photo"
+          @click="stepPhoto(-1)"
+        >
+          <q-icon name="chevron_left" size="28px" />
+        </button>
+        <figure>
+          <img
+            v-if="activeSrc"
+            :src="activeSrc"
+            :alt="`${room.name} photo ${activePhoto + 1}`"
+          />
+        </figure>
+        <button
+          v-if="photos.length > 1"
+          type="button"
+          class="lb__nav"
+          aria-label="Next photo"
+          @click="stepPhoto(1)"
+        >
+          <q-icon name="chevron_right" size="28px" />
+        </button>
+        <p class="lb__count">{{ activePhoto + 1 }} / {{ photos.length }}</p>
+      </div>
+    </q-dialog>
   </q-page>
 
-  <q-page v-else-if="catalogReady" class="gy-section gy-container room-missing">
+  <q-page v-else-if="catalogReady" class="dest-luxe rooms-luxe room-state">
     <SeoHead
       title="Room not found | Greyon"
       description="We couldn’t find that room. Browse Greyon hotels to continue."
     />
-    <p class="gy-eyebrow">Room</p>
-    <h1 class="gy-display">We couldn’t find that room</h1>
-    <p class="gy-muted room-missing__copy">
-      It may have been removed or the link is out of date. Head back to the
-      hotel or browse all Greyon properties.
-    </p>
-    <div class="room-missing__actions">
-      <router-link
-        v-if="hotel"
-        :to="`/hotels/${hotel.slug}`"
-        class="gy-btn gy-btn--light"
-      >
-        Back to {{ hotel.name }}
-      </router-link>
-      <router-link to="/hotels" class="gy-btn gy-btn--outline"
-        >All hotels</router-link
-      >
+    <div class="dest-wrap">
+      <p class="eyebrow">Room</p>
+      <h1>We couldn’t find that room</h1>
+      <p>
+        It may have been removed or the link is out of date. Head back to the
+        hotel or browse all Greyon properties.
+      </p>
+      <div class="room-state__actions">
+        <router-link
+          v-if="hotel"
+          :to="`/hotels/${hotel.slug}`"
+          class="gy-btn gy-btn--light"
+        >
+          Back to {{ hotel.name }}
+        </router-link>
+        <router-link to="/hotels" class="gy-btn gy-btn--outline">
+          All hotels
+        </router-link>
+      </div>
     </div>
   </q-page>
 
-  <q-page v-else class="gy-section gy-container room-missing">
+  <q-page v-else class="dest-luxe rooms-luxe room-state">
     <SeoHead title="Room | Greyon" description="Loading room details." />
-    <p class="gy-muted">Loading room details…</p>
+    <div class="dest-wrap">
+      <p>Loading room details…</p>
+    </div>
   </q-page>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import FeatureChips from "@/components/FeatureChips.vue";
+import RevealWords from "@/components/home/RevealWords.vue";
+import { useDragScroll } from "@/components/home/useDragScroll";
+import { useParallax } from "@/components/home/useParallax";
+import BookingSearchWidget from "@/components/BookingSearchWidget.vue";
+import HotelAmenityBand from "@/components/hotel/HotelAmenityBand.vue";
+import SectionDivider from "@/components/hotel/SectionDivider.vue";
 import RoomFacts from "@/components/RoomFacts.vue";
-import RoomMediaCarousel from "@/components/RoomMediaCarousel.vue";
-import RoomOfferCard from "@/components/RoomOfferCard.vue";
 import SeoHead from "@/components/SeoHead.vue";
 import { useBookingStore } from "@/stores/booking-store";
 import { useCmsStore } from "@/stores/cms-store";
@@ -270,6 +437,20 @@ const router = useRouter();
 const booking = useBookingStore();
 const cms = useCmsStore();
 const catalogReady = ref(false);
+const activePhoto = ref(0);
+const galleryOpen = ref(false);
+
+const stageFrame = ref<HTMLElement | null>(null);
+const stageOffset = useParallax(stageFrame, 120);
+const stageStyle = computed(() => ({
+  transform: `translate3d(0, ${stageOffset.value}px, 0)`
+}));
+const filmstrip = ref<HTMLElement | null>(null);
+const policyRail = ref<HTMLElement | null>(null);
+const otherRail = ref<HTMLElement | null>(null);
+useDragScroll(filmstrip, { momentum: true });
+useDragScroll(policyRail, { momentum: true });
+useDragScroll(otherRail, { momentum: true });
 
 const hotelSlug = computed(() => String(route.params.hotelSlug || ""));
 const roomSlug = computed(() => String(route.params.roomSlug || ""));
@@ -313,9 +494,26 @@ watch(
   { immediate: true }
 );
 
+watch(room, () => {
+  activePhoto.value = 0;
+  galleryOpen.value = false;
+});
+
+const photos = computed(() => {
+  const urls = (room.value?.images ?? [])
+    .map(src => src.trim())
+    .filter(Boolean);
+  return [...new Set(urls)];
+});
+
+const activeSrc = computed(() => photos.value[activePhoto.value] ?? "");
+const lensSrc = computed(() => {
+  if (photos.value.length < 2) return "";
+  return photos.value[(activePhoto.value + 1) % photos.value.length] ?? "";
+});
+
 const coverImage = computed(
-  () =>
-    room.value?.images.find(src => src.trim()) || hotel.value?.heroImage || ""
+  () => photos.value[0] || hotel.value?.heroImage || ""
 );
 
 const roomDescription = computed(() => {
@@ -325,6 +523,10 @@ const roomDescription = computed(() => {
   return desc;
 });
 
+const policies = computed(() =>
+  (hotel.value?.policies ?? []).map(item => item.trim()).filter(Boolean)
+);
+
 const seoTitle = computed(() =>
   room.value && hotel.value
     ? `${room.value.name} · ${hotel.value.name} | Greyon`
@@ -333,12 +535,14 @@ const seoTitle = computed(() =>
 
 const seoDescription = computed(() => {
   if (!room.value || !hotel.value) return "";
-  return (
-    roomDescription.value ||
-    `${room.value.name} at ${hotel.value.name}. ${
-      room.value.bedType || "Comfortable stay"
-    }${room.value.maxGuests ? ` · up to ${room.value.maxGuests} guests` : ""}.`
-  );
+  if (roomDescription.value) return roomDescription.value;
+  const bits = [
+    room.value.bedType,
+    room.value.maxGuests ? `up to ${room.value.maxGuests} guests` : ""
+  ].filter(Boolean);
+  return bits.length
+    ? `${room.value.name} at ${hotel.value.name}. ${bits.join(" · ")}.`
+    : `${room.value.name} at ${hotel.value.name}.`;
 });
 
 const jsonLd = computed(() =>
@@ -366,22 +570,22 @@ const otherRooms = computed(() => {
   if (!hotel.value || !room.value) return [];
   return cms
     .getRoomTypesByHotelId(hotel.value.id)
-    .filter(r => r.id !== room.value?.id)
-    .slice(0, 4);
+    .filter(item => item.id !== room.value?.id);
 });
 
 const hasSearchedDates = computed(
   () =>
     Boolean(booking.search.checkIn && booking.search.checkOut) &&
     booking.results.length > 0 &&
-    booking.results.some(r => r.hotel.id === hotel.value?.id)
+    booking.results.some(item => item.hotel.id === hotel.value?.id)
 );
 
 function pricedRoom(roomTypeId: string) {
   if (!hotel.value) return null;
   return (
     booking.results.find(
-      r => r.hotel.id === hotel.value?.id && r.roomType.id === roomTypeId
+      item =>
+        item.hotel.id === hotel.value?.id && item.roomType.id === roomTypeId
     ) ?? null
   );
 }
@@ -400,15 +604,24 @@ const perNightLabel = computed(() => {
   return (priced.value.total / priced.value.nights).toFixed(0);
 });
 
-const galleryBadge = computed(() => {
-  if (
-    priced.value &&
-    priced.value.availableUnits > 0 &&
-    priced.value.availableUnits <= 8
-  ) {
-    return `${priced.value.availableUnits} left`;
-  }
-  return room.value?.bedType?.trim() || "";
+const planLabel = computed(() => {
+  const name =
+    priced.value?.ratePlan.name?.trim() ||
+    (room.value
+      ? cms.getRatePlanByRoomTypeId(room.value.id)?.name?.trim()
+      : "") ||
+    "";
+  return name;
+});
+
+const planPolicy = computed(() => {
+  const text =
+    priced.value?.ratePlan.cancellationPolicy?.trim() ||
+    (room.value
+      ? cms.getRatePlanByRoomTypeId(room.value.id)?.cancellationPolicy?.trim()
+      : "") ||
+    "";
+  return text;
 });
 
 const guestsLabel = computed(() => {
@@ -427,6 +640,33 @@ const bookCtaLabel = computed(() => {
   return "Check availability";
 });
 
+function pad(value: number) {
+  return String(value).padStart(2, "0");
+}
+
+function coverOf(item: RoomType) {
+  return item.images.find(src => src.trim())?.trim() ?? "";
+}
+
+function revealOf(item: RoomType) {
+  const cover = coverOf(item);
+  return (
+    item.images.find(src => src.trim() && src.trim() !== cover)?.trim() ?? ""
+  );
+}
+
+function stepPhoto(delta: number) {
+  const total = photos.value.length;
+  if (total < 2) return;
+  activePhoto.value = (activePhoto.value + delta + total) % total;
+}
+
+function onStageKey(event: KeyboardEvent) {
+  if (event.key === "ArrowRight") stepPhoto(1);
+  else if (event.key === "ArrowLeft") stepPhoto(-1);
+  else if (event.key === "Escape") galleryOpen.value = false;
+}
+
 function formatStayDate(ymd: string) {
   if (!ymd) return "—";
   const d = new Date(`${ymd}T12:00:00`);
@@ -438,25 +678,9 @@ function formatStayDate(ymd: string) {
   });
 }
 
-function roomSubtitle(r: RoomType) {
-  const desc = r.description?.trim() || "";
-  const name = r.name?.trim() || "";
-  if (desc && desc.toLowerCase() !== name.toLowerCase()) return desc;
-  if (r.roomSize && r.bedType) return `${r.bedType} · ${r.roomSize}`;
-  if (r.roomSize) return r.roomSize;
-  if (r.maxGuests) return `Sleeps up to ${r.maxGuests}`;
-  return "Comfortable Greyon stay";
-}
-
 function roomPriceText(roomTypeId: string) {
   const match = pricedRoom(roomTypeId);
   return match ? `$${match.total.toFixed(2)}` : "";
-}
-
-function roomPricePerNight(roomTypeId: string) {
-  const match = pricedRoom(roomTypeId);
-  if (!match || !match.nights) return "";
-  return `$${(match.total / match.nights).toFixed(0)} per night`;
 }
 
 async function bookRoom(roomTypeId: string) {
@@ -470,7 +694,7 @@ async function bookRoom(roomTypeId: string) {
     return;
   }
   await booking.runSearch();
-  const found = booking.results.find(r => r.roomType.id === roomTypeId);
+  const found = booking.results.find(item => item.roomType.id === roomTypeId);
   if (found) booking.selectResult(found);
   void router.push({ name: "booking" });
 }
@@ -481,322 +705,6 @@ async function bookThisRoom() {
 }
 </script>
 
-<style scoped>
-.room-detail {
-  padding-bottom: 6rem;
-  background:
-    radial-gradient(
-      ellipse 80% 40% at 10% 0%,
-      rgba(196, 163, 90, 0.08),
-      transparent 55%
-    ),
-    linear-gradient(
-      180deg,
-      var(--gy-cream) 0%,
-      #f6f4f1 40%,
-      var(--gy-sand) 100%
-    );
-}
-
-.room-detail__inner {
-  padding-top: 1.25rem;
-  padding-bottom: 2.5rem;
-}
-
-.room-crumb {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.35rem 0.45rem;
-  margin: 0 0 1.25rem;
-  font-size: 0.82rem;
-  line-height: 1.4;
-  color: var(--gy-muted);
-}
-
-.room-crumb a {
-  color: var(--gy-forest);
-  text-decoration: none;
-  min-height: 44px;
-  display: inline-flex;
-  align-items: center;
-  transition: color 0.2s ease;
-}
-
-.room-crumb a:hover {
-  color: var(--gy-ink);
-  text-decoration: underline;
-}
-
-.room-crumb__sep {
-  opacity: 0.55;
-}
-
-.room-crumb__current {
-  color: var(--gy-ink);
-  font-weight: 600;
-}
-
-.room-detail__layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 1.75rem;
-  align-items: start;
-}
-
-.room-detail__main {
-  min-width: 0;
-}
-
-.room-gallery-block__carousel {
-  width: 100%;
-  max-width: 100%;
-  aspect-ratio: 16 / 10;
-  border-radius: 18px;
-  box-shadow:
-    0 1px 2px rgba(69, 76, 75, 0.05),
-    0 16px 40px rgba(69, 76, 75, 0.1);
-}
-
-.room-header {
-  margin-top: 1.5rem;
-  display: grid;
-  gap: 0.75rem;
-}
-
-.room-header h1 {
-  margin: 0;
-  font-size: clamp(1.85rem, 4vw, 2.65rem);
-  line-height: 1.15;
-}
-
-.room-header__desc {
-  margin: 0.25rem 0 0;
-  max-width: 42rem;
-  font-size: 1.05rem;
-  line-height: 1.7;
-  color: var(--gy-ink);
-}
-
-.room-block {
-  margin-top: 2.25rem;
-}
-
-.room-block__head {
-  margin-bottom: 1rem;
-}
-
-.room-block__head h2 {
-  margin: 0 0 0.35rem;
-  font-size: clamp(1.45rem, 2.5vw, 1.85rem);
-}
-
-.room-block__head .gy-muted {
-  margin: 0;
-}
-
-.room-others {
-  display: grid;
-  gap: 1rem;
-}
-
-.room-back {
-  margin: 2.5rem 0 0;
-}
-
-.room-back__link {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  color: var(--gy-forest);
-  font-weight: 600;
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-.room-back__link:hover {
-  color: var(--gy-ink);
-  text-decoration: underline;
-}
-
-.room-book {
-  display: none;
-}
-
-.room-book__card {
-  position: sticky;
-  top: 5.5rem;
-  display: grid;
-  gap: 1.1rem;
-  padding: 1.25rem 1.2rem 1.35rem;
-  background: var(--gy-white);
-  border-radius: 16px;
-  box-shadow:
-    0 1px 2px rgba(69, 76, 75, 0.05),
-    0 18px 40px rgba(69, 76, 75, 0.1);
-}
-
-.room-book__price {
-  display: grid;
-  gap: 0.2rem;
-}
-
-.room-book__from {
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--gy-muted);
-  font-weight: 600;
-}
-
-.room-book__price strong {
-  font-family: var(--font-display);
-  font-size: 2rem;
-  font-weight: 600;
-  line-height: 1.05;
-  letter-spacing: -0.02em;
-  color: var(--gy-ink);
-}
-
-.room-book__hint {
-  font-size: 0.8rem;
-  color: var(--gy-muted);
-  line-height: 1.4;
-}
-
-.room-book__meta {
-  display: grid;
-  gap: 0.65rem;
-  margin: 0;
-  padding: 0.85rem 0;
-  border-top: 1px solid rgba(69, 76, 75, 0.08);
-  border-bottom: 1px solid rgba(69, 76, 75, 0.08);
-}
-
-.room-book__meta > div {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  align-items: baseline;
-}
-
-.room-book__meta dt {
-  margin: 0;
-  font-size: 0.78rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--gy-muted);
-}
-
-.room-book__meta dd {
-  margin: 0;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--gy-ink);
-  text-align: right;
-}
-
-.room-book__cta {
-  width: 100%;
-  min-height: 48px;
-}
-
-.room-book__error {
-  margin: 0;
-  font-size: 0.85rem;
-  color: #9a3b2f;
-  line-height: 1.4;
-}
-
-.room-book-bar {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 40;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.85rem;
-  padding: 0.85rem 1rem calc(0.85rem + env(safe-area-inset-bottom));
-  background: rgba(255, 255, 255, 0.97);
-  border-top: 1px solid rgba(69, 76, 75, 0.1);
-  box-shadow: 0 -12px 28px rgba(69, 76, 75, 0.1);
-  backdrop-filter: blur(10px);
-}
-
-.room-book-bar__price {
-  display: grid;
-  gap: 0.1rem;
-  min-width: 0;
-}
-
-.room-book-bar__price strong {
-  font-family: var(--font-display);
-  font-size: 1.25rem;
-  font-weight: 600;
-  line-height: 1.1;
-  color: var(--gy-ink);
-}
-
-.room-book-bar__price span {
-  font-size: 0.72rem;
-  color: var(--gy-muted);
-}
-
-.room-book-bar__cta {
-  flex-shrink: 0;
-  min-height: 44px;
-  min-width: 9.5rem;
-  padding-inline: 1rem;
-  font-size: 0.72rem;
-}
-
-.room-missing h1 {
-  margin: 0 0 0.75rem;
-  font-size: clamp(1.85rem, 4vw, 2.5rem);
-}
-
-.room-missing__copy {
-  max-width: 32rem;
-  margin: 0 0 1.5rem;
-  line-height: 1.6;
-}
-
-.room-missing__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-}
-
-@media (min-width: 900px) {
-  .room-detail {
-    padding-bottom: 2.5rem;
-  }
-
-  .room-detail__layout {
-    grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
-    gap: 2rem;
-  }
-
-  .room-book {
-    display: block;
-  }
-
-  .room-book-bar {
-    display: none;
-  }
-
-  .room-gallery-block__carousel {
-    aspect-ratio: 16 / 9;
-    min-height: 320px;
-  }
-}
-
-@media (max-width: 389px) {
-  .room-book-bar__cta {
-    min-width: 0;
-    padding-inline: 0.75rem;
-  }
-}
-</style>
+<style src="@/components/home/home-motion.css"></style>
+<style src="./destination-luxe.css"></style>
+<style src="./rooms-luxe.css"></style>

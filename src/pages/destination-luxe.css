@@ -1,0 +1,147 @@
+/* Shared luxury language for the destination pages. Motion helpers stay in boot/motion and home-motion.css. */
+
+.dest-luxe {
+  --header-offset: 5.5rem;
+  --stack-step: 3.35rem;
+  --photo-step: 1.15rem;
+  --dest-ink: #161311;
+  background:
+    radial-gradient(
+      ellipse at 100% 0%,
+      rgba(196, 163, 90, 0.12),
+      transparent 28%
+    ),
+    var(--gy-cream);
+  color: var(--gy-ink);
+}
+
+.dest-luxe h1,
+.dest-luxe h2 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+}
+
+.dest-wrap {
+  width: min(1240px, calc(100% - 2.5rem));
+  margin-inline: auto;
+}
+
+.dest-luxe .eyebrow {
+  margin: 0 0 0.85rem;
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--gy-gold-deep);
+}
+
+.dest-luxe .eyebrow::after {
+  content: "";
+  display: block;
+  width: 0;
+  height: 1px;
+  margin-top: 0.8rem;
+  background: linear-gradient(90deg, var(--gy-gold), var(--gy-forest));
+  transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.dest-luxe .eyebrow.gy-reveal--in::after {
+  width: 3.25rem;
+}
+
+.dest-luxe .eyebrow--light {
+  color: var(--gy-gold);
+}
+
+.dest-luxe .section-lead {
+  max-width: 36rem;
+  margin: 0.85rem 0 0;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.6;
+  color: var(--gy-muted);
+}
+
+.dest-luxe .glass-edge {
+  position: relative;
+}
+
+.dest-luxe .glass-edge::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  background: linear-gradient(
+    145deg,
+    var(--gy-gold),
+    var(--gy-forest) 55%,
+    rgba(255, 255, 255, 0.7)
+  );
+  pointer-events: none;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+
+.dest-luxe .dest-tilt {
+  transition: transform 0.18s linear;
+}
+
+.dest-luxe .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+#dest-journey,
+#dest-index,
+#dest-story,
+#dest-highlights,
+#dest-gallery,
+#dest-hotels,
+#dest-visit,
+#dest-elsewhere {
+  scroll-margin-top: var(--header-offset);
+}
+
+@media (max-width: 599px) {
+  .dest-luxe {
+    --header-offset: 4.5rem;
+    --stack-step: 2.75rem;
+  }
+
+  .dest-wrap {
+    width: min(1240px, calc(100% - 1.5rem));
+  }
+
+  .dest-luxe .eyebrow {
+    letter-spacing: 0.16em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dest-luxe .eyebrow::after,
+  .dest-luxe .dest-tilt {
+    transition: none;
+  }
+
+  .dest-luxe .eyebrow::after {
+    width: 3.25rem;
+  }
+}
