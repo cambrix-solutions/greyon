@@ -632,7 +632,7 @@ async function onSubmit() {
 
 .form-alert--error {
   background: rgba(139, 46, 46, 0.08);
-  color: #8b2e2e;
+  color: var(--q-negative);
 }
 
 .form-alert--success {
@@ -725,7 +725,7 @@ async function onSubmit() {
 
 .contact-select-menu .q-item--active,
 .contact-select-menu .q-manual-focusable--focused {
-  background: #627063 !important;
+  background: var(--gy-forest) !important;
   color: #fff !important;
 }
 </style>

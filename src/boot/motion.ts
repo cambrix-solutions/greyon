@@ -85,7 +85,51 @@ function bindImageFallback() {
   );
 }
 
+/** Slight pull toward the pointer. Home-section buttons only. */
+const magnetic: Directive<HTMLElement> = {
+  mounted(el) {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (window.matchMedia("(hover: none)").matches) return;
+
+    const onMove = (event: PointerEvent) => {
+      const rect = el.getBoundingClientRect();
+      const dx = event.clientX - (rect.left + rect.width / 2);
+      const dy = event.clientY - (rect.top + rect.height / 2);
+      const x = Math.max(-12, Math.min(12, dx * 0.28));
+      const y = Math.max(-10, Math.min(6, dy * 0.22)) - 4;
+      el.style.transition = "transform 0.12s linear";
+      el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+    };
+    const onLeave = () => {
+      el.style.transition = "";
+      el.style.transform = "";
+    };
+    el.addEventListener("pointermove", onMove);
+    el.addEventListener("pointerleave", onLeave);
+    (
+      el as HTMLElement & {
+        __magnetic?: {
+          onMove: (event: PointerEvent) => void;
+          onLeave: () => void;
+        };
+      }
+    ).__magnetic = { onMove, onLeave };
+  },
+  unmounted(el) {
+    const node = el as HTMLElement & {
+      __magnetic?: {
+        onMove: (event: PointerEvent) => void;
+        onLeave: () => void;
+      };
+    };
+    if (!node.__magnetic) return;
+    el.removeEventListener("pointermove", node.__magnetic.onMove);
+    el.removeEventListener("pointerleave", node.__magnetic.onLeave);
+  }
+};
+
 export default defineBoot(({ app }) => {
   app.directive("reveal", reveal);
+  app.directive("magnetic", magnetic);
   bindImageFallback();
 });
