@@ -41,26 +41,37 @@
               v-if="slideCtaInternal"
               :to="activeSlide?.ctaUrl || '/'"
               class="gy-btn gy-btn--light"
-              >{{ activeSlide?.ctaLabel }}</router-link
+              ><span class="home-hero__cta-label">{{
+                activeSlide?.ctaLabel
+              }}</span></router-link
             >
             <a
-              v-else-if="activeSlide?.ctaLabel && activeSlide?.ctaUrl"
+              v-else-if="slideHasCta"
               class="gy-btn gy-btn--light"
-              :href="activeSlide.ctaUrl"
+              :href="activeSlide?.ctaUrl"
               target="_blank"
               rel="noopener noreferrer"
-              >{{ activeSlide.ctaLabel }}</a
+              ><span class="home-hero__cta-label">{{
+                activeSlide?.ctaLabel
+              }}</span></a
             >
             <router-link
               v-if="auth.featureEnabled('booking_public')"
               to="/booking"
               class="gy-btn"
-              :class="activeSlide?.ctaLabel ? 'gy-btn--ghost' : 'gy-btn--light'"
-              >{{ $t("nav.bookNow") }}</router-link
+              :class="slideHasCta ? 'gy-btn--ghost' : 'gy-btn--light'"
+              ><span class="home-hero__cta-label">{{
+                $t("nav.bookNow")
+              }}</span></router-link
             >
-            <router-link to="/hotels" class="gy-btn gy-btn--ghost">{{
-              $t("home.viewHotels")
-            }}</router-link>
+            <router-link
+              v-if="!slideHasCta"
+              to="/hotels"
+              class="gy-btn gy-btn--ghost"
+              ><span class="home-hero__cta-label">{{
+                $t("home.viewHotels")
+              }}</span></router-link
+            >
           </div>
         </div>
         <BookingSearchWidget
@@ -175,10 +186,16 @@ const activeSlide = computed(
   () => heroSlides.value[heroIndex.value] ?? heroSlides.value[0]
 );
 
+const slideHasCta = computed(() => {
+  const label = activeSlide.value?.ctaLabel?.trim() ?? "";
+  const url = activeSlide.value?.ctaUrl?.trim() ?? "";
+  return Boolean(label && url);
+});
+
 const slideCtaInternal = computed(() => {
   const url = activeSlide.value?.ctaUrl?.trim() ?? "";
   return Boolean(
-    activeSlide.value?.ctaLabel && url.startsWith("/") && !url.startsWith("//")
+    slideHasCta.value && url.startsWith("/") && !url.startsWith("//")
   );
 });
 
@@ -441,6 +458,26 @@ onUnmounted(() => clearTimer());
 
   .home-hero__content {
     padding-bottom: 1.25rem;
+  }
+
+  .home-hero__cta {
+    flex-wrap: nowrap;
+    gap: 0.45rem;
+  }
+
+  .home-hero__cta .gy-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0.55rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.04em;
+  }
+
+  .home-hero__cta-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
   }
 }
 
