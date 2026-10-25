@@ -1305,9 +1305,18 @@ onUnmounted(() => {
 
 /* ---- Mobile drawer sheet ---- */
 .gy-drawer {
-  /* Above Quasar defaults; cookie banner is also hidden while open. */
-  z-index: 6000 !important;
   background: var(--gy-cream) !important;
+}
+
+/*
+ * Quasar puts this component's class on the inner content node, not the
+ * positioned aside, so a z-index on .gy-drawer never lifts the panel.
+ * The backdrop rule is :deep and does apply, which left the dimmer (5990)
+ * above the aside (3000) and swallowed every tap. Raise the aside itself.
+ * Backdrop stays just under it, and above the cookie banner (z-index 5000).
+ */
+.gy-layout :deep(.q-drawer--on-top) {
+  z-index: 6000 !important;
 }
 
 .gy-layout :deep(.q-drawer__backdrop) {
