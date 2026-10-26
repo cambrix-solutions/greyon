@@ -6,7 +6,7 @@
       :image="mastImage || undefined"
     />
 
-    <section v-spot class="mast" data-sheet="Mast" aria-labelledby="apt-title">
+    <section class="mast" data-sheet="Mast" aria-labelledby="apt-title">
       <div ref="mastFrame" class="mast__media">
         <img
           v-if="mastImage"
@@ -16,16 +16,7 @@
           :style="mastStyle"
         />
         <div class="mast__veil" />
-        <img
-          v-if="mastReveal"
-          class="mast__lens"
-          :src="mastReveal"
-          alt=""
-          :style="mastStyle"
-        />
-        <div class="mast__spot" />
       </div>
-      <p v-if="mastReveal" class="mast__hint">Move across the photograph</p>
 
       <div class="dest-wrap mast__content">
         <p v-if="mastPlace" v-reveal class="mast__chip">{{ mastPlace }}</p>
@@ -335,27 +326,6 @@ const mastImage = computed(() => {
     hotel.heroImage.trim() ||
     hotel.gallery.find(src => src.trim())?.trim() ||
     ""
-  );
-});
-
-const mastReveal = computed(() => {
-  const hotel = mastHotel.value;
-  const cover = mastImage.value;
-  if (!hotel || !cover) return "";
-  const fromGallery = hotel.gallery.find(
-    src => src.trim() && src.trim() !== cover
-  );
-  if (fromGallery) return fromGallery.trim();
-  const other = apartments.value.find(item => {
-    if (item.id === hotel.id) return false;
-    const hero = item.heroImage.trim();
-    return (hero && hero !== cover) || item.gallery.some(src => src.trim());
-  });
-  if (!other) return "";
-  const hero = other.heroImage.trim();
-  if (hero && hero !== cover) return hero;
-  return (
-    other.gallery.find(src => src.trim() && src.trim() !== cover)?.trim() ?? ""
   );
 });
 

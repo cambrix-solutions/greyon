@@ -167,43 +167,9 @@ const tilt: Directive<HTMLElement, { max?: number } | undefined> = {
   }
 };
 
-/** Writes --spot-x / --spot-y so a mask can follow the pointer. */
-const spot: Directive<HTMLElement> = {
-  mounted(el) {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    if (window.matchMedia("(hover: none)").matches) return;
-
-    const onMove = (event: PointerEvent) => {
-      const rect = el.getBoundingClientRect();
-      if (!rect.width || !rect.height) return;
-      const x = ((event.clientX - rect.left) / rect.width) * 100;
-      const y = ((event.clientY - rect.top) / rect.height) * 100;
-      el.style.setProperty("--spot-x", `${x}%`);
-      el.style.setProperty("--spot-y", `${y}%`);
-    };
-    const onLeave = () => {
-      el.style.removeProperty("--spot-x");
-      el.style.removeProperty("--spot-y");
-    };
-    el.addEventListener("pointermove", onMove);
-    el.addEventListener("pointerleave", onLeave);
-    (el as HTMLElement & { __spot?: PointerHandlers }).__spot = {
-      onMove,
-      onLeave
-    };
-  },
-  unmounted(el) {
-    const node = el as HTMLElement & { __spot?: PointerHandlers };
-    if (!node.__spot) return;
-    el.removeEventListener("pointermove", node.__spot.onMove);
-    el.removeEventListener("pointerleave", node.__spot.onLeave);
-  }
-};
-
 export default defineBoot(({ app }) => {
   app.directive("reveal", reveal);
   app.directive("magnetic", magnetic);
   app.directive("tilt", tilt);
-  app.directive("spot", spot);
   bindImageFallback();
 });

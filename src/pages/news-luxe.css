@@ -238,16 +238,8 @@
   letter-spacing: -0.02em;
 }
 
-.news-luxe .story-spot {
-  --spot-x: 50%;
-  --spot-y: 40%;
-  background:
-    radial-gradient(
-      circle 11rem at var(--spot-x) var(--spot-y),
-      rgba(196, 163, 90, 0.28),
-      transparent 72%
-    ),
-    rgba(255, 252, 247, 0.94);
+.news-luxe .story {
+  background: rgba(255, 252, 247, 0.94);
 }
 
 .news-luxe .article-html {

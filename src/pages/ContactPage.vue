@@ -24,7 +24,6 @@
 
       <section
         v-if="heroImage"
-        v-spot
         class="stage stage--short"
         data-sheet="Arrive"
         aria-labelledby="contact-title"
@@ -39,10 +38,7 @@
             fetchpriority="high"
           />
           <div class="stage__veil" />
-          <img class="stage__lens" :src="heroImage" alt="" :style="heroStyle" />
-          <div class="stage__spot" />
         </div>
-        <p class="stage__hint">Move across the photograph</p>
         <div class="dest-wrap stage__content">
           <p v-reveal class="eyebrow eyebrow--light">Get in touch</p>
           <h1 id="contact-title" v-reveal="{ delay: '70ms' }">Contact</h1>
@@ -111,9 +107,8 @@
 
       <section class="contact-band" aria-label="Enquiry">
         <div class="dest-wrap contact-grid">
-          <div v-spot class="map-card glass-edge" data-sheet="Map">
+          <div class="map-card glass-edge" data-sheet="Map">
             <span v-if="showSheets" class="sheet-label">Map</span>
-            <span class="map-glow" aria-hidden="true" />
             <div class="map-chips" role="tablist" aria-label="Branch locations">
               <button
                 v-for="choice in mapChoices"

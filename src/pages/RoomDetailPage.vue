@@ -11,7 +11,6 @@
     />
 
     <section
-      v-spot
       class="stage"
       data-sheet="Gallery"
       tabindex="0"
@@ -28,14 +27,6 @@
           :style="stageStyle"
         />
         <div class="stage__veil" />
-        <img
-          v-if="lensSrc"
-          class="stage__lens"
-          :src="lensSrc"
-          alt=""
-          :style="stageStyle"
-        />
-        <div class="stage__spot" />
         <button
           v-if="photos.length"
           type="button"
@@ -44,7 +35,6 @@
           @click="galleryOpen = true"
         />
       </div>
-      <p v-if="lensSrc" class="stage__hint">Move across the photograph</p>
 
       <div class="dest-wrap stage__content">
         <nav class="crumb" aria-label="Breadcrumb">
@@ -507,10 +497,6 @@ const photos = computed(() => {
 });
 
 const activeSrc = computed(() => photos.value[activePhoto.value] ?? "");
-const lensSrc = computed(() => {
-  if (photos.value.length < 2) return "";
-  return photos.value[(activePhoto.value + 1) % photos.value.length] ?? "";
-});
 
 const coverImage = computed(
   () => photos.value[0] || hotel.value?.heroImage || ""

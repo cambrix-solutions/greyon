@@ -84,17 +84,7 @@
 .story-luxe .mask__title.has-photo {
   background-image: var(--mask-image);
   background-size: 170% 170%;
-  background-position: var(--spot-x, 50%) var(--mask-y, 42%);
-}
-
-.story-luxe .mask__hint {
-  margin: 0.9rem 0 0;
-  font-family: var(--font-display);
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--gy-gold-deep);
+  background-position: 50% var(--mask-y, 42%);
 }
 
 .story-luxe .mask__lead,
@@ -397,8 +387,6 @@
 }
 
 .story-luxe .map-card {
-  --spot-x: 50%;
-  --spot-y: 40%;
   padding: 0.85rem;
   border-radius: 28px;
   background: rgba(255, 252, 247, 0.86);
@@ -406,23 +394,7 @@
   backdrop-filter: blur(16px) saturate(1.2);
 }
 
-.story-luxe .map-glow {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  border-radius: inherit;
-  pointer-events: none;
-  background: radial-gradient(
-    circle 9rem at var(--spot-x) var(--spot-y),
-    rgba(196, 163, 90, 0.42),
-    transparent 72%
-  );
-  mix-blend-mode: soft-light;
-  opacity: 0;
-  transition: opacity 0.35s ease;
-}
-
-.story-luxe .map-card > :not(.map-glow):not(.sheet-label) {
+.story-luxe .map-card > :not(.sheet-label) {
   position: relative;
   z-index: 3;
 }
@@ -669,11 +641,6 @@
 }
 
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  .story-luxe .map-card:hover .map-glow,
-  .story-luxe .map-card:focus-within .map-glow {
-    opacity: 1;
-  }
-
   .story-luxe .enquiry__field:focus-within {
     transform: translateY(-2px);
   }
@@ -748,25 +715,13 @@
   }
 }
 
-@media (hover: none) {
-  .story-luxe .mask__hint {
-    display: none;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .story-luxe .mask__title.has-photo,
-  .story-luxe .map-glow,
   .story-luxe .enquiry__field,
   .story-luxe .enquiry__field > span,
   .story-luxe .contact-field .q-field__control,
   .story-luxe .layers__frame img {
     transition: none;
-  }
-
-  .story-luxe .mask__hint,
-  .story-luxe .map-glow {
-    display: none;
   }
 
   .story-luxe .read-bar .sheet-label {

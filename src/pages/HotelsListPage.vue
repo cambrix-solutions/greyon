@@ -5,7 +5,7 @@
       description="Browse Greyon hotel portfolio across Cambodia."
     />
 
-    <section v-spot class="mast" data-sheet="Masthead">
+    <section class="mast" data-sheet="Masthead">
       <div ref="mastFrame" class="mast__media">
         <img
           v-if="mastImage"
@@ -15,7 +15,6 @@
           :style="mastStyle"
         />
         <div class="mast__veil" />
-        <div class="mast__spot" />
       </div>
 
       <div class="listing-wrap mast__content">
@@ -487,8 +486,6 @@ const showError = computed(
 }
 
 .mast {
-  --spot-x: 68%;
-  --spot-y: 36%;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -500,8 +497,7 @@ const showError = computed(
 }
 
 .mast__media,
-.mast__veil,
-.mast__spot {
+.mast__veil {
   position: absolute;
   inset: 0;
 }
@@ -532,16 +528,6 @@ const showError = computed(
       rgba(12, 11, 10, 0.08) 36%,
       rgba(12, 11, 10, 0.72) 100%
     );
-}
-
-.mast__spot {
-  background: radial-gradient(
-    circle 12rem at var(--spot-x) var(--spot-y),
-    rgba(196, 163, 90, 0.42),
-    transparent 68%
-  );
-  mix-blend-mode: soft-light;
-  opacity: 0;
 }
 
 .mast__content {
@@ -900,27 +886,6 @@ const showError = computed(
 
 .result-move {
   transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-@media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  .mast:hover .mast__veil {
-    -webkit-mask-image: radial-gradient(
-      circle 13rem at var(--spot-x) var(--spot-y),
-      transparent 0%,
-      rgba(0, 0, 0, 0.2) 42%,
-      #000 72%
-    );
-    mask-image: radial-gradient(
-      circle 13rem at var(--spot-x) var(--spot-y),
-      transparent 0%,
-      rgba(0, 0, 0, 0.2) 42%,
-      #000 72%
-    );
-  }
-
-  .mast:hover .mast__spot {
-    opacity: 1;
-  }
 }
 
 #listing-results {

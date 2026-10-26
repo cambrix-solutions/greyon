@@ -6,7 +6,7 @@
       :image="heroImage || undefined"
     />
 
-    <section v-spot class="hero" data-sheet="Hero">
+    <section class="hero" data-sheet="Hero">
       <div ref="heroFrame" class="hero__media">
         <img
           v-if="heroImage"
@@ -16,18 +16,7 @@
           :style="heroStyle"
         />
         <div class="hero__veil" />
-        <img
-          v-if="revealImage"
-          class="hero__lens"
-          :src="revealImage"
-          alt=""
-          :style="heroStyle"
-        />
-        <div class="hero__spot" />
       </div>
-      <p v-if="revealImage" class="hero__hint">
-        Move to reveal another photograph
-      </p>
       <div class="dest-wrap hero__content">
         <p v-reveal class="eyebrow eyebrow--light">Destination</p>
         <RevealWords tag="h1" :text="location.name" />
@@ -174,12 +163,10 @@
 
     <section
       id="dest-hotels"
-      v-spot
       class="stays"
       data-sheet="Stays"
       aria-labelledby="stays-title"
     >
-      <div class="stays__spot" />
       <div
         class="dest-wrap stays__grid"
         :class="{ 'is-empty': !hotelsHere.length }"
@@ -372,17 +359,9 @@ const gallery = computed(() =>
 const highlights = computed(() =>
   (location.value?.highlights ?? []).map(item => item.trim()).filter(Boolean)
 );
-const revealImage = computed(
-  () => gallery.value.find(src => src !== heroImage.value) ?? ""
+const portraitImage = computed(
+  () => gallery.value.find(src => src !== heroImage.value) || ""
 );
-const portraitImage = computed(() => {
-  const used = new Set([heroImage.value, revealImage.value]);
-  return (
-    gallery.value.find(src => !used.has(src)) ||
-    gallery.value.find(src => src !== heroImage.value) ||
-    ""
-  );
-});
 const phone = computed(() => location.value?.phone?.trim() ?? "");
 const email = computed(() => location.value?.email?.trim() ?? "");
 const hasContact = computed(() => Boolean(phone.value || email.value));
@@ -470,8 +449,6 @@ function bookHere() {
 
 <style scoped>
 .hero {
-  --spot-x: 68%;
-  --spot-y: 40%;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -483,8 +460,7 @@ function bookHere() {
 }
 
 .hero__media,
-.hero__veil,
-.hero__spot {
+.hero__veil {
   position: absolute;
   inset: 0;
 }
@@ -494,8 +470,7 @@ function bookHere() {
   pointer-events: none;
 }
 
-.hero__img,
-.hero__lens {
+.hero__img {
   position: absolute;
   left: 0;
   width: 100%;
@@ -519,48 +494,6 @@ function bookHere() {
       rgba(12, 11, 10, 0.04) 42%,
       rgba(12, 11, 10, 0.78) 100%
     );
-}
-
-.hero__lens {
-  z-index: 2;
-  opacity: 0;
-  transition: opacity 0.35s ease;
-  -webkit-mask-image: radial-gradient(
-    circle 12.5rem at var(--spot-x) var(--spot-y),
-    #000 56%,
-    transparent 74%
-  );
-  mask-image: radial-gradient(
-    circle 12.5rem at var(--spot-x) var(--spot-y),
-    #000 56%,
-    transparent 74%
-  );
-}
-
-.hero__spot {
-  z-index: 3;
-  background: radial-gradient(
-    circle 14rem at var(--spot-x) var(--spot-y),
-    rgba(196, 163, 90, 0.48),
-    transparent 68%
-  );
-  mix-blend-mode: soft-light;
-  opacity: 0;
-  transition: opacity 0.35s ease;
-}
-
-.hero__hint {
-  position: absolute;
-  top: 1.2rem;
-  right: max(1.25rem, calc((100% - 1240px) / 2));
-  z-index: 4;
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.82);
 }
 
 .hero__content {
@@ -816,24 +749,11 @@ function bookHere() {
 }
 
 .stays {
-  --spot-x: 78%;
-  --spot-y: 24%;
   position: relative;
   isolation: isolate;
   overflow: hidden;
   padding: clamp(2.5rem, 6vw, 4.5rem) 0 clamp(3rem, 7vw, 5rem);
   background: var(--gy-white);
-}
-
-.stays__spot {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    circle 18rem at var(--spot-x) var(--spot-y),
-    rgba(196, 163, 90, 0.28),
-    transparent 70%
-  );
-  pointer-events: none;
 }
 
 .stays__grid {
@@ -1056,15 +976,6 @@ function bookHere() {
   }
 }
 
-@media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  .hero:hover .hero__lens,
-  .hero:focus-within .hero__lens,
-  .hero:hover .hero__spot,
-  .hero:focus-within .hero__spot {
-    opacity: 1;
-  }
-}
-
 @media (max-width: 900px) {
   .story__grid,
   .stays__grid,
@@ -1104,15 +1015,8 @@ function bookHere() {
   }
 }
 
-@media (hover: none), (prefers-reduced-motion: reduce) {
-  .hero__hint {
-    display: none;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .hero__img,
-  .hero__lens,
   .portrait__frame img,
   .marquee__item em,
   .marquee__track {
@@ -1121,14 +1025,9 @@ function bookHere() {
   }
 
   .hero__img,
-  .hero__lens,
   .portrait__frame img {
     height: 100%;
     transform: none !important;
-  }
-
-  .hero__lens {
-    display: none;
   }
 
   .marquee {

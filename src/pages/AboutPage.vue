@@ -21,7 +21,6 @@
       </div>
 
       <section
-        v-spot
         id="about-story"
         class="mask"
         data-sheet="Story"
@@ -38,7 +37,6 @@
           >
             About us
           </h1>
-          <p v-if="maskImage" class="mask__hint">Move across the photograph</p>
           <p v-reveal="{ delay: '80ms' }" class="mask__lead">
             Greyon is a Cambodia hospitality brand focused on calm, modern stays
             — from city hotels to serviced apartments — with booking that stays
@@ -99,7 +97,6 @@
 
       <section
         v-if="lens"
-        v-spot
         id="about-lens"
         class="stage"
         data-sheet="Lens"
@@ -109,10 +106,7 @@
         <div ref="lensFrame" class="stage__media">
           <img class="stage__img" :src="lens.src" alt="" :style="lensStyle" />
           <div class="stage__veil" />
-          <img class="stage__lens" :src="lens.src" alt="" :style="lensStyle" />
-          <div class="stage__spot" />
         </div>
-        <p class="stage__hint">Move across the photograph</p>
         <div class="dest-wrap stage__content">
           <p v-reveal class="eyebrow eyebrow--light">{{ lens.kicker }}</p>
           <h2 id="about-lens-title" v-reveal="{ delay: '70ms' }">

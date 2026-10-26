@@ -7,11 +7,10 @@
       :json-ld="jsonLd"
     />
 
-    <section v-spot class="hero" data-sheet="Hero">
+    <section class="hero" data-sheet="Hero">
       <div class="hero__media">
         <img v-if="coverImage" class="hero__img" :src="coverImage" alt="" />
         <div class="hero__veil" />
-        <div class="hero__spot" />
       </div>
 
       <div class="gy-container hero__content">
@@ -705,8 +704,6 @@ async function openRoom(roomTypeId: string) {
 }
 
 .hero {
-  --spot-x: 68%;
-  --spot-y: 34%;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -733,8 +730,7 @@ async function openRoom(roomTypeId: string) {
   animation: hero-ken 22s ease-in-out infinite alternate;
 }
 
-.hero__veil,
-.hero__spot {
+.hero__veil {
   position: absolute;
   inset: 0;
   pointer-events: none;
@@ -748,16 +744,6 @@ async function openRoom(roomTypeId: string) {
     rgba(12, 11, 10, 0.62) 72%,
     rgba(12, 11, 10, 0.84) 100%
   );
-}
-
-.hero__spot {
-  background: radial-gradient(
-    circle 10rem at var(--spot-x) var(--spot-y),
-    rgba(196, 163, 90, 0.34),
-    transparent 70%
-  );
-  mix-blend-mode: soft-light;
-  opacity: 0;
 }
 
 .hero__content,
@@ -1386,25 +1372,6 @@ async function openRoom(roomTypeId: string) {
 }
 
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  .hero:hover .hero__veil {
-    -webkit-mask-image: radial-gradient(
-      circle 11rem at var(--spot-x) var(--spot-y),
-      transparent 0%,
-      rgba(0, 0, 0, 0.25) 46%,
-      #000 74%
-    );
-    mask-image: radial-gradient(
-      circle 11rem at var(--spot-x) var(--spot-y),
-      transparent 0%,
-      rgba(0, 0, 0, 0.25) 46%,
-      #000 74%
-    );
-  }
-
-  .hero:hover .hero__spot {
-    opacity: 1;
-  }
-
   .product-card:hover img {
     transform: scale(1.08);
   }
