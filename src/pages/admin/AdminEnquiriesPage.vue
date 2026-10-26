@@ -16,7 +16,7 @@
         />
       </template>
       <template #toolbar>
-        <q-select
+        <GySelect
           v-model="statusFilter"
           :options="statusFilterOptions"
           dense
@@ -26,7 +26,6 @@
           options-dense
           class="enquiries-filter"
           label="Status"
-          popup-content-class="admin-filter-menu"
         />
         <q-input
           :model-value="query"
@@ -67,7 +66,7 @@
                 <div class="text-caption">{{ item.phone }}</div>
               </td>
               <td>
-                <q-select
+                <GySelect
                   dense
                   outlined
                   :model-value="item.status"
@@ -160,7 +159,7 @@
             <div class="admin-data-card__row">
               <dt>Status</dt>
               <dd>
-                <q-select
+                <GySelect
                   dense
                   outlined
                   :model-value="item.status"
@@ -225,6 +224,7 @@
 </template>
 
 <script setup lang="ts">
+import GySelect from "@/components/GySelect.vue";
 import { computed, nextTick, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useQuasar } from "quasar";

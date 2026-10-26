@@ -36,7 +36,7 @@
         >
           <template #prepend><q-icon name="search" /></template>
         </q-input>
-        <q-select
+        <GySelect
           v-model="statusFilter"
           :options="statusOptions"
           dense
@@ -46,9 +46,8 @@
           options-dense
           label="Status"
           style="min-width: 140px; background: #fff"
-          popup-content-class="admin-filter-menu"
         />
-        <q-select
+        <GySelect
           v-model="locationFilter"
           :options="locationFilterOptions"
           dense
@@ -58,7 +57,6 @@
           options-dense
           label="Destination"
           style="min-width: 180px; background: #fff"
-          popup-content-class="admin-filter-menu"
         />
         <q-toggle v-model="featuredOnly" label="Featured only" dense />
       </template>
@@ -249,7 +247,7 @@
       </template>
       <AdminFormSection title="Essentials" :columns="2">
         <q-input v-model="form.name" label="Hotel name" outlined dense />
-        <q-select
+        <GySelect
           v-model="form.status"
           :options="cms.statusOptions"
           label="Status"
@@ -265,7 +263,7 @@
         />
       </AdminFormSection>
       <AdminFormSection title="Details" :columns="2">
-        <q-select
+        <GySelect
           v-model="form.locationId"
           :options="locationOptions"
           label="Parent destination"
@@ -288,7 +286,7 @@
           dense
           hint='e.g. "Hotel & Serviced Apartment"'
         />
-        <q-select
+        <GySelect
           v-model="form.starRating"
           :options="starRatingOptions"
           label="Star rating"
@@ -425,6 +423,7 @@
 </template>
 
 <script setup lang="ts">
+import GySelect from "@/components/GySelect.vue";
 import { computed, onMounted, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useQuasar } from "quasar";

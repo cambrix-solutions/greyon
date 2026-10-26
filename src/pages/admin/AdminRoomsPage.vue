@@ -34,7 +34,7 @@
         >
           <template #prepend><q-icon name="search" /></template>
         </q-input>
-        <q-select
+        <GySelect
           v-model="hotelFilter"
           :options="hotelFilterOptions"
           dense
@@ -44,7 +44,7 @@
           label="Hotel"
           style="min-width: 200px; background: #fff"
         />
-        <q-select
+        <GySelect
           v-model="statusFilter"
           :options="statusOptions"
           dense
@@ -222,14 +222,14 @@
       </template>
       <AdminFormSection title="Essentials" :columns="2">
         <q-input v-model="form.name" label="Room type name" outlined dense />
-        <q-select
+        <GySelect
           v-model="form.status"
           :options="cms.statusOptions"
           label="Status"
           outlined
           dense
         />
-        <q-select
+        <GySelect
           v-model="form.hotelId"
           :options="hotelOptions"
           label="Parent hotel"
@@ -316,6 +316,7 @@
 </template>
 
 <script setup lang="ts">
+import GySelect from "@/components/GySelect.vue";
 import { computed, onMounted, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useQuasar } from "quasar";

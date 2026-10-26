@@ -1,6 +1,6 @@
 <template>
   <div class="amenities-editor">
-    <q-select
+    <GySelect
       :model-value="modelValue"
       :options="filteredOptions"
       :label="label"
@@ -20,6 +20,7 @@
 </template>
 
 <script setup lang="ts">
+import GySelect from "@/components/GySelect.vue";
 import { ref } from "vue";
 import { STANDARD_AMENITIES } from "@/data/standardAmenities";
 

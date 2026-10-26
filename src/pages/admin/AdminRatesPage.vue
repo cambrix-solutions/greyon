@@ -25,7 +25,7 @@
           label="Search plans / rooms / hotels"
           class="rates-toolbar-field"
         />
-        <q-select
+        <GySelect
           v-model="planStatusFilter"
           :options="planStatusOptions"
           dense
@@ -33,7 +33,7 @@
           class="rates-toolbar-field rates-toolbar-field--sm"
           label="Status"
         />
-        <q-select
+        <GySelect
           v-model="planHotelFilter"
           :options="planHotelFilterOptions"
           dense
@@ -44,7 +44,7 @@
           label="Hotel"
           class="rates-toolbar-field"
         />
-        <q-select
+        <GySelect
           v-model="planRoomFilter"
           :options="planRoomFilterOptions"
           dense
@@ -55,7 +55,7 @@
           label="Room type"
           class="rates-toolbar-field"
         />
-        <q-select
+        <GySelect
           v-model="planPageSize"
           :options="planPageSizeOptions"
           dense
@@ -250,7 +250,7 @@
 
       <div class="row q-col-gutter-md q-mb-md">
         <div class="col-12 col-md-4">
-          <q-select
+          <GySelect
             v-model="selectedRoomId"
             :options="roomOptions"
             label="Room type"
@@ -261,7 +261,7 @@
           />
         </div>
         <div class="col-12 col-md-3">
-          <q-select
+          <GySelect
             v-model="selectedPlanId"
             :options="planOptionsForRoom"
             label="Price plan (for night prices)"
@@ -444,7 +444,7 @@
       subtitle="Default price and policies for one room type."
     >
       <AdminFormSection title="Plan" :columns="2">
-        <q-select
+        <GySelect
           v-model="form.roomTypeId"
           :options="roomOptions"
           label="Room type"
@@ -505,7 +505,7 @@
           outlined
           autogrow
         />
-        <q-select
+        <GySelect
           v-model="form.status"
           :options="cms.statusOptions"
           label="Status"
@@ -630,6 +630,7 @@
 </template>
 
 <script setup lang="ts">
+import GySelect from "@/components/GySelect.vue";
 import { computed, onMounted, reactive, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useQuasar } from "quasar";

@@ -207,16 +207,13 @@
             </div>
             <div class="enquiry__field">
               <span>Destination</span>
-              <q-select
+              <GySelect
                 v-model="form.locationId"
-                class="contact-field contact-select"
+                class="contact-field"
                 outlined
                 emit-value
                 map-options
-                behavior="menu"
                 hide-bottom-space
-                dropdown-icon="expand_more"
-                popup-content-class="contact-select-menu"
                 :options="destinationOptions"
                 option-value="id"
                 option-label="name"
@@ -225,7 +222,7 @@
                 <template v-if="!form.locationId" #selected>
                   <span class="select-placeholder">Select a destination</span>
                 </template>
-              </q-select>
+              </GySelect>
             </div>
             <div class="enquiry__field">
               <span>Message</span>
@@ -278,6 +275,7 @@
 import { computed, reactive, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import ContactBranchMap from "@/components/ContactBranchMap.vue";
+import GySelect from "@/components/GySelect.vue";
 import { useParallax } from "@/components/home/useParallax";
 import { useReadProgress } from "@/components/home/useReadProgress";
 import SectionDivider from "@/components/hotel/SectionDivider.vue";
@@ -575,25 +573,3 @@ async function onSubmit() {
 <style src="./rooms-luxe.css"></style>
 <style src="./news-luxe.css"></style>
 <style src="./story-luxe.css"></style>
-
-<style>
-.contact-select-menu {
-  border-radius: 14px !important;
-  padding: 0.35rem;
-  border: 1px solid rgba(69, 76, 75, 0.08);
-  box-shadow: 0 16px 40px rgba(69, 76, 75, 0.16);
-}
-
-.contact-select-menu .q-item {
-  min-height: 2.75rem;
-  border-radius: 10px;
-  font-family: var(--font-body);
-  color: var(--gy-ink);
-}
-
-.contact-select-menu .q-item--active,
-.contact-select-menu .q-manual-focusable--focused {
-  background: var(--gy-forest) !important;
-  color: #fff !important;
-}
-</style>

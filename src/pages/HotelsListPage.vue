@@ -108,24 +108,28 @@
             </label>
             <label class="field">
               <span>Destination</span>
-              <select :value="locationFilter" @change="onLocationChange">
-                <option value="">All destinations</option>
-                <option
-                  v-for="loc in cms.publishedLocations"
-                  :key="loc.id"
-                  :value="loc.id"
-                >
-                  {{ loc.name }}
-                </option>
-              </select>
+              <GySelect
+                :model-value="locationFilter"
+                :options="locationOptions"
+                emit-value
+                map-options
+                outlined
+                hide-bottom-space
+                aria-label="Destination"
+                @update:model-value="onLocationChange"
+              />
             </label>
             <label class="field">
               <span>Sort</span>
-              <select v-model="sortKey">
-                <option value="featured">Featured</option>
-                <option value="az">Name A–Z</option>
-                <option value="za">Name Z–A</option>
-              </select>
+              <GySelect
+                v-model="sortKey"
+                :options="sortOptions"
+                emit-value
+                map-options
+                outlined
+                hide-bottom-space
+                aria-label="Sort"
+              />
             </label>
           </div>
 
@@ -237,6 +241,7 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import DestinationsMap from "@/components/DestinationsMap.vue";
+import GySelect from "@/components/GySelect.vue";
 import RevealWords from "@/components/home/RevealWords.vue";
 import { useDragScroll } from "@/components/home/useDragScroll";
 import { useParallax } from "@/components/home/useParallax";
@@ -260,6 +265,15 @@ const locationFilter = ref("");
 const keyword = ref("");
 const propertyFilter = ref("");
 const sortKey = ref<"featured" | "az" | "za">("featured");
+const sortOptions = [
+  { label: "Featured", value: "featured" },
+  { label: "Name A–Z", value: "az" },
+  { label: "Name Z–A", value: "za" }
+] as const;
+const locationOptions = computed(() => [
+  { label: "All destinations", value: "" },
+  ...cms.publishedLocations.map(loc => ({ label: loc.name, value: loc.id }))
+]);
 const viewMode = ref<"list" | "map">("list");
 
 const mastFrame = ref<HTMLElement | null>(null);
@@ -307,8 +321,8 @@ function chooseDestination(id: string) {
   setLocation(locationFilter.value === id ? "" : id);
 }
 
-function onLocationChange(event: Event) {
-  setLocation((event.target as HTMLSelectElement).value);
+function onLocationChange(value: string | null) {
+  setLocation(value ?? "");
 }
 
 function scrollToResults() {

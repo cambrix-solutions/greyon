@@ -168,16 +168,16 @@
           </label>
           <label class="field">
             Destination
-            <select :value="locationFilter" @change="onLocationChange">
-              <option value="">All destinations</option>
-              <option
-                v-for="loc in cms.publishedLocations"
-                :key="loc.id"
-                :value="loc.id"
-              >
-                {{ loc.name }}
-              </option>
-            </select>
+            <GySelect
+              :model-value="locationFilter"
+              :options="locationOptions"
+              emit-value
+              map-options
+              outlined
+              hide-bottom-space
+              aria-label="Destination"
+              @update:model-value="onLocationChange"
+            />
           </label>
           <p class="filters__count" aria-live="polite">{{ resultLabel }}</p>
         </form>
@@ -233,6 +233,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import GySelect from "@/components/GySelect.vue";
 import RevealWords from "@/components/home/RevealWords.vue";
 import { useParallax } from "@/components/home/useParallax";
 import { usePinnedRail } from "@/components/home/usePinnedRail";
@@ -255,6 +256,10 @@ const booking = useBookingStore();
 const route = useRoute();
 const router = useRouter();
 const locationFilter = ref("");
+const locationOptions = computed(() => [
+  { label: "All destinations", value: "" },
+  ...cms.publishedLocations.map(loc => ({ label: loc.name, value: loc.id }))
+]);
 const keyword = ref("");
 
 const apartments = computed(() =>
@@ -439,8 +444,8 @@ function applyLocationSlugFromQuery() {
   if (loc) locationFilter.value = loc.id;
 }
 
-function onLocationChange(event: Event) {
-  const id = (event.target as HTMLSelectElement).value;
+function onLocationChange(value: string | null) {
+  const id = value ?? "";
   locationFilter.value = id;
   const loc = cms.publishedLocations.find(item => item.id === id);
   const nextQuery = { ...route.query } as Record<string, string | string[]>;

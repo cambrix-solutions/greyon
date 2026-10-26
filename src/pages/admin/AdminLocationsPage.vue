@@ -48,7 +48,7 @@
         >
           <template #prepend><q-icon name="search" /></template>
         </q-input>
-        <q-select
+        <GySelect
           v-model="statusFilter"
           :options="statusOptions"
           dense
@@ -274,7 +274,7 @@
           dense
           :disable="editing ? !auth.canAction('locations', 'update') : false"
         />
-        <q-select
+        <GySelect
           v-model="form.status"
           :options="cms.statusOptions"
           label="Status"
@@ -351,6 +351,7 @@
 </template>
 
 <script setup lang="ts">
+import GySelect from "@/components/GySelect.vue";
 import { computed, onMounted, reactive, ref } from "vue";
 import { useQuasar } from "quasar";
 import AdminDialog from "@/components/admin/AdminDialog.vue";

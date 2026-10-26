@@ -591,3 +591,81 @@ img.gy-img--broken {
     transform: none;
   }
 }
+
+/* City selector (Kampot / Phnom Penh / Sihanoukville) shared by every select. */
+.gy-select.q-field .q-field__control {
+  min-height: 3rem;
+  border-radius: 12px !important;
+  background: var(--gy-white);
+}
+
+.gy-select.q-field .q-field__native,
+.gy-select.q-field .q-field__input,
+.gy-select.q-field .q-field__label {
+  font-family: var(--font-body);
+  color: var(--gy-ink);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.gy-select.q-field .q-field__marginal {
+  color: var(--gy-forest);
+}
+
+.gy-select.q-field .q-select__dropdown-icon {
+  color: var(--gy-forest);
+}
+
+.gy-select.q-field.q-field--outlined .q-field__control:before,
+.gy-select.q-field.q-field--outlined .q-field__control:after {
+  border-color: var(--gy-forest) !important;
+  border-width: 1px !important;
+  border-radius: 12px;
+}
+
+.gy-select.q-field.q-field--borderless .q-field__control {
+  box-shadow: inset 0 0 0 1px var(--gy-forest);
+  padding-inline: 0.7rem;
+}
+
+.gy-select.q-field.q-field--focused .q-field__control {
+  box-shadow: none;
+}
+
+.gy-select-menu.q-menu {
+  z-index: 6000;
+  padding: 0.35rem;
+  background: var(--gy-white);
+  border: 1px solid var(--gy-stone);
+  border-radius: 14px;
+  box-shadow: var(--gy-shadow);
+  color: var(--gy-ink);
+}
+
+.gy-select-menu .q-item {
+  min-height: 2.75rem;
+  margin: 0.12rem 0;
+  padding-inline: 0.9rem;
+  border-radius: 999px;
+  font-family: var(--font-body);
+  color: var(--gy-ink);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.gy-select-menu .q-item .q-item__label {
+  font-family: var(--font-body);
+  color: inherit;
+}
+
+.gy-select-menu .q-item:hover,
+.gy-select-menu .q-manual-focusable--focused:not(.q-item--active) {
+  background: var(--gy-sand);
+}
+
+.gy-select-menu .q-item--active,
+.gy-select-menu .q-item--active .q-item__label,
+.gy-select-menu .q-item--active .q-item__label--caption {
+  background: var(--gy-forest) !important;
+  color: var(--gy-white) !important;
+}

@@ -28,19 +28,17 @@
       </div>
       <label class="dest-map__select-wrap">
         <span class="sr-only">Choose destination</span>
-        <select
+        <GySelect
           class="dest-map__select"
-          :value="selectedSlug"
+          :model-value="selectedSlug"
+          :options="destinationOptions"
+          emit-value
+          map-options
+          outlined
+          hide-bottom-space
           aria-label="Choose destination"
-          @change="
-            selectDestination(($event.target as HTMLSelectElement).value)
-          "
-        >
-          <option value="">All destinations</option>
-          <option v-for="loc in locations" :key="loc.id" :value="loc.slug">
-            {{ loc.name }}
-          </option>
-        </select>
+          @update:model-value="selectDestination"
+        />
       </label>
     </div>
 
@@ -65,6 +63,7 @@
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from "vue";
+import GySelect from "@/components/GySelect.vue";
 import { useCmsStore } from "@/stores/cms-store";
 import type { Hotel } from "@/types/greyon";
 
@@ -95,6 +94,10 @@ const mapError = ref("");
 let resizeTimer = 0;
 
 const locations = computed(() => cms.publishedLocations);
+const destinationOptions = computed(() => [
+  { label: "All destinations", value: "" },
+  ...locations.value.map(loc => ({ label: loc.name, value: loc.slug }))
+]);
 
 function hasCoords(hotel: Hotel) {
   const { lat, lng } = hotel.coordinates ?? { lat: 0, lng: 0 };
@@ -120,8 +123,8 @@ function locationName(locationId: string) {
   return cms.getLocationById(locationId)?.name ?? "Greyon";
 }
 
-function selectDestination(slug: string) {
-  selectedSlug.value = slug;
+function selectDestination(slug: string | null) {
+  selectedSlug.value = slug ?? "";
 }
 
 function pinIcon() {
@@ -272,12 +275,6 @@ watch(
 
 .dest-map__select {
   width: 100%;
-  min-height: 2.75rem;
-  padding: 0.45rem 0.7rem;
-  border: 1px solid rgba(69, 76, 75, 0.16);
-  border-radius: 10px;
-  background: var(--gy-white);
-  font: inherit;
 }
 
 .dest-map__canvas {

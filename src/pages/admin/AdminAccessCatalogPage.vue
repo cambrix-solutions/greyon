@@ -265,7 +265,7 @@
           dense
           autogrow
         />
-        <q-select
+        <GySelect
           v-model="roleForm.scope"
           :options="scopeOptions"
           label="Scope"
@@ -317,7 +317,7 @@
           dense
           autogrow
         />
-        <q-select
+        <GySelect
           v-model="featureForm.category"
           :options="categoryOptions"
           label="Category"
@@ -371,7 +371,7 @@
           dense
           autogrow
         />
-        <q-select
+        <GySelect
           v-model="permissionForm.featureKey"
           :options="featureKeyOptions"
           label="Parent feature"
@@ -406,6 +406,7 @@
 </template>
 
 <script setup lang="ts">
+import GySelect from "@/components/GySelect.vue";
 import { computed, onMounted, reactive, ref } from "vue";
 import { useQuasar } from "quasar";
 import AdminDialog from "@/components/admin/AdminDialog.vue";

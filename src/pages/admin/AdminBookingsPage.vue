@@ -17,7 +17,7 @@
         />
       </template>
       <template #toolbar>
-        <q-select
+        <GySelect
           v-model="statusFilter"
           :options="statusFilterOptions"
           dense
@@ -27,7 +27,6 @@
           options-dense
           style="min-width: 160px; background: #fff"
           label="Status"
-          popup-content-class="admin-filter-menu"
         />
         <q-input
           :model-value="query"
@@ -226,7 +225,7 @@
 
         <section class="booking-detail__section">
           <h3>Status</h3>
-          <q-select
+          <GySelect
             dense
             outlined
             :model-value="detailBooking.status"
@@ -278,7 +277,7 @@
         </div>
 
         <div class="booking-grid booking-grid--2">
-          <q-select
+          <GySelect
             v-model="form.hotelId"
             :options="hotelOptions"
             label="Hotel"
@@ -288,7 +287,7 @@
             map-options
             @update:model-value="onHotelChange"
           />
-          <q-select
+          <GySelect
             v-model="form.roomTypeId"
             :options="roomOptions"
             label="Room type"
@@ -301,7 +300,7 @@
           />
         </div>
 
-        <q-select
+        <GySelect
           v-model="form.ratePlanId"
           :options="rateOptions"
           label="Rate plan"
@@ -434,7 +433,7 @@
           outlined
           :input-style="{ minHeight: '72px', maxHeight: '120px' }"
         />
-        <q-select
+        <GySelect
           v-model="form.status"
           :options="statusCreateOptions"
           label="Booking status"
@@ -503,6 +502,7 @@
 </template>
 
 <script setup lang="ts">
+import GySelect from "@/components/GySelect.vue";
 import { computed, nextTick, onMounted, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useQuasar } from "quasar";
