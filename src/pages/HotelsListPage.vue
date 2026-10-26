@@ -684,9 +684,7 @@ const showError = computed(
 }
 
 .filters {
-  position: sticky;
-  top: 5.7rem;
-  z-index: 20;
+  position: relative;
   display: grid;
   gap: 0.8rem;
   margin: 0.4rem 0 1.6rem;
@@ -922,7 +920,6 @@ const showError = computed(
 
 @media (max-width: 599px) {
   .filters {
-    top: 4.65rem;
     gap: 0.55rem;
     margin-bottom: 1.1rem;
     padding: 0.7rem 0.7rem 0.65rem;
