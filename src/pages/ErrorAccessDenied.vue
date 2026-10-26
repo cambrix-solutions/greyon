@@ -62,7 +62,7 @@ const isAdmin = computed(() => auth.isAuthenticated);
 .err-404__code {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(5rem, 18vw, 8rem);
+  font-size: var(--gy-text-display);
   font-weight: 700;
   line-height: 0.9;
   letter-spacing: -0.04em;

@@ -21,7 +21,7 @@
         <p class="auth-shell__rule" aria-hidden="true" />
       </aside>
 
-      <div v-reveal="{ delay: '90ms' }" class="auth-shell__panel">
+      <div v-reveal class="auth-shell__panel">
         <slot />
       </div>
     </div>
@@ -58,7 +58,6 @@ withDefaults(
   background-position: center;
   background-size: cover;
   transform: scale(1.06);
-  animation: auth-drift 32s ease-in-out infinite alternate;
   z-index: 0;
 }
 
@@ -90,7 +89,6 @@ withDefaults(
   filter: blur(8px);
   z-index: 0;
   pointer-events: none;
-  animation: auth-glow 10s ease-in-out infinite alternate;
 }
 
 .auth-shell__layout {
@@ -130,7 +128,6 @@ withDefaults(
   width: 3.5rem;
   height: 2px;
   background: linear-gradient(90deg, var(--gy-gold), transparent);
-  animation: auth-rule 1.2s ease 0.35s both;
 }
 
 .auth-shell__panel {
@@ -167,38 +164,6 @@ withDefaults(
   );
 }
 
-@keyframes auth-drift {
-  from {
-    transform: scale(1.06) translate3d(0, 0, 0);
-  }
-  to {
-    transform: scale(1.12) translate3d(-1.5%, -1%, 0);
-  }
-}
-
-@keyframes auth-glow {
-  from {
-    opacity: 0.55;
-    transform: translate(0, 0);
-  }
-  to {
-    opacity: 0.9;
-    transform: translate(8%, -6%);
-  }
-}
-
-@keyframes auth-rule {
-  from {
-    transform: scaleX(0);
-    transform-origin: left;
-    opacity: 0;
-  }
-  to {
-    transform: scaleX(1);
-    opacity: 1;
-  }
-}
-
 @media (max-width: 820px) {
   .auth-shell {
     padding-top: 5rem;
@@ -221,7 +186,7 @@ withDefaults(
   }
 
   .auth-shell__mark {
-    font-size: clamp(2.4rem, 12vw, 3.2rem);
+    font-size: var(--gy-text-4xl);
   }
 
   .auth-shell__lede {

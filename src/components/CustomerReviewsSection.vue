@@ -5,10 +5,6 @@
     class="reviews-section home-motion"
     aria-roledescription="carousel"
     aria-labelledby="home-reviews-title"
-    @mouseenter="pause"
-    @mouseleave="resume"
-    @focusin="pause"
-    @focusout="onFocusOut"
   >
     <div class="gy-container">
       <header class="section-head">
@@ -30,10 +26,8 @@
           'is-single': reviews.length === 1,
           'is-pair': reviews.length === 2
         }"
-        :aria-live="paused ? 'polite' : 'off'"
+        aria-live="polite"
         @scroll.passive="onTrackScroll"
-        @touchstart.passive="pause"
-        @touchend.passive="resume"
       >
         <article
           v-for="review in reviews"
@@ -104,49 +98,12 @@ import {
   type GuestReview
 } from "@/services/engine/reviews";
 
-const AUTO_MS = 6000;
-
 const reviews = ref<GuestReview[]>([]);
 const index = ref(0);
-const paused = ref(false);
 const trackEl = ref<HTMLElement | null>(null);
 
-let timer: ReturnType<typeof setInterval> | null = null;
 let scrollTimer: ReturnType<typeof setTimeout> | null = null;
 let programmatic = false;
-let reduceMotion = false;
-
-function clearTimer() {
-  if (timer) {
-    clearInterval(timer);
-    timer = null;
-  }
-}
-
-function startTimer() {
-  clearTimer();
-  if (reduceMotion || paused.value || reviews.value.length < 2) return;
-  timer = setInterval(() => {
-    goTo(index.value + 1, false);
-  }, AUTO_MS);
-}
-
-function pause() {
-  paused.value = true;
-  clearTimer();
-}
-
-function resume() {
-  paused.value = false;
-  startTimer();
-}
-
-function onFocusOut(event: FocusEvent) {
-  const root = trackEl.value?.closest(".reviews-section");
-  const next = event.relatedTarget as Node | null;
-  if (root && next && root.contains(next)) return;
-  resume();
-}
 
 function scrollToIndex(i: number) {
   const track = trackEl.value;
@@ -156,12 +113,11 @@ function scrollToIndex(i: number) {
   track.scrollTo({ left: card.offsetLeft });
 }
 
-function goTo(i: number, restart = true) {
+function goTo(i: number) {
   if (!reviews.value.length) return;
   index.value =
     ((i % reviews.value.length) + reviews.value.length) % reviews.value.length;
   scrollToIndex(index.value);
-  if (restart) startTimer();
 }
 
 function goNext() {
@@ -200,17 +156,14 @@ function onTrackScroll() {
 }
 
 onMounted(async () => {
-  reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   try {
     reviews.value = await fetchPublicReviews();
   } catch {
     reviews.value = [];
   }
-  if (reviews.value.length) startTimer();
 });
 
 onUnmounted(() => {
-  clearTimer();
   if (scrollTimer) clearTimeout(scrollTimer);
 });
 </script>
@@ -248,7 +201,7 @@ onUnmounted(() => {
 .section-title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(2.18rem, 6vw, 3.78rem);
+  font-size: var(--gy-text-4xl);
   font-weight: 800;
   line-height: 1;
   letter-spacing: -0.035em;
@@ -293,7 +246,7 @@ onUnmounted(() => {
   margin: 0;
   max-width: 18em;
   font-family: var(--font-display);
-  font-size: clamp(1.85rem, 3.6vw, 3.15rem);
+  font-size: var(--gy-text-2xl);
   font-weight: 800;
   line-height: 1.15;
   letter-spacing: -0.035em;

@@ -252,7 +252,7 @@ function download() {
 
 .page-title {
   margin: 0 0 0.75rem;
-  font-size: clamp(2.4rem, 5vw, 3.5rem);
+  font-size: var(--gy-text-4xl);
 }
 
 .lead {

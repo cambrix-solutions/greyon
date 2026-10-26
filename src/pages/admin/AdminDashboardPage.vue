@@ -26,7 +26,7 @@
       </div>
     </header>
 
-    <div v-reveal="{ delay: '70ms' }" class="dash-toolbar">
+    <div v-reveal class="dash-toolbar">
       <q-input
         v-model="search"
         dense
@@ -78,7 +78,7 @@
 
     <div
       v-if="attentionItems.length && focus === 'all'"
-      v-reveal="{ delay: '100ms' }"
+      v-reveal
       class="dash-alert"
     >
       <div>
@@ -116,11 +116,11 @@
       </div>
     </div>
 
-    <div v-reveal="{ delay: '120ms' }" class="dash-stats">
+    <div v-reveal class="dash-stats">
       <router-link
         v-for="(card, i) in cards"
         :key="card.label"
-        v-reveal="{ delay: `${140 + i * 60}ms` }"
+        v-reveal
         :to="card.to"
         class="dash-stat"
       >
@@ -135,13 +135,13 @@
       </router-link>
     </div>
 
-    <section v-reveal="{ delay: '160ms' }" class="dash-section">
+    <section v-reveal class="dash-section">
       <h2 class="dash-section__title">Quick actions</h2>
       <div class="dash-actions">
         <router-link
           v-for="(action, i) in quickActions"
           :key="action.to"
-          v-reveal="{ delay: `${180 + i * 50}ms` }"
+          v-reveal
           :to="action.to"
           class="dash-action"
         >
@@ -153,7 +153,7 @@
 
     <div class="dash-panels">
       <!-- Bookings / arrivals -->
-      <section v-reveal="{ delay: '220ms' }" class="dash-panel">
+      <section v-reveal class="dash-panel">
         <div class="dash-panel__head">
           <h2 class="dash-panel__title">{{ bookingsPanelTitle }}</h2>
           <router-link
@@ -223,7 +223,7 @@
       </section>
 
       <!-- Enquiries -->
-      <section v-reveal="{ delay: '280ms' }" class="dash-panel">
+      <section v-reveal class="dash-panel">
         <div class="dash-panel__head">
           <h2 class="dash-panel__title">{{ enquiriesPanelTitle }}</h2>
           <router-link

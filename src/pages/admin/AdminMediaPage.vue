@@ -56,13 +56,13 @@
 
     <div
       v-if="filtered.length"
-      v-reveal="{ delay: '120ms' }"
+      v-reveal
       class="row q-col-gutter-md gy-reveal-stagger"
     >
       <div
         v-for="(item, i) in filtered"
         :key="item.id"
-        v-reveal="{ delay: `${Math.min(i, 5) * 60}ms` }"
+        v-reveal
         class="col-12 col-sm-6 col-md-4 col-lg-3"
       >
         <q-card flat bordered class="bg-white media-card gy-interactive">

@@ -46,13 +46,12 @@
         data-sheet="Featured"
         aria-labelledby="news-feature-title"
       >
-        <div ref="mastFrame" class="mast__media">
+        <div class="mast__media">
           <img
             v-if="featured.coverImage"
             class="mast__img"
             :src="featured.coverImage"
             alt=""
-            :style="mastStyle"
             fetchpriority="high"
           />
           <div class="mast__veil" />
@@ -82,7 +81,7 @@
           <p v-if="featured.excerpt" class="feature-deck__excerpt">{{
             featured.excerpt
           }}</p>
-          <router-link v-magnetic class="gy-btn" :to="featuredPath">
+          <router-link class="gy-btn" :to="featuredPath">
             Read the story
           </router-link>
         </article>
@@ -111,9 +110,7 @@
           <header class="rail__head">
             <div>
               <p v-reveal class="eyebrow eyebrow--light">Latest</p>
-              <h2 id="news-latest-title" v-reveal="{ delay: '60ms' }">
-                Just published
-              </h2>
+              <h2 id="news-latest-title" v-reveal> Just published </h2>
               <p class="rail__count" aria-live="polite">
                 {{ pad(activeIndex + 1) }} / {{ pad(posts.length) }}
               </p>
@@ -144,7 +141,6 @@
               <div
                 v-for="(item, index) in posts"
                 :key="item.id"
-                v-tilt="{ max: 6 }"
                 class="room-panel rooms-tilt glass-edge"
                 :class="{ 'is-active': activeIndex === index }"
               >
@@ -199,15 +195,12 @@
       >
         <div class="dest-wrap">
           <p v-reveal class="eyebrow">Index</p>
-          <h2 id="news-index-title" v-reveal="{ delay: '60ms' }">
-            In this issue
-          </h2>
+          <h2 id="news-index-title" v-reveal> In this issue </h2>
         </div>
         <div class="dest-wrap archive__grid">
           <router-link
             v-for="(item, index) in posts"
             :key="item.id"
-            v-tilt="{ max: 7 }"
             class="archive-card rooms-tilt spin-edge"
             :to="`/news/${item.slug}`"
           >
@@ -238,7 +231,6 @@
 import { computed, onMounted, ref } from "vue";
 import HotelAmenityBand from "@/components/hotel/HotelAmenityBand.vue";
 import RevealWords from "@/components/home/RevealWords.vue";
-import { useParallax } from "@/components/home/useParallax";
 import { usePinnedRail } from "@/components/home/usePinnedRail";
 import SectionDivider from "@/components/hotel/SectionDivider.vue";
 import SeoHead from "@/components/SeoHead.vue";
@@ -264,12 +256,6 @@ const {
   barEl,
   goToPanel
 } = usePinnedRail(computed(() => posts.value.length));
-
-const mastFrame = ref<HTMLElement | null>(null);
-const mastOffset = useParallax(mastFrame, 150);
-const mastStyle = computed(() => ({
-  transform: `translate3d(0, ${mastOffset.value}px, 0)`
-}));
 
 const showLoading = computed(
   () => cms.catalogSyncing && !cms.publishedNews.length

@@ -14,19 +14,14 @@
           :text="$t('home.fromGreyon')"
         />
       </div>
-      <router-link v-reveal="{ delay: '120ms' }" to="/news" class="text-link">
+      <router-link v-reveal to="/news" class="text-link">
         {{ $t("home.allNews") }}
         <span aria-hidden="true">→</span>
       </router-link>
     </header>
 
     <div v-if="lead" class="stage">
-      <router-link
-        :to="`/news/${lead.slug}`"
-        class="stage__photo"
-        @pointermove="onMove"
-        @pointerleave="onLeave"
-      >
+      <router-link :to="`/news/${lead.slug}`" class="stage__photo">
         <img v-if="lead.coverImage" :src="lead.coverImage" :alt="lead.title" />
       </router-link>
       <div class="stage__copy">
@@ -72,14 +67,11 @@
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import RevealWords from "@/components/home/RevealWords.vue";
-import { useTilt } from "@/components/home/useTilt";
 import { useCmsStore } from "@/stores/cms-store";
 import { formatDate } from "@/utils/datetime";
 
 const cms = useCmsStore();
 const { locale } = useI18n();
-const { onMove, onLeave } = useTilt();
-
 const articles = computed(() => cms.publishedNews.slice(0, 3));
 const lead = computed(() => articles.value[0] ?? null);
 const rest = computed(() => articles.value.slice(1));
@@ -128,7 +120,7 @@ function dateLabel(value: string) {
 .news__title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(2.69rem, 6vw, 4.54rem);
+  font-size: var(--gy-text-4xl);
   font-weight: 800;
   letter-spacing: -0.035em;
   line-height: 1;
@@ -164,8 +156,6 @@ function dateLabel(value: string) {
   overflow: hidden;
   border-radius: 36px 36px 140px 36px;
   background: #2a2e2c;
-  transform-style: preserve-3d;
-  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .stage__photo img {
@@ -191,7 +181,7 @@ function dateLabel(value: string) {
 .stage__headline {
   display: block;
   font-family: var(--font-display);
-  font-size: clamp(2.58rem, 6vw, 5.02rem);
+  font-size: var(--gy-text-display);
   font-weight: 800;
   letter-spacing: -0.035em;
   line-height: 1;
@@ -218,7 +208,7 @@ function dateLabel(value: string) {
 .stage__card-in p {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(1.25rem, 2vw, 1.6rem);
+  font-size: var(--gy-text-xl);
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1.35;
@@ -297,7 +287,7 @@ function dateLabel(value: string) {
   }
 
   .stage__headline {
-    font-size: clamp(2.8rem, 12vw, 3.8rem);
+    font-size: var(--gy-text-4xl);
   }
 
   .stage__card {

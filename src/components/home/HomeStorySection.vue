@@ -13,7 +13,7 @@
           :text="$t('home.storyTitle')"
         />
       </div>
-      <div v-reveal="{ delay: '160ms' }" class="story__aside">
+      <div v-reveal class="story__aside">
         <p class="story__body">{{ $t("home.storyBody") }}</p>
         <p class="story__note">{{ $t("home.laterPhase") }}</p>
         <router-link
@@ -96,7 +96,7 @@ const auth = useAuthStore();
   margin: 0;
   max-width: 12ch;
   font-family: var(--font-display);
-  font-size: clamp(2.86rem, 6.12vw, 5.71rem);
+  font-size: var(--gy-text-display);
   font-weight: 800;
   letter-spacing: -0.035em;
   line-height: 1;
@@ -164,7 +164,7 @@ const auth = useAuthStore();
 
   .story__title {
     max-width: none;
-    font-size: clamp(2.77rem, 9.28vw, 3.86rem);
+    font-size: var(--gy-text-display);
   }
 }
 </style>

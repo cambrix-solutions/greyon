@@ -696,7 +696,7 @@ function showGuestError(
 
 .page-title {
   margin: 0;
-  font-size: clamp(2.3rem, 5vw, 3.4rem);
+  font-size: var(--gy-text-4xl);
   line-height: 1.05;
 }
 
@@ -740,7 +740,7 @@ function showGuestError(
 
 .panel-title {
   margin: 0 0 0.35rem;
-  font-size: clamp(1.7rem, 3vw, 2.1rem);
+  font-size: var(--gy-text-2xl);
   line-height: 1.15;
 }
 

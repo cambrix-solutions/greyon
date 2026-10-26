@@ -51,7 +51,7 @@ const paragraphs = computed(() => {
 <style scoped>
 .legal h1 {
   margin: 0 0 1.25rem;
-  font-size: clamp(2.2rem, 5vw, 3.2rem);
+  font-size: var(--gy-text-4xl);
 }
 
 .content {

@@ -1,5 +1,5 @@
 /* Room and apartment pages. Shared language stays in destination-luxe.css.
-   Motion helpers stay in boot/motion, usePinnedRail, useDragScroll, and useParallax. */
+   Horizontal rails scroll natively. */
 
 .rooms-luxe {
   overflow-x: clip;
@@ -9,11 +9,6 @@
   font-family: var(--font-display);
   font-weight: 700;
   letter-spacing: -0.02em;
-}
-
-.rooms-luxe .rooms-tilt {
-  transform-style: preserve-3d;
-  transition: transform 0.18s linear;
 }
 
 .rooms-luxe .spin-edge {
@@ -31,7 +26,7 @@
   padding: 1.5px;
   border-radius: inherit;
   background: conic-gradient(
-    from var(--gy-spin),
+    from 40deg,
     var(--gy-gold),
     var(--gy-forest) 34%,
     rgba(255, 255, 255, 0.15) 54%,
@@ -39,7 +34,6 @@
     var(--gy-gold)
   );
   pointer-events: none;
-  animation: gy-card-spin 9s linear infinite;
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
     linear-gradient(#000 0 0);
@@ -159,7 +153,7 @@
   max-width: 12em;
   margin: 0;
   color: #fff;
-  font-size: clamp(2.58rem, 6.84vw, 5.62rem);
+  font-size: var(--gy-text-display);
   line-height: 1;
 }
 
@@ -211,7 +205,7 @@
 
 .rooms-luxe .mast__fact strong {
   font-family: var(--font-display);
-  font-size: clamp(1.35rem, 2vw, 1.8rem);
+  font-size: var(--gy-text-xl);
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1.05;
@@ -240,7 +234,7 @@
 .rooms-luxe .rail h2 {
   margin: 0;
   color: #fff;
-  font-size: clamp(2.6rem, 5vw, 4.4rem);
+  font-size: var(--gy-text-4xl);
   line-height: 1;
 }
 
@@ -460,7 +454,7 @@
   font-family: var(--font-display);
   font-weight: 800;
   letter-spacing: -0.035em;
-  font-size: clamp(2.35rem, 6vw, 3.86rem);
+  font-size: var(--gy-text-4xl);
   line-height: 1;
   color: var(--gy-gold);
 }
@@ -478,7 +472,7 @@
 .rooms-luxe .room-panel__copy h3 {
   margin: 0;
   color: #fff;
-  font-size: clamp(2rem, 3vw, 3.2rem);
+  font-size: var(--gy-text-3xl);
   line-height: 1;
 }
 
@@ -520,7 +514,7 @@
 .rooms-luxe .residences h2,
 .rooms-luxe .dossier h2 {
   margin: 0;
-  font-size: clamp(2.18rem, 6vw, 3.86rem);
+  font-size: var(--gy-text-4xl);
   line-height: 1;
 }
 
@@ -590,7 +584,7 @@
 }
 
 .rooms-luxe .stack-card {
-  position: sticky;
+  position: relative;
   overflow: hidden;
   border-radius: 26px;
   background: rgba(255, 255, 255, 0.96);
@@ -627,7 +621,7 @@
 .rooms-luxe .stack-card__bar strong {
   min-width: 0;
   overflow: hidden;
-  font-size: clamp(1.25rem, 2vw, 1.7rem);
+  font-size: var(--gy-text-xl);
   line-height: 1;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -946,7 +940,7 @@
 
 .rooms-luxe .other-card h3 {
   margin: 0;
-  font-size: clamp(1.45rem, 2vw, 1.8rem);
+  font-size: var(--gy-text-xl);
   line-height: 1.05;
 }
 
@@ -1002,7 +996,7 @@
 
 .rooms-luxe .price-card h2 {
   margin: 0;
-  font-size: clamp(2.2rem, 3vw, 3rem);
+  font-size: var(--gy-text-3xl);
   line-height: 1;
 }
 
@@ -1117,7 +1111,7 @@
 
 .rooms-luxe .room-state h1 {
   margin: 0 0 0.75rem;
-  font-size: clamp(2.4rem, 6vw, 4rem);
+  font-size: var(--gy-text-4xl);
   line-height: 1;
 }
 
@@ -1228,7 +1222,7 @@
 
   .rooms-luxe .mast h1,
   .rooms-luxe .stage h1 {
-    font-size: clamp(3rem, 14vw, 4.4rem);
+    font-size: var(--gy-text-display);
   }
 
   .rooms-luxe .stack-card .hotel-card__media {

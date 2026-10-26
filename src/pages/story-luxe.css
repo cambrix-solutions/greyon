@@ -76,7 +76,7 @@
   background-position: center;
   -webkit-background-clip: text;
   background-clip: text;
-  font-size: clamp(3.26rem, 9.28vw, 7.82rem);
+  font-size: var(--gy-text-display);
   line-height: 1;
   letter-spacing: -0.035em;
 }
@@ -119,7 +119,7 @@
 
 .story-luxe.contact-luxe .stage h1,
 .story-luxe .arrive-plain h1 {
-  font-size: clamp(3.13rem, 6.96vw, 5.78rem);
+  font-size: var(--gy-text-display);
   line-height: 1;
 }
 
@@ -127,7 +127,7 @@
   max-width: 11em;
   margin: 0;
   color: #fff;
-  font-size: clamp(2.35rem, 6vw, 4.56rem);
+  font-size: var(--gy-text-4xl);
   line-height: 1;
 }
 
@@ -249,7 +249,7 @@
 
 .story-luxe .place-card__body h3 {
   margin: 0;
-  font-size: clamp(2.1rem, 4vw, 3.3rem);
+  font-size: var(--gy-text-3xl);
 }
 
 .story-luxe .place-card__body p,
@@ -310,7 +310,7 @@
 .story-luxe .service-card h3,
 .story-luxe .reach-card h3 {
   margin: 0;
-  font-size: clamp(1.7rem, 2.4vw, 2.25rem);
+  font-size: var(--gy-text-stat);
   line-height: 0.96;
 }
 
@@ -362,7 +362,7 @@
 
 .story-luxe .arrive-plain h1 {
   margin: 0;
-  font-size: clamp(3.04rem, 6.96vw, 5.32rem);
+  font-size: var(--gy-text-display);
   line-height: 1;
 }
 
@@ -482,7 +482,7 @@
 
 .story-luxe .enquiry h2 {
   margin: 0;
-  font-size: clamp(2.2rem, 4vw, 3rem);
+  font-size: var(--gy-text-3xl);
 }
 
 .story-luxe .enquiry__lead {
@@ -707,7 +707,7 @@
 
   .story-luxe .mask__title {
     max-width: none;
-    font-size: clamp(3.19rem, 12.76vw, 4.86rem);
+    font-size: var(--gy-text-display);
   }
 
   .story-luxe .map-frame,

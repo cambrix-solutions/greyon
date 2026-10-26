@@ -5,8 +5,8 @@
     class="band home-motion"
     :aria-label="amenities.length ? $t('home.amenities') : $t('home.exploreBy')"
   >
-    <div ref="frame" class="band__frame">
-      <img class="band__img" :src="image" alt="" :style="imageStyle" />
+    <div class="band__frame">
+      <img class="band__img" :src="image" alt="" />
     </div>
     <div class="band__veil" />
     <div class="band__content">
@@ -21,15 +21,6 @@
       >
         <div class="marquee__track">
           <span v-for="item in amenities" :key="item" class="chip">
-            <q-icon :name="iconFor(item)" size="22px" />
-            {{ item }}
-          </span>
-          <span
-            v-for="item in amenities"
-            :key="`loop-${item}`"
-            class="chip marquee__clone"
-            aria-hidden="true"
-          >
             <q-icon :name="iconFor(item)" size="22px" />
             {{ item }}
           </span>
@@ -50,17 +41,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
-import { useParallax } from "@/components/home/useParallax";
+import { computed } from "vue";
 import { useCmsStore } from "@/stores/cms-store";
 
 const cms = useCmsStore();
-const frame = ref<HTMLElement | null>(null);
-const offset = useParallax(frame, 180);
-
-const imageStyle = computed(() => ({
-  transform: `translate3d(0, ${offset.value}px, 0) scale(1.15)`
-}));
 
 const featured = computed(() =>
   cms.publishedHotels.find(hotel => hotel.featured)
@@ -142,14 +126,13 @@ function iconFor(label: string) {
 
 .band__frame {
   position: absolute;
-  inset: -20% 0;
+  inset: 0;
 }
 
 .band__img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  will-change: transform;
 }
 
 .band__veil {
@@ -204,7 +187,7 @@ function iconFor(label: string) {
   margin: 0 0 1.6rem;
   padding-inline: clamp(1.25rem, 6vw, 5rem);
   font-family: var(--font-display);
-  font-size: clamp(2.99rem, 6.96vw, 6.12rem);
+  font-size: var(--gy-text-display);
   font-weight: 800;
   letter-spacing: -0.035em;
   line-height: 1;
@@ -219,8 +202,18 @@ function iconFor(label: string) {
   color: transparent;
 }
 
+.band .marquee {
+  overflow: visible;
+  mask-image: none;
+  -webkit-mask-image: none;
+  padding-inline: clamp(1.25rem, 6vw, 5rem);
+}
+
 .band .marquee__track {
-  gap: 0;
+  flex-wrap: wrap;
+  width: auto;
+  max-width: 100%;
+  gap: 0.75rem;
 }
 
 .chip {
@@ -256,7 +249,7 @@ function iconFor(label: string) {
 
 .places__link {
   font-family: var(--font-display);
-  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  font-size: var(--gy-text-2xl);
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1.1;

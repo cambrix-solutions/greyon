@@ -7,31 +7,19 @@
     />
 
     <section class="hero" data-sheet="Hero">
-      <div ref="heroFrame" class="hero__media">
-        <img
-          v-if="heroImage"
-          class="hero__img"
-          :src="heroImage"
-          alt=""
-          :style="heroStyle"
-        />
+      <div class="hero__media">
+        <img v-if="heroImage" class="hero__img" :src="heroImage" alt="" />
         <div class="hero__veil" />
       </div>
       <div class="dest-wrap hero__content">
         <p v-reveal class="eyebrow eyebrow--light">Destination</p>
         <RevealWords tag="h1" :text="location.name" />
-        <div v-reveal="{ delay: '160ms' }" class="hero__actions">
-          <button
-            v-magnetic
-            class="gy-btn gy-btn--light"
-            type="button"
-            @click="bookHere"
-          >
+        <div v-reveal class="hero__actions">
+          <button class="gy-btn gy-btn--light" type="button" @click="bookHere">
             Book in {{ location.name }}
           </button>
           <button
             v-if="hotelsHere.length"
-            v-magnetic
             class="gy-btn gy-btn--ghost"
             type="button"
             @click="scrollToId('dest-hotels')"
@@ -53,26 +41,18 @@
       <div class="dest-wrap story__grid">
         <div v-if="description" class="story__copy">
           <p v-reveal class="eyebrow">The place</p>
-          <h2 id="story-title" v-reveal="{ delay: '80ms' }" class="story__body">
+          <h2 id="story-title" v-reveal class="story__body">
             {{ description }}
           </h2>
-          <div v-reveal="{ delay: '140ms' }" class="story__actions">
+          <div v-reveal class="story__actions">
             <router-link class="gy-btn gy-btn--outline" to="/locations">
               All destinations
             </router-link>
           </div>
         </div>
-        <figure
-          v-if="portraitImage"
-          v-tilt="{ max: 7 }"
-          class="portrait dest-tilt"
-        >
-          <div ref="portraitFrame" class="portrait__frame">
-            <img
-              :src="portraitImage"
-              :alt="location.name"
-              :style="portraitStyle"
-            />
+        <figure v-if="portraitImage" class="portrait dest-tilt">
+          <div class="portrait__frame">
+            <img :src="portraitImage" :alt="location.name" />
           </div>
         </figure>
       </div>
@@ -91,24 +71,9 @@
       data-sheet="Highlights"
       aria-labelledby="highlights-title"
     >
-      <ul v-if="!reduceMotion" class="sr-only">
-        <li v-for="item in highlights" :key="item">{{ item }}</li>
-      </ul>
-      <div
-        class="marquee"
-        :class="{ 'is-static': reduceMotion, 'is-paused': paused }"
-        :aria-hidden="reduceMotion ? undefined : 'true'"
-        @pointerdown="paused = true"
-        @pointerup="paused = false"
-        @pointercancel="paused = false"
-        @pointerleave="paused = false"
-      >
-        <div class="marquee__track" :style="marqueeStyle">
-          <span
-            v-for="(item, index) in marqueeItems"
-            :key="`${index}-${item}`"
-            class="marquee__item"
-          >
+      <div class="marquee is-static" :aria-label="highlights.join(', ')">
+        <div class="marquee__track">
+          <span v-for="item in highlights" :key="item" class="marquee__item">
             <em>{{ item }}</em>
             <span class="marquee__mark" />
           </span>
@@ -116,7 +81,7 @@
       </div>
       <div class="dest-wrap highlights__copy">
         <p v-reveal class="eyebrow eyebrow--light">Notes</p>
-        <h2 id="highlights-title" v-reveal="{ delay: '70ms' }">Highlights</h2>
+        <h2 id="highlights-title" v-reveal>Highlights</h2>
       </div>
       <SectionDivider
         kind="angle"
@@ -133,8 +98,8 @@
     >
       <div class="dest-wrap gallery__head">
         <p v-reveal class="eyebrow">Photographs</p>
-        <h2 id="gallery-title" v-reveal="{ delay: '60ms' }">In the frame</h2>
-        <p v-reveal="{ delay: '110ms' }" class="section-lead">
+        <h2 id="gallery-title" v-reveal>In the frame</h2>
+        <p v-reveal class="section-lead">
           Gallery images published for {{ location.name }}.
         </p>
       </div>
@@ -173,10 +138,8 @@
       >
         <div class="stays__intro">
           <p v-reveal class="eyebrow">Stay</p>
-          <h2 id="stays-title" v-reveal="{ delay: '60ms' }">
-            Greyon hotels here
-          </h2>
-          <p v-reveal="{ delay: '110ms' }" class="section-lead">
+          <h2 id="stays-title" v-reveal> Greyon hotels here </h2>
+          <p v-reveal class="section-lead">
             <template v-if="hotelsHere.length">
               Published properties in {{ location.name }}.
             </template>
@@ -189,7 +152,6 @@
           <div
             v-for="hotel in hotelsHere"
             :key="hotel.id"
-            v-tilt="{ max: 4 }"
             class="stays__tilt dest-tilt"
           >
             <HotelCard live :hotel="hotel" />
@@ -209,26 +171,18 @@
     >
       <div class="dest-wrap">
         <p v-reveal class="eyebrow">Visit</p>
-        <h2 id="visit-title" v-reveal="{ delay: '60ms' }">
+        <h2 id="visit-title" v-reveal>
           {{ hasContact ? "Contact" : "Map" }}
         </h2>
-        <p v-reveal="{ delay: '100ms' }" class="section-lead">
+        <p v-reveal class="section-lead">
           Reach the Greyon team for this destination.
         </p>
         <div v-if="hasContact" class="visit__grid">
-          <article
-            v-if="phone"
-            v-tilt="{ max: 6 }"
-            class="visit-card dest-tilt glass-edge"
-          >
+          <article v-if="phone" class="visit-card dest-tilt glass-edge">
             <span>Phone</span>
             <a :href="`tel:${phone}`">{{ phone }}</a>
           </article>
-          <article
-            v-if="email"
-            v-tilt="{ max: 6 }"
-            class="visit-card dest-tilt glass-edge"
-          >
+          <article v-if="email" class="visit-card dest-tilt glass-edge">
             <span>Email</span>
             <a :href="`mailto:${email}`">{{ email }}</a>
           </article>
@@ -254,9 +208,7 @@
     >
       <div class="dest-wrap elsewhere__head">
         <p v-reveal class="eyebrow eyebrow--light">Continue</p>
-        <h2 id="elsewhere-title" v-reveal="{ delay: '60ms' }">
-          Other destinations
-        </h2>
+        <h2 id="elsewhere-title" v-reveal> Other destinations </h2>
       </div>
       <div
         ref="elseRail"
@@ -267,7 +219,6 @@
         <article
           v-for="loc in others"
           :key="loc.id"
-          v-tilt="{ max: 5 }"
           class="else-card dest-tilt"
         >
           <router-link :to="`/locations/${loc.slug}`">
@@ -314,7 +265,6 @@ import { computed, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import RevealWords from "@/components/home/RevealWords.vue";
 import { useDragScroll } from "@/components/home/useDragScroll";
-import { useParallax } from "@/components/home/useParallax";
 import SectionDivider from "@/components/hotel/SectionDivider.vue";
 import HotelCard from "@/components/HotelCard.vue";
 import MapEmbed from "@/components/MapEmbed.vue";
@@ -327,25 +277,8 @@ const router = useRouter();
 const booking = useBookingStore();
 const cms = useCmsStore();
 
-const heroFrame = ref<HTMLElement | null>(null);
-const portraitFrame = ref<HTMLElement | null>(null);
 const elseRail = ref<HTMLElement | null>(null);
-const paused = ref(false);
-const reduceMotion = ref(
-  typeof window !== "undefined" &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches
-);
-
-const heroOffset = useParallax(heroFrame, 140);
-const portraitOffset = useParallax(portraitFrame, 110);
 useDragScroll(elseRail, { momentum: true });
-
-const heroStyle = computed(() => ({
-  transform: `translate3d(0, ${heroOffset.value}px, 0)`
-}));
-const portraitStyle = computed(() => ({
-  transform: `translate3d(0, ${portraitOffset.value}px, 0)`
-}));
 
 const location = computed(() =>
   cms.getLocationBySlug(String(route.params.slug))
@@ -397,33 +330,12 @@ const heroEdge = computed(() => {
   return "var(--gy-white)";
 });
 
-const marqueeHalf = computed(() => {
-  const items = highlights.value;
-  if (!items.length || reduceMotion.value) return items;
-  const repeats = Math.max(1, Math.ceil(8 / items.length));
-  return Array.from({ length: repeats }, () => items).flat();
-});
-const marqueeItems = computed(() =>
-  reduceMotion.value
-    ? marqueeHalf.value
-    : [...marqueeHalf.value, ...marqueeHalf.value]
-);
-const marqueeStyle = computed(() => {
-  if (reduceMotion.value) return undefined;
-  const seconds = Math.max(24, marqueeHalf.value.length * 3.6);
-  return { animationDuration: `${seconds}s` };
-});
-
 function pad(value: number) {
   return String(value).padStart(2, "0");
 }
 
 function photoStyle(index: number) {
-  const capped = Math.min(index, 4);
-  return {
-    top: `calc(var(--header-offset) + ${capped} * var(--photo-step))`,
-    zIndex: index + 1
-  };
+  return { zIndex: index + 1 };
 }
 
 function scrollToId(id: string) {
@@ -505,7 +417,7 @@ function bookHere() {
 .detail :deep(h1) {
   max-width: 9em;
   margin: 0;
-  font-size: clamp(2.5rem, 6.8vw, 5.58rem);
+  font-size: var(--gy-text-display);
   line-height: 1;
   overflow-wrap: break-word;
 }
@@ -538,7 +450,7 @@ function bookHere() {
 .story__body {
   margin: 0;
   max-width: 12em;
-  font-size: clamp(2.4rem, 4.6vw, 4.4rem);
+  font-size: var(--gy-text-4xl);
   line-height: 0.98;
 }
 
@@ -611,12 +523,6 @@ function bookHere() {
 .marquee__track {
   display: flex;
   width: max-content;
-  animation: dest-highlight-marquee 32s linear infinite;
-}
-
-.marquee:hover .marquee__track,
-.marquee.is-paused .marquee__track {
-  animation-play-state: paused;
 }
 
 .marquee__item {
@@ -628,7 +534,7 @@ function bookHere() {
 
 .marquee__item em {
   font-family: var(--font-display);
-  font-size: clamp(2.18rem, 6vw, 4.2rem);
+  font-size: var(--gy-text-4xl);
   font-weight: 800;
   letter-spacing: -0.035em;
   line-height: 1;
@@ -661,7 +567,7 @@ function bookHere() {
 
 .highlights h2 {
   margin: 0;
-  font-size: clamp(2.52rem, 6vw, 4.7rem);
+  font-size: var(--gy-text-4xl);
   line-height: 1;
 }
 
@@ -680,7 +586,7 @@ function bookHere() {
 .visit h2,
 .elsewhere h2 {
   margin: 0;
-  font-size: clamp(2.35rem, 6vw, 4.2rem);
+  font-size: var(--gy-text-4xl);
   line-height: 1;
 }
 
@@ -694,9 +600,9 @@ function bookHere() {
 }
 
 .photo-card {
-  position: sticky;
+  position: relative;
   height: min(70vh, 640px);
-  margin-bottom: min(12vh, 6.5rem);
+  margin-bottom: 1.25rem;
   padding: 0.55rem;
   border-radius: 28px;
   background: linear-gradient(
@@ -812,7 +718,7 @@ function bookHere() {
 
 .visit-card a {
   font-family: var(--font-display);
-  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  font-size: var(--gy-text-3xl);
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1.05;
@@ -833,7 +739,7 @@ function bookHere() {
 .visit__map h3 {
   margin: 0 0 0.75rem;
   font-family: var(--font-display);
-  font-size: clamp(2rem, 3vw, 2.8rem);
+  font-size: var(--gy-text-3xl);
   font-weight: 800;
   letter-spacing: -0.035em;
 }
@@ -929,7 +835,7 @@ function bookHere() {
 .else-card__name {
   padding-top: 0.9rem;
   font-family: var(--font-display);
-  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  font-size: var(--gy-text-2xl);
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1.05;
@@ -955,7 +861,7 @@ function bookHere() {
 
 .dest-missing h1 {
   margin: 0 0 0.85rem;
-  font-size: clamp(2.43rem, 6.08vw, 4.56rem);
+  font-size: var(--gy-text-4xl);
   line-height: 1;
 }
 
@@ -965,15 +871,6 @@ function bookHere() {
   font-family: var(--font-display);
   font-weight: 500;
   color: var(--gy-muted);
-}
-
-@keyframes dest-highlight-marquee {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
 }
 
 @media (max-width: 900px) {
@@ -994,7 +891,7 @@ function bookHere() {
 
 @media (max-width: 599px) {
   .detail :deep(h1) {
-    font-size: clamp(2.8rem, 14vw, 4.2rem);
+    font-size: var(--gy-text-display);
   }
 
   .hero__actions .gy-btn {
@@ -1007,7 +904,7 @@ function bookHere() {
   }
 
   .marquee__item em {
-    font-size: clamp(1.9rem, 9vw, 2.6rem);
+    font-size: var(--gy-text-2xl);
   }
 
   .visit__map :deep(.map-embed__frame) {

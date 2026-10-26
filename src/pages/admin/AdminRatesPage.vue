@@ -68,7 +68,7 @@
       </template>
     </AdminPageHeader>
 
-    <q-banner v-reveal="{ delay: '100ms' }" class="bg-grey-2 q-mb-md" rounded>
+    <q-banner v-reveal class="bg-grey-2 q-mb-md" rounded>
       Set the default price for each room below. Hotel check-in / check-out
       <strong>times</strong> come from each hotel (edit under Hotels).
       <template v-if="auth.isDeveloper">
@@ -77,7 +77,7 @@
       </template>
     </q-banner>
 
-    <div v-reveal="{ delay: '140ms' }" class="admin-data">
+    <div v-reveal class="admin-data">
       <div class="admin-data__table">
         <q-markup-table flat bordered class="bg-white">
           <thead>
@@ -290,11 +290,7 @@
         <strong>{{ roomHotelTimes.checkOut }}</strong>
       </q-banner>
 
-      <div
-        v-if="inventoryView === 'list'"
-        v-reveal="{ delay: '160ms' }"
-        class="admin-scroll"
-      >
+      <div v-if="inventoryView === 'list'" v-reveal class="admin-scroll">
         <q-markup-table flat bordered>
           <thead>
             <tr>
@@ -381,7 +377,7 @@
         </q-markup-table>
       </div>
 
-      <div v-else v-reveal="{ delay: '160ms' }" class="cal">
+      <div v-else v-reveal class="cal">
         <div class="cal__toolbar">
           <q-btn flat dense round icon="chevron_left" @click="shiftMonth(-1)" />
           <div class="cal__month">{{ monthLabel }}</div>

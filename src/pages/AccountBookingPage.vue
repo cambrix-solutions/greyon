@@ -260,7 +260,7 @@ function rateLabel(ratePlanId: string) {
 
 .stay-detail__title {
   margin: 0;
-  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-size: var(--gy-text-2xl);
   line-height: 1.15;
 }
 

@@ -7,7 +7,7 @@
   >
     <div class="gy-container gallery__head">
       <p v-reveal class="eyebrow">Photographs</p>
-      <h2 id="hotel-gallery-title" v-reveal="{ delay: '70ms' }">Gallery</h2>
+      <h2 id="hotel-gallery-title" v-reveal>Gallery</h2>
     </div>
 
     <div
@@ -185,7 +185,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .gallery h2 {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(2.52rem, 6vw, 4.54rem);
+  font-size: var(--gy-text-4xl);
   font-weight: 800;
   letter-spacing: -0.035em;
   line-height: 1;
@@ -309,7 +309,6 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
   height: 100%;
   object-fit: contain;
   transform-origin: center center;
-  animation: gallery-ken 16s ease-in-out infinite alternate;
 }
 
 .lb__close,
@@ -373,15 +372,6 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
-}
-
-@keyframes gallery-ken {
-  from {
-    transform: scale(1);
-  }
-  to {
-    transform: scale(1.08);
-  }
 }
 
 @media (hover: hover) {

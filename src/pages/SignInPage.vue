@@ -177,7 +177,7 @@ function onGoogle() {
 
 .auth-card__title {
   margin: 0 0 0.45rem;
-  font-size: clamp(1.85rem, 4vw, 2.35rem);
+  font-size: var(--gy-text-3xl);
   line-height: 1.05;
   color: var(--gy-ink);
 }

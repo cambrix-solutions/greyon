@@ -40,7 +40,7 @@
       </template>
     </AdminPageHeader>
 
-    <div v-reveal="{ delay: '120ms' }" class="admin-data">
+    <div v-reveal class="admin-data">
       <div class="admin-data__table bookings-scroll">
         <table class="bookings-table">
           <thead>
