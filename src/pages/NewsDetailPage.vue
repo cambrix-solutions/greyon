@@ -22,12 +22,7 @@
     </div>
 
     <article ref="articleEl">
-      <section
-        v-spot
-        class="stage"
-        data-sheet="Cover"
-        aria-labelledby="article-title"
-      >
+      <section class="stage" data-sheet="Cover" aria-labelledby="article-title">
         <div ref="stageFrame" class="stage__media">
           <img
             v-if="article.coverImage"
@@ -38,18 +33,7 @@
             fetchpriority="high"
           />
           <div class="stage__veil" />
-          <img
-            v-if="article.coverImage"
-            class="stage__lens"
-            :src="article.coverImage"
-            alt=""
-            :style="stageStyle"
-          />
-          <div class="stage__spot" />
         </div>
-        <p v-if="article.coverImage" class="stage__hint">
-          Move across the photograph
-        </p>
         <div class="dest-wrap stage__content">
           <nav class="crumb" aria-label="Breadcrumb">
             <router-link to="/news">News</router-link>
@@ -91,15 +75,10 @@
             </div>
             <div
               v-else-if="htmlBody"
-              v-spot
-              class="story story-spot article-html"
+              class="story article-html"
               v-html="htmlBody"
             />
-            <article
-              v-else-if="passages.length"
-              v-spot
-              class="story story-spot spin-edge"
-            >
+            <article v-else-if="passages.length" class="story spin-edge">
               <p :class="passageClass(passages[0] ?? '')">{{ passages[0] }}</p>
             </article>
           </div>

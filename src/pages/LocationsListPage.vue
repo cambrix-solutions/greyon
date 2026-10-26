@@ -2,7 +2,7 @@
   <q-page class="dest-luxe home-motion places">
     <SeoHead title="Destinations | Greyon" :description="seoDescription" />
 
-    <section v-spot class="mast" data-sheet="Mast">
+    <section class="mast" data-sheet="Mast">
       <div ref="mastFrame" class="mast__media">
         <img
           v-if="mastBase"
@@ -12,17 +12,7 @@
           :style="mastStyle"
         />
         <div class="mast__veil" />
-        <img
-          v-if="mastReveal"
-          class="mast__lens"
-          :src="mastReveal"
-          alt=""
-          :style="mastStyle"
-        />
-        <div class="mast__spot" />
       </div>
-
-      <p v-if="mastReveal" class="mast__hint">Move across the photograph</p>
 
       <div class="dest-wrap mast__content">
         <p v-if="mastBase" v-reveal class="mast__chip">{{ mastBase.name }}</p>
@@ -245,20 +235,6 @@ const mastBase = computed(
   () => locations.value.find(loc => loc.heroImage.trim()) ?? null
 );
 
-const mastReveal = computed(() => {
-  const base = mastBase.value;
-  if (!base) return "";
-  const hero = base.heroImage.trim();
-  const fromGallery = base.gallery.find(
-    src => src.trim() && src.trim() !== hero
-  );
-  if (fromGallery) return fromGallery.trim();
-  const other = locations.value.find(
-    loc => loc.id !== base.id && loc.heroImage.trim()
-  );
-  return other?.heroImage.trim() ?? "";
-});
-
 const seoDescription = computed(() => {
   const names = locations.value.map(loc => loc.name).filter(Boolean);
   return names.length
@@ -296,8 +272,6 @@ function scrollToJourney() {
 
 <style scoped>
 .mast {
-  --spot-x: 70%;
-  --spot-y: 36%;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -309,8 +283,7 @@ function scrollToJourney() {
 }
 
 .mast__media,
-.mast__veil,
-.mast__spot {
+.mast__veil {
   position: absolute;
   inset: 0;
 }
@@ -320,8 +293,7 @@ function scrollToJourney() {
   pointer-events: none;
 }
 
-.mast__img,
-.mast__lens {
+.mast__img {
   position: absolute;
   left: 0;
   width: 100%;
@@ -345,48 +317,6 @@ function scrollToJourney() {
       rgba(12, 11, 10, 0.05) 40%,
       rgba(12, 11, 10, 0.78) 100%
     );
-}
-
-.mast__lens {
-  z-index: 2;
-  opacity: 0;
-  transition: opacity 0.35s ease;
-  -webkit-mask-image: radial-gradient(
-    circle 12rem at var(--spot-x) var(--spot-y),
-    #000 58%,
-    transparent 74%
-  );
-  mask-image: radial-gradient(
-    circle 12rem at var(--spot-x) var(--spot-y),
-    #000 58%,
-    transparent 74%
-  );
-}
-
-.mast__spot {
-  z-index: 3;
-  background: radial-gradient(
-    circle 13rem at var(--spot-x) var(--spot-y),
-    rgba(196, 163, 90, 0.5),
-    transparent 68%
-  );
-  mix-blend-mode: soft-light;
-  opacity: 0;
-  transition: opacity 0.35s ease;
-}
-
-.mast__hint {
-  position: absolute;
-  top: 1.2rem;
-  right: max(1.25rem, calc((100% - 1240px) / 2));
-  z-index: 4;
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.82);
 }
 
 .mast__content {
@@ -854,15 +784,6 @@ function scrollToJourney() {
   margin-top: clamp(1.8rem, 4vw, 2.6rem);
 }
 
-@media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  .mast:hover .mast__lens,
-  .mast:focus-within .mast__lens,
-  .mast:hover .mast__spot,
-  .mast:focus-within .mast__spot {
-    opacity: 1;
-  }
-}
-
 @media (max-width: 899px) {
   .journey__head {
     flex-direction: column;
@@ -924,29 +845,17 @@ function scrollToJourney() {
   }
 }
 
-@media (hover: none), (prefers-reduced-motion: reduce) {
-  .mast__hint {
-    display: none;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .mast__img,
-  .mast__lens,
   .journey.is-pin .journey__panel,
   .journey__progress span {
     transition: none;
     animation: none;
   }
 
-  .mast__img,
-  .mast__lens {
+  .mast__img {
     height: 100%;
     transform: none !important;
-  }
-
-  .mast__lens {
-    display: none;
   }
 
   .journey.is-pin .journey__panel {

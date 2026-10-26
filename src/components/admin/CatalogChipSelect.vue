@@ -1,6 +1,6 @@
 <template>
   <div class="catalog-chip-select">
-    <q-select
+    <GySelect
       :model-value="modelValue"
       :options="filteredOptions"
       :label="label"
@@ -57,11 +57,12 @@
           {{ scope.opt.label }}
         </q-chip>
       </template>
-    </q-select>
+    </GySelect>
   </div>
 </template>
 
 <script setup lang="ts">
+import GySelect from "@/components/GySelect.vue";
 import { ref, watch } from "vue";
 
 export type CatalogChipOption = {

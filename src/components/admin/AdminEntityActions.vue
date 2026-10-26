@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import GySelect from "@/components/GySelect.vue";
 import { computed } from "vue";
 
 /**
@@ -79,7 +80,7 @@ function onPrimaryClick() {
       'entity-actions--stack': stack
     }"
   >
-    <q-select
+    <GySelect
       v-if="showStatus"
       dense
       borderless

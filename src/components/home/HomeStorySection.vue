@@ -3,8 +3,6 @@
     id="home-story"
     class="story home-motion"
     aria-labelledby="home-story-title"
-    @pointermove="onMove"
-    @pointerleave="onLeave"
   >
     <div class="story__grid">
       <div>
@@ -28,64 +26,14 @@
         </router-link>
       </div>
     </div>
-    <div
-      v-if="image"
-      class="lens"
-      :class="{ 'is-on': lensOn }"
-      :style="lensStyle"
-      aria-hidden="true"
-    >
-      <img :src="image" alt="" />
-    </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
 import RevealWords from "@/components/home/RevealWords.vue";
 import { useAuthStore } from "@/stores/auth-store";
-import { useCmsStore } from "@/stores/cms-store";
 
 const auth = useAuthStore();
-const cms = useCmsStore();
-const lensOn = ref(false);
-const lensX = ref(0);
-const lensY = ref(0);
-const allowLens = ref(false);
-
-const image = computed(() => {
-  const loc = cms.publishedLocations.find(item => item.heroImage?.trim());
-  return (
-    loc?.heroImage ||
-    cms.publishedHotels.find(hotel => hotel.heroImage?.trim())?.heroImage ||
-    ""
-  );
-});
-
-const lensStyle = computed(() => ({
-  left: `${lensX.value}px`,
-  top: `${lensY.value}px`
-}));
-
-onMounted(() => {
-  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const hover = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
-  allowLens.value = hover && !reduce;
-});
-
-function onMove(event: PointerEvent) {
-  if (!allowLens.value || event.pointerType !== "mouse") return;
-  const root = event.currentTarget;
-  if (!(root instanceof HTMLElement)) return;
-  const rect = root.getBoundingClientRect();
-  lensX.value = event.clientX - rect.left;
-  lensY.value = event.clientY - rect.top;
-  lensOn.value = true;
-}
-
-function onLeave() {
-  lensOn.value = false;
-}
 </script>
 
 <style scoped>
@@ -204,34 +152,6 @@ function onLeave() {
   color: #3e4a40;
 }
 
-.lens {
-  position: absolute;
-  z-index: 4;
-  width: min(42vw, 320px);
-  height: min(42vw, 320px);
-  border-radius: 50%;
-  overflow: hidden;
-  border: 2px solid rgba(196, 163, 90, 0.9);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.28);
-  opacity: 0;
-  pointer-events: none;
-  transform: translate(-50%, -50%) scale(0.82);
-  transition:
-    opacity 0.25s ease,
-    transform 0.25s ease;
-}
-
-.lens.is-on {
-  opacity: 1;
-  transform: translate(-50%, -50%) scale(1);
-}
-
-.lens img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
 @media (max-width: 860px) {
   .story {
     min-height: 0;
@@ -245,16 +165,6 @@ function onLeave() {
   .story__title {
     max-width: none;
     font-size: clamp(2.77rem, 9.28vw, 3.86rem);
-  }
-
-  .lens {
-    display: none;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .lens {
-    display: none;
   }
 }
 </style>

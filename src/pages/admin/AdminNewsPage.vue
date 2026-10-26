@@ -36,7 +36,7 @@
         >
           <template #prepend><q-icon name="search" /></template>
         </q-input>
-        <q-select
+        <GySelect
           v-model="statusFilter"
           :options="statusOptions"
           dense
@@ -46,9 +46,8 @@
           options-dense
           label="Status"
           style="min-width: 140px; background: #fff"
-          popup-content-class="admin-filter-menu"
         />
-        <q-select
+        <GySelect
           v-model="locationFilter"
           :options="locationFilterOptions"
           dense
@@ -58,7 +57,6 @@
           options-dense
           label="Destination"
           style="min-width: 180px; background: #fff"
-          popup-content-class="admin-filter-menu"
         />
       </template>
     </AdminPageHeader>
@@ -154,14 +152,14 @@
     >
       <AdminFormSection title="Essentials" :columns="2">
         <q-input v-model="form.title" label="Title" outlined dense />
-        <q-select
+        <GySelect
           v-model="form.status"
           :options="cms.statusOptions"
           label="Status"
           outlined
           dense
         />
-        <q-select
+        <GySelect
           v-model="form.locationId"
           :options="locationFormOptions"
           label="Destination"
@@ -234,6 +232,7 @@
 </template>
 
 <script setup lang="ts">
+import GySelect from "@/components/GySelect.vue";
 import { computed, onMounted, reactive, ref } from "vue";
 import { useQuasar } from "quasar";
 import AdminDialog from "@/components/admin/AdminDialog.vue";

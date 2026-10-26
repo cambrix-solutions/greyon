@@ -28,7 +28,7 @@
         >
           <template #prepend><q-icon name="search" /></template>
         </q-input>
-        <q-select
+        <GySelect
           v-model="locationFilter"
           :options="locationFilterOptions"
           dense
@@ -38,10 +38,9 @@
           options-dense
           label="Destination"
           class="media-toolbar-select"
-          popup-content-class="admin-filter-menu"
           @update:model-value="onLocationFilterChange"
         />
-        <q-select
+        <GySelect
           v-model="hotelFilter"
           :options="hotelFilterOptions"
           dense
@@ -51,7 +50,6 @@
           options-dense
           label="Hotel"
           class="media-toolbar-select"
-          popup-content-class="admin-filter-menu"
         />
       </template>
     </AdminPageHeader>
@@ -82,7 +80,7 @@
               "
             />
             <div class="media-card__scope-fields">
-              <q-select
+              <GySelect
                 dense
                 outlined
                 emit-value
@@ -96,7 +94,7 @@
                   (v: string) => patchScope(item.id, v, item.hotelId)
                 "
               />
-              <q-select
+              <GySelect
                 dense
                 outlined
                 emit-value
@@ -161,7 +159,7 @@
         hint="Destination is required. Hotel narrows the library filter under that city."
         :columns="2"
       >
-        <q-select
+        <GySelect
           v-model="formLocationId"
           :options="locationOptions"
           label="Destination *"
@@ -171,7 +169,7 @@
           map-options
           @update:model-value="formHotelId = null"
         />
-        <q-select
+        <GySelect
           v-model="formHotelId"
           :options="hotelOptionsForLocation(formLocationId)"
           label="Hotel (optional)"
@@ -218,6 +216,7 @@
 </template>
 
 <script setup lang="ts">
+import GySelect from "@/components/GySelect.vue";
 import { computed, onMounted, ref, watch } from "vue";
 import { useQuasar } from "quasar";
 import AdminDialog from "@/components/admin/AdminDialog.vue";

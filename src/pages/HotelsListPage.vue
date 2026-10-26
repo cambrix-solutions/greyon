@@ -5,7 +5,7 @@
       description="Browse Greyon hotel portfolio across Cambodia."
     />
 
-    <section v-spot class="mast" data-sheet="Masthead">
+    <section class="mast" data-sheet="Masthead">
       <div ref="mastFrame" class="mast__media">
         <img
           v-if="mastImage"
@@ -15,7 +15,6 @@
           :style="mastStyle"
         />
         <div class="mast__veil" />
-        <div class="mast__spot" />
       </div>
 
       <div class="listing-wrap mast__content">
@@ -109,24 +108,28 @@
             </label>
             <label class="field">
               <span>Destination</span>
-              <select :value="locationFilter" @change="onLocationChange">
-                <option value="">All destinations</option>
-                <option
-                  v-for="loc in cms.publishedLocations"
-                  :key="loc.id"
-                  :value="loc.id"
-                >
-                  {{ loc.name }}
-                </option>
-              </select>
+              <GySelect
+                :model-value="locationFilter"
+                :options="locationOptions"
+                emit-value
+                map-options
+                outlined
+                hide-bottom-space
+                aria-label="Destination"
+                @update:model-value="onLocationChange"
+              />
             </label>
             <label class="field">
               <span>Sort</span>
-              <select v-model="sortKey">
-                <option value="featured">Featured</option>
-                <option value="az">Name A–Z</option>
-                <option value="za">Name Z–A</option>
-              </select>
+              <GySelect
+                v-model="sortKey"
+                :options="sortOptions"
+                emit-value
+                map-options
+                outlined
+                hide-bottom-space
+                aria-label="Sort"
+              />
             </label>
           </div>
 
@@ -238,6 +241,7 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import DestinationsMap from "@/components/DestinationsMap.vue";
+import GySelect from "@/components/GySelect.vue";
 import RevealWords from "@/components/home/RevealWords.vue";
 import { useDragScroll } from "@/components/home/useDragScroll";
 import { useParallax } from "@/components/home/useParallax";
@@ -261,6 +265,15 @@ const locationFilter = ref("");
 const keyword = ref("");
 const propertyFilter = ref("");
 const sortKey = ref<"featured" | "az" | "za">("featured");
+const sortOptions = [
+  { label: "Featured", value: "featured" },
+  { label: "Name A–Z", value: "az" },
+  { label: "Name Z–A", value: "za" }
+] as const;
+const locationOptions = computed(() => [
+  { label: "All destinations", value: "" },
+  ...cms.publishedLocations.map(loc => ({ label: loc.name, value: loc.id }))
+]);
 const viewMode = ref<"list" | "map">("list");
 
 const mastFrame = ref<HTMLElement | null>(null);
@@ -308,8 +321,8 @@ function chooseDestination(id: string) {
   setLocation(locationFilter.value === id ? "" : id);
 }
 
-function onLocationChange(event: Event) {
-  setLocation((event.target as HTMLSelectElement).value);
+function onLocationChange(value: string | null) {
+  setLocation(value ?? "");
 }
 
 function scrollToResults() {
@@ -487,8 +500,6 @@ const showError = computed(
 }
 
 .mast {
-  --spot-x: 68%;
-  --spot-y: 36%;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -500,8 +511,7 @@ const showError = computed(
 }
 
 .mast__media,
-.mast__veil,
-.mast__spot {
+.mast__veil {
   position: absolute;
   inset: 0;
 }
@@ -532,16 +542,6 @@ const showError = computed(
       rgba(12, 11, 10, 0.08) 36%,
       rgba(12, 11, 10, 0.72) 100%
     );
-}
-
-.mast__spot {
-  background: radial-gradient(
-    circle 12rem at var(--spot-x) var(--spot-y),
-    rgba(196, 163, 90, 0.42),
-    transparent 68%
-  );
-  mix-blend-mode: soft-light;
-  opacity: 0;
 }
 
 .mast__content {
@@ -900,27 +900,6 @@ const showError = computed(
 
 .result-move {
   transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-@media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  .mast:hover .mast__veil {
-    -webkit-mask-image: radial-gradient(
-      circle 13rem at var(--spot-x) var(--spot-y),
-      transparent 0%,
-      rgba(0, 0, 0, 0.2) 42%,
-      #000 72%
-    );
-    mask-image: radial-gradient(
-      circle 13rem at var(--spot-x) var(--spot-y),
-      transparent 0%,
-      rgba(0, 0, 0, 0.2) 42%,
-      #000 72%
-    );
-  }
-
-  .mast:hover .mast__spot {
-    opacity: 1;
-  }
 }
 
 #listing-results {

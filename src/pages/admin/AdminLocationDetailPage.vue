@@ -294,7 +294,7 @@
           outlined
           dense
         />
-        <q-select
+        <GySelect
           v-model="locForm.status"
           :options="cms.statusOptions"
           label="Status"
@@ -374,7 +374,7 @@
     >
       <AdminFormSection title="Essentials" :columns="2">
         <q-input v-model="hotelForm.name" label="Hotel name" outlined dense />
-        <q-select
+        <GySelect
           v-model="hotelForm.status"
           :options="cms.statusOptions"
           label="Status"
@@ -414,7 +414,7 @@
           dense
           hint='e.g. "Hotel & Serviced Apartment"'
         />
-        <q-select
+        <GySelect
           v-model="hotelForm.starRating"
           :options="starRatingOptions"
           label="Star rating"
@@ -539,14 +539,14 @@
     >
       <AdminFormSection title="Essentials" :columns="2">
         <q-input v-model="roomForm.name" label="Room name" outlined dense />
-        <q-select
+        <GySelect
           v-model="roomForm.status"
           :options="cms.statusOptions"
           label="Status"
           outlined
           dense
         />
-        <q-select
+        <GySelect
           v-model="roomForm.hotelId"
           :options="hotelOptions"
           label="Parent hotel"
@@ -632,6 +632,7 @@
 </template>
 
 <script setup lang="ts">
+import GySelect from "@/components/GySelect.vue";
 import { computed, onMounted, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useQuasar } from "quasar";

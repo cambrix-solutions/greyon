@@ -224,7 +224,7 @@
         title="Seat (role)"
         hint="Shown as roles — each seat unlocks features + CRUD permissions."
       >
-        <q-select
+        <GySelect
           v-model="form.packageIds"
           :options="seatOptions"
           emit-value
@@ -242,7 +242,7 @@
         v-if="needsManagerScope || needsHotelScope"
         title="Property scope"
       >
-        <q-select
+        <GySelect
           v-if="needsManagerScope"
           v-model="form.locationIds"
           :options="locationOptions"
@@ -255,7 +255,7 @@
           dense
           hint="Assign many locations to one manager (Phnom Penh, Sihanoukville, Kampot)."
         />
-        <q-select
+        <GySelect
           v-if="needsHotelScope"
           v-model="form.hotelIds"
           :options="hotelOptions"
@@ -297,6 +297,7 @@
 </template>
 
 <script setup lang="ts">
+import GySelect from "@/components/GySelect.vue";
 import { computed, onMounted, reactive, ref } from "vue";
 import { useQuasar } from "quasar";
 import AccessHubBanner from "@/components/admin/AccessHubBanner.vue";

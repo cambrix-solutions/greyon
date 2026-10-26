@@ -112,10 +112,3 @@ defineProps<{
   }
 }
 </style>
-
-<style>
-/* Teleported q-select menus used by admin list filters */
-.admin-filter-menu {
-  z-index: 6000 !important;
-}
-</style>

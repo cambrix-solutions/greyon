@@ -42,7 +42,6 @@
 
     <template v-else>
       <section
-        v-spot
         class="mast"
         data-sheet="Featured"
         aria-labelledby="news-feature-title"
@@ -57,18 +56,7 @@
             fetchpriority="high"
           />
           <div class="mast__veil" />
-          <img
-            v-if="featured.coverImage"
-            class="mast__lens"
-            :src="featured.coverImage"
-            alt=""
-            :style="mastStyle"
-          />
-          <div class="mast__spot" />
         </div>
-        <p v-if="featured.coverImage" class="mast__hint">
-          Move across the photograph
-        </p>
         <div class="dest-wrap mast__content">
           <p v-if="featuredPlace" class="mast__chip">
             <router-link v-if="featuredPlacePath" :to="featuredPlacePath">{{
