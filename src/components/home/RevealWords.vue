@@ -5,17 +5,28 @@
     ref="root"
     class="reveal-words"
     :class="{ 'is-in': shown }"
-    >{{ text }}</component
+    :aria-label="text"
   >
+    <span
+      v-for="(word, i) in words"
+      :key="`${i}-${word}`"
+      class="reveal-words__w"
+      :style="{ '--d': `${Math.min(i, 14) * 72}ms` }"
+      aria-hidden="true"
+      >{{ word }}</span
+    >
+  </component>
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 
-withDefaults(defineProps<{ text: string; tag?: string; id?: string }>(), {
-  tag: "h2"
-});
+const props = withDefaults(
+  defineProps<{ text: string; tag?: string; id?: string }>(),
+  { tag: "h2" }
+);
 
+const words = computed(() => props.text.trim().split(/\s+/).filter(Boolean));
 const root = ref<HTMLElement | null>(null);
 const shown = ref(false);
 let io: IntersectionObserver | null = null;
@@ -32,7 +43,7 @@ onMounted(() => {
     io?.disconnect();
   };
   const rect = el.getBoundingClientRect();
-  if (rect.top < window.innerHeight && rect.bottom > 0) {
+  if (rect.top < window.innerHeight * 0.94 && rect.bottom > 0) {
     requestAnimationFrame(arm);
     return;
   }
@@ -49,21 +60,28 @@ onUnmounted(() => io?.disconnect());
 </script>
 
 <style>
-.reveal-words {
+.reveal-words__w {
+  display: inline-block;
+  margin-right: 0.26em;
   opacity: 0;
-  transform: translateY(20px);
+  transform: translate3d(0, 0.72em, 0);
   transition:
-    opacity 0.55s ease,
-    transform 0.55s ease;
+    opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--d, 0ms);
 }
 
-.reveal-words.is-in {
+.reveal-words__w:last-child {
+  margin-right: 0;
+}
+
+.reveal-words.is-in .reveal-words__w {
   opacity: 1;
   transform: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .reveal-words {
+  .reveal-words__w {
     opacity: 1;
     transform: none;
     transition: none;

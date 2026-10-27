@@ -14,14 +14,19 @@
           :text="$t('home.fromGreyon')"
         />
       </div>
-      <router-link v-reveal to="/news" class="text-link">
+      <router-link v-reveal="{ delay: '120ms' }" to="/news" class="text-link">
         {{ $t("home.allNews") }}
         <span aria-hidden="true">→</span>
       </router-link>
     </header>
 
     <div v-if="lead" class="stage">
-      <router-link :to="`/news/${lead.slug}`" class="stage__photo">
+      <router-link
+        :to="`/news/${lead.slug}`"
+        class="stage__photo"
+        @pointermove="onMove"
+        @pointerleave="onLeave"
+      >
         <img v-if="lead.coverImage" :src="lead.coverImage" :alt="lead.title" />
       </router-link>
       <div class="stage__copy">
@@ -67,11 +72,14 @@
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import RevealWords from "@/components/home/RevealWords.vue";
+import { useTilt } from "@/components/home/useTilt";
 import { useCmsStore } from "@/stores/cms-store";
 import { formatDate } from "@/utils/datetime";
 
 const cms = useCmsStore();
 const { locale } = useI18n();
+const { onMove, onLeave } = useTilt();
+
 const articles = computed(() => cms.publishedNews.slice(0, 3));
 const lead = computed(() => articles.value[0] ?? null);
 const rest = computed(() => articles.value.slice(1));
@@ -156,6 +164,8 @@ function dateLabel(value: string) {
   overflow: hidden;
   border-radius: 36px 36px 140px 36px;
   background: #2a2e2c;
+  transform-style: preserve-3d;
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .stage__photo img {
@@ -222,9 +232,6 @@ function dateLabel(value: string) {
 .news__card {
   flex: 0 0 min(70vw, 24rem);
   color: inherit;
-  transition:
-    transform 0.55s ease,
-    box-shadow 0.55s ease;
 }
 
 .news__card-media {
@@ -239,7 +246,6 @@ function dateLabel(value: string) {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.55s ease;
 }
 
 .news__card-title {
@@ -251,16 +257,6 @@ function dateLabel(value: string) {
   letter-spacing: normal;
   line-height: 1.3;
   color: var(--gy-forest);
-}
-
-@media (hover: hover) {
-  .news__card:hover {
-    transform: translateY(-6px);
-  }
-
-  .news__card:hover img {
-    transform: scale(1.04);
-  }
 }
 
 .stage__photo:focus-visible,
@@ -313,11 +309,9 @@ function dateLabel(value: string) {
 
 @media (prefers-reduced-motion: reduce) {
   .stage__photo,
-  .stage__card,
-  .news__card,
-  .news__card img {
-    transition: none !important;
-    transform: none !important;
+  .stage__card {
+    transition: none;
+    transform: none;
   }
 }
 </style>

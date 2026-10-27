@@ -642,6 +642,10 @@
   .story-luxe .contact-grid {
     grid-template-columns: 1fr;
   }
+
+  .story-luxe .mask__title.has-photo {
+    transition: background-position 0.35s ease;
+  }
 }
 
 @media (max-width: 800px) {
@@ -704,6 +708,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .story-luxe .mask__title.has-photo,
   .story-luxe .enquiry__field,
   .story-luxe .enquiry__field > span,
   .story-luxe .contact-field .q-field__control,

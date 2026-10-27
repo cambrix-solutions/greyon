@@ -13,7 +13,10 @@
           nearby.
         </p>
       </header>
-      <DestinationsMap v-reveal :initial-slug="initialSlug" />
+      <DestinationsMap
+        v-reveal="{ delay: '80ms' }"
+        :initial-slug="initialSlug"
+      />
     </div>
   </q-page>
 </template>

@@ -17,7 +17,7 @@
       aria-labelledby="room-title"
       @keydown="onStageKey"
     >
-      <div class="stage__media">
+      <div ref="stageFrame" class="stage__media">
         <img
           v-if="activeSrc"
           :key="activeSrc"
@@ -108,7 +108,7 @@
         <div>
           <article class="story spin-edge" data-sheet="The room">
             <p v-reveal class="eyebrow">The room</p>
-            <h2 v-reveal>{{ room.name }}</h2>
+            <h2 v-reveal="{ delay: '60ms' }">{{ room.name }}</h2>
             <p v-if="roomDescription" class="story__body">{{
               roomDescription
             }}</p>
@@ -121,7 +121,7 @@
 
           <div class="dates-block">
             <p v-reveal class="eyebrow">Dates</p>
-            <h2 v-reveal>Check availability</h2>
+            <h2 v-reveal="{ delay: '60ms' }">Check availability</h2>
             <BookingSearchWidget
               :navigate="false"
               submit-label="Check availability"
@@ -135,11 +135,14 @@
             aria-labelledby="policy-title"
           >
             <p v-reveal class="eyebrow">House rules</p>
-            <h2 id="policy-title" v-reveal>Stay policies</h2>
+            <h2 id="policy-title" v-reveal="{ delay: '60ms' }"
+              >Stay policies</h2
+            >
             <ul ref="policyRail" class="policy-grid">
               <li
                 v-for="(policy, index) in policies"
                 :key="`${index}-${policy}`"
+                v-tilt="{ max: 6 }"
                 class="policy-card rooms-tilt glass-edge"
               >
                 <p>{{ policy }}</p>
@@ -154,11 +157,14 @@
             aria-labelledby="others-title"
           >
             <p v-reveal class="eyebrow">Also here</p>
-            <h2 id="others-title" v-reveal> Other rooms at this hotel </h2>
+            <h2 id="others-title" v-reveal="{ delay: '60ms' }">
+              Other rooms at this hotel
+            </h2>
             <ul ref="otherRail" class="other-rail">
               <li
                 v-for="other in otherRooms"
                 :key="other.id"
+                v-tilt="{ max: 7 }"
                 class="other-card rooms-tilt"
               >
                 <router-link
@@ -270,6 +276,7 @@
             </div>
           </dl>
           <button
+            v-magnetic
             class="gy-btn gy-btn--light price-card__cta"
             type="button"
             :disabled="booking.searching"
@@ -403,6 +410,7 @@ import { computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import RevealWords from "@/components/home/RevealWords.vue";
 import { useDragScroll } from "@/components/home/useDragScroll";
+import { useParallax } from "@/components/home/useParallax";
 import BookingSearchWidget from "@/components/BookingSearchWidget.vue";
 import HotelAmenityBand from "@/components/hotel/HotelAmenityBand.vue";
 import SectionDivider from "@/components/hotel/SectionDivider.vue";
@@ -421,6 +429,11 @@ const catalogReady = ref(false);
 const activePhoto = ref(0);
 const galleryOpen = ref(false);
 
+const stageFrame = ref<HTMLElement | null>(null);
+const stageOffset = useParallax(stageFrame, 120);
+const stageStyle = computed(() => ({
+  transform: `translate3d(0, ${stageOffset.value}px, 0)`
+}));
 const filmstrip = ref<HTMLElement | null>(null);
 const policyRail = ref<HTMLElement | null>(null);
 const otherRail = ref<HTMLElement | null>(null);

@@ -29,7 +29,7 @@
         aria-labelledby="contact-title"
       >
         <span v-if="showSheets" class="sheet-label">Arrive</span>
-        <div class="stage__media">
+        <div ref="heroFrame" class="stage__media">
           <img
             class="stage__img"
             :src="heroImage"
@@ -40,8 +40,10 @@
         </div>
         <div class="dest-wrap stage__content">
           <p v-reveal class="eyebrow eyebrow--light">Get in touch</p>
-          <h1 id="contact-title" v-reveal>Contact</h1>
-          <p v-reveal class="stage__lead">{{ addressLine }}</p>
+          <h1 id="contact-title" v-reveal="{ delay: '70ms' }">Contact</h1>
+          <p v-reveal="{ delay: '120ms' }" class="stage__lead">{{
+            addressLine
+          }}</p>
         </div>
         <SectionDivider fill="var(--gy-cream)" />
       </section>
@@ -75,6 +77,7 @@
           <article
             v-for="card in reachCards"
             :key="card.id"
+            v-tilt="{ max: 7 }"
             class="reach-card rooms-tilt glass-edge"
           >
             <h3>{{ card.title }}</h3>
@@ -145,7 +148,7 @@
           </div>
 
           <q-form
-            v-reveal
+            v-reveal="{ delay: '120ms' }"
             class="enquiry spin-edge"
             data-sheet="Enquiry"
             greedy
@@ -253,6 +256,7 @@
             </p>
 
             <button
+              v-magnetic
               class="gy-btn contact-submit"
               type="submit"
               :disabled="sending"
@@ -271,6 +275,7 @@ import { computed, reactive, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import ContactBranchMap from "@/components/ContactBranchMap.vue";
 import GySelect from "@/components/GySelect.vue";
+import { useParallax } from "@/components/home/useParallax";
 import { useReadProgress } from "@/components/home/useReadProgress";
 import SectionDivider from "@/components/hotel/SectionDivider.vue";
 import SeoHead from "@/components/SeoHead.vue";
@@ -317,6 +322,12 @@ const barStyle = computed(() => ({
   transform: `scaleX(${progress.value})`
 }));
 const showSheets = computed(() => String(route.query.sheets ?? "") === "1");
+
+const heroFrame = ref<HTMLElement | null>(null);
+const heroOffset = useParallax(heroFrame, 140);
+const heroStyle = computed(() => ({
+  transform: `translate3d(0, ${heroOffset.value}px, 0)`
+}));
 
 const form = reactive({
   name: "",

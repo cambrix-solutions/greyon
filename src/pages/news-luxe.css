@@ -1,4 +1,18 @@
-/* Editorial news pages. */
+/* Editorial news pages. Shared language and motion stay in
+   destination-luxe.css, rooms-luxe.css, home-motion.css, boot/motion,
+   usePinnedRail, and useParallax. */
+
+@property --gy-spin {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes gy-card-spin {
+  to {
+    --gy-spin: 360deg;
+  }
+}
 
 .news-luxe .mast__break {
   margin-left: -3vw;

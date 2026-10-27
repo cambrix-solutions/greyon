@@ -93,7 +93,9 @@
     <div
       v-if="rooms.length"
       id="home-rooms"
+      ref="pinSection"
       class="rooms"
+      :class="{ 'is-pinned': pinned }"
       aria-roledescription="carousel"
       :aria-label="$t('home.rooms')"
     >
@@ -104,7 +106,7 @@
             $t("home.rooms")
           }}</h2>
         </div>
-        <div ref="roomTrack" class="rooms__track">
+        <div ref="roomTrack" class="rooms__track" :style="trackStyle">
           <router-link
             v-for="room in rooms"
             :key="room.id"
@@ -137,6 +139,7 @@ import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import FeatureChips from "@/components/FeatureChips.vue";
 import { useDragScroll } from "@/components/home/useDragScroll";
+import { usePinScroll } from "@/components/home/usePinScroll";
 import { useCmsStore } from "@/stores/cms-store";
 import type { Hotel, RoomType } from "@/types/greyon";
 import { formatTime } from "@/utils/datetime";
@@ -147,10 +150,18 @@ const SWIPE_PX = 48;
 const cms = useCmsStore();
 const { t } = useI18n();
 const photoIndex = ref<Record<string, number>>({});
+const pinSection = ref<HTMLElement | null>(null);
 const roomTrack = ref<HTMLElement | null>(null);
+const { shift, pinned } = usePinScroll(pinSection, roomTrack);
 let touchX: number | null = null;
 
 useDragScroll(roomTrack, { momentum: true });
+
+const trackStyle = computed(() =>
+  pinned.value
+    ? { transform: `translate3d(${shift.value}px, 0, 0)` }
+    : undefined
+);
 
 const featuredHotels = computed(() =>
   cms.publishedHotels.filter(hotel => hotel.featured)
@@ -269,10 +280,11 @@ function roomDetail(room: RoomType) {
 
 .property__img {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  inset: -8%;
+  width: 116%;
+  height: 116%;
   object-fit: cover;
+  animation: ken 18s ease-in-out infinite alternate;
 }
 
 .property__veil {
@@ -457,9 +469,6 @@ function roomDetail(room: RoomType) {
   color: #fff;
   background: #2a2e2c;
   scroll-snap-align: start;
-  transition:
-    transform 0.55s ease,
-    box-shadow 0.55s ease;
 }
 
 .room__media,
@@ -473,7 +482,7 @@ function roomDetail(room: RoomType) {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.55s ease;
+  transition: transform 0.8s ease;
 }
 
 .room__shade {
@@ -502,13 +511,17 @@ function roomDetail(room: RoomType) {
 }
 
 @media (hover: hover) {
-  .room:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 16px 32px rgba(18, 17, 16, 0.16);
-  }
-
   .room:hover img {
-    transform: scale(1.04);
+    transform: scale(1.08);
+  }
+}
+
+@keyframes ken {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.1);
   }
 }
 
@@ -530,7 +543,6 @@ function roomDetail(room: RoomType) {
 
 @media (prefers-reduced-motion: reduce) {
   .property__img,
-  .room,
   .room__media img {
     animation: none !important;
     transition: none !important;

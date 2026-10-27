@@ -23,7 +23,7 @@
 
     <article ref="articleEl">
       <section class="stage" data-sheet="Cover" aria-labelledby="article-title">
-        <div class="stage__media">
+        <div ref="stageFrame" class="stage__media">
           <img
             v-if="article.coverImage"
             class="stage__img"
@@ -98,6 +98,7 @@
               </div>
             </dl>
             <a
+              v-magnetic
               class="gy-btn gy-btn--light price-card__cta"
               :href="shareHref"
               target="_blank"
@@ -162,6 +163,7 @@
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import RevealWords from "@/components/home/RevealWords.vue";
+import { useParallax } from "@/components/home/useParallax";
 import SectionDivider from "@/components/hotel/SectionDivider.vue";
 import SeoHead from "@/components/SeoHead.vue";
 import { useCmsStore } from "@/stores/cms-store";
@@ -171,6 +173,12 @@ const cms = useCmsStore();
 
 const article = computed(() => cms.getNewsBySlug(String(route.params.slug)));
 const pending = computed(() => cms.catalogSyncing && !cms.publishedNews.length);
+
+const stageFrame = ref<HTMLElement | null>(null);
+const stageOffset = useParallax(stageFrame, 160);
+const stageStyle = computed(() => ({
+  transform: `translate3d(0, ${stageOffset.value}px, 0)`
+}));
 
 const articleEl = ref<HTMLElement | null>(null);
 const progress = ref(0);
@@ -301,7 +309,11 @@ function passageClass(text: string) {
 }
 
 function stackStyle(index: number) {
-  return { zIndex: index + 1 };
+  const capped = Math.min(index, 4);
+  return {
+    top: `calc(var(--header-offset) + ${capped} * var(--stack-step))`,
+    zIndex: index + 1
+  };
 }
 
 function pad(value: number) {

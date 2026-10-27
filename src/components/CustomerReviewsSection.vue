@@ -5,6 +5,10 @@
     class="reviews-section home-motion"
     aria-roledescription="carousel"
     aria-labelledby="home-reviews-title"
+    @mouseenter="pause"
+    @mouseleave="resume"
+    @focusin="pause"
+    @focusout="onFocusOut"
   >
     <div class="gy-container">
       <header class="section-head">
@@ -26,8 +30,10 @@
           'is-single': reviews.length === 1,
           'is-pair': reviews.length === 2
         }"
-        aria-live="polite"
+        :aria-live="paused ? 'polite' : 'off'"
         @scroll.passive="onTrackScroll"
+        @touchstart.passive="pause"
+        @touchend.passive="resume"
       >
         <article
           v-for="review in reviews"
@@ -98,12 +104,49 @@ import {
   type GuestReview
 } from "@/services/engine/reviews";
 
+const AUTO_MS = 6000;
+
 const reviews = ref<GuestReview[]>([]);
 const index = ref(0);
+const paused = ref(false);
 const trackEl = ref<HTMLElement | null>(null);
 
+let timer: ReturnType<typeof setInterval> | null = null;
 let scrollTimer: ReturnType<typeof setTimeout> | null = null;
 let programmatic = false;
+let reduceMotion = false;
+
+function clearTimer() {
+  if (timer) {
+    clearInterval(timer);
+    timer = null;
+  }
+}
+
+function startTimer() {
+  clearTimer();
+  if (reduceMotion || paused.value || reviews.value.length < 2) return;
+  timer = setInterval(() => {
+    goTo(index.value + 1, false);
+  }, AUTO_MS);
+}
+
+function pause() {
+  paused.value = true;
+  clearTimer();
+}
+
+function resume() {
+  paused.value = false;
+  startTimer();
+}
+
+function onFocusOut(event: FocusEvent) {
+  const root = trackEl.value?.closest(".reviews-section");
+  const next = event.relatedTarget as Node | null;
+  if (root && next && root.contains(next)) return;
+  resume();
+}
 
 function scrollToIndex(i: number) {
   const track = trackEl.value;
@@ -118,6 +161,7 @@ function goTo(i: number) {
   index.value =
     ((i % reviews.value.length) + reviews.value.length) % reviews.value.length;
   scrollToIndex(index.value);
+  if (restart) startTimer();
 }
 
 function goNext() {
@@ -156,14 +200,17 @@ function onTrackScroll() {
 }
 
 onMounted(async () => {
+  reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   try {
     reviews.value = await fetchPublicReviews();
   } catch {
     reviews.value = [];
   }
+  if (reviews.value.length) startTimer();
 });
 
 onUnmounted(() => {
+  clearTimer();
   if (scrollTimer) clearTimeout(scrollTimer);
 });
 </script>
@@ -187,6 +234,15 @@ onUnmounted(() => {
   letter-spacing: 0.28em;
   text-transform: uppercase;
   color: var(--gy-gold);
+}
+
+.section-kicker::after {
+  content: "";
+  display: block;
+  width: 2.5rem;
+  height: 1px;
+  margin-top: 0.85rem;
+  background: var(--gy-gold);
 }
 
 .section-title {

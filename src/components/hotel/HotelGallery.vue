@@ -7,7 +7,7 @@
   >
     <div class="gy-container gallery__head">
       <p v-reveal class="eyebrow">Photographs</p>
-      <h2 id="hotel-gallery-title" v-reveal>Gallery</h2>
+      <h2 id="hotel-gallery-title" v-reveal="{ delay: '70ms' }">Gallery</h2>
     </div>
 
     <div
@@ -168,6 +168,20 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
   color: var(--gy-gold);
 }
 
+.eyebrow::after {
+  content: "";
+  display: block;
+  width: 0;
+  height: 1px;
+  margin-top: 0.8rem;
+  background: linear-gradient(90deg, var(--gy-gold), var(--gy-forest));
+  transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.eyebrow.gy-reveal--in::after {
+  width: 3.25rem;
+}
+
 .gallery h2 {
   margin: 0;
   font-family: var(--font-display);
@@ -295,6 +309,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
   height: 100%;
   object-fit: contain;
   transform-origin: center center;
+  animation: gallery-ken 16s ease-in-out infinite alternate;
 }
 
 .lb__close,
@@ -360,6 +375,15 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
   border: 0;
 }
 
+@keyframes gallery-ken {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.08);
+  }
+}
+
 @media (hover: hover) {
   .shot.is-pinned img {
     transform: scale(1.06);
@@ -394,7 +418,8 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 
 @media (prefers-reduced-motion: reduce) {
   .shot,
-  .shot img {
+  .shot img,
+  .eyebrow::after {
     transition: none;
   }
 

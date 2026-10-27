@@ -13,7 +13,7 @@
           :text="$t('home.storyTitle')"
         />
       </div>
-      <div v-reveal class="story__aside">
+      <div v-reveal="{ delay: '160ms' }" class="story__aside">
         <p class="story__body">{{ $t("home.storyBody") }}</p>
         <p class="story__note">{{ $t("home.laterPhase") }}</p>
         <router-link
