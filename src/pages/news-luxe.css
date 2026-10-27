@@ -14,10 +14,6 @@
   }
 }
 
-.news-luxe .mast__break {
-  margin-left: -3vw;
-}
-
 .news-luxe .mast__content {
   padding-bottom: 2.2rem;
 }
@@ -326,10 +322,6 @@
 }
 
 @media (max-width: 800px) {
-  .news-luxe .mast__break {
-    margin-left: 0;
-  }
-
   .news-luxe .mast__content {
     padding-bottom: 1.35rem;
   }
