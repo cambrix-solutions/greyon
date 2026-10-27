@@ -369,7 +369,7 @@ async function onLogout() {
 .account-profile__name {
   margin: 0 0 0.25rem;
   font-size: 1.15rem;
-  font-weight: 500;
+  font-weight: 700;
   color: var(--gy-forest);
   line-height: 1.25;
 }
@@ -470,7 +470,7 @@ async function onLogout() {
 .account-empty__title {
   margin: 0 0 0.35rem;
   font-size: 1.05rem;
-  font-weight: 500;
+  font-weight: 700;
   color: var(--gy-forest);
 }
 
@@ -551,7 +551,7 @@ async function onLogout() {
 
 .account-stay__hotel {
   margin: 0;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--gy-forest);
 }
 
@@ -649,7 +649,7 @@ async function onLogout() {
 
 .account-hotel__name {
   margin: 0 0 0.2rem;
-  font-weight: 500;
+  font-weight: 700;
   font-size: 0.98rem;
 }
 

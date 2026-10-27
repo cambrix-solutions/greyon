@@ -121,7 +121,7 @@ function dateLabel(value: string) {
   margin: 0;
   font-family: var(--font-display);
   font-size: var(--gy-text-4xl);
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: normal;
   line-height: 1;
 }
@@ -182,7 +182,7 @@ function dateLabel(value: string) {
   display: block;
   font-family: var(--font-display);
   font-size: var(--gy-text-4xl);
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: normal;
   line-height: 1;
   color: var(--gy-forest);
@@ -222,6 +222,9 @@ function dateLabel(value: string) {
 .news__card {
   flex: 0 0 min(70vw, 24rem);
   color: inherit;
+  transition:
+    transform 0.55s ease,
+    box-shadow 0.55s ease;
 }
 
 .news__card-media {
@@ -236,17 +239,28 @@ function dateLabel(value: string) {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.55s ease;
 }
 
 .news__card-title {
   display: block;
   margin-top: 0.75rem;
   font-family: var(--font-display);
-  font-size: 1.1rem;
-  font-weight: 500;
+  font-size: 1.2rem;
+  font-weight: 700;
   letter-spacing: normal;
   line-height: 1.3;
   color: var(--gy-forest);
+}
+
+@media (hover: hover) {
+  .news__card:hover {
+    transform: translateY(-6px);
+  }
+
+  .news__card:hover img {
+    transform: scale(1.04);
+  }
 }
 
 .stage__photo:focus-visible,
@@ -299,9 +313,11 @@ function dateLabel(value: string) {
 
 @media (prefers-reduced-motion: reduce) {
   .stage__photo,
-  .stage__card {
-    transition: none;
-    transform: none;
+  .stage__card,
+  .news__card,
+  .news__card img {
+    transition: none !important;
+    transform: none !important;
   }
 }
 </style>

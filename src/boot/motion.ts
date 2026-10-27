@@ -5,6 +5,25 @@ type RevealValue = {
   once?: boolean;
 };
 
+/** Light stagger only among reveal siblings in the same parent. */
+function staggerMs(el: HTMLElement): number {
+  const parent = el.parentElement;
+  if (!parent) return 0;
+  let index = 0;
+  for (const child of parent.children) {
+    if (child === el) break;
+    if (
+      child instanceof HTMLElement &&
+      (child.classList.contains("gy-reveal") ||
+        child.classList.contains("reveal-words"))
+    ) {
+      index += 1;
+    }
+  }
+  if (index === 0) return 0;
+  return Math.min(index, 3) * 80;
+}
+
 const reveal: Directive<HTMLElement, RevealValue | undefined> = {
   mounted(el, binding) {
     const prefersReduced = window.matchMedia(
@@ -16,6 +35,8 @@ const reveal: Directive<HTMLElement, RevealValue | undefined> = {
     }
 
     el.classList.add("gy-reveal");
+    const delay = staggerMs(el);
+    if (delay) el.style.transitionDelay = `${delay}ms`;
     const show = () => el.classList.add("gy-reveal--in");
 
     // Tall admin lists (hotels / rooms) can be many viewports high. A

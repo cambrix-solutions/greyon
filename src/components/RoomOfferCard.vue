@@ -226,7 +226,7 @@ const amenities = computed(() => props.amenities ?? []);
 
 .room-offer__title {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   line-height: 1.3;
   color: var(--gy-forest);
   overflow-wrap: anywhere;

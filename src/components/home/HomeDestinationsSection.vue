@@ -35,10 +35,10 @@
               :alt="loc.name"
               loading="lazy"
             />
+            <span class="stack__index" aria-hidden="true">{{
+              String(i + 1).padStart(2, "0")
+            }}</span>
           </span>
-          <span class="stack__index" aria-hidden="true">{{
-            String(i + 1).padStart(2, "0")
-          }}</span>
           <span class="stack__panel glass-frame">
             <span class="glass-frame__in stack__panel-in">
               <span v-if="hotelCount(loc.id)" class="stack__kicker">
@@ -140,7 +140,7 @@ function hotelsFor(locationId: string) {
   margin: 0;
   font-family: var(--font-display);
   font-size: var(--gy-text-4xl);
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: normal;
   line-height: 1;
 }
@@ -182,6 +182,7 @@ function hotelsFor(locationId: string) {
 }
 
 .stack__media {
+  position: relative;
   display: block;
   height: 100%;
   overflow: hidden;
@@ -193,12 +194,13 @@ function hotelsFor(locationId: string) {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.55s ease;
 }
 
 .stack__index {
   position: absolute;
-  top: -0.35rem;
-  left: 1.1rem;
+  top: 1rem;
+  left: 1.25rem;
   z-index: 2;
   font-family: var(--font-display);
   font-size: var(--gy-text-4xl);
@@ -238,8 +240,8 @@ function hotelsFor(locationId: string) {
 
 .stack__name {
   font-family: var(--font-display);
-  font-size: 1.1rem;
-  font-weight: 500;
+  font-size: 1.2rem;
+  font-weight: 700;
   letter-spacing: normal;
   line-height: 1.3;
 }
@@ -255,9 +257,23 @@ function hotelsFor(locationId: string) {
   overflow: hidden;
 }
 
+.stack__tilt {
+  transition: transform 0.55s ease;
+}
+
 .stack__tilt:focus-visible {
   outline: 2px solid var(--gy-gold);
   outline-offset: 4px;
+}
+
+@media (hover: hover) {
+  .stack__tilt:hover {
+    transform: translateY(-6px);
+  }
+
+  .stack__tilt:hover .stack__media img {
+    transform: scale(1.04);
+  }
 }
 
 @media (max-width: 800px) {
@@ -286,8 +302,10 @@ function hotelsFor(locationId: string) {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .stack__tilt {
-    transition: none;
+  .stack__tilt,
+  .stack__media img {
+    transition: none !important;
+    transform: none !important;
   }
 }
 </style>

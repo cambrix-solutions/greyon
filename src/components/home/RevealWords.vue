@@ -51,10 +51,10 @@ onUnmounted(() => io?.disconnect());
 <style>
 .reveal-words {
   opacity: 0;
-  transform: translateY(12px);
+  transform: translateY(20px);
   transition:
-    opacity 0.35s ease,
-    transform 0.35s ease;
+    opacity 0.55s ease,
+    transform 0.55s ease;
 }
 
 .reveal-words.is-in {

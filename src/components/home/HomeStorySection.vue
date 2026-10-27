@@ -97,7 +97,7 @@ const auth = useAuthStore();
   max-width: 12ch;
   font-family: var(--font-display);
   font-size: var(--gy-text-4xl);
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: normal;
   line-height: 1;
   color: var(--gy-forest);

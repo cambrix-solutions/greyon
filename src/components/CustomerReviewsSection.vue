@@ -193,7 +193,7 @@ onUnmounted(() => {
   margin: 0;
   font-family: var(--font-display);
   font-size: var(--gy-text-4xl);
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1;
   letter-spacing: normal;
 }
@@ -255,7 +255,7 @@ onUnmounted(() => {
   margin: 0;
   font-family: var(--font-display);
   font-size: 0.78rem;
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: normal;
 }
 
