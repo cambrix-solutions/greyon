@@ -180,15 +180,15 @@ function iconFor(label: string) {
   font-weight: 700;
   letter-spacing: 0.28em;
   text-transform: uppercase;
-  color: #e4d2a4;
+  color: var(--gy-gold);
 }
 
 .band__title {
   margin: 0 0 1.6rem;
   padding-inline: clamp(1.25rem, 6vw, 5rem);
   font-family: var(--font-display);
-  font-size: var(--gy-text-display);
-  font-weight: 600;
+  font-size: var(--gy-text-4xl);
+  font-weight: 500;
   letter-spacing: normal;
   line-height: 1;
   color: var(--gy-white);
@@ -228,7 +228,7 @@ function iconFor(label: string) {
 }
 
 .chip .q-icon {
-  color: #e4d2a4;
+  color: var(--gy-gold);
 }
 
 .places {
@@ -245,12 +245,12 @@ function iconFor(label: string) {
   font-weight: 600;
   letter-spacing: normal;
   line-height: 1.1;
-  color: rgba(255, 255, 255, 0.92);
+  color: var(--gy-gold);
 }
 
 .places__link:hover,
 .places__link:focus-visible {
-  color: #e4d2a4;
+  color: var(--gy-gold);
 }
 
 .places__link:focus-visible {

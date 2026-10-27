@@ -418,7 +418,7 @@ function scrollToJourney() {
 
 .journey__nav button.is-active {
   background: var(--gy-gold);
-  color: #1a211e;
+  color: var(--gy-forest);
 }
 
 .journey__nav button:focus-visible,
@@ -565,9 +565,10 @@ function scrollToJourney() {
   margin: 0;
   font-family: var(--font-display);
   font-size: var(--gy-text-4xl);
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: normal;
-  line-height: 1;
+  line-height: 1.2;
+  color: #fff;
 }
 
 .journey__copy p {
@@ -605,7 +606,7 @@ function scrollToJourney() {
 
 .state {
   padding: clamp(3rem, 8vw, 5rem) 0;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
   font-family: var(--font-display);
 }
 
@@ -661,7 +662,7 @@ function scrollToJourney() {
 }
 
 .index-card__bar span {
-  color: var(--gy-gold-deep);
+  color: var(--gy-gold);
   font-size: 1.35rem;
 }
 
@@ -706,10 +707,10 @@ function scrollToJourney() {
 .index-card__body h3 {
   margin: 0;
   font-family: var(--font-display);
-  font-size: var(--gy-text-4xl);
-  font-weight: 600;
+  font-size: 1.1rem;
+  font-weight: 500;
   letter-spacing: normal;
-  line-height: 1;
+  line-height: 1.3;
 }
 
 .index-card__body p {
@@ -718,7 +719,7 @@ function scrollToJourney() {
   font-size: 0.98rem;
   font-weight: 400;
   line-height: 1.6;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
 }
 
 .index-card__body .gy-btn {
@@ -742,7 +743,7 @@ function scrollToJourney() {
   font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--gy-gold-deep);
+  color: var(--gy-gold);
 }
 
 .index-card__stays {

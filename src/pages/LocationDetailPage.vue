@@ -449,9 +449,12 @@ function bookHere() {
 
 .story__body {
   margin: 0;
-  max-width: 12em;
-  font-size: var(--gy-text-4xl);
-  line-height: 0.98;
+  max-width: 36rem;
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--gy-forest);
 }
 
 .story__actions {
@@ -536,7 +539,7 @@ function bookHere() {
   font-style: normal;
   font-family: var(--font-display);
   font-size: var(--gy-text-4xl);
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: normal;
   line-height: 1;
   white-space: nowrap;
@@ -714,16 +717,16 @@ function bookHere() {
   font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--gy-gold-deep);
+  color: var(--gy-gold);
 }
 
 .visit-card a {
   font-family: var(--font-display);
-  font-size: var(--gy-text-3xl);
-  font-weight: 600;
+  font-size: 1.1rem;
+  font-weight: 500;
   letter-spacing: normal;
-  line-height: 1.05;
-  color: var(--gy-ink);
+  line-height: 1.3;
+  color: var(--gy-gold);
   text-decoration: underline;
   text-underline-offset: 0.12em;
   overflow-wrap: anywhere;
@@ -741,7 +744,7 @@ function bookHere() {
   margin: 0 0 0.75rem;
   font-family: var(--font-display);
   font-size: var(--gy-text-3xl);
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: normal;
 }
 
@@ -837,7 +840,7 @@ function bookHere() {
   padding-top: 0.9rem;
   font-family: var(--font-display);
   font-size: var(--gy-text-2xl);
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: normal;
   line-height: 1.05;
 }
@@ -862,8 +865,8 @@ function bookHere() {
 
 .dest-missing h1 {
   margin: 0 0 0.85rem;
-  font-size: var(--gy-text-4xl);
-  line-height: 1;
+  font-size: var(--gy-text-display);
+  line-height: 1.15;
 }
 
 .dest-missing p {
@@ -871,7 +874,7 @@ function bookHere() {
   max-width: 36rem;
   font-family: var(--font-body);
   font-weight: 400;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
 }
 
 @media (max-width: 900px) {
@@ -886,7 +889,7 @@ function bookHere() {
   }
 
   .story__body {
-    max-width: 16em;
+    max-width: none;
   }
 }
 

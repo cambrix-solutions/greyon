@@ -12,13 +12,13 @@
       transparent 28%
     ),
     var(--gy-cream);
-  color: var(--gy-ink);
+  color: var(--gy-forest);
 }
 
 .dest-luxe h1,
 .dest-luxe h2 {
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: normal;
 }
 
@@ -35,7 +35,7 @@
   font-weight: 700;
   letter-spacing: 0.28em;
   text-transform: uppercase;
-  color: var(--gy-gold-deep);
+  color: var(--gy-gold);
 }
 
 .dest-luxe .eyebrow--light {
@@ -49,7 +49,7 @@
   font-size: 1rem;
   font-weight: 400;
   line-height: 1.6;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
 }
 
 .dest-luxe .glass-edge {

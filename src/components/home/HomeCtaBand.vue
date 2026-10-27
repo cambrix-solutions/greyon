@@ -111,15 +111,15 @@ const image = computed(() => {
   font-weight: 700;
   letter-spacing: 0.28em;
   text-transform: uppercase;
-  color: #e4d2a4;
+  color: var(--gy-gold);
 }
 
 .cta__title {
   margin: 0;
   max-width: 12ch;
   font-family: var(--font-display);
-  font-size: var(--gy-text-display);
-  font-weight: 600;
+  font-size: var(--gy-text-4xl);
+  font-weight: 500;
   letter-spacing: normal;
   line-height: 1;
   color: var(--gy-white);

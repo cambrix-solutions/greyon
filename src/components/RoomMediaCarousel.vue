@@ -302,7 +302,7 @@ function openGallery(idx: number) {
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--gy-muted);
+  color: var(--gy-gold);
 }
 
 .room-media__badge {
@@ -317,7 +317,7 @@ function openGallery(idx: number) {
   font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.04em;
-  color: var(--gy-ink);
+  color: var(--gy-forest);
   background: rgba(255, 255, 255, 0.94);
   box-shadow: 0 6px 18px rgba(69, 76, 75, 0.16);
   backdrop-filter: blur(6px);

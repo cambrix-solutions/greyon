@@ -38,7 +38,7 @@ const initialSlug = computed(() => {
 
 .map-page__title {
   margin: 0 0 0.6rem;
-  font-size: var(--gy-text-4xl);
+  font-size: var(--gy-text-display);
 }
 
 .map-page__lead {

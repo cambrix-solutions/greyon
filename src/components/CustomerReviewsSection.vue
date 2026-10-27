@@ -172,7 +172,7 @@ onUnmounted(() => {
 .reviews-section {
   padding: clamp(5rem, 10vw, 8rem) 0;
   background: var(--gy-cream);
-  color: var(--gy-ink);
+  color: var(--gy-forest);
 }
 
 .section-head {
@@ -186,7 +186,7 @@ onUnmounted(() => {
   font-weight: 700;
   letter-spacing: 0.28em;
   text-transform: uppercase;
-  color: var(--gy-gold-deep);
+  color: var(--gy-gold);
 }
 
 .section-title {
@@ -226,7 +226,7 @@ onUnmounted(() => {
 .reviews-card__stars {
   display: flex;
   gap: 0.15rem;
-  color: var(--gy-gold-deep);
+  color: var(--gy-gold);
 }
 
 .reviews-card__quote {
@@ -241,7 +241,7 @@ onUnmounted(() => {
   font-weight: 400;
   line-height: 1.15;
   letter-spacing: normal;
-  color: var(--gy-ink);
+  color: var(--gy-forest);
 }
 
 .reviews-card__meta {
@@ -255,13 +255,13 @@ onUnmounted(() => {
   margin: 0;
   font-family: var(--font-display);
   font-size: 0.78rem;
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: normal;
 }
 
 .reviews-card__hotel {
   margin: 0;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
   font-family: var(--font-display);
   font-size: 0.85rem;
 }
@@ -281,7 +281,7 @@ onUnmounted(() => {
   border: 1px solid rgba(69, 76, 75, 0.2);
   border-radius: 999px;
   background: transparent;
-  color: var(--gy-ink);
+  color: var(--gy-forest);
   cursor: pointer;
   transition:
     border-color 0.2s ease,

@@ -234,7 +234,7 @@ watch(
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--gy-muted);
+  color: var(--gy-gold);
 }
 
 .dest-map__chips {
@@ -248,7 +248,7 @@ watch(
   border: 1px solid rgba(69, 76, 75, 0.16);
   border-radius: 999px;
   background: var(--gy-white);
-  color: var(--gy-ink);
+  color: var(--gy-gold);
   font: inherit;
   font-size: 0.88rem;
   font-weight: 500;
@@ -332,7 +332,7 @@ watch(
 
 .dest-map__card span {
   font-size: 0.85rem;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
 }
 
 .sr-only {

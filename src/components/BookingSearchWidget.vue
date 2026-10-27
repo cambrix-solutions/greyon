@@ -604,7 +604,7 @@ async function onSubmit() {
   container: gy-search / inline-size;
   display: grid;
   gap: 0.6rem;
-  color: var(--gy-ink);
+  color: var(--gy-forest);
   font-family: var(--font-display);
 }
 
@@ -707,7 +707,7 @@ async function onSubmit() {
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--gy-muted);
+  color: var(--gy-gold);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -727,7 +727,7 @@ async function onSubmit() {
 .gy-seg__value {
   font-size: 0.95rem;
   font-weight: 600;
-  color: var(--gy-ink);
+  color: var(--gy-forest);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -801,7 +801,7 @@ async function onSubmit() {
 }
 
 .gy-search__hint {
-  color: var(--gy-muted);
+  color: var(--gy-forest);
 }
 
 /* ---- Compact (header bar + home hero) ---- */
@@ -1238,7 +1238,7 @@ async function onSubmit() {
   border: 0;
   border-radius: 12px;
   background: transparent;
-  color: var(--gy-ink);
+  color: var(--gy-forest);
   font-family: var(--font-display);
   font-size: 0.92rem;
   font-weight: 500;
@@ -1276,7 +1276,7 @@ async function onSubmit() {
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--gy-muted);
+  color: var(--gy-gold);
 }
 
 .gy-rates__code input {
@@ -1285,7 +1285,7 @@ async function onSubmit() {
   border: 1px solid rgba(69, 76, 75, 0.18);
   border-radius: 8px;
   background: var(--gy-white);
-  color: var(--gy-ink);
+  color: var(--gy-forest);
   font: inherit;
   font-size: 0.95rem;
 }
@@ -1310,7 +1310,7 @@ async function onSubmit() {
   border: 0;
   border-radius: 12px;
   background: transparent;
-  color: var(--gy-ink);
+  color: var(--gy-forest);
   font-family: var(--font-display);
   font-size: 0.92rem;
   font-weight: 500;
@@ -1355,12 +1355,12 @@ async function onSubmit() {
 .gy-pop-summary strong {
   font-size: 0.92rem;
   font-weight: 600;
-  color: var(--gy-ink);
+  color: var(--gy-forest);
 }
 
 .gy-pop-summary span {
   font-size: 0.78rem;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
 }
 
 .gy-pop-actions {
@@ -1373,7 +1373,7 @@ async function onSubmit() {
   padding: 0.5rem 0.75rem;
   border: 0;
   background: transparent;
-  color: var(--gy-ink);
+  color: var(--gy-forest);
   font-family: var(--font-display);
   font-size: 0.82rem;
   font-weight: 600;

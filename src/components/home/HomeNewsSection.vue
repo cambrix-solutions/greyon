@@ -93,7 +93,7 @@ function dateLabel(value: string) {
       transparent 60%
     ),
     #f7f3ec;
-  color: #1c1f1e;
+  color: var(--gy-forest);
   overflow-x: clip;
 }
 
@@ -114,14 +114,14 @@ function dateLabel(value: string) {
   font-weight: 700;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: var(--gy-gold-deep);
+  color: var(--gy-gold);
 }
 
 .news__title {
   margin: 0;
   font-family: var(--font-display);
   font-size: var(--gy-text-4xl);
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: normal;
   line-height: 1;
 }
@@ -136,7 +136,7 @@ function dateLabel(value: string) {
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #3e4a40;
+  color: var(--gy-gold);
 }
 
 .stage {
@@ -181,11 +181,11 @@ function dateLabel(value: string) {
 .stage__headline {
   display: block;
   font-family: var(--font-display);
-  font-size: var(--gy-text-display);
-  font-weight: 600;
+  font-size: var(--gy-text-4xl);
+  font-weight: 500;
   letter-spacing: normal;
   line-height: 1;
-  color: #1c1f1e;
+  color: var(--gy-forest);
 }
 
 .stage__card {
@@ -242,10 +242,11 @@ function dateLabel(value: string) {
   display: block;
   margin-top: 0.75rem;
   font-family: var(--font-display);
-  font-size: 1.7rem;
-  font-weight: 600;
+  font-size: 1.1rem;
+  font-weight: 500;
   letter-spacing: normal;
-  line-height: 1.1;
+  line-height: 1.3;
+  color: var(--gy-forest);
 }
 
 .stage__photo:focus-visible,

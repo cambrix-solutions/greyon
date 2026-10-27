@@ -177,14 +177,14 @@ function onGoogle() {
 
 .auth-card__title {
   margin: 0 0 0.45rem;
-  font-size: var(--gy-text-3xl);
+  font-size: var(--gy-text-display);
   line-height: 1.05;
-  color: var(--gy-ink);
+  color: var(--gy-forest);
 }
 
 .auth-card__sub {
   margin: 0 0 1.35rem;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
   font-size: 0.95rem;
   line-height: 1.5;
 }
@@ -199,7 +199,7 @@ function onGoogle() {
   border: 1px solid rgba(18, 17, 16, 0.12);
   border-radius: 10px;
   background: #fff;
-  color: var(--gy-ink);
+  color: var(--gy-forest);
   font: inherit;
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -234,7 +234,7 @@ function onGoogle() {
   align-items: center;
   gap: 0.75rem;
   margin: 1.2rem 0 1.05rem;
-  color: var(--gy-muted);
+  color: var(--gy-gold);
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -260,7 +260,7 @@ function onGoogle() {
   font-weight: 650;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--gy-muted);
+  color: var(--gy-gold);
 }
 
 .auth-field input {
@@ -273,7 +273,7 @@ function onGoogle() {
   font-weight: 400;
   letter-spacing: 0;
   text-transform: none;
-  color: var(--gy-ink);
+  color: var(--gy-gold);
   background: var(--gy-sand);
   transition:
     border-color 0.2s ease,
@@ -317,7 +317,7 @@ function onGoogle() {
   font-weight: 400;
   letter-spacing: 0;
   text-transform: none;
-  color: var(--gy-ink);
+  color: var(--gy-forest);
 }
 
 .auth-q-input :deep(.q-field__append) {
@@ -342,7 +342,7 @@ function onGoogle() {
   border: none;
   border-radius: 8px;
   background: transparent;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
   cursor: pointer;
   transition:
     color 0.15s ease,
@@ -350,7 +350,7 @@ function onGoogle() {
 }
 
 .auth-eye:hover {
-  color: var(--gy-ink);
+  color: var(--gy-forest);
   background: rgba(18, 17, 16, 0.04);
 }
 
@@ -384,12 +384,12 @@ function onGoogle() {
 .auth-card__foot {
   margin: 1.25rem 0 0;
   text-align: center;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
   font-size: 0.92rem;
 }
 
 .auth-card__foot a {
-  color: var(--gy-gold-deep);
+  color: var(--gy-gold);
   font-weight: 650;
   text-decoration: none;
   border-bottom: 1px solid transparent;

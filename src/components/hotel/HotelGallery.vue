@@ -172,7 +172,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
   margin: 0;
   font-family: var(--font-display);
   font-size: var(--gy-text-4xl);
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: normal;
   line-height: 1;
 }

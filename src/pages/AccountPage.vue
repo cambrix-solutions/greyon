@@ -325,7 +325,7 @@ async function onLogout() {
 
 .account-hero__title {
   margin: 0 0 0.55rem;
-  font-size: var(--gy-text-3xl);
+  font-size: var(--gy-text-display);
   color: var(--gy-white);
 }
 
@@ -359,7 +359,7 @@ async function onLogout() {
   display: grid;
   place-items: center;
   background: linear-gradient(145deg, var(--gy-gold), var(--gy-gold-deep));
-  color: var(--gy-ink);
+  color: var(--gy-forest);
   font-family: var(--font-display, inherit);
   font-size: 1.35rem;
   font-weight: 600;
@@ -369,15 +369,15 @@ async function onLogout() {
 .account-profile__name {
   margin: 0 0 0.25rem;
   font-size: 1.15rem;
-  font-weight: 600;
-  color: var(--gy-ink);
+  font-weight: 500;
+  color: var(--gy-forest);
   line-height: 1.25;
 }
 
 .account-profile__email,
 .account-profile__phone {
   margin: 0;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
   font-size: 0.92rem;
   word-break: break-word;
 }
@@ -390,7 +390,7 @@ async function onLogout() {
   font-size: 0.78rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--gy-muted);
+  color: var(--gy-gold);
 }
 
 .account-dot {
@@ -409,7 +409,7 @@ async function onLogout() {
   padding: 0;
   border: 0;
   background: none;
-  color: var(--gy-gold-deep);
+  color: var(--gy-gold);
   font: inherit;
   font-size: 0.88rem;
   font-weight: 600;
@@ -419,7 +419,7 @@ async function onLogout() {
 }
 
 .account-signout:hover {
-  color: var(--gy-ink);
+  color: var(--gy-gold);
 }
 
 .account-main {
@@ -470,20 +470,20 @@ async function onLogout() {
 .account-empty__title {
   margin: 0 0 0.35rem;
   font-size: 1.05rem;
-  font-weight: 600;
-  color: var(--gy-ink);
+  font-weight: 500;
+  color: var(--gy-forest);
 }
 
 .account-empty__copy {
   margin: 0 0 0.85rem;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
   max-width: 32rem;
   line-height: 1.5;
   font-size: 0.95rem;
 }
 
 .account-empty__link {
-  color: var(--gy-gold-deep);
+  color: var(--gy-gold);
   font-weight: 600;
   text-decoration: none;
   font-size: 0.92rem;
@@ -552,27 +552,27 @@ async function onLogout() {
 .account-stay__hotel {
   margin: 0;
   font-weight: 600;
-  color: var(--gy-ink);
+  color: var(--gy-forest);
 }
 
 .account-stay__status {
   font-size: 0.72rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--gy-gold-deep);
+  color: var(--gy-gold);
   font-weight: 700;
 }
 
 .account-stay__meta,
 .account-stay__ref {
   margin: 0;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
   font-size: 0.88rem;
 }
 
 .account-stay__open {
   margin-left: 0.45rem;
-  color: var(--gy-gold-deep);
+  color: var(--gy-gold);
   font-weight: 600;
   white-space: nowrap;
 }
@@ -602,12 +602,12 @@ async function onLogout() {
 
 .account-explore__label {
   font-weight: 600;
-  color: var(--gy-ink);
+  color: var(--gy-gold);
 }
 
 .account-explore__hint {
   font-size: 0.82rem;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
 }
 
 .account-hotels {
@@ -649,14 +649,14 @@ async function onLogout() {
 
 .account-hotel__name {
   margin: 0 0 0.2rem;
-  font-weight: 600;
+  font-weight: 500;
   font-size: 0.98rem;
 }
 
 .account-hotel__loc {
   margin: 0;
   font-size: 0.8rem;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
   letter-spacing: 0.03em;
   text-transform: uppercase;
 }

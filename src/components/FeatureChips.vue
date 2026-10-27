@@ -214,7 +214,7 @@ function iconFor(label: string) {
   font-size: 0.78rem;
   line-height: 1.25;
   letter-spacing: 0.01em;
-  color: var(--gy-ink);
+  color: var(--gy-forest);
   background: var(--gy-sand);
   border: 0;
   transition:
@@ -322,7 +322,7 @@ function iconFor(label: string) {
   max-height: 88dvh;
   background: var(--gy-white);
   border-radius: 20px 20px 0 0;
-  color: var(--gy-ink);
+  color: var(--gy-forest);
   overflow: hidden;
 }
 
@@ -350,7 +350,7 @@ function iconFor(label: string) {
   margin: 0;
   font-family: var(--font-display);
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.3;
 }
 
@@ -366,7 +366,7 @@ function iconFor(label: string) {
   border: 0;
   border-radius: 999px;
   background: transparent;
-  color: var(--gy-ink);
+  color: var(--gy-forest);
   cursor: pointer;
 }
 

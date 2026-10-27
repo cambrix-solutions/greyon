@@ -55,7 +55,7 @@ const auth = useAuthStore();
       transparent 55%
     ),
     #f7f3ec;
-  color: #1c1f1e;
+  color: var(--gy-forest);
 }
 
 .story::after {
@@ -89,18 +89,18 @@ const auth = useAuthStore();
   font-weight: 700;
   letter-spacing: 0.28em;
   text-transform: uppercase;
-  color: var(--gy-gold-deep);
+  color: var(--gy-gold);
 }
 
 .story__title {
   margin: 0;
   max-width: 12ch;
   font-family: var(--font-display);
-  font-size: var(--gy-text-display);
-  font-weight: 600;
+  font-size: var(--gy-text-4xl);
+  font-weight: 500;
   letter-spacing: normal;
   line-height: 1;
-  color: var(--gy-ink);
+  color: var(--gy-forest);
 }
 
 .story__aside {
@@ -126,7 +126,7 @@ const auth = useAuthStore();
 
 .story__note {
   margin-top: 0.9rem;
-  color: #6d675f;
+  color: var(--gy-forest);
   font-size: 0.88rem;
 }
 
@@ -141,7 +141,7 @@ const auth = useAuthStore();
   font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #3e4a40;
+  color: var(--gy-gold);
 }
 
 @media (max-width: 860px) {
@@ -156,7 +156,7 @@ const auth = useAuthStore();
 
   .story__title {
     max-width: none;
-    font-size: var(--gy-text-display);
+    font-size: var(--gy-text-4xl);
   }
 }
 </style>

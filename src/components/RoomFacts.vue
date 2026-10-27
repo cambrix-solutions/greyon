@@ -50,16 +50,16 @@ withDefaults(
   align-items: center;
   gap: 0.4rem;
   font-size: 0.88rem;
-  color: var(--gy-ink);
+  color: var(--gy-forest);
 }
 
 .room-facts--compact li {
   font-size: 0.8rem;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
 }
 
 .room-facts .q-icon {
-  color: var(--gy-gold-deep);
+  color: var(--gy-gold);
 }
 
 .room-facts--light li,

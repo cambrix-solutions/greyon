@@ -306,7 +306,7 @@ defineExpose({ focusActive });
 <style scoped>
 .gy-cal {
   position: relative;
-  color: var(--gy-ink);
+  color: var(--gy-forest);
   font-family: var(--font-display);
 }
 
@@ -327,7 +327,7 @@ defineExpose({ focusActive });
   border: 1px solid rgba(69, 76, 75, 0.14);
   border-radius: 999px;
   background: var(--gy-white);
-  color: var(--gy-ink);
+  color: var(--gy-forest);
   cursor: pointer;
   transition:
     background 0.2s ease,
@@ -362,7 +362,7 @@ defineExpose({ focusActive });
   display: grid;
   place-items: center;
   font-size: 0.95rem;
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: normal;
 }
 
@@ -387,7 +387,7 @@ defineExpose({ focusActive });
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--gy-muted);
+  color: var(--gy-gold);
   padding-bottom: 0.35rem;
 }
 

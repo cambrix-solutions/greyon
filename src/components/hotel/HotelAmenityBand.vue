@@ -118,7 +118,7 @@ const items = computed(() =>
   font-style: normal;
   font-family: var(--font-display);
   font-size: var(--gy-text-3xl);
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: normal;
   line-height: 1;
   white-space: nowrap;
@@ -169,7 +169,7 @@ const items = computed(() =>
   max-width: 12ch;
   font-family: var(--font-display);
   font-size: var(--gy-text-4xl);
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: normal;
   line-height: 1;
 }

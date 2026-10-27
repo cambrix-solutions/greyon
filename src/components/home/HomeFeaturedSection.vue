@@ -333,8 +333,8 @@ function roomDetail(room: RoomType) {
   bottom: 36%;
   margin: 0;
   font-family: var(--font-display);
-  font-size: var(--gy-text-display);
-  font-weight: 600;
+  font-size: var(--gy-text-4xl);
+  font-weight: 500;
   letter-spacing: normal;
   line-height: 1;
 }
@@ -366,7 +366,7 @@ function roomDetail(room: RoomType) {
   font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #e4d2a4;
+  color: var(--gy-gold);
 }
 
 .property__lead {
@@ -394,7 +394,7 @@ function roomDetail(room: RoomType) {
 .rooms {
   position: relative;
   background: #f4efe6;
-  color: #1c1f1e;
+  color: var(--gy-forest);
 }
 
 .rooms.is-pinned .rooms__sticky {
@@ -418,14 +418,14 @@ function roomDetail(room: RoomType) {
   font-weight: 700;
   letter-spacing: 0.28em;
   text-transform: uppercase;
-  color: var(--gy-gold-deep);
+  color: var(--gy-gold);
 }
 
 .rooms__title {
   margin: 0;
   font-family: var(--font-display);
   font-size: var(--gy-text-4xl);
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: normal;
   line-height: 1;
 }
@@ -488,10 +488,10 @@ function roomDetail(room: RoomType) {
 
 .room__name {
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: normal;
-  font-size: var(--gy-text-2xl);
-  line-height: 1.05;
+  font-size: 1.1rem;
+  line-height: 1.3;
 }
 
 .room__detail {

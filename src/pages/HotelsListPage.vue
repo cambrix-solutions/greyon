@@ -431,14 +431,14 @@ const showError = computed(
       transparent 28%
     ),
     var(--gy-cream);
-  color: var(--gy-ink);
+  color: var(--gy-forest);
 }
 
 .listing-luxe h1,
 .listing-luxe h2,
 .listing-luxe :deep(h1) {
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: normal;
 }
 
@@ -455,7 +455,7 @@ const showError = computed(
   font-weight: 700;
   letter-spacing: 0.28em;
   text-transform: uppercase;
-  color: var(--gy-gold-deep);
+  color: var(--gy-gold);
 }
 
 .eyebrow--light {
@@ -554,7 +554,7 @@ const showError = computed(
 
 .section-lead {
   margin-bottom: 0.4rem;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
 }
 
 .dest-rail {
@@ -640,10 +640,10 @@ const showError = computed(
   right: 0.9rem;
   bottom: 0.95rem;
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: normal;
-  font-size: var(--gy-text-stat);
-  line-height: 1.05;
+  font-size: 1.1rem;
+  line-height: 1.3;
 }
 
 .results-band {
@@ -716,7 +716,7 @@ const showError = computed(
   font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--gy-gold-deep);
+  color: var(--gy-gold);
 }
 
 .field input,
@@ -727,7 +727,7 @@ const showError = computed(
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.92);
   padding: 0.45rem 0.7rem;
-  color: var(--gy-ink);
+  color: var(--gy-forest);
   font: inherit;
   font-size: 0.92rem;
   font-weight: 500;
@@ -760,7 +760,7 @@ const showError = computed(
   border: 0;
   border-radius: 999px;
   background: transparent;
-  color: var(--gy-ink);
+  color: var(--gy-forest);
   font-family: var(--font-display);
   font-size: 0.72rem;
   font-weight: 700;
@@ -792,7 +792,7 @@ const showError = computed(
   border: 1px solid rgba(69, 76, 75, 0.16);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.8);
-  color: var(--gy-ink);
+  color: var(--gy-forest);
   font-family: var(--font-display);
   font-size: 0.78rem;
   font-weight: 600;
@@ -841,7 +841,7 @@ const showError = computed(
 
 .empty {
   margin: 0.5rem 0 0;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
   font-family: var(--font-display);
 }
 
