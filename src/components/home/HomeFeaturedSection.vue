@@ -452,6 +452,7 @@ function roomDetail(room: RoomType) {
 .rooms:not(.is-pinned) .rooms__track {
   overflow-x: auto;
   scroll-snap-type: x mandatory;
+  scroll-padding-inline: clamp(1.2rem, 4vw, 3rem);
   scrollbar-width: none;
 }
 

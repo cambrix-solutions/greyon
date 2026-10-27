@@ -585,10 +585,13 @@ const showError = computed(
 }
 
 .dest-rail {
+  --rail-gutter: max(1.25rem, calc((100% - 1240px) / 2));
+
   display: flex;
   gap: 0.9rem;
   margin-top: 1.2rem;
-  padding: 0.35rem max(1.25rem, calc((100% - 1240px) / 2)) 1.5rem;
+  padding: 0.35rem var(--rail-gutter) 1.5rem;
+  scroll-padding-inline: var(--rail-gutter);
   overflow-x: auto;
   scroll-snap-type: x proximity;
   overscroll-behavior-x: contain;
@@ -624,6 +627,16 @@ const showError = computed(
   text-align: left;
   cursor: pointer;
   box-shadow: 0 16px 36px rgba(22, 21, 19, 0.12);
+}
+
+/* Auto margins centre the cards when they all fit and fall back to
+   the gutter once the rail scrolls. */
+.dest-card:first-child {
+  margin-inline-start: auto;
+}
+
+.dest-card:last-child {
+  margin-inline-end: auto;
 }
 
 .dest-card:focus-visible {
@@ -938,6 +951,10 @@ const showError = computed(
 
   .listing-wrap {
     width: min(1240px, calc(100% - 1.5rem));
+  }
+
+  .dest-rail {
+    --rail-gutter: 0.75rem;
   }
 }
 

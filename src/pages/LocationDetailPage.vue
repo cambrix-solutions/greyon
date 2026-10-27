@@ -861,9 +861,12 @@ function bookHere() {
 }
 
 .else-rail {
+  --rail-gutter: max(1.25rem, calc((100% - 1240px) / 2));
+
   display: flex;
   gap: 0.9rem;
-  padding: 0.85rem max(1.25rem, calc((100% - 1240px) / 2)) 1.2rem;
+  padding: 0.85rem var(--rail-gutter) 1.2rem;
+  scroll-padding-inline: var(--rail-gutter);
   overflow-x: auto;
   scroll-snap-type: x proximity;
   overscroll-behavior-x: contain;
@@ -889,6 +892,16 @@ function bookHere() {
 .else-card {
   flex: 0 0 min(78vw, 24rem);
   scroll-snap-align: start;
+}
+
+/* Auto margins centre the cards when they all fit and fall back to
+   the gutter once the rail scrolls. */
+.else-card:first-child {
+  margin-inline-start: auto;
+}
+
+.else-card:last-child {
+  margin-inline-end: auto;
 }
 
 .else-card a {
@@ -993,6 +1006,10 @@ function bookHere() {
 }
 
 @media (max-width: 599px) {
+  .else-rail {
+    --rail-gutter: 0.75rem;
+  }
+
   .detail :deep(h1) {
     font-size: var(--gy-text-display);
   }
