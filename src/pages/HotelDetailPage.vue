@@ -644,7 +644,7 @@ async function openRoom(roomTypeId: string) {
 .hotel-luxe h2,
 .hotel-luxe h3 {
   font-family: var(--font-display);
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: normal;
 }
 
@@ -961,7 +961,7 @@ async function openRoom(roomTypeId: string) {
 .product-card h3 {
   margin: 0;
   font-size: 1.1rem;
-  font-weight: 500;
+  font-weight: 700;
   line-height: 1.3;
 }
 
@@ -1068,7 +1068,7 @@ async function openRoom(roomTypeId: string) {
 
 .landmark__place {
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: normal;
   font-size: 1.1rem;
   line-height: 1.3;
@@ -1131,7 +1131,7 @@ async function openRoom(roomTypeId: string) {
 .summary h3 {
   margin: 0;
   font-size: var(--gy-text-4xl);
-  font-weight: 500;
+  font-weight: 700;
   line-height: 1.25;
 }
 
@@ -1187,7 +1187,7 @@ async function openRoom(roomTypeId: string) {
 
 .rooms :deep(.room-offer__title) {
   font-family: var(--font-display);
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: normal;
   font-size: var(--gy-text-2xl);
 }
@@ -1319,7 +1319,7 @@ async function openRoom(roomTypeId: string) {
   margin: 0 0 1rem;
   font-family: var(--font-display);
   font-size: var(--gy-text-display);
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: normal;
 }
 

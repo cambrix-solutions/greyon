@@ -334,7 +334,7 @@ function roomDetail(room: RoomType) {
   margin: 0;
   font-family: var(--font-display);
   font-size: var(--gy-text-4xl);
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: normal;
   line-height: 1;
 }
@@ -425,7 +425,7 @@ function roomDetail(room: RoomType) {
   margin: 0;
   font-family: var(--font-display);
   font-size: var(--gy-text-4xl);
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: normal;
   line-height: 1;
 }
@@ -488,7 +488,7 @@ function roomDetail(room: RoomType) {
 
 .room__name {
   font-family: var(--font-display);
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: normal;
   font-size: 1.1rem;
   line-height: 1.3;

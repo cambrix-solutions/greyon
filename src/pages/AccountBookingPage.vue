@@ -299,7 +299,7 @@ function rateLabel(ratePlanId: string) {
   font-size: 0.78rem;
   letter-spacing: normal;
   color: var(--gy-forest);
-  font-weight: 500;
+  font-weight: 700;
 }
 
 .stay-panel__link {

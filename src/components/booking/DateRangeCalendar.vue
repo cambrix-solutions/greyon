@@ -362,7 +362,7 @@ defineExpose({ focusActive });
   display: grid;
   place-items: center;
   font-size: 0.95rem;
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: normal;
 }
 

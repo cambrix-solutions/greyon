@@ -438,7 +438,7 @@ const showError = computed(
 .listing-luxe h2,
 .listing-luxe :deep(h1) {
   font-family: var(--font-display);
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: normal;
 }
 
@@ -640,7 +640,7 @@ const showError = computed(
   right: 0.9rem;
   bottom: 0.95rem;
   font-family: var(--font-display);
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: normal;
   font-size: 1.1rem;
   line-height: 1.3;

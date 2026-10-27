@@ -723,7 +723,7 @@ function bookHere() {
 .visit-card a {
   font-family: var(--font-display);
   font-size: 1.1rem;
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: normal;
   line-height: 1.3;
   color: var(--gy-gold);
@@ -744,7 +744,7 @@ function bookHere() {
   margin: 0 0 0.75rem;
   font-family: var(--font-display);
   font-size: var(--gy-text-3xl);
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: normal;
 }
 
@@ -840,7 +840,7 @@ function bookHere() {
   padding-top: 0.9rem;
   font-family: var(--font-display);
   font-size: var(--gy-text-2xl);
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: normal;
   line-height: 1.05;
 }

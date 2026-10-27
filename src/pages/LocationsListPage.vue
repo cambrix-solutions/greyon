@@ -565,7 +565,7 @@ function scrollToJourney() {
   margin: 0;
   font-family: var(--font-display);
   font-size: var(--gy-text-4xl);
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: normal;
   line-height: 1.2;
   color: #fff;
@@ -708,7 +708,7 @@ function scrollToJourney() {
   margin: 0;
   font-family: var(--font-display);
   font-size: 1.1rem;
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: normal;
   line-height: 1.3;
 }
