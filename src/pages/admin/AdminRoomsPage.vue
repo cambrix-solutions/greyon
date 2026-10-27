@@ -65,7 +65,7 @@
       <span><strong>This page</strong> Room types</span>
     </div>
 
-    <div v-reveal="{ delay: '80ms' }" class="room-groups">
+    <div v-reveal class="room-groups">
       <section v-for="group in grouped" :key="group.hotelId" class="room-group">
         <header class="room-group__head">
           <div>

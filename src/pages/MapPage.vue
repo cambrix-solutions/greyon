@@ -13,10 +13,7 @@
           nearby.
         </p>
       </header>
-      <DestinationsMap
-        v-reveal="{ delay: '80ms' }"
-        :initial-slug="initialSlug"
-      />
+      <DestinationsMap v-reveal :initial-slug="initialSlug" />
     </div>
   </q-page>
 </template>
@@ -41,7 +38,7 @@ const initialSlug = computed(() => {
 
 .map-page__title {
   margin: 0 0 0.6rem;
-  font-size: clamp(2.4rem, 5vw, 3.5rem);
+  font-size: var(--gy-text-display);
 }
 
 .map-page__lead {

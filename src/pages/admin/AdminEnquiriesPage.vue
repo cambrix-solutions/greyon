@@ -39,7 +39,7 @@
       </template>
     </AdminPageHeader>
 
-    <div v-reveal="{ delay: '120ms' }" class="admin-data">
+    <div v-reveal class="admin-data">
       <div class="admin-data__table">
         <q-markup-table flat bordered class="bg-white">
           <thead>

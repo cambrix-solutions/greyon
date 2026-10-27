@@ -6,26 +6,19 @@
     />
 
     <section class="mast" data-sheet="Masthead">
-      <div ref="mastFrame" class="mast__media">
-        <img
-          v-if="mastImage"
-          class="mast__img"
-          :src="mastImage"
-          alt=""
-          :style="mastStyle"
-        />
+      <div class="mast__media">
+        <img v-if="mastImage" class="mast__img" :src="mastImage" alt="" />
         <div class="mast__veil" />
       </div>
 
       <div class="listing-wrap mast__content">
         <p v-reveal class="eyebrow eyebrow--light">Portfolio</p>
         <RevealWords tag="h1" text="Greyon hotels" />
-        <p v-reveal="{ delay: '140ms' }" class="mast__lead">
+        <p v-reveal class="mast__lead">
           Published properties, ready to filter by destination or name.
         </p>
-        <div v-reveal="{ delay: '200ms' }" class="mast__actions">
+        <div v-reveal class="mast__actions">
           <button
-            v-magnetic
             class="gy-btn gy-btn--light"
             type="button"
             @click="scrollToResults"
@@ -44,8 +37,8 @@
     >
       <div class="listing-wrap destinations__head">
         <p v-reveal class="eyebrow">Places</p>
-        <h2 v-reveal="{ delay: '60ms' }">Destinations</h2>
-        <p v-reveal="{ delay: '100ms' }" class="section-lead">
+        <h2 v-reveal>Destinations</h2>
+        <p v-reveal class="section-lead">
           Drag across the places, then choose one to narrow the list.
         </p>
       </div>
@@ -192,7 +185,7 @@
         <div data-sheet="Results">
           <header class="results-head">
             <p v-reveal class="eyebrow">Stays</p>
-            <h2 v-reveal="{ delay: '60ms' }">In the portfolio</h2>
+            <h2 v-reveal>In the portfolio</h2>
           </header>
 
           <Transition name="swap" mode="out-in">
@@ -223,7 +216,7 @@
                   :key="hotel.id"
                   class="result-slot"
                 >
-                  <div v-tilt="{ max: 5 }" class="result-tilt">
+                  <div class="result-tilt">
                     <HotelCard live :hotel="hotel" />
                   </div>
                 </div>
@@ -244,7 +237,6 @@ import DestinationsMap from "@/components/DestinationsMap.vue";
 import GySelect from "@/components/GySelect.vue";
 import RevealWords from "@/components/home/RevealWords.vue";
 import { useDragScroll } from "@/components/home/useDragScroll";
-import { useParallax } from "@/components/home/useParallax";
 import SectionDivider from "@/components/hotel/SectionDivider.vue";
 import HotelCard from "@/components/HotelCard.vue";
 import SeoHead from "@/components/SeoHead.vue";
@@ -276,11 +268,6 @@ const locationOptions = computed(() => [
 ]);
 const viewMode = ref<"list" | "map">("list");
 
-const mastFrame = ref<HTMLElement | null>(null);
-const mastOffset = useParallax(mastFrame, 140);
-const mastStyle = computed(() => ({
-  transform: `translate3d(0, ${mastOffset.value}px, 0)`
-}));
 const destRail = ref<HTMLElement | null>(null);
 useDragScroll(destRail, { momentum: true });
 
@@ -444,15 +431,15 @@ const showError = computed(
       transparent 28%
     ),
     var(--gy-cream);
-  color: var(--gy-ink);
+  color: var(--gy-forest);
 }
 
 .listing-luxe h1,
 .listing-luxe h2,
 .listing-luxe :deep(h1) {
   font-family: var(--font-display);
-  font-weight: 800;
-  letter-spacing: -0.035em;
+  font-weight: 500;
+  letter-spacing: normal;
 }
 
 .listing-wrap {
@@ -468,21 +455,7 @@ const showError = computed(
   font-weight: 700;
   letter-spacing: 0.28em;
   text-transform: uppercase;
-  color: var(--gy-gold-deep);
-}
-
-.eyebrow::after {
-  content: "";
-  display: block;
-  width: 0;
-  height: 1px;
-  margin-top: 0.8rem;
-  background: linear-gradient(90deg, var(--gy-gold), var(--gy-forest));
-  transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.eyebrow.gy-reveal--in::after {
-  width: 3.25rem;
+  color: var(--gy-gold);
 }
 
 .eyebrow--light {
@@ -495,7 +468,7 @@ const showError = computed(
   margin: 0.9rem 0 0;
   font-family: var(--font-body);
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.6;
 }
 
@@ -553,7 +526,7 @@ const showError = computed(
 .listing-luxe :deep(h1) {
   max-width: 9em;
   margin: 0;
-  font-size: clamp(2.79rem, 7.48vw, 5.85rem);
+  font-size: var(--gy-text-display);
   line-height: 1;
 }
 
@@ -575,13 +548,13 @@ const showError = computed(
 .destinations h2,
 .results-head h2 {
   margin: 0;
-  font-size: clamp(2.35rem, 6vw, 4.2rem);
+  font-size: var(--gy-text-4xl);
   line-height: 1;
 }
 
 .section-lead {
   margin-bottom: 0.4rem;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
 }
 
 .dest-rail {
@@ -667,11 +640,10 @@ const showError = computed(
   right: 0.9rem;
   bottom: 0.95rem;
   font-family: var(--font-display);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  font-size: clamp(1.7rem, 2.4vw, 2.15rem);
-  line-height: 1.05;
-  text-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+  font-weight: 500;
+  letter-spacing: normal;
+  font-size: 1.1rem;
+  line-height: 1.3;
 }
 
 .results-band {
@@ -702,7 +674,7 @@ const showError = computed(
   padding: 2.5px;
   border-radius: inherit;
   background: conic-gradient(
-    from var(--gy-spin),
+    from 40deg,
     var(--gy-gold),
     var(--gy-forest) 32%,
     rgba(255, 255, 255, 0.2) 58%,
@@ -710,7 +682,6 @@ const showError = computed(
     var(--gy-gold)
   );
   pointer-events: none;
-  animation: gy-card-spin 11s linear infinite;
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
     linear-gradient(#000 0 0);
@@ -745,7 +716,7 @@ const showError = computed(
   font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--gy-gold-deep);
+  color: var(--gy-gold);
 }
 
 .field input,
@@ -756,7 +727,7 @@ const showError = computed(
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.92);
   padding: 0.45rem 0.7rem;
-  color: var(--gy-ink);
+  color: var(--gy-forest);
   font: inherit;
   font-size: 0.92rem;
   font-weight: 500;
@@ -789,7 +760,7 @@ const showError = computed(
   border: 0;
   border-radius: 999px;
   background: transparent;
-  color: var(--gy-ink);
+  color: var(--gy-forest);
   font-family: var(--font-display);
   font-size: 0.72rem;
   font-weight: 700;
@@ -821,7 +792,7 @@ const showError = computed(
   border: 1px solid rgba(69, 76, 75, 0.16);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.8);
-  color: var(--gy-ink);
+  color: var(--gy-forest);
   font-family: var(--font-display);
   font-size: 0.78rem;
   font-weight: 600;
@@ -839,7 +810,7 @@ const showError = computed(
   font-family: var(--font-display);
   font-weight: 700;
   letter-spacing: -0.02em;
-  font-size: clamp(1.55rem, 2.4vw, 2.15rem);
+  font-size: var(--gy-text-stat);
   line-height: 1.05;
 }
 
@@ -857,7 +828,6 @@ const showError = computed(
 
 .result-tilt {
   height: 100%;
-  transition: transform 0.18s linear;
 }
 
 .map-stage {
@@ -871,7 +841,7 @@ const showError = computed(
 
 .empty {
   margin: 0.5rem 0 0;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
   font-family: var(--font-display);
 }
 
@@ -943,7 +913,6 @@ const showError = computed(
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .eyebrow::after,
   .filters::before,
   .result-tilt,
   .swap-enter-active,
@@ -953,10 +922,6 @@ const showError = computed(
   .result-move {
     animation: none;
     transition: none;
-  }
-
-  .eyebrow::after {
-    width: 3.25rem;
   }
 
   .mast__img {

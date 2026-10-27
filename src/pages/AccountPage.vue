@@ -10,16 +10,13 @@
       <div class="account-hero__veil" aria-hidden="true" />
       <div class="gy-container account-hero__content">
         <p v-reveal class="account-hero__brand gy-display">Greyon</p>
-        <p
-          v-reveal="{ delay: '50ms' }"
-          class="gy-eyebrow account-hero__eyebrow"
-        >
+        <p v-reveal class="gy-eyebrow account-hero__eyebrow">
           {{ greeting }}
         </p>
-        <h1 v-reveal="{ delay: '90ms' }" class="gy-display account-hero__title">
+        <h1 v-reveal class="gy-display account-hero__title">
           {{ firstName }}
         </h1>
-        <p v-reveal="{ delay: '130ms' }" class="account-hero__lede">
+        <p v-reveal class="account-hero__lede">
           Your stays across Cambodia’s cities, coast, and countryside — in one
           quiet place.
         </p>
@@ -28,7 +25,7 @@
 
     <div class="gy-container account-body">
       <div class="account-layout">
-        <aside v-reveal="{ delay: '80ms' }" class="account-profile">
+        <aside v-reveal class="account-profile">
           <div class="account-profile__avatar" aria-hidden="true">
             {{ initials }}
           </div>
@@ -60,7 +57,7 @@
         </aside>
 
         <div class="account-main">
-          <section v-reveal="{ delay: '120ms' }" class="account-block">
+          <section v-reveal class="account-block">
             <header class="account-block__head">
               <div>
                 <p class="gy-eyebrow">Stays</p>
@@ -132,7 +129,7 @@
             </ul>
           </section>
 
-          <section v-reveal="{ delay: '180ms' }" class="account-block">
+          <section v-reveal class="account-block">
             <header class="account-block__head">
               <div>
                 <p class="gy-eyebrow">Explore</p>
@@ -156,7 +153,7 @@
 
           <section
             v-if="featuredHotels.length"
-            v-reveal="{ delay: '220ms' }"
+            v-reveal
             class="account-block account-block--flush"
           >
             <header class="account-block__head account-block__head--pad">
@@ -292,7 +289,6 @@ async function onLogout() {
   background: url("https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=1800&q=80")
     center / cover;
   transform: scale(1.04);
-  animation: account-hero-drift 28s ease-in-out infinite alternate;
 }
 
 .account-hero__veil {
@@ -315,9 +311,9 @@ async function onLogout() {
 
 .account-hero__brand {
   margin: 0 0 0.85rem;
-  font-size: clamp(2.4rem, 7vw, 3.6rem);
+  font-size: var(--gy-text-4xl);
   line-height: 0.95;
-  letter-spacing: -0.02em;
+  letter-spacing: normal;
   color: var(--gy-white);
   opacity: 0.95;
 }
@@ -329,8 +325,8 @@ async function onLogout() {
 
 .account-hero__title {
   margin: 0 0 0.55rem;
-  font-size: clamp(1.85rem, 4.5vw, 2.6rem);
-  color: var(--gy-gold);
+  font-size: var(--gy-text-display);
+  color: var(--gy-white);
 }
 
 .account-hero__lede {
@@ -363,7 +359,7 @@ async function onLogout() {
   display: grid;
   place-items: center;
   background: linear-gradient(145deg, var(--gy-gold), var(--gy-gold-deep));
-  color: var(--gy-ink);
+  color: var(--gy-forest);
   font-family: var(--font-display, inherit);
   font-size: 1.35rem;
   font-weight: 600;
@@ -373,15 +369,15 @@ async function onLogout() {
 .account-profile__name {
   margin: 0 0 0.25rem;
   font-size: 1.15rem;
-  font-weight: 600;
-  color: var(--gy-ink);
+  font-weight: 500;
+  color: var(--gy-forest);
   line-height: 1.25;
 }
 
 .account-profile__email,
 .account-profile__phone {
   margin: 0;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
   font-size: 0.92rem;
   word-break: break-word;
 }
@@ -394,7 +390,7 @@ async function onLogout() {
   font-size: 0.78rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--gy-muted);
+  color: var(--gy-gold);
 }
 
 .account-dot {
@@ -413,7 +409,7 @@ async function onLogout() {
   padding: 0;
   border: 0;
   background: none;
-  color: var(--gy-gold-deep);
+  color: var(--gy-gold);
   font: inherit;
   font-size: 0.88rem;
   font-weight: 600;
@@ -423,7 +419,7 @@ async function onLogout() {
 }
 
 .account-signout:hover {
-  color: var(--gy-ink);
+  color: var(--gy-gold);
 }
 
 .account-main {
@@ -459,7 +455,7 @@ async function onLogout() {
 
 .account-block__title {
   margin: 0.2rem 0 0;
-  font-size: clamp(1.35rem, 2.5vw, 1.7rem);
+  font-size: var(--gy-text-xl);
 }
 
 .account-block__cta {
@@ -474,20 +470,20 @@ async function onLogout() {
 .account-empty__title {
   margin: 0 0 0.35rem;
   font-size: 1.05rem;
-  font-weight: 600;
-  color: var(--gy-ink);
+  font-weight: 500;
+  color: var(--gy-forest);
 }
 
 .account-empty__copy {
   margin: 0 0 0.85rem;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
   max-width: 32rem;
   line-height: 1.5;
   font-size: 0.95rem;
 }
 
 .account-empty__link {
-  color: var(--gy-gold-deep);
+  color: var(--gy-gold);
   font-weight: 600;
   text-decoration: none;
   font-size: 0.92rem;
@@ -556,27 +552,27 @@ async function onLogout() {
 .account-stay__hotel {
   margin: 0;
   font-weight: 600;
-  color: var(--gy-ink);
+  color: var(--gy-forest);
 }
 
 .account-stay__status {
   font-size: 0.72rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--gy-gold-deep);
+  color: var(--gy-gold);
   font-weight: 700;
 }
 
 .account-stay__meta,
 .account-stay__ref {
   margin: 0;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
   font-size: 0.88rem;
 }
 
 .account-stay__open {
   margin-left: 0.45rem;
-  color: var(--gy-gold-deep);
+  color: var(--gy-gold);
   font-weight: 600;
   white-space: nowrap;
 }
@@ -606,12 +602,12 @@ async function onLogout() {
 
 .account-explore__label {
   font-weight: 600;
-  color: var(--gy-ink);
+  color: var(--gy-gold);
 }
 
 .account-explore__hint {
   font-size: 0.82rem;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
 }
 
 .account-hotels {
@@ -653,25 +649,16 @@ async function onLogout() {
 
 .account-hotel__name {
   margin: 0 0 0.2rem;
-  font-weight: 600;
+  font-weight: 500;
   font-size: 0.98rem;
 }
 
 .account-hotel__loc {
   margin: 0;
   font-size: 0.8rem;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
   letter-spacing: 0.03em;
   text-transform: uppercase;
-}
-
-@keyframes account-hero-drift {
-  from {
-    transform: scale(1.04) translate3d(0, 0, 0);
-  }
-  to {
-    transform: scale(1.1) translate3d(-1.5%, -1%, 0);
-  }
 }
 
 @media (max-width: 900px) {

@@ -8,21 +8,9 @@
     :aria-labelledby="showCopy ? 'hotel-amenities-title' : undefined"
     :aria-hidden="showCopy ? undefined : true"
   >
-    <div
-      class="marquee"
-      :class="{ 'is-static': reduceMotion, 'is-paused': paused }"
-      aria-hidden="true"
-      @pointerdown="paused = true"
-      @pointerup="paused = false"
-      @pointercancel="paused = false"
-      @pointerleave="paused = false"
-    >
-      <div class="marquee__track" :style="trackStyle">
-        <span
-          v-for="(item, index) in loopItems"
-          :key="`${index}-${item}`"
-          class="marquee__item"
-        >
+    <div class="marquee is-static" :aria-label="items.join(', ')">
+      <div class="marquee__track">
+        <span v-for="item in items" :key="item" class="marquee__item">
           <em>{{ item }}</em>
           <i />
         </span>
@@ -31,10 +19,10 @@
 
     <div v-if="showCopy" class="gy-container band__body">
       <p v-reveal class="eyebrow">{{ eyebrow }}</p>
-      <h2 id="hotel-amenities-title" v-reveal="{ delay: '80ms' }">
+      <h2 id="hotel-amenities-title" v-reveal>
         {{ title }}
       </h2>
-      <p v-if="lead" v-reveal="{ delay: '120ms' }" class="band__lead">
+      <p v-if="lead" v-reveal class="band__lead">
         {{ lead }}
       </p>
       <FeatureChips :items="items" on-dark />
@@ -43,7 +31,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed } from "vue";
 import FeatureChips from "@/components/FeatureChips.vue";
 
 const props = withDefaults(
@@ -53,7 +41,7 @@ const props = withDefaults(
     title?: string;
     lead?: string;
     sheet?: string;
-    /** False keeps only the scrolling title band. */
+    /** False keeps only the amenity title band. */
     showCopy?: boolean;
     id?: string;
   }>(),
@@ -67,31 +55,9 @@ const props = withDefaults(
   }
 );
 
-const reduceMotion = ref(
-  typeof window !== "undefined" &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches
-);
-const paused = ref(false);
-
 const items = computed(() =>
   props.items.map(item => item.trim()).filter(Boolean)
 );
-
-const half = computed(() => {
-  if (!items.value.length || reduceMotion.value) return items.value;
-  const repeats = Math.max(1, Math.ceil(6 / items.value.length));
-  return Array.from({ length: repeats }, () => items.value).flat();
-});
-
-const loopItems = computed(() =>
-  reduceMotion.value ? half.value : [...half.value, ...half.value]
-);
-
-const trackStyle = computed(() => {
-  if (reduceMotion.value) return undefined;
-  const seconds = Math.max(28, half.value.length * 3.4);
-  return { animationDuration: `${seconds}s` };
-});
 </script>
 
 <style scoped>
@@ -131,33 +97,14 @@ const trackStyle = computed(() => {
 }
 
 .marquee {
-  overflow: hidden;
   margin-bottom: clamp(2rem, 5vw, 3.5rem);
-  -webkit-mask-image: linear-gradient(
-    90deg,
-    transparent,
-    #000 7%,
-    #000 93%,
-    transparent
-  );
-  mask-image: linear-gradient(
-    90deg,
-    transparent,
-    #000 7%,
-    #000 93%,
-    transparent
-  );
 }
 
 .marquee__track {
   display: flex;
-  width: max-content;
-  animation: amenity-marquee 36s linear infinite;
-}
-
-.marquee:hover .marquee__track,
-.marquee.is-paused .marquee__track {
-  animation-play-state: paused;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.2rem;
+  padding-inline: clamp(1.25rem, 6vw, 5rem);
 }
 
 .marquee__item {
@@ -168,10 +115,11 @@ const trackStyle = computed(() => {
 }
 
 .marquee__item em {
+  font-style: normal;
   font-family: var(--font-display);
-  font-size: clamp(2.15rem, 6vw, 3.86rem);
-  font-weight: 800;
-  letter-spacing: -0.035em;
+  font-size: var(--gy-text-3xl);
+  font-weight: 500;
+  letter-spacing: normal;
   line-height: 1;
   white-space: nowrap;
   transition: color 0.3s ease;
@@ -216,27 +164,13 @@ const trackStyle = computed(() => {
   color: var(--gy-gold);
 }
 
-.eyebrow::after {
-  content: "";
-  display: block;
-  width: 0;
-  height: 1px;
-  margin-top: 0.8rem;
-  background: linear-gradient(90deg, var(--gy-gold), var(--gy-forest));
-  transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.eyebrow.gy-reveal--in::after {
-  width: 3.25rem;
-}
-
 .band h2 {
   margin: 0 0 0.7rem;
   max-width: 12ch;
   font-family: var(--font-display);
-  font-size: clamp(2.52rem, 6vw, 4.54rem);
-  font-weight: 800;
-  letter-spacing: -0.035em;
+  font-size: var(--gy-text-4xl);
+  font-weight: 500;
+  letter-spacing: normal;
   line-height: 1;
 }
 
@@ -245,18 +179,9 @@ const trackStyle = computed(() => {
   margin: 0 0 1.35rem;
   font-family: var(--font-body);
   font-size: 0.95rem;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.6;
   color: rgba(255, 255, 255, 0.78);
-}
-
-@keyframes amenity-marquee {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
 }
 
 @media (max-width: 700px) {
@@ -266,7 +191,7 @@ const trackStyle = computed(() => {
   }
 
   .marquee__item em {
-    font-size: clamp(1.8rem, 9vw, 2.4rem);
+    font-size: var(--gy-text-2xl);
   }
 }
 
@@ -283,13 +208,8 @@ const trackStyle = computed(() => {
     animation: none;
   }
 
-  .marquee__item em,
-  .eyebrow::after {
+  .marquee__item em {
     transition: none;
-  }
-
-  .eyebrow::after {
-    width: 3.25rem;
   }
 }
 </style>

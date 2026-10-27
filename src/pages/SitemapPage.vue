@@ -252,13 +252,13 @@ function download() {
 
 .page-title {
   margin: 0 0 0.75rem;
-  font-size: clamp(2.4rem, 5vw, 3.5rem);
+  font-size: var(--gy-text-display);
 }
 
 .lead {
   max-width: 40rem;
   margin: 0;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
   font-size: 1.05rem;
   line-height: 1.65;
 }
@@ -277,7 +277,7 @@ function download() {
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--gy-gold-deep);
+  color: var(--gy-gold);
 }
 
 .canonical-row a {
@@ -386,11 +386,11 @@ function download() {
   font-family: var(--font-display);
   font-size: 0.95rem;
   font-weight: 600;
-  color: var(--gy-ink);
+  color: var(--gy-forest);
 }
 
 .link-hint {
-  color: var(--gy-muted);
+  color: var(--gy-forest);
   font-size: 0.82rem;
 }
 
@@ -407,7 +407,7 @@ function download() {
   }
 
   .page-title {
-    font-size: 2.15rem;
+    font-size: var(--gy-text-display);
   }
 
   .group-card {

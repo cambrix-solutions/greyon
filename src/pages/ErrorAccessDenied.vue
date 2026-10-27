@@ -51,7 +51,7 @@ const isAdmin = computed(() => auth.isAuthenticated);
       transparent 55%
     ),
     #f6f5f2;
-  color: var(--gy-ink);
+  color: var(--gy-forest);
 }
 
 .err-404__inner {
@@ -62,27 +62,27 @@ const isAdmin = computed(() => auth.isAuthenticated);
 .err-404__code {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(5rem, 18vw, 8rem);
-  font-weight: 700;
+  font-size: var(--gy-text-display);
+  font-weight: 600;
   line-height: 0.9;
-  letter-spacing: -0.04em;
-  color: var(--gy-gold-deep);
+  letter-spacing: normal;
+  color: var(--gy-forest);
   opacity: 0.85;
 }
 
 .err-404__title {
   margin: 0.75rem 0 0;
   font-family: var(--font-display);
-  font-size: 1.65rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-size: var(--gy-text-display);
+  font-weight: 500;
+  letter-spacing: normal;
 }
 
 .err-404__copy {
   margin: 0.75rem 0 0;
   font-size: 0.95rem;
   line-height: 1.5;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
 }
 
 .err-404__actions {

@@ -90,7 +90,7 @@ const emit = defineEmits<{
     0 24px 60px rgba(28, 36, 33, 0.18),
     0 2px 8px rgba(28, 36, 33, 0.06) !important;
   border: 1px solid rgba(69, 76, 75, 0.08);
-  color: var(--gy-ink);
+  color: var(--gy-forest);
 }
 
 .gy-pop__body {
@@ -114,7 +114,7 @@ const emit = defineEmits<{
   max-height: 92dvh;
   background: var(--gy-white);
   border-radius: 20px 20px 0 0;
-  color: var(--gy-ink);
+  color: var(--gy-forest);
   overflow: hidden;
 }
 
@@ -142,7 +142,7 @@ const emit = defineEmits<{
   margin: 0;
   font-family: var(--font-display);
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.3;
 }
 
@@ -158,7 +158,7 @@ const emit = defineEmits<{
   border: 0;
   border-radius: 999px;
   background: transparent;
-  color: var(--gy-ink);
+  color: var(--gy-forest);
   cursor: pointer;
 }
 

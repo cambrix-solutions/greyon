@@ -66,7 +66,7 @@
       site-wide brand news. Managers only see articles for their destinations.
     </p>
 
-    <div v-reveal="{ delay: '80ms' }" class="news-grid">
+    <div v-reveal class="news-grid">
       <article v-for="item in filtered" :key="item.id" class="news-card">
         <div class="news-card__media" v-if="item.coverImage">
           <img :src="item.coverImage" :alt="item.title" />

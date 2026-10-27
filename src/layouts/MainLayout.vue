@@ -1043,6 +1043,8 @@ onUnmounted(() => {
   font-family: var(--font-display);
   font-size: 1.05rem;
   font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--gy-ink);
 }
 
 .gy-header-search-sheet__close {

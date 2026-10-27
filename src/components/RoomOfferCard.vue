@@ -226,9 +226,9 @@ const amenities = computed(() => props.amenities ?? []);
 
 .room-offer__title {
   margin: 0;
-  font-size: clamp(1.2rem, 2.4vw, 1.45rem);
-  line-height: 1.2;
-  color: var(--gy-ink);
+  font-size: 1.1rem;
+  line-height: 1.3;
+  color: var(--gy-forest);
   overflow-wrap: anywhere;
 }
 
@@ -252,7 +252,7 @@ const amenities = computed(() => props.amenities ?? []);
   margin: 0;
   font-size: 0.9rem;
   line-height: 1.45;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -262,7 +262,7 @@ const amenities = computed(() => props.amenities ?? []);
 .room-offer__meta {
   margin: 0;
   font-size: 0.82rem;
-  color: var(--gy-gold-deep);
+  color: var(--gy-gold);
   font-weight: 600;
 }
 
@@ -283,7 +283,7 @@ const amenities = computed(() => props.amenities ?? []);
   font-size: 1.55rem;
   font-weight: 600;
   line-height: 1;
-  color: var(--gy-ink);
+  color: var(--gy-forest);
   letter-spacing: -0.02em;
 }
 
@@ -295,7 +295,7 @@ const amenities = computed(() => props.amenities ?? []);
 
 .room-offer__hint {
   font-size: 0.75rem;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
 }
 
 .room-offer__actions {

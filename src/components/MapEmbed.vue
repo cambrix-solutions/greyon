@@ -136,7 +136,7 @@ const linkLabel = computed(() => {
   min-height: 44px;
   padding-block: 0.45rem;
   font-size: 0.9rem;
-  color: var(--gy-forest);
+  color: var(--gy-gold);
   text-decoration: underline;
 }
 </style>

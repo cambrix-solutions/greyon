@@ -18,7 +18,7 @@
       </template>
     </AdminPageHeader>
 
-    <div v-reveal="{ delay: '120ms' }" class="settings-grid">
+    <div v-reveal class="settings-grid">
       <q-card flat bordered class="bg-white">
         <q-card-section>
           <div class="text-subtitle1 q-mb-md">Site & SEO</div>

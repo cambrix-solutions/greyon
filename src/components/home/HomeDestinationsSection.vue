@@ -14,11 +14,7 @@
           :text="$t('home.destinationsCount', locations.length)"
         />
       </div>
-      <router-link
-        v-reveal="{ delay: '140ms' }"
-        to="/locations"
-        class="text-link"
-      >
+      <router-link v-reveal to="/locations" class="text-link">
         {{ $t("home.allDestinations") }}
         <span aria-hidden="true">→</span>
       </router-link>
@@ -31,12 +27,7 @@
         class="stack__pin"
         :style="{ '--i': i, zIndex: i + 1 }"
       >
-        <router-link
-          :to="`/locations/${loc.slug}`"
-          class="stack__tilt"
-          @pointermove="onMove"
-          @pointerleave="onLeave"
-        >
+        <router-link :to="`/locations/${loc.slug}`" class="stack__tilt">
           <span class="stack__media">
             <img
               v-if="loc.heroImage"
@@ -78,12 +69,9 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import RevealWords from "@/components/home/RevealWords.vue";
-import { useTilt } from "@/components/home/useTilt";
 import { useCmsStore } from "@/stores/cms-store";
 
 const cms = useCmsStore();
-const { onMove, onLeave } = useTilt();
-
 const locations = computed(() => {
   const locs = cms.publishedLocations;
   const rank = (id: string) =>
@@ -145,15 +133,15 @@ function hotelsFor(locationId: string) {
   font-weight: 700;
   letter-spacing: 0.28em;
   text-transform: uppercase;
-  color: #e4d2a4;
+  color: var(--gy-gold);
 }
 
 .dest__title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(2.58rem, 6vw, 4.86rem);
-  font-weight: 800;
-  letter-spacing: -0.035em;
+  font-size: var(--gy-text-4xl);
+  font-weight: 500;
+  letter-spacing: normal;
   line-height: 1;
 }
 
@@ -167,7 +155,7 @@ function hotelsFor(locationId: string) {
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #e4d2a4;
+  color: var(--gy-gold);
 }
 
 .stack {
@@ -176,11 +164,9 @@ function hotelsFor(locationId: string) {
 }
 
 .stack__pin {
-  position: sticky;
-  top: calc(5.4rem + var(--i) * 4.6rem);
+  position: relative;
   height: min(70vh, 640px);
-  margin-bottom: 14vh;
-  perspective: 1400px;
+  margin-bottom: 1.25rem;
 }
 
 .stack__pin:last-child {
@@ -193,8 +179,6 @@ function hotelsFor(locationId: string) {
   height: 100%;
   border-radius: 30px;
   color: inherit;
-  transform-style: preserve-3d;
-  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .stack__media {
@@ -217,12 +201,11 @@ function hotelsFor(locationId: string) {
   left: 1.1rem;
   z-index: 2;
   font-family: var(--font-display);
-  font-size: clamp(3.4rem, 6.8vw, 5.44rem);
-  font-weight: 800;
-  letter-spacing: -0.035em;
+  font-size: var(--gy-text-4xl);
+  font-weight: 500;
+  letter-spacing: normal;
   line-height: 1;
   color: rgba(246, 241, 231, 0.92);
-  text-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
   pointer-events: none;
 }
 
@@ -250,21 +233,21 @@ function hotelsFor(locationId: string) {
   font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #e4d2a4;
+  color: var(--gy-gold);
 }
 
 .stack__name {
   font-family: var(--font-display);
-  font-size: clamp(2.2rem, 4vw, 3.2rem);
-  font-weight: 800;
-  letter-spacing: -0.035em;
-  line-height: 1;
+  font-size: 1.1rem;
+  font-weight: 500;
+  letter-spacing: normal;
+  line-height: 1.3;
 }
 
 .stack__desc {
   font-family: var(--font-body);
   font-size: 0.88rem;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.45;
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -284,10 +267,9 @@ function hotelsFor(locationId: string) {
   }
 
   .stack__pin {
-    top: calc(4.4rem + var(--i) * 2.6rem);
     height: 78vw;
     min-height: 420px;
-    margin-bottom: 3.5rem;
+    margin-bottom: 1.25rem;
   }
 
   .stack__panel {
@@ -299,7 +281,7 @@ function hotelsFor(locationId: string) {
   }
 
   .stack__index {
-    font-size: 4.2rem;
+    font-size: var(--gy-text-3xl);
   }
 }
 

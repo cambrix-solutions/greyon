@@ -138,7 +138,7 @@ onUnmounted(() => {
   width: 2rem;
   height: 2rem;
   line-height: 2rem;
-  color: var(--gy-ink);
+  color: var(--gy-gold);
   border-color: rgba(69, 76, 75, 0.12);
 }
 </style>
