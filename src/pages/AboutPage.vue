@@ -29,14 +29,7 @@
         <span v-if="showSheets" class="sheet-label">Story</span>
         <div class="dest-wrap">
           <p v-reveal class="eyebrow">Greyon</p>
-          <h1
-            id="about-title"
-            class="mask__title"
-            :class="{ 'has-photo': Boolean(maskImage) }"
-            :style="maskVars"
-          >
-            About us
-          </h1>
+          <h1 id="about-title" class="mask__title"> About us </h1>
           <p v-reveal class="mask__lead">
             Greyon is a Cambodia hospitality brand focused on calm, modern stays
             — from city hotels to serviced apartments — with booking that stays
@@ -418,13 +411,6 @@ const photos = computed(() => {
 });
 
 const maskImage = computed(() => photos.value[0]?.src ?? "");
-const maskVars = computed(() => {
-  if (!maskImage.value) return {};
-  return {
-    "--mask-image": `url("${maskImage.value}")`,
-    "--mask-y": "42%"
-  };
-});
 
 const layers = computed(() => {
   const rest = photos.value.filter(frame => frame.src !== maskImage.value);

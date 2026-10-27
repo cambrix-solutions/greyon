@@ -119,18 +119,10 @@ const image = computed(() => {
   max-width: 12ch;
   font-family: var(--font-display);
   font-size: var(--gy-text-display);
-  font-weight: 800;
-  letter-spacing: -0.035em;
+  font-weight: 600;
+  letter-spacing: normal;
   line-height: 1;
-  background: linear-gradient(
-    105deg,
-    #f7f3ec 8%,
-    var(--gy-gold) 48%,
-    #9aaf9c 92%
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--gy-white);
 }
 
 .cta__lead {
@@ -138,7 +130,7 @@ const image = computed(() => {
   margin: 1.2rem 0 0;
   font-family: var(--font-body);
   font-size: 1.02rem;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.65;
   color: rgba(255, 255, 255, 0.88);
 }

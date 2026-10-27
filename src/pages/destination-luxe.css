@@ -18,8 +18,8 @@
 .dest-luxe h1,
 .dest-luxe h2 {
   font-family: var(--font-display);
-  font-weight: 800;
-  letter-spacing: -0.035em;
+  font-weight: 600;
+  letter-spacing: normal;
 }
 
 .dest-wrap {
@@ -38,20 +38,6 @@
   color: var(--gy-gold-deep);
 }
 
-.dest-luxe .eyebrow::after {
-  content: "";
-  display: block;
-  width: 0;
-  height: 1px;
-  margin-top: 0.8rem;
-  background: linear-gradient(90deg, var(--gy-gold), var(--gy-forest));
-  transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.dest-luxe .eyebrow.gy-reveal--in::after {
-  width: 3.25rem;
-}
-
 .dest-luxe .eyebrow--light {
   color: var(--gy-gold);
 }
@@ -61,7 +47,7 @@
   margin: 0.85rem 0 0;
   font-family: var(--font-body);
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.6;
   color: var(--gy-muted);
 }
@@ -136,12 +122,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dest-luxe .eyebrow::after,
   .dest-luxe .dest-tilt {
     transition: none;
-  }
-
-  .dest-luxe .eyebrow::after {
-    width: 3.25rem;
   }
 }

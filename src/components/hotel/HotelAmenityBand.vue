@@ -115,10 +115,11 @@ const items = computed(() =>
 }
 
 .marquee__item em {
+  font-style: normal;
   font-family: var(--font-display);
   font-size: var(--gy-text-3xl);
-  font-weight: 800;
-  letter-spacing: -0.035em;
+  font-weight: 600;
+  letter-spacing: normal;
   line-height: 1;
   white-space: nowrap;
   transition: color 0.3s ease;
@@ -163,22 +164,13 @@ const items = computed(() =>
   color: var(--gy-gold);
 }
 
-.eyebrow::after {
-  content: "";
-  display: block;
-  width: 3.25rem;
-  height: 1px;
-  margin-top: 0.8rem;
-  background: linear-gradient(90deg, var(--gy-gold), var(--gy-forest));
-}
-
 .band h2 {
   margin: 0 0 0.7rem;
   max-width: 12ch;
   font-family: var(--font-display);
   font-size: var(--gy-text-4xl);
-  font-weight: 800;
-  letter-spacing: -0.035em;
+  font-weight: 600;
+  letter-spacing: normal;
   line-height: 1;
 }
 
@@ -187,7 +179,7 @@ const items = computed(() =>
   margin: 0 0 1.35rem;
   font-family: var(--font-body);
   font-size: 0.95rem;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.6;
   color: rgba(255, 255, 255, 0.78);
 }
@@ -216,13 +208,8 @@ const items = computed(() =>
     animation: none;
   }
 
-  .marquee__item em,
-  .eyebrow::after {
+  .marquee__item em {
     transition: none;
-  }
-
-  .eyebrow::after {
-    width: 3.25rem;
   }
 }
 </style>

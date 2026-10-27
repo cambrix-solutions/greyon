@@ -64,27 +64,10 @@
 .story-luxe .mask__title {
   margin: 0;
   max-width: 12ch;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-  background-image: linear-gradient(
-    118deg,
-    var(--gy-gold) 0%,
-    #efe4cc 42%,
-    var(--gy-forest) 100%
-  );
-  background-size: cover;
-  background-position: center;
-  -webkit-background-clip: text;
-  background-clip: text;
   font-size: var(--gy-text-display);
   line-height: 1;
-  letter-spacing: -0.035em;
-}
-
-.story-luxe .mask__title.has-photo {
-  background-image: var(--mask-image);
-  background-size: 170% 170%;
-  background-position: 50% var(--mask-y, 42%);
+  letter-spacing: normal;
+  color: var(--gy-ink);
 }
 
 .story-luxe .mask__lead,
@@ -93,7 +76,7 @@
   margin: 1.15rem 0 0;
   font-family: var(--font-body);
   font-size: 1.05rem;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.65;
   color: var(--gy-ink);
 }
@@ -212,9 +195,8 @@
   color: var(--gy-ink);
   font-family: var(--font-display);
   font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: normal;
   backdrop-filter: blur(12px);
 }
 
@@ -257,7 +239,7 @@
   margin: 0;
   font-family: var(--font-body);
   font-size: 0.95rem;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.55;
   color: var(--gy-muted);
 }
@@ -320,7 +302,7 @@
   margin: 0;
   font-family: var(--font-body);
   font-size: 0.92rem;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.5;
   color: var(--gy-muted);
 }
@@ -490,7 +472,7 @@
   color: var(--gy-muted);
   font-family: var(--font-body);
   font-size: 0.98rem;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.5;
 }
 
@@ -648,10 +630,6 @@
   .story-luxe .enquiry__field:focus-within {
     transform: translateY(-2px);
   }
-
-  .story-luxe .mask__title.has-photo {
-    transition: background-position 0.35s ease;
-  }
 }
 
 @media (max-width: 1023px) {
@@ -720,7 +698,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .story-luxe .mask__title.has-photo,
   .story-luxe .enquiry__field,
   .story-luxe .enquiry__field > span,
   .story-luxe .contact-field .q-field__control,
@@ -730,13 +707,5 @@
 
   .story-luxe .read-bar .sheet-label {
     transform: translateX(-50%);
-  }
-}
-
-@supports not ((-webkit-background-clip: text) or (background-clip: text)) {
-  .story-luxe .mask__title {
-    color: var(--gy-ink);
-    -webkit-text-fill-color: var(--gy-ink);
-    background: none;
   }
 }

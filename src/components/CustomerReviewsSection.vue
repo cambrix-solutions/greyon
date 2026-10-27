@@ -189,22 +189,13 @@ onUnmounted(() => {
   color: var(--gy-gold-deep);
 }
 
-.section-kicker::after {
-  content: "";
-  display: block;
-  width: 2.5rem;
-  height: 1px;
-  margin-top: 0.85rem;
-  background: var(--gy-gold);
-}
-
 .section-title {
   margin: 0;
   font-family: var(--font-display);
   font-size: var(--gy-text-4xl);
-  font-weight: 800;
+  font-weight: 600;
   line-height: 1;
-  letter-spacing: -0.035em;
+  letter-spacing: normal;
 }
 
 .reviews-track {
@@ -245,11 +236,11 @@ onUnmounted(() => {
 .reviews-card__quote p {
   margin: 0;
   max-width: 18em;
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: var(--gy-text-2xl);
-  font-weight: 800;
+  font-weight: 400;
   line-height: 1.15;
-  letter-spacing: -0.035em;
+  letter-spacing: normal;
   color: var(--gy-ink);
 }
 
@@ -264,9 +255,8 @@ onUnmounted(() => {
   margin: 0;
   font-family: var(--font-display);
   font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: normal;
 }
 
 .reviews-card__hotel {

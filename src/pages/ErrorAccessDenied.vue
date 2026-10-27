@@ -63,10 +63,10 @@ const isAdmin = computed(() => auth.isAuthenticated);
   margin: 0;
   font-family: var(--font-display);
   font-size: var(--gy-text-display);
-  font-weight: 700;
+  font-weight: 600;
   line-height: 0.9;
-  letter-spacing: -0.04em;
-  color: var(--gy-gold-deep);
+  letter-spacing: normal;
+  color: var(--gy-ink);
   opacity: 0.85;
 }
 
@@ -74,8 +74,8 @@ const isAdmin = computed(() => auth.isAuthenticated);
   margin: 0.75rem 0 0;
   font-family: var(--font-display);
   font-size: 1.65rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-weight: 600;
+  letter-spacing: normal;
 }
 
 .err-404__copy {

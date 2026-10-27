@@ -363,7 +363,7 @@ defineExpose({ focusActive });
   place-items: center;
   font-size: 0.95rem;
   font-weight: 600;
-  letter-spacing: 0.01em;
+  letter-spacing: normal;
 }
 
 .gy-cal--scroll .gy-cal__title {

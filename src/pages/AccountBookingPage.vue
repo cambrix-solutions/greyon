@@ -297,10 +297,9 @@ function rateLabel(ratePlanId: string) {
 .stay-panel__title {
   margin: 0;
   font-size: 0.78rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: normal;
   color: var(--gy-muted);
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .stay-panel__link {

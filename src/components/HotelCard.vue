@@ -159,7 +159,7 @@ const metaLine = computed(() => {
   margin: 0;
   font-size: var(--gy-text-2xl);
   line-height: 1.1;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .hotel-card__body h3 a {
@@ -238,8 +238,8 @@ const metaLine = computed(() => {
 
 .hotel-card--live h3 {
   font-family: var(--font-display);
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-weight: 600;
+  letter-spacing: normal;
   font-size: var(--gy-text-2xl);
 }
 

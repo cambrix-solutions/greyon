@@ -168,26 +168,12 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
   color: var(--gy-gold);
 }
 
-.eyebrow::after {
-  content: "";
-  display: block;
-  width: 0;
-  height: 1px;
-  margin-top: 0.8rem;
-  background: linear-gradient(90deg, var(--gy-gold), var(--gy-forest));
-  transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.eyebrow.gy-reveal--in::after {
-  width: 3.25rem;
-}
-
 .gallery h2 {
   margin: 0;
   font-family: var(--font-display);
   font-size: var(--gy-text-4xl);
-  font-weight: 800;
-  letter-spacing: -0.035em;
+  font-weight: 600;
+  letter-spacing: normal;
   line-height: 1;
 }
 
@@ -408,13 +394,8 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 
 @media (prefers-reduced-motion: reduce) {
   .shot,
-  .shot img,
-  .eyebrow::after {
+  .shot img {
     transition: none;
-  }
-
-  .eyebrow::after {
-    width: 3.25rem;
   }
 
   .lb__img {

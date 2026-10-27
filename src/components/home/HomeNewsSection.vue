@@ -121,8 +121,8 @@ function dateLabel(value: string) {
   margin: 0;
   font-family: var(--font-display);
   font-size: var(--gy-text-4xl);
-  font-weight: 800;
-  letter-spacing: -0.035em;
+  font-weight: 600;
+  letter-spacing: normal;
   line-height: 1;
 }
 
@@ -182,13 +182,10 @@ function dateLabel(value: string) {
   display: block;
   font-family: var(--font-display);
   font-size: var(--gy-text-display);
-  font-weight: 800;
-  letter-spacing: -0.035em;
+  font-weight: 600;
+  letter-spacing: normal;
   line-height: 1;
   color: #1c1f1e;
-  text-shadow:
-    0 0 18px rgba(247, 243, 236, 0.95),
-    0 0 2px #f7f3ec;
 }
 
 .stage__card {
@@ -207,10 +204,10 @@ function dateLabel(value: string) {
 
 .stage__card-in p {
   margin: 0;
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: var(--gy-text-xl);
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-weight: 400;
+  letter-spacing: normal;
   line-height: 1.35;
 }
 
@@ -246,8 +243,8 @@ function dateLabel(value: string) {
   margin-top: 0.75rem;
   font-family: var(--font-display);
   font-size: 1.7rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-weight: 600;
+  letter-spacing: normal;
   line-height: 1.1;
 }
 

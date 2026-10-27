@@ -644,8 +644,8 @@ async function openRoom(roomTypeId: string) {
 .hotel-luxe h2,
 .hotel-luxe h3 {
   font-family: var(--font-display);
-  font-weight: 800;
-  letter-spacing: -0.035em;
+  font-weight: 600;
+  letter-spacing: normal;
 }
 
 .eyebrow {
@@ -657,20 +657,6 @@ async function openRoom(roomTypeId: string) {
   letter-spacing: 0.28em;
   text-transform: uppercase;
   color: var(--gy-gold-deep);
-}
-
-.eyebrow::after {
-  content: "";
-  display: block;
-  width: 0;
-  height: 1px;
-  margin-top: 0.8rem;
-  background: linear-gradient(90deg, var(--gy-gold), var(--gy-forest));
-  transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.eyebrow.gy-reveal--in::after {
-  width: 3.25rem;
 }
 
 .eyebrow--light {
@@ -741,7 +727,7 @@ async function openRoom(roomTypeId: string) {
   margin: 1rem 0 0;
   font-family: var(--font-body);
   font-size: 1.02rem;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.6;
   color: rgba(255, 255, 255, 0.88);
 }
@@ -878,10 +864,10 @@ async function openRoom(roomTypeId: string) {
 .story__body {
   margin: 0;
   max-width: 38rem;
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: var(--gy-text-2xl);
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-weight: 400;
+  letter-spacing: normal;
   line-height: 1.35;
 }
 
@@ -936,7 +922,7 @@ async function openRoom(roomTypeId: string) {
   margin: 0 0 1.4rem;
   font-family: var(--font-body);
   font-size: 0.98rem;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.65;
   color: var(--gy-muted);
 }
@@ -984,7 +970,7 @@ async function openRoom(roomTypeId: string) {
   font-family: var(--font-body);
   font-size: 0.88rem;
   font-style: normal;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.5;
   color: var(--gy-muted);
 }
@@ -1081,8 +1067,8 @@ async function openRoom(roomTypeId: string) {
 
 .landmark__place {
   font-family: var(--font-display);
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-weight: 600;
+  letter-spacing: normal;
   font-size: var(--gy-text-xl);
   line-height: 1.05;
 }
@@ -1199,8 +1185,8 @@ async function openRoom(roomTypeId: string) {
 
 .rooms :deep(.room-offer__title) {
   font-family: var(--font-display);
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-weight: 600;
+  letter-spacing: normal;
   font-size: var(--gy-text-2xl);
 }
 
@@ -1331,8 +1317,8 @@ async function openRoom(roomTypeId: string) {
   margin: 0 0 1rem;
   font-family: var(--font-display);
   font-size: var(--gy-text-4xl);
-  font-weight: 800;
-  letter-spacing: -0.035em;
+  font-weight: 600;
+  letter-spacing: normal;
 }
 
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
@@ -1404,14 +1390,9 @@ async function openRoom(roomTypeId: string) {
 @media (prefers-reduced-motion: reduce) {
   .hero__img,
   .product-card__media img,
-  .hd-tilt,
-  .eyebrow::after {
+  .hd-tilt {
     animation: none;
     transition: none;
-  }
-
-  .eyebrow::after {
-    width: 3.25rem;
   }
 
   .portrait__frame img {

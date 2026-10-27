@@ -328,7 +328,7 @@ function scrollToJourney() {
   margin: 1rem 0 0;
   font-family: var(--font-body);
   font-size: 1.02rem;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.6;
   color: rgba(255, 255, 255, 0.9);
 }
@@ -565,8 +565,8 @@ function scrollToJourney() {
   margin: 0;
   font-family: var(--font-display);
   font-size: var(--gy-text-4xl);
-  font-weight: 800;
-  letter-spacing: -0.035em;
+  font-weight: 600;
+  letter-spacing: normal;
   line-height: 1;
 }
 
@@ -575,7 +575,7 @@ function scrollToJourney() {
   max-width: 28rem;
   font-family: var(--font-body);
   font-size: 0.98rem;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.55;
   color: rgba(255, 255, 255, 0.86);
   display: -webkit-box;
@@ -707,8 +707,8 @@ function scrollToJourney() {
   margin: 0;
   font-family: var(--font-display);
   font-size: var(--gy-text-4xl);
-  font-weight: 800;
-  letter-spacing: -0.035em;
+  font-weight: 600;
+  letter-spacing: normal;
   line-height: 1;
 }
 
@@ -716,7 +716,7 @@ function scrollToJourney() {
   margin: 0;
   font-family: var(--font-body);
   font-size: 0.98rem;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.6;
   color: var(--gy-muted);
 }

@@ -140,8 +140,8 @@ function hotelsFor(locationId: string) {
   margin: 0;
   font-family: var(--font-display);
   font-size: var(--gy-text-display);
-  font-weight: 800;
-  letter-spacing: -0.035em;
+  font-weight: 600;
+  letter-spacing: normal;
   line-height: 1;
 }
 
@@ -202,11 +202,10 @@ function hotelsFor(locationId: string) {
   z-index: 2;
   font-family: var(--font-display);
   font-size: var(--gy-text-display);
-  font-weight: 800;
-  letter-spacing: -0.035em;
+  font-weight: 600;
+  letter-spacing: normal;
   line-height: 1;
   color: rgba(246, 241, 231, 0.92);
-  text-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
   pointer-events: none;
 }
 
@@ -240,15 +239,15 @@ function hotelsFor(locationId: string) {
 .stack__name {
   font-family: var(--font-display);
   font-size: var(--gy-text-3xl);
-  font-weight: 800;
-  letter-spacing: -0.035em;
+  font-weight: 600;
+  letter-spacing: normal;
   line-height: 1;
 }
 
 .stack__desc {
   font-family: var(--font-body);
   font-size: 0.88rem;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.45;
   display: -webkit-box;
   -webkit-line-clamp: 3;

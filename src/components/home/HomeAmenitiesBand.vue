@@ -188,18 +188,10 @@ function iconFor(label: string) {
   padding-inline: clamp(1.25rem, 6vw, 5rem);
   font-family: var(--font-display);
   font-size: var(--gy-text-display);
-  font-weight: 800;
-  letter-spacing: -0.035em;
+  font-weight: 600;
+  letter-spacing: normal;
   line-height: 1;
-  background: linear-gradient(
-    100deg,
-    #f6f1e7 10%,
-    var(--gy-gold) 55%,
-    #9aaf9c 100%
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--gy-white);
 }
 
 .band .marquee {
@@ -250,8 +242,8 @@ function iconFor(label: string) {
 .places__link {
   font-family: var(--font-display);
   font-size: var(--gy-text-2xl);
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-weight: 600;
+  letter-spacing: normal;
   line-height: 1.1;
   color: rgba(255, 255, 255, 0.92);
 }

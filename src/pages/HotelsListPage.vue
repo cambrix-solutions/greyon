@@ -438,8 +438,8 @@ const showError = computed(
 .listing-luxe h2,
 .listing-luxe :deep(h1) {
   font-family: var(--font-display);
-  font-weight: 800;
-  letter-spacing: -0.035em;
+  font-weight: 600;
+  letter-spacing: normal;
 }
 
 .listing-wrap {
@@ -458,20 +458,6 @@ const showError = computed(
   color: var(--gy-gold-deep);
 }
 
-.eyebrow::after {
-  content: "";
-  display: block;
-  width: 0;
-  height: 1px;
-  margin-top: 0.8rem;
-  background: linear-gradient(90deg, var(--gy-gold), var(--gy-forest));
-  transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.eyebrow.gy-reveal--in::after {
-  width: 3.25rem;
-}
-
 .eyebrow--light {
   color: var(--gy-gold);
 }
@@ -482,7 +468,7 @@ const showError = computed(
   margin: 0.9rem 0 0;
   font-family: var(--font-body);
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.6;
 }
 
@@ -654,11 +640,10 @@ const showError = computed(
   right: 0.9rem;
   bottom: 0.95rem;
   font-family: var(--font-display);
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-weight: 600;
+  letter-spacing: normal;
   font-size: var(--gy-text-stat);
   line-height: 1.05;
-  text-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
 }
 
 .results-band {
@@ -928,7 +913,6 @@ const showError = computed(
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .eyebrow::after,
   .filters::before,
   .result-tilt,
   .swap-enter-active,
@@ -938,10 +922,6 @@ const showError = computed(
   .result-move {
     animation: none;
     transition: none;
-  }
-
-  .eyebrow::after {
-    width: 3.25rem;
   }
 
   .mast__img {

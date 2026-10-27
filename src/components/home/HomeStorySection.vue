@@ -97,18 +97,10 @@ const auth = useAuthStore();
   max-width: 12ch;
   font-family: var(--font-display);
   font-size: var(--gy-text-display);
-  font-weight: 800;
-  letter-spacing: -0.035em;
+  font-weight: 600;
+  letter-spacing: normal;
   line-height: 1;
-  background: linear-gradient(
-    115deg,
-    #1c1f1e 10%,
-    var(--gy-gold-deep) 55%,
-    var(--gy-forest) 100%
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--gy-ink);
 }
 
 .story__aside {
@@ -128,7 +120,7 @@ const auth = useAuthStore();
   margin: 0;
   font-family: var(--font-body);
   font-size: 0.98rem;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.7;
 }
 

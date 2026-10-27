@@ -533,10 +533,11 @@ function bookHere() {
 }
 
 .marquee__item em {
+  font-style: normal;
   font-family: var(--font-display);
   font-size: var(--gy-text-4xl);
-  font-weight: 800;
-  letter-spacing: -0.035em;
+  font-weight: 600;
+  letter-spacing: normal;
   line-height: 1;
   white-space: nowrap;
 }
@@ -719,8 +720,8 @@ function bookHere() {
 .visit-card a {
   font-family: var(--font-display);
   font-size: var(--gy-text-3xl);
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-weight: 600;
+  letter-spacing: normal;
   line-height: 1.05;
   color: var(--gy-ink);
   text-decoration: underline;
@@ -740,8 +741,8 @@ function bookHere() {
   margin: 0 0 0.75rem;
   font-family: var(--font-display);
   font-size: var(--gy-text-3xl);
-  font-weight: 800;
-  letter-spacing: -0.035em;
+  font-weight: 600;
+  letter-spacing: normal;
 }
 
 .visit__map :deep(.map-embed) {
@@ -836,8 +837,8 @@ function bookHere() {
   padding-top: 0.9rem;
   font-family: var(--font-display);
   font-size: var(--gy-text-2xl);
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-weight: 600;
+  letter-spacing: normal;
   line-height: 1.05;
 }
 
@@ -846,7 +847,7 @@ function bookHere() {
   padding-bottom: 1rem;
   font-family: var(--font-body);
   font-size: 0.88rem;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.45;
   color: rgba(255, 255, 255, 0.78);
   display: -webkit-box;
@@ -868,8 +869,8 @@ function bookHere() {
 .dest-missing p {
   margin: 0 0 1.4rem;
   max-width: 36rem;
-  font-family: var(--font-display);
-  font-weight: 500;
+  font-family: var(--font-body);
+  font-weight: 400;
   color: var(--gy-muted);
 }
 

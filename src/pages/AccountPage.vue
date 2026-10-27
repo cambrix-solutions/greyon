@@ -313,7 +313,7 @@ async function onLogout() {
   margin: 0 0 0.85rem;
   font-size: var(--gy-text-4xl);
   line-height: 0.95;
-  letter-spacing: -0.02em;
+  letter-spacing: normal;
   color: var(--gy-white);
   opacity: 0.95;
 }
@@ -326,7 +326,7 @@ async function onLogout() {
 .account-hero__title {
   margin: 0 0 0.55rem;
   font-size: var(--gy-text-3xl);
-  color: var(--gy-gold);
+  color: var(--gy-white);
 }
 
 .account-hero__lede {
