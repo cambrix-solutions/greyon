@@ -57,12 +57,12 @@ onMounted(async () => {
 
 .auth-complete h1 {
   margin: 0;
-  font-size: 1.75rem;
+  font-size: var(--gy-text-display);
 }
 
 .auth-complete__msg {
   margin: 0 0 0.75rem;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
   max-width: 28rem;
 }
 </style>

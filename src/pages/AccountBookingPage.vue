@@ -215,13 +215,13 @@ function rateLabel(ratePlanId: string) {
 
 .stay-detail__back {
   justify-self: start;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
   text-decoration: none;
   font-size: 0.9rem;
 }
 
 .stay-detail__back:hover {
-  color: var(--gy-ink);
+  color: var(--gy-forest);
   text-decoration: underline;
 }
 
@@ -229,12 +229,12 @@ function rateLabel(ratePlanId: string) {
   display: grid;
   gap: 1rem;
   padding: 2.5rem 0;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
 }
 
 .stay-detail__state-title {
   margin: 0;
-  color: var(--gy-ink);
+  color: var(--gy-forest);
   font-weight: 600;
 }
 
@@ -260,7 +260,7 @@ function rateLabel(ratePlanId: string) {
 
 .stay-detail__title {
   margin: 0;
-  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-size: var(--gy-text-2xl);
   line-height: 1.15;
 }
 
@@ -269,13 +269,13 @@ function rateLabel(ratePlanId: string) {
   font-size: 0.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--gy-gold-deep);
+  color: var(--gy-gold);
   font-weight: 700;
 }
 
 .stay-detail__ref {
   margin: 0.25rem 0 0;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
   font-size: 0.95rem;
 }
 
@@ -297,15 +297,14 @@ function rateLabel(ratePlanId: string) {
 .stay-panel__title {
   margin: 0;
   font-size: 0.78rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--gy-muted);
-  font-weight: 700;
+  letter-spacing: normal;
+  color: var(--gy-forest);
+  font-weight: 500;
 }
 
 .stay-panel__link {
   justify-self: start;
-  color: var(--gy-gold-deep);
+  color: var(--gy-gold);
   text-decoration: none;
   font-size: 0.9rem;
   font-weight: 600;
@@ -326,12 +325,12 @@ function rateLabel(ratePlanId: string) {
   font-size: 0.72rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--gy-muted);
+  color: var(--gy-gold);
 }
 
 .stay-dl dd {
   margin: 0;
-  color: var(--gy-ink);
+  color: var(--gy-forest);
   line-height: 1.4;
 }
 
@@ -344,7 +343,7 @@ function rateLabel(ratePlanId: string) {
   display: flex;
   justify-content: space-between;
   gap: 1rem;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
   font-size: 0.95rem;
 }
 
@@ -352,21 +351,21 @@ function rateLabel(ratePlanId: string) {
   margin-top: 0.35rem;
   padding-top: 0.55rem;
   border-top: 1px solid rgba(18, 17, 16, 0.08);
-  color: var(--gy-ink);
+  color: var(--gy-forest);
   font-weight: 700;
   font-size: 1.05rem;
 }
 
 .stay-price__note {
   margin: 0;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
   font-size: 0.85rem;
   line-height: 1.45;
 }
 
 .stay-detail__meta {
   margin: 0;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
   font-size: 0.85rem;
 }
 

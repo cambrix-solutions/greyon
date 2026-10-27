@@ -44,7 +44,7 @@
 
     <div v-if="loading" class="text-body2 text-grey-7 q-pa-md">Loading…</div>
 
-    <div v-else v-reveal="{ delay: '80ms' }" class="prod-grid">
+    <div v-else v-reveal class="prod-grid">
       <article v-for="item in filtered" :key="item.id" class="prod-card">
         <div v-if="item.imageUrl" class="prod-card__media">
           <img :src="item.imageUrl" :alt="item.name" loading="lazy" />

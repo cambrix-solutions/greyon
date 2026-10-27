@@ -696,13 +696,13 @@ function showGuestError(
 
 .page-title {
   margin: 0;
-  font-size: clamp(2.3rem, 5vw, 3.4rem);
+  font-size: var(--gy-text-display);
   line-height: 1.05;
 }
 
 .booking-lead {
   margin: 0.55rem 0 0;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
   max-width: 36rem;
 }
 
@@ -714,7 +714,7 @@ function showGuestError(
   padding: 0.85rem 1rem;
   margin: 0 0 1.25rem;
   background: var(--gy-sand);
-  color: var(--gy-ink);
+  color: var(--gy-forest);
   border-left: 3px solid var(--gy-gold);
   line-height: 1.55;
   font-size: 0.92rem;
@@ -740,7 +740,7 @@ function showGuestError(
 
 .panel-title {
   margin: 0 0 0.35rem;
-  font-size: clamp(1.7rem, 3vw, 2.1rem);
+  font-size: var(--gy-text-2xl);
   line-height: 1.15;
 }
 
@@ -799,13 +799,13 @@ function showGuestError(
 .result-card__facts {
   margin: 0;
   font-size: 0.88rem;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
   line-height: 1.45;
 }
 
 .empty-note {
   margin: 0.5rem 0 0;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
 }
 
 .summary-card__hotel {
@@ -815,7 +815,7 @@ function showGuestError(
 
 .summary-card__room {
   margin: 0 0 0.55rem;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
 }
 
 .summary-card__desc {
@@ -840,7 +840,7 @@ function showGuestError(
 .breakdown {
   margin: 0.35rem 0 0;
   font-size: 0.85rem;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
 }
 
 .form-grid {
@@ -867,8 +867,8 @@ function showGuestError(
 
 .guest-account__title {
   margin: 0;
-  font-weight: 600;
-  color: var(--gy-ink);
+  font-weight: 500;
+  color: var(--gy-forest);
 }
 
 .guest-account__copy,
@@ -887,7 +887,7 @@ function showGuestError(
 }
 
 .guest-account__link {
-  color: var(--gy-gold-deep);
+  color: var(--gy-gold);
   font-weight: 600;
   text-decoration: none;
   font-size: 0.9rem;
@@ -909,7 +909,7 @@ label {
   font-size: 0.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--gy-muted);
+  color: var(--gy-gold);
 }
 
 label.is-invalid input {
@@ -932,7 +932,7 @@ textarea {
   font: inherit;
   text-transform: none;
   letter-spacing: normal;
-  color: var(--gy-ink);
+  color: var(--gy-forest);
   transition:
     border-color 0.2s ease,
     background 0.2s ease;
@@ -968,7 +968,7 @@ textarea:focus {
   font-size: 0.7rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--gy-muted);
+  color: var(--gy-gold);
 }
 
 .review-block--total {
@@ -987,7 +987,7 @@ textarea:focus {
   margin: 1.15rem 0 0;
   font-size: 0.92rem;
   line-height: 1.55;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
 }
 
 .consent {
@@ -999,7 +999,7 @@ textarea:focus {
   text-transform: none;
   letter-spacing: normal;
   font-size: 0.95rem;
-  color: var(--gy-ink);
+  color: var(--gy-forest);
 }
 
 .consent input {
@@ -1028,7 +1028,7 @@ textarea:focus {
 
 .success-lead {
   margin: 0 0 1.25rem;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
   max-width: 34rem;
   line-height: 1.55;
 }
@@ -1047,7 +1047,7 @@ textarea:focus {
   font-size: 0.72rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--gy-muted);
+  color: var(--gy-gold);
 }
 
 .success-ref strong {

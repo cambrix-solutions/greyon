@@ -7,14 +7,8 @@
     />
 
     <section class="mast" data-sheet="Mast" aria-labelledby="apt-title">
-      <div ref="mastFrame" class="mast__media">
-        <img
-          v-if="mastImage"
-          class="mast__img"
-          :src="mastImage"
-          alt=""
-          :style="mastStyle"
-        />
+      <div class="mast__media">
+        <img v-if="mastImage" class="mast__img" :src="mastImage" alt="" />
         <div class="mast__veil" />
       </div>
 
@@ -22,12 +16,11 @@
         <p v-if="mastPlace" v-reveal class="mast__chip">{{ mastPlace }}</p>
         <p v-reveal class="eyebrow eyebrow--light">Portfolio</p>
         <RevealWords id="apt-title" tag="h1" text="Apartments" />
-        <p v-reveal="{ delay: '140ms' }" class="mast__lead">
+        <p v-reveal class="mast__lead">
           Serviced apartments and residences from the Greyon portfolio.
         </p>
-        <div v-reveal="{ delay: '200ms' }" class="mast__actions">
+        <div v-reveal class="mast__actions">
           <button
-            v-magnetic
             class="gy-btn gy-btn--light"
             type="button"
             @click="scrollTo(rooms.length ? 'apt-rooms' : 'apt-residences')"
@@ -65,9 +58,7 @@
         <header class="rail__head">
           <div>
             <p v-reveal class="eyebrow eyebrow--light">Rooms</p>
-            <h2 id="rooms-title" v-reveal="{ delay: '60ms' }">
-              Stay in frame
-            </h2>
+            <h2 id="rooms-title" v-reveal> Stay in frame </h2>
             <p class="rail__count" aria-live="polite">
               {{ pad(activeIndex + 1) }} / {{ pad(rooms.length) }}
             </p>
@@ -98,7 +89,6 @@
             <div
               v-for="(room, index) in rooms"
               :key="room.id"
-              v-tilt="{ max: 6 }"
               class="room-panel rooms-tilt glass-edge"
               :class="{ 'is-active': activeIndex === index }"
             >
@@ -151,8 +141,8 @@
     <section id="apt-filters" class="filters" data-sheet="Filters">
       <div class="dest-wrap">
         <p v-reveal class="eyebrow">Find a residence</p>
-        <h2 v-reveal="{ delay: '60ms' }">In the portfolio</h2>
-        <p v-reveal="{ delay: '100ms' }" class="section-lead">
+        <h2 v-reveal>In the portfolio</h2>
+        <p v-reveal class="section-lead">
           Filter the published apartments by destination or name.
         </p>
         <form class="filters__bar spin-edge" role="search" @submit.prevent>
@@ -192,10 +182,8 @@
     >
       <div class="dest-wrap residences__head">
         <p v-reveal class="eyebrow">Residences</p>
-        <h2 id="residences-title" v-reveal="{ delay: '60ms' }">
-          Stacked stays
-        </h2>
-        <p v-reveal="{ delay: '110ms' }" class="section-lead">
+        <h2 id="residences-title" v-reveal> Stacked stays </h2>
+        <p v-reveal class="section-lead">
           Each published apartment, held so the next one covers the last.
         </p>
       </div>
@@ -210,7 +198,7 @@
             <span>{{ pad(index + 1) }}</span>
             <strong>{{ hotel.name }}</strong>
           </header>
-          <div v-tilt="{ max: 5 }" class="rooms-tilt">
+          <div class="rooms-tilt">
             <HotelCard live :hotel="hotel" />
           </div>
         </article>
@@ -235,7 +223,6 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import GySelect from "@/components/GySelect.vue";
 import RevealWords from "@/components/home/RevealWords.vue";
-import { useParallax } from "@/components/home/useParallax";
 import { usePinnedRail } from "@/components/home/usePinnedRail";
 import HotelCard from "@/components/HotelCard.vue";
 import RoomFacts from "@/components/RoomFacts.vue";
@@ -310,12 +297,6 @@ const {
   barEl,
   goToPanel
 } = usePinnedRail(computed(() => rooms.value.length));
-
-const mastFrame = ref<HTMLElement | null>(null);
-const mastOffset = useParallax(mastFrame, 150);
-const mastStyle = computed(() => ({
-  transform: `translate3d(0, ${mastOffset.value}px, 0)`
-}));
 
 const mastHotel = computed(
   () =>
@@ -402,11 +383,7 @@ function pad(value: number) {
 }
 
 function stackStyle(index: number) {
-  const capped = Math.min(index, 3);
-  return {
-    top: `calc(var(--header-offset) + ${capped} * var(--stack-step))`,
-    zIndex: index + 1
-  };
+  return { zIndex: index + 1 };
 }
 
 function scrollTo(id: string) {

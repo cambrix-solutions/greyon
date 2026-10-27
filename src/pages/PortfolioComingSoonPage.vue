@@ -49,7 +49,7 @@ const description = computed(() => t("portfolios.comingSoonLead"));
 
 .coming-soon h1 {
   margin: 0 0 1rem;
-  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  font-size: var(--gy-text-display);
 }
 
 .note {

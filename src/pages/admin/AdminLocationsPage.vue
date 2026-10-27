@@ -69,7 +69,7 @@
       <span><strong>3 · Rooms</strong> how many you can sell</span>
     </div>
 
-    <div v-reveal="{ delay: '80ms' }" class="loc-hub">
+    <div v-reveal class="loc-hub">
       <article
         v-for="loc in filtered"
         :key="loc.id"

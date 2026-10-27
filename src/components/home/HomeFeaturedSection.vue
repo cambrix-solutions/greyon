@@ -93,9 +93,7 @@
     <div
       v-if="rooms.length"
       id="home-rooms"
-      ref="pinSection"
       class="rooms"
-      :class="{ 'is-pinned': pinned }"
       aria-roledescription="carousel"
       :aria-label="$t('home.rooms')"
     >
@@ -106,7 +104,7 @@
             $t("home.rooms")
           }}</h2>
         </div>
-        <div ref="roomTrack" class="rooms__track" :style="trackStyle">
+        <div ref="roomTrack" class="rooms__track">
           <router-link
             v-for="room in rooms"
             :key="room.id"
@@ -139,7 +137,6 @@ import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import FeatureChips from "@/components/FeatureChips.vue";
 import { useDragScroll } from "@/components/home/useDragScroll";
-import { usePinScroll } from "@/components/home/usePinScroll";
 import { useCmsStore } from "@/stores/cms-store";
 import type { Hotel, RoomType } from "@/types/greyon";
 import { formatTime } from "@/utils/datetime";
@@ -150,18 +147,10 @@ const SWIPE_PX = 48;
 const cms = useCmsStore();
 const { t } = useI18n();
 const photoIndex = ref<Record<string, number>>({});
-const pinSection = ref<HTMLElement | null>(null);
 const roomTrack = ref<HTMLElement | null>(null);
-const { shift, pinned } = usePinScroll(pinSection, roomTrack);
 let touchX: number | null = null;
 
 useDragScroll(roomTrack, { momentum: true });
-
-const trackStyle = computed(() =>
-  pinned.value
-    ? { transform: `translate3d(${shift.value}px, 0, 0)` }
-    : undefined
-);
 
 const featuredHotels = computed(() =>
   cms.publishedHotels.filter(hotel => hotel.featured)
@@ -280,11 +269,10 @@ function roomDetail(room: RoomType) {
 
 .property__img {
   position: absolute;
-  inset: -8%;
-  width: 116%;
-  height: 116%;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  animation: ken 18s ease-in-out infinite alternate;
 }
 
 .property__veil {
@@ -345,9 +333,9 @@ function roomDetail(room: RoomType) {
   bottom: 36%;
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(2.58rem, 6vw, 5.32rem);
-  font-weight: 800;
-  letter-spacing: -0.035em;
+  font-size: var(--gy-text-4xl);
+  font-weight: 500;
+  letter-spacing: normal;
   line-height: 1;
 }
 
@@ -378,15 +366,15 @@ function roomDetail(room: RoomType) {
   font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #e4d2a4;
+  color: var(--gy-gold);
 }
 
 .property__lead {
   margin: 0;
-  font-family: var(--font-display);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  font-size: clamp(1.45rem, 2.4vw, 2rem);
+  font-family: var(--font-body);
+  font-weight: 400;
+  letter-spacing: normal;
+  font-size: var(--gy-text-2xl);
   line-height: 1.25;
 }
 
@@ -406,7 +394,7 @@ function roomDetail(room: RoomType) {
 .rooms {
   position: relative;
   background: #f4efe6;
-  color: #1c1f1e;
+  color: var(--gy-forest);
 }
 
 .rooms.is-pinned .rooms__sticky {
@@ -430,15 +418,15 @@ function roomDetail(room: RoomType) {
   font-weight: 700;
   letter-spacing: 0.28em;
   text-transform: uppercase;
-  color: var(--gy-gold-deep);
+  color: var(--gy-gold);
 }
 
 .rooms__title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(2.52rem, 6vw, 4.54rem);
-  font-weight: 800;
-  letter-spacing: -0.035em;
+  font-size: var(--gy-text-4xl);
+  font-weight: 500;
+  letter-spacing: normal;
   line-height: 1;
 }
 
@@ -500,10 +488,10 @@ function roomDetail(room: RoomType) {
 
 .room__name {
   font-family: var(--font-display);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  font-size: clamp(1.6rem, 2vw, 2.2rem);
-  line-height: 1.05;
+  font-weight: 500;
+  letter-spacing: normal;
+  font-size: 1.1rem;
+  line-height: 1.3;
 }
 
 .room__detail {
@@ -520,15 +508,6 @@ function roomDetail(room: RoomType) {
   }
 }
 
-@keyframes ken {
-  from {
-    transform: scale(1);
-  }
-  to {
-    transform: scale(1.1);
-  }
-}
-
 @media (max-width: 860px) {
   .property__media {
     height: 78vh;
@@ -538,7 +517,7 @@ function roomDetail(room: RoomType) {
   .property__name {
     right: 1.1rem;
     bottom: 38%;
-    font-size: clamp(2.8rem, 12vw, 3.8rem);
+    font-size: var(--gy-text-4xl);
   }
 
   .property__float {

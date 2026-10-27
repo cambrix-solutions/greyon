@@ -3,13 +3,12 @@
     <SeoHead title="Destinations | Greyon" :description="seoDescription" />
 
     <section class="mast" data-sheet="Mast">
-      <div ref="mastFrame" class="mast__media">
+      <div class="mast__media">
         <img
           v-if="mastBase"
           class="mast__img"
           :src="mastBase.heroImage"
           alt=""
-          :style="mastStyle"
         />
         <div class="mast__veil" />
       </div>
@@ -18,16 +17,11 @@
         <p v-if="mastBase" v-reveal class="mast__chip">{{ mastBase.name }}</p>
         <p v-reveal class="eyebrow eyebrow--light">Greyon</p>
         <RevealWords tag="h1" text="Destinations" />
-        <p v-reveal="{ delay: '140ms' }" class="mast__lead">
+        <p v-reveal class="mast__lead">
           Published places in the Greyon portfolio.
         </p>
-        <div
-          v-if="locations.length"
-          v-reveal="{ delay: '200ms' }"
-          class="mast__actions"
-        >
+        <div v-if="locations.length" v-reveal class="mast__actions">
           <button
-            v-magnetic
             class="gy-btn gy-btn--light"
             type="button"
             @click="scrollToJourney"
@@ -52,9 +46,7 @@
         <header class="journey__head">
           <div>
             <p v-reveal class="eyebrow eyebrow--light">The route</p>
-            <h2 id="journey-title" v-reveal="{ delay: '60ms' }">
-              Places in view
-            </h2>
+            <h2 id="journey-title" v-reveal> Places in view </h2>
           </div>
           <nav class="journey__nav" aria-label="Destinations">
             <button
@@ -130,8 +122,8 @@
     >
       <div class="dest-wrap index__head">
         <p v-reveal class="eyebrow">Index</p>
-        <h2 id="index-title" v-reveal="{ delay: '60ms' }">Stacked places</h2>
-        <p v-reveal="{ delay: '110ms' }" class="section-lead">
+        <h2 id="index-title" v-reveal>Stacked places</h2>
+        <p v-reveal class="section-lead">
           Each published destination, held so the next one covers the last.
         </p>
       </div>
@@ -193,7 +185,6 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import RevealWords from "@/components/home/RevealWords.vue";
-import { useParallax } from "@/components/home/useParallax";
 import { usePinnedRail } from "@/components/home/usePinnedRail";
 import SectionDivider from "@/components/hotel/SectionDivider.vue";
 import SeoHead from "@/components/SeoHead.vue";
@@ -214,12 +205,6 @@ const {
   goToPanel
 } = usePinnedRail(computed(() => locations.value.length));
 const stickyEl = ref<HTMLElement | null>(null);
-const mastFrame = ref<HTMLElement | null>(null);
-
-const mastOffset = useParallax(mastFrame, 150);
-const mastStyle = computed(() => ({
-  transform: `translate3d(0, ${mastOffset.value}px, 0)`
-}));
 
 const hotelsByLocation = computed(() => {
   const map = new Map<string, Hotel[]>();
@@ -251,11 +236,7 @@ function pad(value: number) {
 }
 
 function stackStyle(index: number) {
-  const capped = Math.min(index, 3);
-  return {
-    top: `calc(var(--header-offset) + ${capped} * var(--stack-step))`,
-    zIndex: index + 1
-  };
+  return { zIndex: index + 1 };
 }
 
 function scrollToJourney() {
@@ -338,7 +319,7 @@ function scrollToJourney() {
 .places :deep(h1) {
   max-width: 8em;
   margin: 0;
-  font-size: clamp(2.5rem, 7.48vw, 5.85rem);
+  font-size: var(--gy-text-display);
   line-height: 1;
 }
 
@@ -347,7 +328,7 @@ function scrollToJourney() {
   margin: 1rem 0 0;
   font-family: var(--font-body);
   font-size: 1.02rem;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.6;
   color: rgba(255, 255, 255, 0.9);
 }
@@ -398,7 +379,7 @@ function scrollToJourney() {
 
 .journey h2 {
   margin: 0;
-  font-size: clamp(2.6rem, 5vw, 4.4rem);
+  font-size: var(--gy-text-4xl);
   line-height: 1;
 }
 
@@ -437,7 +418,7 @@ function scrollToJourney() {
 
 .journey__nav button.is-active {
   background: var(--gy-gold);
-  color: #1a211e;
+  color: var(--gy-forest);
 }
 
 .journey__nav button:focus-visible,
@@ -575,7 +556,7 @@ function scrollToJourney() {
   font-family: var(--font-display);
   font-weight: 800;
   letter-spacing: -0.035em;
-  font-size: clamp(2.69rem, 6vw, 4.62rem);
+  font-size: var(--gy-text-4xl);
   line-height: 1;
   color: var(--gy-gold);
 }
@@ -583,10 +564,11 @@ function scrollToJourney() {
 .journey__copy h3 {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(2.6rem, 4vw, 4.4rem);
-  font-weight: 800;
-  letter-spacing: -0.035em;
-  line-height: 1;
+  font-size: var(--gy-text-4xl);
+  font-weight: 500;
+  letter-spacing: normal;
+  line-height: 1.2;
+  color: #fff;
 }
 
 .journey__copy p {
@@ -594,7 +576,7 @@ function scrollToJourney() {
   max-width: 28rem;
   font-family: var(--font-body);
   font-size: 0.98rem;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.55;
   color: rgba(255, 255, 255, 0.86);
   display: -webkit-box;
@@ -624,7 +606,7 @@ function scrollToJourney() {
 
 .state {
   padding: clamp(3rem, 8vw, 5rem) 0;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
   font-family: var(--font-display);
 }
 
@@ -636,7 +618,7 @@ function scrollToJourney() {
 
 .index h2 {
   margin: 0;
-  font-size: clamp(2.35rem, 6vw, 4.2rem);
+  font-size: var(--gy-text-4xl);
   line-height: 1;
 }
 
@@ -650,7 +632,7 @@ function scrollToJourney() {
 }
 
 .index-card {
-  position: sticky;
+  position: relative;
   overflow: hidden;
   border-radius: 26px;
   background: rgba(255, 255, 255, 0.94);
@@ -680,14 +662,14 @@ function scrollToJourney() {
 }
 
 .index-card__bar span {
-  color: var(--gy-gold-deep);
+  color: var(--gy-gold);
   font-size: 1.35rem;
 }
 
 .index-card__bar strong {
   min-width: 0;
   overflow: hidden;
-  font-size: clamp(1.35rem, 2vw, 1.85rem);
+  font-size: var(--gy-text-stat);
   line-height: 1;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -725,19 +707,19 @@ function scrollToJourney() {
 .index-card__body h3 {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(2.4rem, 4vw, 3.8rem);
-  font-weight: 800;
-  letter-spacing: -0.035em;
-  line-height: 1;
+  font-size: 1.1rem;
+  font-weight: 500;
+  letter-spacing: normal;
+  line-height: 1.3;
 }
 
 .index-card__body p {
   margin: 0;
   font-family: var(--font-body);
   font-size: 0.98rem;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.6;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
 }
 
 .index-card__body .gy-btn {
@@ -761,7 +743,7 @@ function scrollToJourney() {
   font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--gy-gold-deep);
+  color: var(--gy-gold);
 }
 
 .index-card__stays {
@@ -841,7 +823,7 @@ function scrollToJourney() {
   }
 
   .places :deep(h1) {
-    font-size: clamp(2.6rem, 9.28vw, 3.86rem);
+    font-size: var(--gy-text-display);
   }
 }
 

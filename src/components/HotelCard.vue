@@ -157,9 +157,9 @@ const metaLine = computed(() => {
 
 .hotel-card__body h3 {
   margin: 0;
-  font-size: clamp(1.55rem, 2.2vw, 1.9rem);
+  font-size: var(--gy-text-2xl);
   line-height: 1.1;
-  font-weight: 700;
+  font-weight: 500;
 }
 
 .hotel-card__body h3 a {
@@ -170,12 +170,12 @@ const metaLine = computed(() => {
 }
 
 .hotel-card__body h3 a:hover {
-  color: var(--gy-gold-deep);
+  color: var(--gy-gold);
 }
 
 .hotel-card__desc {
   margin: 0;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
   font-size: 0.95rem;
   line-height: 1.55;
   display: -webkit-box;
@@ -208,7 +208,7 @@ const metaLine = computed(() => {
   padding: 2.5px;
   border-radius: inherit;
   background: conic-gradient(
-    from var(--gy-spin),
+    from 40deg,
     var(--gy-gold),
     var(--gy-forest) 35%,
     rgba(255, 255, 255, 0.15) 55%,
@@ -216,7 +216,6 @@ const metaLine = computed(() => {
     var(--gy-gold)
   );
   pointer-events: none;
-  animation: gy-card-spin 8s linear infinite;
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
     linear-gradient(#000 0 0);
@@ -229,19 +228,19 @@ const metaLine = computed(() => {
 
 .hotel-card__meta {
   margin: 0;
-  font-family: "Montserrat", system-ui, sans-serif;
+  font-family: var(--font-display);
   font-size: 0.68rem;
   font-weight: 600;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--gy-gold-deep);
+  color: var(--gy-gold);
 }
 
 .hotel-card--live h3 {
   font-family: var(--font-display);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  font-size: clamp(2rem, 2.6vw, 2.75rem);
+  font-weight: 500;
+  letter-spacing: normal;
+  font-size: var(--gy-text-2xl);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -255,16 +254,4 @@ const metaLine = computed(() => {
 }
 </style>
 
-<style>
-@property --gy-spin {
-  syntax: "<angle>";
-  initial-value: 0deg;
-  inherits: false;
-}
-
-@keyframes gy-card-spin {
-  to {
-    --gy-spin: 360deg;
-  }
-}
-</style>
+<style></style>

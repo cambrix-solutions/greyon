@@ -29,37 +29,26 @@
         <span v-if="showSheets" class="sheet-label">Story</span>
         <div class="dest-wrap">
           <p v-reveal class="eyebrow">Greyon</p>
-          <h1
-            id="about-title"
-            class="mask__title"
-            :class="{ 'has-photo': Boolean(maskImage) }"
-            :style="maskVars"
-          >
-            About us
-          </h1>
-          <p v-reveal="{ delay: '80ms' }" class="mask__lead">
+          <h1 id="about-title" class="mask__title"> About us </h1>
+          <p v-reveal class="mask__lead">
             Greyon is a Cambodia hospitality brand focused on calm, modern stays
             — from city hotels to serviced apartments — with booking that stays
             simple for guests and teams.
           </p>
-          <p v-reveal="{ delay: '140ms' }" class="mask__body">
+          <p v-reveal class="mask__body">
             We design each property around the destination: clear rooms,
             thoughtful amenities, and stay policies guests can understand before
             they book.
           </p>
-          <div v-reveal="{ delay: '180ms' }" class="mask__actions">
-            <router-link v-magnetic class="gy-btn" to="/hotels">{{
+          <div v-reveal class="mask__actions">
+            <router-link class="gy-btn" to="/hotels">{{
               t("home.viewHotels")
             }}</router-link>
-            <router-link
-              v-magnetic
-              class="gy-btn gy-btn--outline"
-              to="/apartments"
+            <router-link class="gy-btn gy-btn--outline" to="/apartments"
               >Serviced Apartments</router-link
             >
             <router-link
               v-if="contactOn"
-              v-magnetic
               class="gy-btn gy-btn--outline"
               to="/contact"
               >Contact us</router-link
@@ -83,13 +72,7 @@
             class="layers__frame"
             :class="`is-${index}`"
           >
-            <img
-              :ref="node => setFrame(frame.id, node)"
-              :src="frame.src"
-              :alt="frame.name"
-              :style="layerStyle(frame)"
-              loading="lazy"
-            />
+            <img :src="frame.src" :alt="frame.name" loading="lazy" />
             <figcaption class="layers__name">{{ frame.name }}</figcaption>
           </figure>
         </div>
@@ -103,19 +86,19 @@
         aria-labelledby="about-lens-title"
       >
         <span v-if="showSheets" class="sheet-label">Lens</span>
-        <div ref="lensFrame" class="stage__media">
-          <img class="stage__img" :src="lens.src" alt="" :style="lensStyle" />
+        <div class="stage__media">
+          <img class="stage__img" :src="lens.src" alt="" />
           <div class="stage__veil" />
         </div>
         <div class="dest-wrap stage__content">
           <p v-reveal class="eyebrow eyebrow--light">{{ lens.kicker }}</p>
-          <h2 id="about-lens-title" v-reveal="{ delay: '70ms' }">
+          <h2 id="about-lens-title" v-reveal>
             {{ lens.name }}
           </h2>
-          <p v-if="lens.lead" v-reveal="{ delay: '120ms' }" class="stage__lead">
+          <p v-if="lens.lead" v-reveal class="stage__lead">
             {{ lens.lead }}
           </p>
-          <router-link v-magnetic class="gy-btn gy-btn--light" :to="lens.to">
+          <router-link class="gy-btn gy-btn--light" :to="lens.to">
             {{ lens.cta }}
           </router-link>
         </div>
@@ -142,15 +125,12 @@
         <span v-if="showSheets" class="sheet-label">Services</span>
         <div class="dest-wrap">
           <p v-reveal class="eyebrow">On site</p>
-          <h2 id="about-services-title" v-reveal="{ delay: '60ms' }">
-            Services
-          </h2>
+          <h2 id="about-services-title" v-reveal> Services </h2>
         </div>
         <div class="dest-wrap services__grid">
           <article
             v-for="item in serviceCards"
             :key="item.id"
-            v-tilt="{ max: 6 }"
             class="service-card rooms-tilt glass-edge"
           >
             <p v-if="item.hotel" class="service-card__where">{{
@@ -172,10 +152,8 @@
         <span v-if="showSheets" class="sheet-label">Places</span>
         <div class="dest-wrap residences__head">
           <p v-reveal class="eyebrow">{{ t("nav.location") }}</p>
-          <h2 id="about-places-title" v-reveal="{ delay: '60ms' }">
-            Stacked places
-          </h2>
-          <p v-reveal="{ delay: '110ms' }" class="section-lead">
+          <h2 id="about-places-title" v-reveal> Stacked places </h2>
+          <p v-reveal class="section-lead">
             Each published destination, held so the next one covers the last.
           </p>
         </div>
@@ -242,7 +220,7 @@
               <p v-reveal class="eyebrow eyebrow--light">{{
                 t("nav.hotels")
               }}</p>
-              <h2 id="about-stays-title" v-reveal="{ delay: '60ms' }">
+              <h2 id="about-stays-title" v-reveal>
                 {{ t("home.stayWith") }}
               </h2>
               <p class="rail__count" aria-live="polite">
@@ -275,7 +253,6 @@
               <div
                 v-for="(hotel, index) in hotels"
                 :key="hotel.id"
-                v-tilt="{ max: 6 }"
                 class="room-panel rooms-tilt glass-edge"
                 :class="{ 'is-active': activeIndex === index }"
               >
@@ -344,8 +321,6 @@ import { computed, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import HotelAmenityBand from "@/components/hotel/HotelAmenityBand.vue";
-import { useParallax } from "@/components/home/useParallax";
-import { useParallaxGroup } from "@/components/home/useParallax";
 import { usePinnedRail } from "@/components/home/usePinnedRail";
 import { useReadProgress } from "@/components/home/useReadProgress";
 import SectionDivider from "@/components/hotel/SectionDivider.vue";
@@ -359,7 +334,6 @@ type Frame = {
   id: string;
   src: string;
   name: string;
-  factor: number;
 };
 
 type Lens = {
@@ -384,7 +358,7 @@ const route = useRoute();
 const { t } = useI18n();
 
 const pageEl = ref<HTMLElement | null>(null);
-const { progress, reduceMotion } = useReadProgress(pageEl);
+const { progress } = useReadProgress(pageEl);
 const readPercent = computed(() => Math.round(progress.value * 100));
 const barStyle = computed(() => ({
   transform: `scaleX(${progress.value})`
@@ -406,13 +380,6 @@ const {
   goToPanel
 } = usePinnedRail(computed(() => hotels.value.length));
 
-const { setFrame, offsets } = useParallaxGroup(180);
-const lensFrame = ref<HTMLElement | null>(null);
-const lensOffset = useParallax(lensFrame, 150);
-const lensStyle = computed(() => ({
-  transform: `translate3d(0, ${lensOffset.value}px, 0)`
-}));
-
 const serviceCards = ref<ServiceCard[]>([]);
 
 onMounted(() => {
@@ -426,8 +393,7 @@ const photos = computed(() => {
     if (!hosted || !name.trim() || frames.some(frame => frame.src === hosted)) {
       return;
     }
-    const factor = [0.55, 1, 1.35, 0.8][frames.length] ?? 1;
-    frames.push({ id, src: hosted, name: name.trim(), factor });
+    frames.push({ id, src: hosted, name: name.trim() });
   };
   for (const hotel of hotels.value) {
     push(`hotel-${hotel.id}`, hotel.heroImage, hotel.name);
@@ -445,14 +411,6 @@ const photos = computed(() => {
 });
 
 const maskImage = computed(() => photos.value[0]?.src ?? "");
-const maskVars = computed(() => {
-  if (!maskImage.value) return {};
-  const y = reduceMotion.value ? 42 : 22 + progress.value * 50;
-  return {
-    "--mask-image": `url("${maskImage.value}")`,
-    "--mask-y": `${y}%`
-  };
-});
 
 const layers = computed(() => {
   const rest = photos.value.filter(frame => frame.src !== maskImage.value);
@@ -509,11 +467,6 @@ const showCatalogError = computed(
     !hotels.value.length
 );
 
-function layerStyle(frame: Frame) {
-  const shift = Math.round((offsets.value[frame.id] ?? 0) * frame.factor);
-  return { transform: `translate3d(0, ${shift}px, 0)` };
-}
-
 function hotelsFor(locationId: string) {
   return hotels.value.filter(hotel => hotel.locationId === locationId);
 }
@@ -528,11 +481,7 @@ function placeOf(hotel: Hotel) {
 }
 
 function stackStyle(index: number) {
-  const capped = Math.min(index, 4);
-  return {
-    top: `calc(var(--header-offset) + ${capped} * var(--stack-step))`,
-    zIndex: index + 1
-  };
+  return { zIndex: index + 1 };
 }
 
 function pad(value: number) {

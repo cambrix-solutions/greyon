@@ -71,12 +71,12 @@ function set(value: number) {
   font-family: var(--font-display);
   font-size: 0.92rem;
   font-weight: 600;
-  color: var(--gy-ink);
+  color: var(--gy-gold);
 }
 
 .gy-counter__hint {
   font-size: 0.8rem;
-  color: var(--gy-muted);
+  color: var(--gy-forest);
 }
 
 .gy-counter__controls {
@@ -93,7 +93,7 @@ function set(value: number) {
   border: 1px solid rgba(69, 76, 75, 0.28);
   border-radius: 999px;
   background: var(--gy-white);
-  color: var(--gy-ink);
+  color: var(--gy-forest);
   cursor: pointer;
   transition:
     border-color 0.2s ease,

@@ -1,14 +1,5 @@
 /* Motion for sections below the hero. The hero, navbar, and footer do not use this class. */
 
-.home-motion .gy-reveal {
-  transform: translateY(72px);
-  transition-duration: 1.05s;
-}
-
-.home-motion .gy-reveal.gy-reveal--in {
-  transform: none;
-}
-
 .home-motion .text-link {
   position: relative;
 }
@@ -23,7 +14,7 @@
   background: currentColor;
   transform: scaleX(0);
   transform-origin: left center;
-  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 0.35s ease;
 }
 
 .home-motion .text-link:hover::after,
@@ -31,41 +22,15 @@
   transform: scaleX(1);
 }
 
-.home-motion .text-link span {
-  display: inline-block;
-  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.home-motion .text-link:hover span,
-.home-motion .text-link:focus-visible span {
-  transform: translateX(12px);
-}
-
-@media (hover: hover) {
-  .home-motion .gy-btn:hover {
-    transform: translateY(-6px);
-  }
-}
-
-@property --wow-spin {
-  syntax: "<angle>";
-  initial-value: 0deg;
-  inherits: false;
-}
-
 .home-motion .glass-frame {
   border-radius: 28px;
   padding: 2px;
-  background: conic-gradient(
-    from var(--wow-spin),
+  background: linear-gradient(
+    135deg,
     var(--gy-gold),
-    #9aaf9c,
-    #f6f1e7,
-    var(--gy-gold-deep),
-    var(--gy-forest),
-    var(--gy-gold)
+    var(--gy-forest) 55%,
+    var(--gy-gold-deep)
   );
-  animation: wow-spin 7s linear infinite;
 }
 
 .home-motion .glass-frame__in {
@@ -76,48 +41,14 @@
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
 }
 
-@keyframes wow-spin {
-  to {
-    --wow-spin: 360deg;
-  }
-}
-
 .home-motion .marquee {
-  overflow: hidden;
-  mask-image: linear-gradient(
-    90deg,
-    transparent,
-    #000 8%,
-    #000 92%,
-    transparent
-  );
+  overflow: visible;
 }
 
 .home-motion .marquee__track {
   display: flex;
-  width: max-content;
-  gap: 2.5rem;
-  animation: wow-marquee 32s linear infinite;
-}
-
-@keyframes wow-marquee {
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .home-motion .gy-reveal,
-  .home-motion .text-link::after,
-  .home-motion .text-link span,
-  .home-motion .gy-btn {
-    transition: none !important;
-    animation: none !important;
-    transform: none !important;
-  }
-
-  .home-motion .glass-frame,
-  .home-motion .marquee__track {
-    animation: none !important;
-  }
+  flex-wrap: wrap;
+  width: auto;
+  max-width: 100%;
+  gap: 0.75rem 1.25rem;
 }

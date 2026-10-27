@@ -5,24 +5,21 @@
     class="cta home-motion"
     aria-labelledby="home-cta-title"
   >
-    <div ref="frame" class="cta__frame">
-      <img class="cta__img" :src="image" alt="" :style="imageStyle" />
+    <div class="cta__frame">
+      <img class="cta__img" :src="image" alt="" />
     </div>
     <div class="cta__veil" />
     <div class="cta__copy">
       <p v-reveal class="eyebrow">Greyon</p>
       <h2 id="home-cta-title" class="cta__title">{{ $t("home.stayWith") }}</h2>
-      <p v-reveal="{ delay: '140ms' }" class="cta__lead">{{
-        $t("home.subhead")
-      }}</p>
-      <div v-reveal="{ delay: '220ms' }" class="glass-frame cta__glass">
+      <p v-reveal class="cta__lead">{{ $t("home.subhead") }}</p>
+      <div v-reveal class="glass-frame cta__glass">
         <div class="glass-frame__in cta__actions">
-          <router-link v-magnetic to="/hotels" class="gy-btn gy-btn--light">
+          <router-link to="/hotels" class="gy-btn gy-btn--light">
             {{ $t("home.viewHotels") }}
           </router-link>
           <router-link
             v-if="auth.featureEnabled('contact_public')"
-            v-magnetic
             to="/contact"
             class="gy-btn gy-btn--ghost"
           >
@@ -35,19 +32,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
-import { useParallax } from "@/components/home/useParallax";
+import { computed } from "vue";
 import { useAuthStore } from "@/stores/auth-store";
 import { useCmsStore } from "@/stores/cms-store";
 
 const cms = useCmsStore();
 const auth = useAuthStore();
-const frame = ref<HTMLElement | null>(null);
-const offset = useParallax(frame, 200);
-
-const imageStyle = computed(() => ({
-  transform: `translate3d(0, ${offset.value}px, 0) scale(1.18)`
-}));
 
 const image = computed(() => {
   const featured = cms.publishedHotels.find(hotel => hotel.featured);
@@ -80,14 +70,13 @@ const image = computed(() => {
 
 .cta__frame {
   position: absolute;
-  inset: -22% 0;
+  inset: 0;
 }
 
 .cta__img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  will-change: transform;
 }
 
 .cta__veil {
@@ -122,26 +111,18 @@ const image = computed(() => {
   font-weight: 700;
   letter-spacing: 0.28em;
   text-transform: uppercase;
-  color: #e4d2a4;
+  color: var(--gy-gold);
 }
 
 .cta__title {
   margin: 0;
   max-width: 12ch;
   font-family: var(--font-display);
-  font-size: clamp(2.86rem, 7.48vw, 5.85rem);
-  font-weight: 800;
-  letter-spacing: -0.035em;
+  font-size: var(--gy-text-4xl);
+  font-weight: 500;
+  letter-spacing: normal;
   line-height: 1;
-  background: linear-gradient(
-    105deg,
-    #f7f3ec 8%,
-    var(--gy-gold) 48%,
-    #9aaf9c 92%
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--gy-white);
 }
 
 .cta__lead {
@@ -149,7 +130,7 @@ const image = computed(() => {
   margin: 1.2rem 0 0;
   font-family: var(--font-body);
   font-size: 1.02rem;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.65;
   color: rgba(255, 255, 255, 0.88);
 }

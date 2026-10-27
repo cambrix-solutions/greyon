@@ -70,7 +70,7 @@
       <span><strong>Children</strong> Room types</span>
     </div>
 
-    <div v-reveal="{ delay: '80ms' }" class="hotel-groups">
+    <div v-reveal class="hotel-groups">
       <section
         v-for="group in grouped"
         :key="group.locationId"

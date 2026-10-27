@@ -82,7 +82,7 @@
       </div>
     </section>
 
-    <section v-reveal="{ delay: '70ms' }" class="prop-board">
+    <section v-reveal class="prop-board">
       <header class="prop-board__head">
         <div>
           <p class="prop-board__eyebrow">Properties</p>

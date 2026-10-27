@@ -44,7 +44,7 @@
 
     <div v-if="loading" class="text-body2 text-grey-7 q-pa-md">Loading…</div>
 
-    <div v-else v-reveal="{ delay: '80ms' }" class="svc-grid">
+    <div v-else v-reveal class="svc-grid">
       <article v-for="item in filtered" :key="item.id" class="svc-card">
         <div class="svc-card__icon" aria-hidden="true">
           <q-icon :name="item.icon || 'spa'" size="22px" />
