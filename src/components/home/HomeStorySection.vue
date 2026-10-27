@@ -47,8 +47,11 @@ import { hostedImage } from "@/utils/hostedImage";
 const auth = useAuthStore();
 const cms = useCmsStore();
 
-/** First real uploaded hotel photo from the engine catalog (stock hosts are dropped). */
+/** First hotel's third gallery photo, else the first real hotel photo (stock hosts are dropped). */
 const photo = computed(() => {
+  const first = cms.publishedHotels[0];
+  const third = hostedImage(first?.gallery[2]);
+  if (first && third) return { src: third, name: first.name };
   for (const hotel of cms.publishedHotels) {
     const src = hostedImage(hotel.heroImage) || hostedImage(hotel.gallery[0]);
     if (src) return { src, name: hotel.name };
