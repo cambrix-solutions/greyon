@@ -722,7 +722,7 @@ function bookHere() {
 
 .visit-card a {
   font-family: var(--font-display);
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   font-weight: 700;
   letter-spacing: normal;
   line-height: 1.3;

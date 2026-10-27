@@ -44,17 +44,17 @@
             {{ indexFor(hotel.id) + 1 }} / {{ photosFor(hotel).length }}
           </p>
         </template>
-        <h2
-          :id="hotelIndex === 0 ? 'home-featured-title' : undefined"
-          class="property__name"
-        >
-          <router-link :to="hotelPath(hotel)">{{ hotel.name }}</router-link>
-        </h2>
       </div>
 
       <div class="property__float">
         <div class="glass-frame">
           <div class="glass-frame__in property__card">
+            <h2
+              :id="hotelIndex === 0 ? 'home-featured-title' : undefined"
+              class="property__name"
+            >
+              <router-link :to="hotelPath(hotel)">{{ hotel.name }}</router-link>
+            </h2>
             <p v-if="metaLine(hotel)" class="property__meta">
               {{ metaLine(hotel) }}
             </p>
@@ -326,21 +326,17 @@ function roomDetail(room: RoomType) {
 }
 
 .property__name {
-  position: absolute;
-  z-index: 3;
-  left: clamp(1.2rem, 5vw, 4rem);
-  right: 28%;
-  bottom: 36%;
   margin: 0;
   font-family: var(--font-display);
-  font-size: var(--gy-text-4xl);
+  font-size: var(--gy-text-display);
   font-weight: 700;
   letter-spacing: normal;
-  line-height: 1;
+  line-height: 1.15;
+  color: #fff;
 }
 
 .property__name a {
-  color: #fff;
+  color: inherit;
 }
 
 .property__float {
@@ -461,6 +457,9 @@ function roomDetail(room: RoomType) {
   color: #fff;
   background: #2a2e2c;
   scroll-snap-align: start;
+  transition:
+    transform 0.55s ease,
+    box-shadow 0.55s ease;
 }
 
 .room__media,
@@ -474,7 +473,7 @@ function roomDetail(room: RoomType) {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.8s ease;
+  transition: transform 0.55s ease;
 }
 
 .room__shade {
@@ -490,7 +489,7 @@ function roomDetail(room: RoomType) {
   font-family: var(--font-display);
   font-weight: 700;
   letter-spacing: normal;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   line-height: 1.3;
 }
 
@@ -503,8 +502,13 @@ function roomDetail(room: RoomType) {
 }
 
 @media (hover: hover) {
+  .room:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 16px 32px rgba(18, 17, 16, 0.16);
+  }
+
   .room:hover img {
-    transform: scale(1.08);
+    transform: scale(1.04);
   }
 }
 
@@ -512,12 +516,6 @@ function roomDetail(room: RoomType) {
   .property__media {
     height: 78vh;
     min-height: 520px;
-  }
-
-  .property__name {
-    right: 1.1rem;
-    bottom: 38%;
-    font-size: var(--gy-text-4xl);
   }
 
   .property__float {
@@ -532,6 +530,7 @@ function roomDetail(room: RoomType) {
 
 @media (prefers-reduced-motion: reduce) {
   .property__img,
+  .room,
   .room__media img {
     animation: none !important;
     transition: none !important;

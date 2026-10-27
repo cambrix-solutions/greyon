@@ -642,7 +642,7 @@ const showError = computed(
   font-family: var(--font-display);
   font-weight: 700;
   letter-spacing: normal;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   line-height: 1.3;
 }
 

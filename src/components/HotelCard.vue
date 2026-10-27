@@ -109,8 +109,20 @@ const metaLine = computed(() => {
   transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.hotel-card:hover .hotel-card__cover {
-  transform: scale(1.06);
+.hotel-card {
+  transition:
+    transform 0.55s ease,
+    box-shadow 0.55s ease;
+}
+
+@media (hover: hover) {
+  .hotel-card:hover {
+    transform: translateY(-6px);
+  }
+
+  .hotel-card:hover .hotel-card__cover {
+    transform: scale(1.04);
+  }
 }
 
 .hotel-card__reveal {
@@ -244,6 +256,13 @@ const metaLine = computed(() => {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .hotel-card,
+  .hotel-card__cover,
+  .hotel-card__reveal {
+    transition: none !important;
+    transform: none !important;
+  }
+
   .hotel-card__reveal {
     display: none;
   }

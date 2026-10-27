@@ -23,13 +23,13 @@
   --gy-text-base: clamp(0.9375rem, 0.9rem + 0.2vw, 1.0625rem);
   --gy-text-lead: clamp(1rem, 0.95rem + 0.28vw, 1.15rem);
   --gy-text-lg: clamp(1.125rem, 1.02rem + 0.45vw, 1.35rem);
-  --gy-text-xl: 1.1rem;
-  --gy-text-2xl: 1.1rem;
-  --gy-text-3xl: 1.1rem;
-  --gy-text-card: 1.1rem;
-  --gy-text-4xl: clamp(1.4rem, 1.2rem + 0.6vw, 1.75rem);
-  --gy-text-display: clamp(1.9rem, 1.5rem + 1.2vw, 2.5rem);
-  --gy-text-stat: 1.1rem;
+  --gy-text-xl: 1.2rem;
+  --gy-text-2xl: 1.2rem;
+  --gy-text-3xl: 1.2rem;
+  --gy-text-card: 1.2rem;
+  --gy-text-4xl: clamp(1.75rem, 1.4rem + 1vw, 2.25rem);
+  --gy-text-display: clamp(2.25rem, 1.6rem + 2vw, 3.25rem);
+  --gy-text-stat: 1.2rem;
 }
 
 html,
@@ -198,11 +198,11 @@ a {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 1.05s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 0.55s ease;
 }
 
 .gy-card-media:hover img {
-  transform: scale(1.08);
+  transform: scale(1.04);
 }
 
 /* Photo failed to load (see boot/motion.ts) — show the placeholder wash. */
@@ -462,13 +462,13 @@ img.gy-img--broken {
 .gy-page-enter-active,
 .gy-page-leave-active {
   transition:
-    opacity 0.35s ease,
-    transform 0.35s ease;
+    opacity 0.55s ease,
+    transform 0.55s ease;
 }
 
 .gy-page-enter-from {
   opacity: 0;
-  transform: translateY(12px);
+  transform: translateY(20px);
 }
 
 .gy-page-leave-to {
@@ -478,10 +478,10 @@ img.gy-img--broken {
 
 .gy-reveal {
   opacity: 0;
-  transform: translateY(12px);
+  transform: translateY(20px);
   transition:
-    opacity 0.35s ease,
-    transform 0.35s ease;
+    opacity 0.55s ease,
+    transform 0.55s ease;
 }
 
 /* Invisible reveal targets must not steal clicks from content below
@@ -498,10 +498,13 @@ img.gy-img--broken {
 }
 
 .gy-interactive {
-  transition: box-shadow 0.35s ease;
+  transition:
+    box-shadow 0.55s ease,
+    transform 0.55s ease;
 }
 
 .gy-interactive:hover {
+  transform: translateY(-4px);
   box-shadow: 0 12px 28px rgba(26, 24, 20, 0.08);
 }
 
