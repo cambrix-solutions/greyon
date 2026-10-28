@@ -62,18 +62,8 @@ const imageStyle = computed(() => ({
   transform: `translate3d(0, ${offset.value}px, 0) scale(1.15)`
 }));
 
-const featured = computed(() =>
-  cms.publishedHotels.find(hotel => hotel.featured)
-);
-
-const image = computed(() => {
-  const gallery = featured.value?.gallery.find(src => src.trim())?.trim();
-  if (gallery) return gallery;
-  const other = cms.publishedLocations.find(
-    loc => loc.heroImage && loc.id !== featured.value?.locationId
-  );
-  return other?.heroImage || featured.value?.heroImage || "";
-});
+/** Client-supplied drone photo of the Greyon building (replaces the 3D render). */
+const image = "/images/greyon-building.webp";
 
 const words = computed(() =>
   cms.publishedLocations.flatMap(loc =>
@@ -149,6 +139,8 @@ function iconFor(label: string) {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  /* Keep the rooftop GREYON sign in frame. */
+  object-position: 58% 34%;
   will-change: transform;
 }
 
@@ -293,6 +285,12 @@ function iconFor(label: string) {
 
   .marquee__clone {
     display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .band__img {
+    object-position: 60% 38%;
   }
 }
 </style>
