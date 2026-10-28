@@ -6,19 +6,26 @@
     />
 
     <section class="mast" data-sheet="Masthead">
-      <div class="mast__media">
-        <img v-if="mastImage" class="mast__img" :src="mastImage" alt="" />
+      <div ref="mastFrame" class="mast__media">
+        <img
+          v-if="mastImage"
+          class="mast__img"
+          :src="mastImage"
+          alt=""
+          :style="mastStyle"
+        />
         <div class="mast__veil" />
       </div>
 
       <div class="listing-wrap mast__content">
         <p v-reveal class="eyebrow eyebrow--light">Portfolio</p>
         <RevealWords tag="h1" text="Greyon hotels" />
-        <p v-reveal class="mast__lead">
+        <p v-reveal="{ delay: '140ms' }" class="mast__lead">
           Published properties, ready to filter by destination or name.
         </p>
-        <div v-reveal class="mast__actions">
+        <div v-reveal="{ delay: '200ms' }" class="mast__actions">
           <button
+            v-magnetic
             class="gy-btn gy-btn--light"
             type="button"
             @click="scrollToResults"
@@ -37,8 +44,8 @@
     >
       <div class="listing-wrap destinations__head">
         <p v-reveal class="eyebrow">Places</p>
-        <h2 v-reveal>Destinations</h2>
-        <p v-reveal class="section-lead">
+        <h2 v-reveal="{ delay: '60ms' }">Destinations</h2>
+        <p v-reveal="{ delay: '100ms' }" class="section-lead">
           Drag across the places, then choose one to narrow the list.
         </p>
       </div>
@@ -185,7 +192,7 @@
         <div data-sheet="Results">
           <header class="results-head">
             <p v-reveal class="eyebrow">Stays</p>
-            <h2 v-reveal>In the portfolio</h2>
+            <h2 v-reveal="{ delay: '60ms' }">In the portfolio</h2>
           </header>
 
           <Transition name="swap" mode="out-in">
@@ -216,7 +223,7 @@
                   :key="hotel.id"
                   class="result-slot"
                 >
-                  <div class="result-tilt">
+                  <div v-tilt="{ max: 5 }" class="result-tilt">
                     <HotelCard live :hotel="hotel" />
                   </div>
                 </div>
@@ -237,6 +244,7 @@ import DestinationsMap from "@/components/DestinationsMap.vue";
 import GySelect from "@/components/GySelect.vue";
 import RevealWords from "@/components/home/RevealWords.vue";
 import { useDragScroll } from "@/components/home/useDragScroll";
+import { useParallax } from "@/components/home/useParallax";
 import SectionDivider from "@/components/hotel/SectionDivider.vue";
 import HotelCard from "@/components/HotelCard.vue";
 import SeoHead from "@/components/SeoHead.vue";
@@ -268,6 +276,11 @@ const locationOptions = computed(() => [
 ]);
 const viewMode = ref<"list" | "map">("list");
 
+const mastFrame = ref<HTMLElement | null>(null);
+const mastOffset = useParallax(mastFrame, 140);
+const mastStyle = computed(() => ({
+  transform: `translate3d(0, ${mastOffset.value}px, 0)`
+}));
 const destRail = ref<HTMLElement | null>(null);
 useDragScroll(destRail, { momentum: true });
 
@@ -438,7 +451,7 @@ const showError = computed(
 .listing-luxe h2,
 .listing-luxe :deep(h1) {
   font-family: var(--font-display);
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: normal;
 }
 
@@ -456,6 +469,20 @@ const showError = computed(
   letter-spacing: 0.28em;
   text-transform: uppercase;
   color: var(--gy-gold);
+}
+
+.eyebrow::after {
+  content: "";
+  display: block;
+  width: 0;
+  height: 1px;
+  margin-top: 0.8rem;
+  background: linear-gradient(90deg, var(--gy-gold), var(--gy-forest));
+  transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.eyebrow.gy-reveal--in::after {
+  width: 3.25rem;
 }
 
 .eyebrow--light {
@@ -558,10 +585,13 @@ const showError = computed(
 }
 
 .dest-rail {
+  --rail-gutter: max(1.25rem, calc((100% - 1240px) / 2));
+
   display: flex;
   gap: 0.9rem;
   margin-top: 1.2rem;
-  padding: 0.35rem max(1.25rem, calc((100% - 1240px) / 2)) 1.5rem;
+  padding: 0.35rem var(--rail-gutter) 1.5rem;
+  scroll-padding-inline: var(--rail-gutter);
   overflow-x: auto;
   scroll-snap-type: x proximity;
   overscroll-behavior-x: contain;
@@ -597,6 +627,16 @@ const showError = computed(
   text-align: left;
   cursor: pointer;
   box-shadow: 0 16px 36px rgba(22, 21, 19, 0.12);
+}
+
+/* Auto margins centre the cards when they all fit and fall back to
+   the gutter once the rail scrolls. */
+.dest-card:first-child {
+  margin-inline-start: auto;
+}
+
+.dest-card:last-child {
+  margin-inline-end: auto;
 }
 
 .dest-card:focus-visible {
@@ -640,9 +680,9 @@ const showError = computed(
   right: 0.9rem;
   bottom: 0.95rem;
   font-family: var(--font-display);
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: normal;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   line-height: 1.3;
 }
 
@@ -674,7 +714,7 @@ const showError = computed(
   padding: 2.5px;
   border-radius: inherit;
   background: conic-gradient(
-    from 40deg,
+    from var(--gy-spin),
     var(--gy-gold),
     var(--gy-forest) 32%,
     rgba(255, 255, 255, 0.2) 58%,
@@ -682,6 +722,7 @@ const showError = computed(
     var(--gy-gold)
   );
   pointer-events: none;
+  animation: gy-card-spin 11s linear infinite;
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
     linear-gradient(#000 0 0);
@@ -828,6 +869,7 @@ const showError = computed(
 
 .result-tilt {
   height: 100%;
+  transition: transform 0.18s linear;
 }
 
 .map-stage {
@@ -910,9 +952,14 @@ const showError = computed(
   .listing-wrap {
     width: min(1240px, calc(100% - 1.5rem));
   }
+
+  .dest-rail {
+    --rail-gutter: 0.75rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .eyebrow::after,
   .filters::before,
   .result-tilt,
   .swap-enter-active,

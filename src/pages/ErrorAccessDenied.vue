@@ -74,7 +74,7 @@ const isAdmin = computed(() => auth.isAuthenticated);
   margin: 0.75rem 0 0;
   font-family: var(--font-display);
   font-size: var(--gy-text-display);
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: normal;
 }
 

@@ -44,17 +44,17 @@
             {{ indexFor(hotel.id) + 1 }} / {{ photosFor(hotel).length }}
           </p>
         </template>
-        <h2
-          :id="hotelIndex === 0 ? 'home-featured-title' : undefined"
-          class="property__name"
-        >
-          <router-link :to="hotelPath(hotel)">{{ hotel.name }}</router-link>
-        </h2>
       </div>
 
       <div class="property__float">
         <div class="glass-frame">
           <div class="glass-frame__in property__card">
+            <h2
+              :id="hotelIndex === 0 ? 'home-featured-title' : undefined"
+              class="property__name"
+            >
+              <router-link :to="hotelPath(hotel)">{{ hotel.name }}</router-link>
+            </h2>
             <p v-if="metaLine(hotel)" class="property__meta">
               {{ metaLine(hotel) }}
             </p>
@@ -93,7 +93,9 @@
     <div
       v-if="rooms.length"
       id="home-rooms"
+      ref="pinSection"
       class="rooms"
+      :class="{ 'is-pinned': pinned }"
       aria-roledescription="carousel"
       :aria-label="$t('home.rooms')"
     >
@@ -104,7 +106,7 @@
             $t("home.rooms")
           }}</h2>
         </div>
-        <div ref="roomTrack" class="rooms__track">
+        <div ref="roomTrack" class="rooms__track" :style="trackStyle">
           <router-link
             v-for="room in rooms"
             :key="room.id"
@@ -137,6 +139,7 @@ import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import FeatureChips from "@/components/FeatureChips.vue";
 import { useDragScroll } from "@/components/home/useDragScroll";
+import { usePinScroll } from "@/components/home/usePinScroll";
 import { useCmsStore } from "@/stores/cms-store";
 import type { Hotel, RoomType } from "@/types/greyon";
 import { formatTime } from "@/utils/datetime";
@@ -147,10 +150,18 @@ const SWIPE_PX = 48;
 const cms = useCmsStore();
 const { t } = useI18n();
 const photoIndex = ref<Record<string, number>>({});
+const pinSection = ref<HTMLElement | null>(null);
 const roomTrack = ref<HTMLElement | null>(null);
+const { shift, pinned } = usePinScroll(pinSection, roomTrack);
 let touchX: number | null = null;
 
 useDragScroll(roomTrack, { momentum: true });
+
+const trackStyle = computed(() =>
+  pinned.value
+    ? { transform: `translate3d(${shift.value}px, 0, 0)` }
+    : undefined
+);
 
 const featuredHotels = computed(() =>
   cms.publishedHotels.filter(hotel => hotel.featured)
@@ -269,10 +280,11 @@ function roomDetail(room: RoomType) {
 
 .property__img {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  inset: -8%;
+  width: 116%;
+  height: 116%;
   object-fit: cover;
+  animation: ken 18s ease-in-out infinite alternate;
 }
 
 .property__veil {
@@ -326,21 +338,17 @@ function roomDetail(room: RoomType) {
 }
 
 .property__name {
-  position: absolute;
-  z-index: 3;
-  left: clamp(1.2rem, 5vw, 4rem);
-  right: 28%;
-  bottom: 36%;
   margin: 0;
   font-family: var(--font-display);
-  font-size: var(--gy-text-4xl);
-  font-weight: 500;
+  font-size: var(--gy-text-display);
+  font-weight: 700;
   letter-spacing: normal;
-  line-height: 1;
+  line-height: 1.15;
+  color: #fff;
 }
 
 .property__name a {
-  color: #fff;
+  color: inherit;
 }
 
 .property__float {
@@ -425,7 +433,7 @@ function roomDetail(room: RoomType) {
   margin: 0;
   font-family: var(--font-display);
   font-size: var(--gy-text-4xl);
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: normal;
   line-height: 1;
 }
@@ -444,6 +452,7 @@ function roomDetail(room: RoomType) {
 .rooms:not(.is-pinned) .rooms__track {
   overflow-x: auto;
   scroll-snap-type: x mandatory;
+  scroll-padding-inline: clamp(1.2rem, 4vw, 3rem);
   scrollbar-width: none;
 }
 
@@ -488,9 +497,9 @@ function roomDetail(room: RoomType) {
 
 .room__name {
   font-family: var(--font-display);
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: normal;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   line-height: 1.3;
 }
 
@@ -508,16 +517,19 @@ function roomDetail(room: RoomType) {
   }
 }
 
+@keyframes ken {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.1);
+  }
+}
+
 @media (max-width: 860px) {
   .property__media {
     height: 78vh;
     min-height: 520px;
-  }
-
-  .property__name {
-    right: 1.1rem;
-    bottom: 38%;
-    font-size: var(--gy-text-4xl);
   }
 
   .property__float {

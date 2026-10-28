@@ -5,8 +5,8 @@
     class="band home-motion"
     :aria-label="amenities.length ? $t('home.amenities') : $t('home.exploreBy')"
   >
-    <div class="band__frame">
-      <img class="band__img" :src="image" alt="" />
+    <div ref="frame" class="band__frame">
+      <img class="band__img" :src="image" alt="" :style="imageStyle" />
     </div>
     <div class="band__veil" />
     <div class="band__content">
@@ -21,6 +21,15 @@
       >
         <div class="marquee__track">
           <span v-for="item in amenities" :key="item" class="chip">
+            <q-icon :name="iconFor(item)" size="22px" />
+            {{ item }}
+          </span>
+          <span
+            v-for="item in amenities"
+            :key="`loop-${item}`"
+            class="chip marquee__clone"
+            aria-hidden="true"
+          >
             <q-icon :name="iconFor(item)" size="22px" />
             {{ item }}
           </span>
@@ -41,23 +50,20 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
+import { useParallax } from "@/components/home/useParallax";
 import { useCmsStore } from "@/stores/cms-store";
 
 const cms = useCmsStore();
+const frame = ref<HTMLElement | null>(null);
+const offset = useParallax(frame, 180);
 
-const featured = computed(() =>
-  cms.publishedHotels.find(hotel => hotel.featured)
-);
+const imageStyle = computed(() => ({
+  transform: `translate3d(0, ${offset.value}px, 0) scale(1.15)`
+}));
 
-const image = computed(() => {
-  const gallery = featured.value?.gallery.find(src => src.trim())?.trim();
-  if (gallery) return gallery;
-  const other = cms.publishedLocations.find(
-    loc => loc.heroImage && loc.id !== featured.value?.locationId
-  );
-  return other?.heroImage || featured.value?.heroImage || "";
-});
+/** Client-supplied drone photo of the Greyon building (replaces the 3D render). */
+const image = "/images/greyon-building.webp";
 
 const words = computed(() =>
   cms.publishedLocations.flatMap(loc =>
@@ -133,6 +139,9 @@ function iconFor(label: string) {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  /* Keep the rooftop GREYON sign in frame. */
+  object-position: 58% 34%;
+  will-change: transform;
 }
 
 .band__veil {
@@ -188,24 +197,22 @@ function iconFor(label: string) {
   padding-inline: clamp(1.25rem, 6vw, 5rem);
   font-family: var(--font-display);
   font-size: var(--gy-text-4xl);
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: normal;
   line-height: 1;
+  background: linear-gradient(
+    100deg,
+    #f6f1e7 10%,
+    var(--gy-gold) 55%,
+    #9aaf9c 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
   color: var(--gy-white);
 }
 
-.band .marquee {
-  overflow: visible;
-  mask-image: none;
-  -webkit-mask-image: none;
-  padding-inline: clamp(1.25rem, 6vw, 5rem);
-}
-
 .band .marquee__track {
-  flex-wrap: wrap;
-  width: auto;
-  max-width: 100%;
-  gap: 0.75rem;
+  gap: 0;
 }
 
 .chip {
@@ -278,6 +285,12 @@ function iconFor(label: string) {
 
   .marquee__clone {
     display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .band__img {
+    object-position: 60% 38%;
   }
 }
 </style>

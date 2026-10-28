@@ -1,7 +1,17 @@
-/* Editorial news pages. */
+/* Editorial news pages. Shared language and motion stay in
+   destination-luxe.css, rooms-luxe.css, home-motion.css, boot/motion,
+   usePinnedRail, and useParallax. */
 
-.news-luxe .mast__break {
-  margin-left: -3vw;
+@property --gy-spin {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes gy-card-spin {
+  to {
+    --gy-spin: 360deg;
+  }
 }
 
 .news-luxe .mast__content {
@@ -143,8 +153,8 @@
 
 .news-luxe .archive-card h3 {
   margin: 0;
-  font-size: 1.1rem;
-  font-weight: 500;
+  font-size: 1.2rem;
+  font-weight: 700;
   line-height: 1.3;
 }
 
@@ -312,10 +322,6 @@
 }
 
 @media (max-width: 800px) {
-  .news-luxe .mast__break {
-    margin-left: 0;
-  }
-
   .news-luxe .mast__content {
     padding-bottom: 1.35rem;
   }

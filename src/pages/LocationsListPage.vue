@@ -3,7 +3,7 @@
     <SeoHead title="Destinations | Greyon" :description="seoDescription" />
 
     <section class="mast" data-sheet="Mast">
-      <div class="mast__media">
+      <div ref="mastFrame" class="mast__media">
         <img
           v-if="mastBase"
           class="mast__img"
@@ -17,11 +17,16 @@
         <p v-if="mastBase" v-reveal class="mast__chip">{{ mastBase.name }}</p>
         <p v-reveal class="eyebrow eyebrow--light">Greyon</p>
         <RevealWords tag="h1" text="Destinations" />
-        <p v-reveal class="mast__lead">
+        <p v-reveal="{ delay: '140ms' }" class="mast__lead">
           Published places in the Greyon portfolio.
         </p>
-        <div v-if="locations.length" v-reveal class="mast__actions">
+        <div
+          v-if="locations.length"
+          v-reveal="{ delay: '200ms' }"
+          class="mast__actions"
+        >
           <button
+            v-magnetic
             class="gy-btn gy-btn--light"
             type="button"
             @click="scrollToJourney"
@@ -46,7 +51,9 @@
         <header class="journey__head">
           <div>
             <p v-reveal class="eyebrow eyebrow--light">The route</p>
-            <h2 id="journey-title" v-reveal> Places in view </h2>
+            <h2 id="journey-title" v-reveal="{ delay: '60ms' }">
+              Places in view
+            </h2>
           </div>
           <nav class="journey__nav" aria-label="Destinations">
             <button
@@ -122,8 +129,8 @@
     >
       <div class="dest-wrap index__head">
         <p v-reveal class="eyebrow">Index</p>
-        <h2 id="index-title" v-reveal>Stacked places</h2>
-        <p v-reveal class="section-lead">
+        <h2 id="index-title" v-reveal="{ delay: '60ms' }">Stacked places</h2>
+        <p v-reveal="{ delay: '110ms' }" class="section-lead">
           Each published destination, held so the next one covers the last.
         </p>
       </div>
@@ -185,6 +192,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import RevealWords from "@/components/home/RevealWords.vue";
+import { useParallax } from "@/components/home/useParallax";
 import { usePinnedRail } from "@/components/home/usePinnedRail";
 import SectionDivider from "@/components/hotel/SectionDivider.vue";
 import SeoHead from "@/components/SeoHead.vue";
@@ -205,6 +213,12 @@ const {
   goToPanel
 } = usePinnedRail(computed(() => locations.value.length));
 const stickyEl = ref<HTMLElement | null>(null);
+const mastFrame = ref<HTMLElement | null>(null);
+
+const mastOffset = useParallax(mastFrame, 150);
+const mastStyle = computed(() => ({
+  transform: `translate3d(0, ${mastOffset.value}px, 0)`
+}));
 
 const hotelsByLocation = computed(() => {
   const map = new Map<string, Hotel[]>();
@@ -236,7 +250,11 @@ function pad(value: number) {
 }
 
 function stackStyle(index: number) {
-  return { zIndex: index + 1 };
+  const capped = Math.min(index, 3);
+  return {
+    top: `calc(var(--header-offset) + ${capped} * var(--stack-step))`,
+    zIndex: index + 1
+  };
 }
 
 function scrollToJourney() {
@@ -565,7 +583,7 @@ function scrollToJourney() {
   margin: 0;
   font-family: var(--font-display);
   font-size: var(--gy-text-4xl);
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: normal;
   line-height: 1.2;
   color: #fff;
@@ -632,7 +650,7 @@ function scrollToJourney() {
 }
 
 .index-card {
-  position: relative;
+  position: sticky;
   overflow: hidden;
   border-radius: 26px;
   background: rgba(255, 255, 255, 0.94);
@@ -707,8 +725,8 @@ function scrollToJourney() {
 .index-card__body h3 {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 1.1rem;
-  font-weight: 500;
+  font-size: 1.2rem;
+  font-weight: 700;
   letter-spacing: normal;
   line-height: 1.3;
 }

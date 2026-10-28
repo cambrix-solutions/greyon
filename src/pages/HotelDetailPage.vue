@@ -15,10 +15,10 @@
 
       <div class="gy-container hero__content">
         <p v-reveal class="eyebrow eyebrow--light">{{ locationName }}</p>
-        <h1 v-reveal>{{ hotel.name }}</h1>
+        <h1 v-reveal="{ delay: '80ms' }">{{ hotel.name }}</h1>
         <div
           v-if="hotel.propertyType || starLabel"
-          v-reveal
+          v-reveal="{ delay: '120ms' }"
           class="hero__badges"
         >
           <span v-if="hotel.propertyType" class="pill">{{
@@ -26,9 +26,12 @@
           }}</span>
           <span v-if="starLabel" class="pill pill--stars">{{ starLabel }}</span>
         </div>
-        <p v-reveal class="hero__lead">{{ hotel.shortDescription }}</p>
-        <div v-reveal class="hero__actions">
+        <p v-reveal="{ delay: '150ms' }" class="hero__lead">{{
+          hotel.shortDescription
+        }}</p>
+        <div v-reveal="{ delay: '190ms' }" class="hero__actions">
           <button
+            v-magnetic
             class="gy-btn gy-btn--light"
             type="button"
             @click="scrollToRooms"
@@ -67,9 +70,12 @@
       <div class="gy-container story__grid">
         <div class="story__copy">
           <p v-reveal class="eyebrow">Overview</p>
-          <p v-reveal class="story__body">{{ hotel.description }}</p>
-          <div v-reveal class="story__actions">
+          <p v-reveal="{ delay: '80ms' }" class="story__body">{{
+            hotel.description
+          }}</p>
+          <div v-reveal="{ delay: '140ms' }" class="story__actions">
             <button
+              v-magnetic
               class="gy-btn gy-btn--light"
               type="button"
               @click="scrollToRooms"
@@ -81,9 +87,17 @@
             </router-link>
           </div>
         </div>
-        <figure v-if="portraitImage" class="portrait hd-tilt">
-          <div class="portrait__frame">
-            <img :src="portraitImage" :alt="hotel.name" />
+        <figure
+          v-if="portraitImage"
+          v-tilt="{ max: 7 }"
+          class="portrait hd-tilt"
+        >
+          <div ref="portraitFrame" class="portrait__frame">
+            <img
+              :src="portraitImage"
+              :alt="hotel.name"
+              :style="portraitStyle"
+            />
           </div>
         </figure>
       </div>
@@ -94,14 +108,15 @@
     <section v-if="hotelServices.length" class="panel" data-sheet="Services">
       <div class="gy-container">
         <p v-reveal class="eyebrow">On site</p>
-        <h2 v-reveal>Services</h2>
-        <p v-reveal class="panel__lead">
+        <h2 v-reveal="{ delay: '60ms' }">Services</h2>
+        <p v-reveal="{ delay: '100ms' }" class="panel__lead">
           Experiences and facilities available at this property.
         </p>
         <ul class="card-grid">
           <li
             v-for="svc in hotelServices"
             :key="svc.id"
+            v-tilt="{ max: 6 }"
             class="info-card hd-tilt glass-edge"
           >
             <q-icon :name="svc.icon || 'spa'" size="22px" />
@@ -115,14 +130,15 @@
     <section v-if="hotelProducts.length" class="panel" data-sheet="Products">
       <div class="gy-container">
         <p v-reveal class="eyebrow">With your stay</p>
-        <h2 v-reveal>Products</h2>
-        <p v-reveal class="panel__lead">
+        <h2 v-reveal="{ delay: '60ms' }">Products</h2>
+        <p v-reveal="{ delay: '100ms' }" class="panel__lead">
           Add-ons and items you can request with your stay.
         </p>
         <div class="product-grid">
           <article
             v-for="product in hotelProducts"
             :key="product.id"
+            v-tilt="{ max: 6 }"
             class="product-card hd-tilt"
           >
             <div
@@ -154,8 +170,8 @@
     <section v-if="landmarks.length" class="landmarks" data-sheet="Landmarks">
       <div class="gy-container">
         <p v-reveal class="eyebrow">{{ locationName }}</p>
-        <h2 v-reveal>Nearby landmarks</h2>
-        <p v-reveal class="panel__lead">
+        <h2 v-reveal="{ delay: '60ms' }">Nearby landmarks</h2>
+        <p v-reveal="{ delay: '100ms' }" class="panel__lead">
           Distances from the property to places guests ask about most.
         </p>
       </div>
@@ -163,6 +179,7 @@
         <li
           v-for="(item, index) in landmarks"
           :key="`${item.place}-${item.distance}`"
+          v-tilt="{ max: 6 }"
           class="landmark hd-tilt glass-edge"
         >
           <span class="landmark__index">{{
@@ -180,8 +197,8 @@
       <div class="rooms__wrap">
         <header class="rooms__head">
           <p v-reveal class="eyebrow">Stay</p>
-          <h2 v-reveal>Rooms & features</h2>
-          <p v-reveal class="panel__lead">
+          <h2 v-reveal="{ delay: '60ms' }">Rooms & features</h2>
+          <p v-reveal="{ delay: '100ms' }" class="panel__lead">
             Select dates to see live rates, then open room details before
             booking.
           </p>
@@ -223,6 +240,7 @@
               Choose dates to see live rates.
             </p>
             <button
+              v-magnetic
               class="gy-btn gy-btn--light summary__cta"
               type="button"
               @click="
@@ -247,6 +265,7 @@
               <div
                 v-for="room in rooms"
                 :key="room.id"
+                v-tilt="{ max: 4 }"
                 class="room-tilt hd-tilt"
               >
                 <RoomOfferCard
@@ -292,7 +311,7 @@
     <section class="place" data-sheet="Stay & destination">
       <div class="place__copy">
         <p v-reveal class="eyebrow">Good to know</p>
-        <h2 v-reveal>Stay policies</h2>
+        <h2 v-reveal="{ delay: '60ms' }">Stay policies</h2>
         <FeatureChips
           v-if="hotel.policies.length"
           :items="hotel.policies"
@@ -320,7 +339,7 @@
     <section v-if="related.length" class="related" data-sheet="Nearby hotels">
       <div class="gy-container">
         <p v-reveal class="eyebrow">{{ locationName }}</p>
-        <h2 v-reveal>Nearby Greyon hotels</h2>
+        <h2 v-reveal="{ delay: '60ms' }">Nearby Greyon hotels</h2>
         <div class="gy-grid-3">
           <HotelCard v-for="item in related" :key="item.id" :hotel="item" />
         </div>
@@ -372,6 +391,7 @@ import BookingSearchWidget from "@/components/BookingSearchWidget.vue";
 import FeatureChips from "@/components/FeatureChips.vue";
 import HotelCard from "@/components/HotelCard.vue";
 import { useDragScroll } from "@/components/home/useDragScroll";
+import { useParallax } from "@/components/home/useParallax";
 import HotelAmenityBand from "@/components/hotel/HotelAmenityBand.vue";
 import HotelGallery from "@/components/hotel/HotelGallery.vue";
 import SectionDivider from "@/components/hotel/SectionDivider.vue";
@@ -390,8 +410,14 @@ const $q = useQuasar();
 const booking = useBookingStore();
 const cms = useCmsStore();
 
+const portraitFrame = ref<HTMLElement | null>(null);
+const portraitOffset = useParallax(portraitFrame, 110);
 const landmarkTrack = ref<HTMLElement | null>(null);
 useDragScroll(landmarkTrack, { momentum: true });
+
+const portraitStyle = computed(() => ({
+  transform: `translate3d(0, ${portraitOffset.value}px, 0)`
+}));
 
 const hotel = computed(() => cms.getHotelBySlug(String(route.params.slug)));
 
@@ -644,7 +670,7 @@ async function openRoom(roomTypeId: string) {
 .hotel-luxe h2,
 .hotel-luxe h3 {
   font-family: var(--font-display);
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: normal;
 }
 
@@ -657,6 +683,20 @@ async function openRoom(roomTypeId: string) {
   letter-spacing: 0.28em;
   text-transform: uppercase;
   color: var(--gy-gold);
+}
+
+.eyebrow::after {
+  content: "";
+  display: block;
+  width: 0;
+  height: 1px;
+  margin-top: 0.8rem;
+  background: linear-gradient(90deg, var(--gy-gold), var(--gy-forest));
+  transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.eyebrow.gy-reveal--in::after {
+  width: 3.25rem;
 }
 
 .eyebrow--light {
@@ -687,6 +727,7 @@ async function openRoom(roomTypeId: string) {
   height: 100%;
   object-fit: cover;
   transform-origin: 50% 40%;
+  animation: hero-ken 22s ease-in-out infinite alternate;
 }
 
 .hero__veil {
@@ -960,8 +1001,8 @@ async function openRoom(roomTypeId: string) {
 .info-card h3,
 .product-card h3 {
   margin: 0;
-  font-size: 1.1rem;
-  font-weight: 500;
+  font-size: 1.2rem;
+  font-weight: 700;
   line-height: 1.3;
 }
 
@@ -1068,9 +1109,9 @@ async function openRoom(roomTypeId: string) {
 
 .landmark__place {
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: normal;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   line-height: 1.3;
 }
 
@@ -1131,7 +1172,7 @@ async function openRoom(roomTypeId: string) {
 .summary h3 {
   margin: 0;
   font-size: var(--gy-text-4xl);
-  font-weight: 500;
+  font-weight: 700;
   line-height: 1.25;
 }
 
@@ -1187,7 +1228,7 @@ async function openRoom(roomTypeId: string) {
 
 .rooms :deep(.room-offer__title) {
   font-family: var(--font-display);
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: normal;
   font-size: var(--gy-text-2xl);
 }
@@ -1319,8 +1360,17 @@ async function openRoom(roomTypeId: string) {
   margin: 0 0 1rem;
   font-family: var(--font-display);
   font-size: var(--gy-text-display);
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: normal;
+}
+
+@keyframes hero-ken {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.12);
+  }
 }
 
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
@@ -1392,9 +1442,14 @@ async function openRoom(roomTypeId: string) {
 @media (prefers-reduced-motion: reduce) {
   .hero__img,
   .product-card__media img,
-  .hd-tilt {
+  .hd-tilt,
+  .eyebrow::after {
     animation: none;
     transition: none;
+  }
+
+  .eyebrow::after {
+    width: 3.25rem;
   }
 
   .portrait__frame img {

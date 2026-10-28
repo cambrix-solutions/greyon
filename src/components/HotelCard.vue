@@ -159,7 +159,7 @@ const metaLine = computed(() => {
   margin: 0;
   font-size: var(--gy-text-2xl);
   line-height: 1.1;
-  font-weight: 500;
+  font-weight: 700;
 }
 
 .hotel-card__body h3 a {
@@ -208,7 +208,7 @@ const metaLine = computed(() => {
   padding: 2.5px;
   border-radius: inherit;
   background: conic-gradient(
-    from 40deg,
+    from var(--gy-spin),
     var(--gy-gold),
     var(--gy-forest) 35%,
     rgba(255, 255, 255, 0.15) 55%,
@@ -216,6 +216,7 @@ const metaLine = computed(() => {
     var(--gy-gold)
   );
   pointer-events: none;
+  animation: gy-card-spin 8s linear infinite;
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
     linear-gradient(#000 0 0);
@@ -238,7 +239,7 @@ const metaLine = computed(() => {
 
 .hotel-card--live h3 {
   font-family: var(--font-display);
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: normal;
   font-size: var(--gy-text-2xl);
 }
@@ -254,4 +255,16 @@ const metaLine = computed(() => {
 }
 </style>
 
-<style></style>
+<style>
+@property --gy-spin {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes gy-card-spin {
+  to {
+    --gy-spin: 360deg;
+  }
+}
+</style>

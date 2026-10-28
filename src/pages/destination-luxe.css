@@ -18,7 +18,7 @@
 .dest-luxe h1,
 .dest-luxe h2 {
   font-family: var(--font-display);
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: normal;
 }
 
@@ -36,6 +36,20 @@
   letter-spacing: 0.28em;
   text-transform: uppercase;
   color: var(--gy-gold);
+}
+
+.dest-luxe .eyebrow::after {
+  content: "";
+  display: block;
+  width: 0;
+  height: 1px;
+  margin-top: 0.8rem;
+  background: linear-gradient(90deg, var(--gy-gold), var(--gy-forest));
+  transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.dest-luxe .eyebrow.gy-reveal--in::after {
+  width: 3.25rem;
 }
 
 .dest-luxe .eyebrow--light {
@@ -122,6 +136,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .dest-luxe .eyebrow::after,
   .dest-luxe .dest-tilt {
     transition: none;
   }
