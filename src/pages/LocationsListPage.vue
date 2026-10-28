@@ -649,7 +649,9 @@ function scrollToJourney() {
   gap: 1rem;
 }
 
-.index-card {
+/* .dest-luxe .glass-edge sets position: relative, which turned the inline
+   sticky top into a downward offset that pushed cards onto the footer. */
+.dest-luxe .index-card {
   position: sticky;
   overflow: hidden;
   border-radius: 26px;
@@ -835,6 +837,7 @@ function scrollToJourney() {
   }
 
   .index-card__media {
+    width: 100%;
     aspect-ratio: 16 / 10;
     min-height: 0;
     max-height: 14rem;
@@ -860,6 +863,11 @@ function scrollToJourney() {
 
   .journey.is-pin .journey__panel {
     opacity: 1;
+  }
+
+  .dest-luxe .index-card {
+    position: relative;
+    top: auto !important;
   }
 }
 </style>
