@@ -1236,6 +1236,12 @@
   .rooms-luxe .stack-card .hotel-card__media {
     max-height: 12rem;
   }
+
+  /* No sticky stacking on phones: it jumped and flickered as the toolbar resized. */
+  .rooms-luxe .stack-card {
+    position: relative;
+    top: auto !important;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
