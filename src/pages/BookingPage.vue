@@ -24,120 +24,245 @@
         booking.errorMessage
       }}</p>
 
-      <!-- 1 Search -->
-      <section v-if="booking.step === 1" v-reveal class="panel">
+      <!-- 2 Choose a room (search + results; former Find a stay merged here) -->
+      <section v-if="booking.step === 2" class="panel choose-room">
         <BookingSearchWidget :navigate="false" />
-      </section>
 
-      <!-- 2 Results -->
-      <section v-else-if="booking.step === 2" class="panel">
-        <div class="panel__head">
-          <div>
-            <h2 class="gy-display panel-title">Available rooms</h2>
-            <p class="gy-muted panel-sub">
-              {{ staySummary }} · {{ booking.search.rooms }} room(s) ·
-              {{ booking.search.adults }} adults
+        <div class="choose-room__layout">
+          <div class="choose-room__main">
+            <div class="panel__head">
+              <div>
+                <h2 class="gy-display panel-title">Available rooms</h2>
+                <p class="gy-muted panel-sub">
+                  {{ staySummary }} · {{ booking.search.rooms }} room(s) ·
+                  {{ booking.search.adults }} adults
+                </p>
+              </div>
+            </div>
+
+            <div v-if="booking.searching" class="results">
+              <RoomCardSkeleton
+                v-for="n in 3"
+                :key="`result-skel-${n}`"
+                variant="result"
+              />
+            </div>
+            <div v-else-if="booking.results.length" class="results">
+              <RoomOfferCard
+                v-for="(result, idx) in booking.results"
+                :key="idx"
+                variant="result"
+                :title="result.roomType.name"
+                :subtitle="resultRoomSubtitle(result)"
+                :images="result.roomType.images"
+                :bed-type="result.roomType.bedType"
+                :room-size="result.roomType.roomSize"
+                :max-guests="result.roomType.maxGuests"
+                :amenities="result.roomType.amenities"
+                :amenity-limit="4"
+                :badge="resultUrgencyBadge(result)"
+                :meta="resultMeta(result)"
+                :price-text="`$${result.total.toFixed(2)}`"
+                :price-per-night="resultPerNight(result)"
+                price-hint="incl. taxes & fees for your dates"
+                cta-label="Book now"
+                :detail-to="roomDetailPath(result.hotel, result.roomType)"
+                :show-view-details="true"
+                @cta="booking.selectResult(result)"
+              />
+            </div>
+            <p v-else-if="!booking.errorMessage" class="empty-note">
+              Search dates and destination above to see available rooms, or try
+              different dates or occupancy.
             </p>
           </div>
-          <button
-            class="gy-btn gy-btn--outline gy-btn--sm"
-            type="button"
-            @click="booking.step = 1"
-          >
-            Edit search
-          </button>
-        </div>
 
-        <div v-if="booking.searching" class="results">
-          <RoomCardSkeleton
-            v-for="n in 3"
-            :key="`result-skel-${n}`"
-            variant="result"
-          />
+          <aside class="choose-room__aside" aria-label="Your stay summary">
+            <div class="stay-card">
+              <p class="stay-card__eyebrow">Your stay</p>
+              <h3 class="gy-display stay-card__hotel">
+                {{ staySidebar.hotelName }}
+              </h3>
+              <p v-if="staySidebar.city" class="stay-card__city">{{
+                staySidebar.city
+              }}</p>
+              <p
+                v-if="booking.search.checkIn && booking.search.checkOut"
+                class="stay-card__dates"
+              >
+                {{ formatStayShort(booking.search.checkIn) }} –
+                {{ formatStayShort(booking.search.checkOut) }}
+              </p>
+              <p class="stay-card__times">
+                Check-in {{ staySidebar.checkInTime }} · Check-out
+                {{ staySidebar.checkOutTime }}
+              </p>
+              <div v-if="staySidebar.priced" class="stay-card__price">
+                <strong>${{ staySidebar.priced.total.toFixed(0) }}</strong>
+                <span>
+                  {{ staySidebar.priced.roomType.name }} · incl. taxes ·
+                  {{ staySidebar.priced.nights }} night{{
+                    staySidebar.priced.nights === 1 ? "" : "s"
+                  }}
+                </span>
+              </div>
+              <p v-else class="stay-card__pending">
+                Choose dates to see live rates.
+              </p>
+              <button
+                class="gy-btn gy-btn--light stay-card__cta"
+                type="button"
+                :disabled="!staySidebar.priced"
+                @click="bookFromSidebar"
+              >
+                Book
+              </button>
+            </div>
+
+            <div class="assist-card">
+              <p class="stay-card__eyebrow">Need assistance</p>
+              <p class="assist-card__copy">
+                Our reservations team can help with availability and special
+                requests.
+              </p>
+              <a
+                v-if="assistPhone"
+                class="assist-card__link"
+                :href="`tel:${assistPhone}`"
+              >
+                {{ assistPhone }}
+              </a>
+              <a
+                v-if="assistEmail"
+                class="assist-card__link"
+                :href="`mailto:${assistEmail}`"
+              >
+                {{ assistEmail }}
+              </a>
+              <router-link class="assist-card__link" to="/contact">
+                Contact page
+              </router-link>
+            </div>
+          </aside>
         </div>
-        <div v-else-if="booking.results.length" class="results">
-          <RoomOfferCard
-            v-for="(result, idx) in booking.results"
-            :key="idx"
-            variant="result"
-            :title="result.roomType.name"
-            :subtitle="resultRoomSubtitle(result)"
-            :images="result.roomType.images"
-            :bed-type="result.roomType.bedType"
-            :room-size="result.roomType.roomSize"
-            :max-guests="result.roomType.maxGuests"
-            :amenities="result.roomType.amenities"
-            :amenity-limit="4"
-            :badge="resultUrgencyBadge(result)"
-            :meta="resultMeta(result)"
-            :price-text="`$${result.total.toFixed(2)}`"
-            :price-per-night="resultPerNight(result)"
-            price-hint="incl. taxes & fees for your dates"
-            cta-label="View room details"
-            @cta="booking.selectResult(result)"
-          />
-        </div>
-        <p v-else-if="!booking.errorMessage" class="empty-note">
-          No rooms available for this search. Try different dates or occupancy.
-        </p>
       </section>
 
-      <!-- 3 Room -->
-      <section v-else-if="booking.step === 3 && booking.selected" class="panel">
-        <div class="summary-card">
-          <div
-            v-if="roomCover(booking.selected.roomType)"
-            class="summary-card__media gy-card-media"
-          >
-            <img
-              :src="roomCover(booking.selected.roomType)"
-              :alt="booking.selected.roomType.name"
+      <!-- 3 Room details -->
+      <section
+        v-else-if="booking.step === 3 && booking.selected"
+        class="panel room-detail-step"
+      >
+        <div class="room-detail-step__layout">
+          <div class="room-detail-step__main">
+            <div class="room-detail-step__gallery">
+              <RoomMediaCarousel
+                :images="booking.selected.roomType.images"
+                :alt="booking.selected.roomType.name"
+                fill
+                lightbox
+              />
+            </div>
+
+            <p class="room-detail-step__hotel">{{
+              booking.selected.hotel.name
+            }}</p>
+            <h2 class="gy-display room-detail-step__title">
+              {{ booking.selected.roomType.name }}
+            </h2>
+            <p class="room-detail-step__rate">{{
+              booking.selected.ratePlan.name
+            }}</p>
+            <RoomFacts
+              :bed-type="booking.selected.roomType.bedType"
+              :room-size="booking.selected.roomType.roomSize"
+              :max-guests="booking.selected.roomType.maxGuests"
             />
-          </div>
-          <h2 class="gy-display panel-title">Selected room</h2>
-          <p class="summary-card__hotel">{{ booking.selected.hotel.name }}</p>
-          <p class="summary-card__room">
-            {{ booking.selected.roomType.name }} ·
-            {{ booking.selected.ratePlan.name }}
-          </p>
-          <p class="result-card__facts">
-            {{ roomFactsLine(booking.selected.roomType) }}
-          </p>
-          <FeatureChips :items="booking.selected.roomType.amenities" />
-          <p class="gy-muted summary-card__desc">
-            {{ booking.selected.ratePlan.description }}
-          </p>
-          <div class="summary-card__total">
-            <span
-              >Total for {{ booking.selected.nights }} night{{
-                booking.selected.nights === 1 ? "" : "s"
-              }}</span
+
+            <div
+              v-if="booking.selected.roomType.amenities.length"
+              class="amenities-block"
             >
-            <strong>${{ booking.selected.total.toFixed(2) }}</strong>
+              <h3 class="gy-display amenities-block__title">Amenities</h3>
+              <ul class="amenities-grid">
+                <li
+                  v-for="item in booking.selected.roomType.amenities"
+                  :key="item"
+                >
+                  {{ item }}
+                </li>
+              </ul>
+            </div>
+
+            <p
+              v-if="booking.selected.ratePlan.description"
+              class="gy-muted room-detail-step__desc"
+            >
+              {{ booking.selected.ratePlan.description }}
+            </p>
+            <p
+              v-if="booking.selected.ratePlan.cancellationPolicy"
+              class="policy"
+            >
+              {{ booking.selected.ratePlan.cancellationPolicy }}
+            </p>
+
+            <div class="panel-actions">
+              <button
+                class="gy-btn gy-btn--outline"
+                type="button"
+                @click="booking.step = 2"
+              >
+                Back
+              </button>
+              <button
+                class="gy-btn gy-btn--light"
+                type="button"
+                @click="booking.goToGuestDetails()"
+              >
+                Book now
+              </button>
+            </div>
           </div>
-          <p class="breakdown">
-            Subtotal ${{ booking.selected.subtotal.toFixed(2) }} + taxes/fees
-            ${{ booking.selected.taxesFees.toFixed(2) }}
-          </p>
-          <p class="policy">{{
-            booking.selected.ratePlan.cancellationPolicy
-          }}</p>
-        </div>
-        <div class="panel-actions">
-          <button
-            class="gy-btn gy-btn--outline"
-            type="button"
-            @click="booking.step = 2"
+
+          <aside
+            class="room-detail-step__aside stay-card"
+            aria-label="Booking summary"
           >
-            Back
-          </button>
-          <button
-            class="gy-btn gy-btn--light"
-            type="button"
-            @click="booking.goToGuestDetails()"
-          >
-            Continue
-          </button>
+            <p class="stay-card__eyebrow">Your stay</p>
+            <div class="stay-card__price">
+              <strong>${{ booking.selected.total.toFixed(0) }}</strong>
+              <span>
+                Total for {{ booking.selected.nights }} night{{
+                  booking.selected.nights === 1 ? "" : "s"
+                }}
+                · incl. taxes &amp; fees
+              </span>
+            </div>
+            <p class="breakdown">
+              Subtotal ${{ booking.selected.subtotal.toFixed(2) }} + taxes/fees
+              ${{ booking.selected.taxesFees.toFixed(2) }}
+            </p>
+            <p class="stay-card__dates">
+              {{ formatStayShort(booking.search.checkIn) }} –
+              {{ formatStayShort(booking.search.checkOut) }}
+            </p>
+            <p class="stay-card__times">
+              Check-in
+              {{ hotelCheckInTime(booking.selected.hotel.checkInTime) }}
+              · Check-out
+              {{ hotelCheckOutTime(booking.selected.hotel.checkOutTime) }}
+            </p>
+            <p class="stay-card__room-line">
+              {{ booking.selected.roomType.name }}
+            </p>
+            <button
+              class="gy-btn gy-btn--light stay-card__cta"
+              type="button"
+              @click="booking.goToGuestDetails()"
+            >
+              Book now
+            </button>
+          </aside>
         </div>
       </section>
 
@@ -504,8 +629,9 @@
 import { computed, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import BookingSearchWidget from "@/components/BookingSearchWidget.vue";
-import FeatureChips from "@/components/FeatureChips.vue";
 import RoomCardSkeleton from "@/components/RoomCardSkeleton.vue";
+import RoomFacts from "@/components/RoomFacts.vue";
+import RoomMediaCarousel from "@/components/RoomMediaCarousel.vue";
 import RoomOfferCard from "@/components/RoomOfferCard.vue";
 import SeoHead from "@/components/SeoHead.vue";
 import { useBookingStore } from "@/stores/booking-store";
@@ -522,6 +648,7 @@ import {
   hotelCheckInTime,
   hotelCheckOutTime
 } from "@/utils/datetime";
+import { roomDetailPath } from "@/utils/roomPath";
 
 const booking = useBookingStore();
 const cms = useCmsStore();
@@ -536,11 +663,15 @@ onMounted(() => {
     booking.setSearch(searchParamsFromQuery(route.query));
     if (booking.search.checkIn && booking.search.checkOut) {
       void booking.runSearch();
+    } else if (booking.step < 2) {
+      booking.step = 2;
     }
   } else {
     // After sign-in return: restore draft (if any) and fill account details.
     booking.restoreDraft();
   }
+  // Legacy Find a stay (step 1) redirects into Choose a room.
+  if (booking.step <= 1) booking.step = 2;
   if (customer.isAuthenticated && booking.step >= 4) {
     void booking.applyCustomerToGuest();
   }
@@ -609,9 +740,14 @@ function resultPerNight(result: AvailabilityResult) {
 
 // Each step swaps the whole panel — start the new step at the top so mobile
 // users don't land mid-page (e.g. after a long results list).
+// Legacy Find a stay (step 1) always redirects into Choose a room.
 watch(
   () => booking.step,
-  () => {
+  value => {
+    if (value <= 1) {
+      booking.step = 2;
+      return;
+    }
     if (typeof window !== "undefined") {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
@@ -622,10 +758,19 @@ function roomCover(room: RoomType) {
   return room.images?.find(src => src?.trim())?.trim() || "";
 }
 
+function formatStayShort(ymd: string) {
+  if (!ymd) return "";
+  const d = new Date(`${ymd}T12:00:00`);
+  if (Number.isNaN(d.getTime())) return ymd;
+  return d.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short"
+  });
+}
+
 const stepTitle = computed(() => {
   switch (booking.step) {
     case 1:
-      return "Find a stay";
     case 2:
       return "Choose a room";
     case 3:
@@ -644,9 +789,8 @@ const stepTitle = computed(() => {
 const stepLead = computed(() => {
   switch (booking.step) {
     case 1:
-      return "Search Greyon apartels by dates and destination.";
     case 2:
-      return "Compare available rooms for your dates.";
+      return "Search by destination and dates, then compare available rooms.";
     case 6:
       return "";
     default:
@@ -660,6 +804,47 @@ const staySummary = computed(() =>
     checkOutTime: hotelCheckOutTime()
   })
 );
+
+/** Sidebar preview: selected result, else first availability hit. */
+const staySidebar = computed(() => {
+  const priced = booking.selected ?? booking.results[0] ?? null;
+  const hotelFromSearch = booking.search.hotelSlug
+    ? cms.getHotelBySlug(booking.search.hotelSlug)
+    : undefined;
+  const hotel = priced?.hotel ?? hotelFromSearch;
+  const loc = hotel
+    ? cms.getLocationById(hotel.locationId)
+    : booking.search.locationSlug
+      ? cms.getLocationBySlug(booking.search.locationSlug)
+      : undefined;
+  return {
+    priced,
+    hotelName: hotel?.name || "Greyon apartel",
+    city: (loc?.name || "").trim(),
+    checkInTime: hotelCheckInTime(hotel?.checkInTime),
+    checkOutTime: hotelCheckOutTime(hotel?.checkOutTime)
+  };
+});
+
+const assistPhone = computed(
+  () =>
+    staySidebar.value.priced?.hotel.phone?.trim() ||
+    cms.settings.contactPhone?.trim() ||
+    ""
+);
+
+const assistEmail = computed(
+  () =>
+    staySidebar.value.priced?.hotel.email?.trim() ||
+    cms.settings.contactEmail?.trim() ||
+    ""
+);
+
+function bookFromSidebar() {
+  const priced = staySidebar.value.priced;
+  if (!priced) return;
+  booking.selectResult(priced);
+}
 
 const reviewStay = computed(() => {
   const hotel = booking.selected?.hotel;
@@ -691,17 +876,21 @@ function showGuestError(
 
 <style scoped>
 .booking-shell {
-  max-width: 1080px;
+  max-width: 1180px;
 }
 
 .page-title {
   margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
   font-size: var(--gy-text-display);
   line-height: 1.05;
+  color: var(--gy-forest);
 }
 
 .booking-lead {
   margin: 0.55rem 0 0;
+  font-family: var(--font-body);
   color: var(--gy-forest);
   max-width: 36rem;
 }
@@ -735,13 +924,16 @@ function showGuestError(
   justify-content: space-between;
   gap: 1rem;
   align-items: start;
-  margin-bottom: 1.15rem;
+  margin: 1.35rem 0 1.15rem;
 }
 
 .panel-title {
   margin: 0 0 0.35rem;
+  font-family: var(--font-display);
+  font-weight: 700;
   font-size: var(--gy-text-2xl);
   line-height: 1.15;
+  color: var(--gy-forest);
 }
 
 .panel__head .gy-btn {
@@ -751,6 +943,7 @@ function showGuestError(
 
 .panel-sub {
   margin: 0;
+  font-family: var(--font-body);
   font-size: 0.92rem;
 }
 
@@ -761,9 +954,225 @@ function showGuestError(
   margin-top: 1.35rem;
 }
 
+.choose-room__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 280px);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.choose-room__aside {
+  display: grid;
+  gap: 1rem;
+  position: sticky;
+  top: 5.5rem;
+}
+
+.stay-card,
+.assist-card {
+  display: grid;
+  gap: 0.4rem;
+  padding: 1.2rem 1.15rem 1.15rem;
+  border-radius: 16px;
+  background: var(--gy-cream);
+  border: 1px solid rgba(28, 36, 33, 0.08);
+}
+
+.stay-card__eyebrow {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gy-gold);
+}
+
+.stay-card__hotel {
+  margin: 0;
+  font-size: var(--gy-text-xl);
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--gy-forest);
+}
+
+.stay-card__city {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gy-gold);
+}
+
+.stay-card__dates {
+  margin: 0.15rem 0 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.2rem;
+  letter-spacing: -0.02em;
+  color: var(--gy-forest);
+}
+
+.stay-card__times,
+.stay-card__pending,
+.stay-card__price span,
+.stay-card__room-line {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--gy-forest);
+}
+
+.stay-card__price {
+  display: grid;
+  gap: 0.15rem;
+  margin-top: 0.35rem;
+}
+
+.stay-card__price strong {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  color: var(--gy-forest);
+}
+
+.stay-card__cta {
+  width: 100%;
+  margin-top: 0.55rem;
+}
+
+.stay-card__cta:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.assist-card__copy {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--gy-forest);
+}
+
+.assist-card__link {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--gy-gold);
+  text-decoration: none;
+}
+
+.assist-card__link:hover {
+  text-decoration: underline;
+}
+
 .results {
   display: grid;
   gap: 1rem;
+}
+
+.room-detail-step__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 300px);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.room-detail-step__gallery {
+  overflow: hidden;
+  border-radius: 16px;
+  margin-bottom: 1.15rem;
+  min-height: 240px;
+  background: var(--gy-sand);
+}
+
+.room-detail-step__gallery :deep(.room-media),
+.room-detail-step__gallery :deep(.room-media.room-media--fill) {
+  aspect-ratio: 16 / 10;
+  min-height: 260px;
+  max-height: 440px;
+  height: auto;
+  border-radius: 16px;
+}
+
+.room-detail-step__hotel {
+  margin: 0 0 0.25rem;
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gy-gold);
+}
+
+.room-detail-step__title {
+  margin: 0 0 0.35rem;
+  font-size: var(--gy-text-4xl);
+  font-weight: 700;
+  color: var(--gy-forest);
+}
+
+.room-detail-step__rate {
+  margin: 0 0 0.85rem;
+  font-family: var(--font-body);
+  color: var(--gy-forest);
+}
+
+.room-detail-step__desc {
+  margin: 1rem 0 0;
+  font-family: var(--font-body);
+  line-height: 1.55;
+}
+
+.room-detail-step__aside {
+  position: sticky;
+  top: 5.5rem;
+}
+
+.amenities-block {
+  margin-top: 1.35rem;
+}
+
+.amenities-block__title {
+  margin: 0 0 0.75rem;
+  font-size: var(--gy-text-xl);
+  font-weight: 700;
+  color: var(--gy-forest);
+}
+
+.amenities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.55rem 0.85rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.amenities-grid li {
+  position: relative;
+  padding-left: 0.95rem;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: var(--gy-forest);
+}
+
+.amenities-grid li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--gy-gold);
 }
 
 .summary-card__media {
@@ -1068,12 +1477,23 @@ textarea:focus {
 }
 
 @media (max-width: 900px) {
+  .choose-room__layout,
+  .room-detail-step__layout,
   .guest-step {
     grid-template-columns: 1fr;
   }
 
+  .choose-room__aside,
+  .room-detail-step__aside,
   .guest-step__summary {
     position: static;
+  }
+
+  .choose-room__aside {
+    order: 1;
+  }
+
+  .guest-step__summary {
     order: -1;
   }
 }
