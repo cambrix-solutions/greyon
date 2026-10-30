@@ -72,13 +72,14 @@
         <span v-if="showSheets" class="sheet-label">Reach</span>
         <div class="dest-wrap reach__head">
           <p id="reach-title" v-reveal class="eyebrow">Stay connected</p>
+          <SocialLinksNav v-reveal="{ delay: '80ms' }" class="reach__social" />
         </div>
         <div class="dest-wrap reach__grid">
           <article
-            v-for="card in reachCards"
+            v-for="(card, index) in reachCards"
             :key="card.id"
-            v-tilt="{ max: 7 }"
-            class="reach-card rooms-tilt glass-edge"
+            v-reveal="{ delay: `${140 + index * 70}ms` }"
+            class="reach-card"
           >
             <h3>{{ card.title }}</h3>
             <p v-if="card.note" class="reach-card__note">{{ card.note }}</p>
@@ -275,6 +276,7 @@ import { computed, reactive, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import ContactBranchMap from "@/components/ContactBranchMap.vue";
 import GySelect from "@/components/GySelect.vue";
+import SocialLinksNav from "@/components/SocialLinksNav.vue";
 import { useParallax } from "@/components/home/useParallax";
 import { useReadProgress } from "@/components/home/useReadProgress";
 import SectionDivider from "@/components/hotel/SectionDivider.vue";
