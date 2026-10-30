@@ -70,10 +70,10 @@ const image = computed(() => {
   position: relative;
   display: flex;
   align-items: flex-end;
-  min-height: min(88vh, 820px);
+  min-height: min(72vh, 680px);
   margin-top: -1px;
   overflow: hidden;
-  border-radius: 50% 50% 0 0 / 90px 90px 0 0;
+  border-radius: 50% 50% 0 0 / 64px 64px 0 0;
   color: #fff;
   background: #121413;
 }
@@ -112,7 +112,7 @@ const image = computed(() => {
   z-index: 1;
   width: min(980px, calc(100% - 2.5rem));
   margin: 0 auto;
-  padding: clamp(6rem, 12vw, 8rem) 0 clamp(3.5rem, 8vw, 5.5rem);
+  padding: clamp(4rem, 8vw, 5.5rem) 0 clamp(2.75rem, 5.5vw, 4rem);
 }
 
 .eyebrow {

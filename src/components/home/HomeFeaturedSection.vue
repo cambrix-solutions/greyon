@@ -339,8 +339,8 @@ function bedroomLabel(room: RoomType) {
 
 .property__media {
   position: relative;
-  height: min(92vh, 920px);
-  min-height: 560px;
+  height: min(82vh, 780px);
+  min-height: 480px;
   overflow: hidden;
   background: #1a1c1b;
 }
@@ -422,8 +422,8 @@ function bedroomLabel(room: RoomType) {
   position: relative;
   z-index: 4;
   width: min(760px, calc(100% - 2rem));
-  margin: -13rem auto 0;
-  padding-bottom: 1rem;
+  margin: -11rem auto 0;
+  padding-bottom: 0.25rem;
 }
 
 .property__card {
@@ -470,11 +470,11 @@ function bedroomLabel(room: RoomType) {
   position: relative;
   background: #f4efe6;
   color: var(--gy-forest);
-  padding-bottom: 1.4rem;
+  padding-bottom: 0.65rem;
 }
 
 .rooms__head {
-  padding: 1.5rem clamp(1.2rem, 4vw, 3rem) 0.6rem;
+  padding: 1.15rem clamp(1.2rem, 4vw, 3rem) 0.5rem;
 }
 
 .eyebrow {
@@ -503,7 +503,7 @@ function bedroomLabel(room: RoomType) {
 .rooms__track {
   display: flex;
   gap: 1rem;
-  padding: 0.6rem clamp(1.2rem, 4vw, 3rem) 0.4rem;
+  padding: 0.5rem clamp(1.2rem, 4vw, 3rem) 0.4rem;
   overflow-x: auto;
   overscroll-behavior-x: contain;
   scroll-snap-type: x mandatory;
@@ -566,8 +566,8 @@ function bedroomLabel(room: RoomType) {
 .room {
   position: relative;
   flex: 0 0 min(68vw, 28rem);
-  height: min(58vh, 460px);
-  min-height: 280px;
+  height: min(48vh, 400px);
+  min-height: 260px;
   overflow: hidden;
   border-radius: 22px;
   color: #fff;
@@ -642,12 +642,12 @@ function bedroomLabel(room: RoomType) {
 
 @media (max-width: 860px) {
   .property__media {
-    height: 78vh;
-    min-height: 520px;
+    height: 68vh;
+    min-height: 420px;
   }
 
   .property__float {
-    margin-top: -7.5rem;
+    margin-top: -6.5rem;
   }
 
   .rooms-nav {
@@ -656,7 +656,15 @@ function bedroomLabel(room: RoomType) {
 
   .room {
     flex-basis: 82vw;
-    height: 58vh;
+    height: 46vh;
+  }
+
+  .rooms__head {
+    padding-top: 1rem;
+  }
+
+  .rooms__track {
+    padding-bottom: 0.5rem;
   }
 }
 

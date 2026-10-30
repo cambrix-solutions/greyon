@@ -217,13 +217,13 @@ onUnmounted(() => {
 
 <style scoped>
 .reviews-section {
-  padding: clamp(5rem, 10vw, 8rem) 0;
+  padding: clamp(3rem, 6vw, 4.5rem) 0;
   background: var(--gy-cream);
   color: var(--gy-forest);
 }
 
 .section-head {
-  margin-bottom: clamp(2rem, 5vw, 3.5rem);
+  margin-bottom: clamp(1.35rem, 3.5vw, 2.25rem);
 }
 
 .section-kicker {

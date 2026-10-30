@@ -168,7 +168,7 @@ function iconFor(label: string) {
   right: 0;
   bottom: -1px;
   z-index: 2;
-  height: 74px;
+  height: 48px;
   background: #f7f3ec;
   clip-path: ellipse(72% 100% at 50% 100%);
   pointer-events: none;
@@ -178,7 +178,7 @@ function iconFor(label: string) {
   position: relative;
   z-index: 1;
   width: 100%;
-  padding: 18vh 0 11vh;
+  padding: clamp(4.5rem, 10vh, 7rem) 0 clamp(3.5rem, 7vh, 5rem);
 }
 
 .eyebrow {
@@ -242,7 +242,7 @@ function iconFor(label: string) {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem 1.5rem;
-  margin-top: clamp(2rem, 5vw, 3.4rem);
+  margin-top: clamp(1.35rem, 3.5vw, 2.25rem);
   padding-inline: clamp(1.25rem, 6vw, 5rem);
 }
 
