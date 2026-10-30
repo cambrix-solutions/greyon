@@ -272,8 +272,8 @@ function roomDetail(room: RoomType) {
 
 .property__media {
   position: relative;
-  height: min(92vh, 920px);
-  min-height: 560px;
+  height: min(82vh, 780px);
+  min-height: 480px;
   overflow: hidden;
   background: #1a1c1b;
 }
@@ -355,8 +355,8 @@ function roomDetail(room: RoomType) {
   position: relative;
   z-index: 4;
   width: min(760px, calc(100% - 2rem));
-  margin: -13rem auto 0;
-  padding-bottom: 1rem;
+  margin: -11rem auto 0;
+  padding-bottom: 0.25rem;
 }
 
 .property__card {
@@ -410,13 +410,17 @@ function roomDetail(room: RoomType) {
   top: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  height: 100vh;
+  justify-content: flex-start;
+  height: auto;
+  max-height: 100vh;
   overflow: hidden;
+  padding-top: clamp(4.5rem, 6.5vh, 5.25rem);
+  padding-bottom: 0;
+  background: #f4efe6;
 }
 
 .rooms__head {
-  padding: 1.5rem clamp(1.2rem, 4vw, 3rem) 0.6rem;
+  padding: 1.15rem clamp(1.2rem, 4vw, 3rem) 0.5rem;
 }
 
 .eyebrow {
@@ -441,7 +445,7 @@ function roomDetail(room: RoomType) {
 .rooms__track {
   display: flex;
   gap: 1rem;
-  padding: 0.6rem clamp(1.2rem, 4vw, 3rem) 1.4rem;
+  padding: 0.5rem clamp(1.2rem, 4vw, 3rem) 0.65rem;
 }
 
 .rooms.is-pinned .rooms__track {
@@ -463,8 +467,8 @@ function roomDetail(room: RoomType) {
 .room {
   position: relative;
   flex: 0 0 min(68vw, 28rem);
-  height: min(58vh, 460px);
-  min-height: 280px;
+  height: min(48vh, 400px);
+  min-height: 260px;
   overflow: hidden;
   border-radius: 22px;
   color: #fff;
@@ -528,17 +532,25 @@ function roomDetail(room: RoomType) {
 
 @media (max-width: 860px) {
   .property__media {
-    height: 78vh;
-    min-height: 520px;
+    height: 68vh;
+    min-height: 420px;
   }
 
   .property__float {
-    margin-top: -7.5rem;
+    margin-top: -6.5rem;
   }
 
   .room {
     flex-basis: 82vw;
-    height: 58vh;
+    height: 46vh;
+  }
+
+  .rooms__head {
+    padding-top: 1rem;
+  }
+
+  .rooms__track {
+    padding-bottom: 0.5rem;
   }
 }
 

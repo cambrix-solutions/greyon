@@ -93,7 +93,7 @@ function dateLabel(value: string) {
 <style scoped>
 .news {
   position: relative;
-  padding: clamp(4.5rem, 8vw, 6.5rem) 0 clamp(4rem, 8vw, 6rem);
+  padding: clamp(3rem, 6vw, 4.5rem) 0 clamp(2.75rem, 5.5vw, 4rem);
   background:
     radial-gradient(
       640px 280px at 0% 20%,

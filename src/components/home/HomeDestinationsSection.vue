@@ -104,7 +104,7 @@ function hotelsFor(locationId: string) {
 <style scoped>
 .dest {
   position: relative;
-  padding: clamp(4.5rem, 9vw, 7rem) 0 6rem;
+  padding: clamp(2.25rem, 4.5vw, 3.25rem) 0 clamp(2.75rem, 5vw, 3.75rem);
   background:
     radial-gradient(
       700px 280px at 90% 0%,
@@ -123,7 +123,7 @@ function hotelsFor(locationId: string) {
   right: 0;
   bottom: -1px;
   z-index: 5;
-  height: 78px;
+  height: 48px;
   background: #0c0e0d;
   clip-path: ellipse(74% 100% at 50% 100%);
   pointer-events: none;
@@ -135,7 +135,7 @@ function hotelsFor(locationId: string) {
   justify-content: space-between;
   gap: 1rem 2rem;
   width: min(1100px, calc(100% - 2.5rem));
-  margin: 0 auto 2.5rem;
+  margin: 0 auto 1.35rem;
 }
 
 .eyebrow {
@@ -178,13 +178,13 @@ function hotelsFor(locationId: string) {
 .stack__pin {
   position: sticky;
   top: calc(5.4rem + var(--i) * 4.6rem);
-  height: min(70vh, 640px);
-  margin-bottom: 14vh;
+  height: min(64vh, 560px);
+  margin-bottom: 8vh;
   perspective: 1400px;
 }
 
 .stack__pin:last-child {
-  margin-bottom: 6vh;
+  margin-bottom: 3.5vh;
 }
 
 .stack__tilt {
@@ -287,8 +287,8 @@ function hotelsFor(locationId: string) {
     position: relative;
     top: auto;
     height: 78vw;
-    min-height: 420px;
-    margin-bottom: 3.5rem;
+    min-height: 380px;
+    margin-bottom: 2.25rem;
   }
 
   .stack__panel {
