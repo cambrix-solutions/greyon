@@ -875,17 +875,29 @@ function showGuestError(
 </script>
 
 <style scoped>
+.booking-page {
+  overflow-x: clip;
+  max-width: 100%;
+}
+
+/* Cap width only — do not override .gy-container’s calc(100% - gutters). */
 .booking-shell {
   max-width: 1180px;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .page-title {
   margin: 0;
+  max-width: 100%;
+  min-width: 0;
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: var(--gy-text-display);
+  font-size: clamp(1.75rem, 1.2rem + 2.4vw, 3.25rem);
   line-height: 1.05;
   color: var(--gy-forest);
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .booking-lead {
@@ -917,6 +929,10 @@ function showGuestError(
   background: var(--gy-white);
   border: 1px solid rgba(28, 36, 33, 0.08);
   padding: clamp(1.25rem, 3vw, 1.75rem);
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow-x: clip;
 }
 
 .panel__head {
@@ -959,6 +975,13 @@ function showGuestError(
   grid-template-columns: minmax(0, 1fr) minmax(240px, 280px);
   gap: 1.25rem;
   align-items: start;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.choose-room__main {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .choose-room__aside {
@@ -1074,7 +1097,10 @@ function showGuestError(
 
 .results {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 1rem;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .room-detail-step__layout {
@@ -1082,18 +1108,30 @@ function showGuestError(
   grid-template-columns: minmax(0, 1fr) minmax(240px, 300px);
   gap: 1.5rem;
   align-items: start;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.room-detail-step__main {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .room-detail-step__gallery {
   overflow: hidden;
   border-radius: 16px;
   margin-bottom: 1.15rem;
+  min-width: 0;
+  max-width: 100%;
   min-height: 240px;
   background: var(--gy-sand);
 }
 
 .room-detail-step__gallery :deep(.room-media),
 .room-detail-step__gallery :deep(.room-media.room-media--fill) {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   aspect-ratio: 16 / 10;
   min-height: 260px;
   max-height: 440px;
@@ -1113,9 +1151,14 @@ function showGuestError(
 
 .room-detail-step__title {
   margin: 0 0 0.35rem;
+  max-width: 100%;
+  min-width: 0;
   font-size: var(--gy-text-4xl);
   font-weight: 700;
   color: var(--gy-forest);
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
 }
 
 .room-detail-step__rate {
@@ -1148,11 +1191,13 @@ function showGuestError(
 
 .amenities-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(160px, 100%), 1fr));
   gap: 0.55rem 0.85rem;
   margin: 0;
   padding: 0;
   list-style: none;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .amenities-grid li {
@@ -1480,13 +1525,15 @@ textarea:focus {
   .choose-room__layout,
   .room-detail-step__layout,
   .guest-step {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .choose-room__aside,
   .room-detail-step__aside,
   .guest-step__summary {
     position: static;
+    min-width: 0;
+    max-width: 100%;
   }
 
   .choose-room__aside {

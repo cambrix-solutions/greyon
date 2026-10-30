@@ -36,6 +36,8 @@ html,
 body,
 #q-app {
   min-height: 100%;
+  max-width: 100%;
+  overflow-x: clip;
   font-family: var(--font-body);
   font-weight: 400;
   color: var(--gy-forest);

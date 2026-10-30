@@ -567,6 +567,8 @@ onUnmounted(() => {
 <style scoped>
 .gy-layout {
   min-height: 100vh;
+  max-width: 100%;
+  overflow-x: clip;
   background: var(--gy-white);
 }
 
