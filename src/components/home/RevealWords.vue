@@ -60,11 +60,22 @@ onUnmounted(() => io?.disconnect());
 </script>
 
 <style>
+.reveal-words {
+  max-width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 .reveal-words__w {
   display: inline-block;
+  max-width: 100%;
   margin-right: 0.26em;
   opacity: 0;
   transform: translate3d(0, 0.72em, 0);
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
   transition:
     opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1),
     transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);

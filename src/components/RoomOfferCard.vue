@@ -156,6 +156,9 @@ const amenities = computed(() => props.amenities ?? []);
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: auto auto;
   gap: 0;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   overflow: hidden;
   background: var(--gy-white);
   border-radius: 16px;
@@ -226,15 +229,23 @@ const amenities = computed(() => props.amenities ?? []);
 
 .room-offer__title {
   margin: 0;
+  max-width: 100%;
+  min-width: 0;
   font-size: 1.2rem;
   line-height: 1.3;
   color: var(--gy-forest);
   overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
 }
 
 .room-offer__title-link {
+  display: inline;
   color: inherit;
   text-decoration: none;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
   transition: color 0.2s ease;
 }
 

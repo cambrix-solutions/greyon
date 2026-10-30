@@ -176,6 +176,8 @@ onMounted(() => {
 
 <style scoped>
 .listing-luxe {
+  overflow-x: clip;
+  max-width: 100%;
   background:
     radial-gradient(
       ellipse at 100% 0%,
@@ -186,9 +188,39 @@ onMounted(() => {
   color: var(--gy-forest);
 }
 
+.listing-luxe h1,
+.listing-luxe h2,
+.listing-luxe :deep(h1) {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: normal;
+}
+
+/* Override Quasar’s 6rem h1 so “Serviced Apartment” fits on phones. */
+.listing-luxe :deep(h1) {
+  max-width: 100%;
+  min-width: 0;
+  margin: 0;
+  font-size: clamp(1.65rem, 1.05rem + 2.6vw, 3.1rem);
+  line-height: 1.12;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
+}
+
+.listing-luxe :deep(.reveal-words__w) {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
+}
+
 .listing-wrap {
-  width: min(1120px, calc(100% - 2rem));
+  width: min(1120px, calc(100% - 2.5rem));
   margin-inline: auto;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .mast {
@@ -198,6 +230,8 @@ onMounted(() => {
   align-items: end;
   color: var(--gy-white);
   overflow: hidden;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .mast__media {
@@ -228,15 +262,18 @@ onMounted(() => {
   position: relative;
   z-index: 1;
   padding: 5.5rem 0 3.25rem;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .mast__lead {
-  max-width: 34rem;
+  max-width: min(34rem, 100%);
   margin: 0.85rem 0 0;
   font-family: var(--font-body);
-  font-size: 1.05rem;
+  font-size: clamp(0.95rem, 0.9rem + 0.35vw, 1.05rem);
   line-height: 1.65;
   color: rgba(255, 255, 255, 0.88);
+  overflow-wrap: anywhere;
 }
 
 .mast__actions {
@@ -254,10 +291,13 @@ onMounted(() => {
 
 .results-head h2 {
   margin: 0.35rem 0 0;
+  max-width: 100%;
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: clamp(1.6rem, 2.4vw, 2.2rem);
+  font-size: clamp(1.35rem, 1.05rem + 1.6vw, 2.2rem);
   color: var(--gy-forest);
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .section-lead {
@@ -268,8 +308,10 @@ onMounted(() => {
 
 .results {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(16.5rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(16.5rem, 100%), 1fr));
   gap: 1.35rem;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .result-slot {
