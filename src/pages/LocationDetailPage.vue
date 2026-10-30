@@ -1019,6 +1019,8 @@ function bookHere() {
   }
 
   .photo-card {
+    position: relative;
+    top: auto;
     height: min(58vh, 460px);
     margin-bottom: 2.5rem;
   }

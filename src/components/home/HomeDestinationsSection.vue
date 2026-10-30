@@ -284,7 +284,8 @@ function hotelsFor(locationId: string) {
   }
 
   .stack__pin {
-    top: calc(4.4rem + var(--i) * 2.6rem);
+    position: relative;
+    top: auto;
     height: 78vw;
     min-height: 420px;
     margin-bottom: 3.5rem;

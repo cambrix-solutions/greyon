@@ -138,6 +138,7 @@
         <article
           v-for="(loc, i) in locations"
           :key="loc.id"
+          v-reveal="{ delay: '60ms' }"
           class="index-card glass-edge"
           :style="stackStyle(i)"
         >
@@ -830,7 +831,29 @@ function scrollToJourney() {
   }
 }
 
+@media (min-width: 721px) {
+  /* Desktop keeps the sticky stack; only fade so transforms never fight it. */
+  .dest-luxe .index-card.gy-reveal {
+    transform: none;
+  }
+}
+
 @media (max-width: 720px) {
+  /* Sticky stacking flickered on mobile Chrome (toolbar resize + tall cards),
+     so cards sit in normal flow with a short reveal instead. */
+  .dest-luxe .index-card {
+    position: relative;
+    top: auto !important;
+  }
+
+  .dest-luxe .index-card.gy-reveal {
+    transform: translateY(24px);
+  }
+
+  .dest-luxe .index-card.gy-reveal.gy-reveal--in {
+    transform: none;
+  }
+
   .index-card__main {
     grid-template-columns: 1fr;
     min-height: 0;
