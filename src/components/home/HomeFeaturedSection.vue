@@ -122,9 +122,12 @@
               />
             </span>
             <span class="room__shade">
+              <span v-if="propertyName(room)" class="room__property">{{
+                propertyName(room)
+              }}</span>
               <span class="room__name">{{ room.name }}</span>
-              <span v-if="roomDetail(room)" class="room__detail">{{
-                roomDetail(room)
+              <span v-if="bedroomLabel(room)" class="room__beds">{{
+                bedroomLabel(room)
               }}</span>
             </span>
           </router-link>
@@ -244,7 +247,10 @@ function hotelPath(hotel: Hotel) {
 }
 
 function hotelForRoom(room: RoomType) {
-  return featuredHotels.value.find(hotel => hotel.id === room.hotelId);
+  return (
+    cms.getHotelById(room.hotelId) ??
+    featuredHotels.value.find(hotel => hotel.id === room.hotelId)
+  );
 }
 
 function roomLink(room: RoomType) {
@@ -256,11 +262,14 @@ function roomImage(room: RoomType) {
   return room.images.find(src => src.trim())?.trim() ?? "";
 }
 
-function roomDetail(room: RoomType) {
-  const hotel = hotelForRoom(room);
-  const bits = [room.bedType.trim(), room.roomSize.trim()].filter(Boolean);
-  if (featuredHotels.value.length > 1 && hotel) bits.unshift(hotel.name);
-  return bits.join("  ·  ");
+/** Property name from the linked hotel (API catalog). */
+function propertyName(room: RoomType) {
+  return hotelForRoom(room)?.name?.trim() ?? "";
+}
+
+/** Bedroom count / bed label from room.bedType (e.g. "1 bedroom"). */
+function bedroomLabel(room: RoomType) {
+  return room.bedType?.trim() ?? "";
 }
 </script>
 
@@ -495,20 +504,31 @@ function roomDetail(room: RoomType) {
   background: linear-gradient(to top, rgba(8, 8, 7, 0.82), transparent 62%);
 }
 
+.room__property {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gy-gold);
+}
+
 .room__name {
   font-family: var(--font-display);
   font-weight: 700;
   letter-spacing: normal;
   font-size: 1.2rem;
   line-height: 1.3;
+  color: var(--gy-white);
 }
 
-.room__detail {
-  font-family: var(--font-display);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
+.room__beds {
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  font-weight: 400;
+  letter-spacing: normal;
+  line-height: 1.35;
+  color: var(--gy-gold);
 }
 
 @media (hover: hover) {

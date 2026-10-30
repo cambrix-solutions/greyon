@@ -34,16 +34,16 @@
           <time v-if="lead.publishedAt" :datetime="lead.publishedAt">{{
             dateLabel(lead.publishedAt)
           }}</time>
-          <span v-if="lead.locationName">{{ lead.locationName }}</span>
         </p>
         <router-link :to="`/news/${lead.slug}`" class="stage__headline">
           {{ lead.title }}
         </router-link>
-      </div>
-      <div v-if="lead.excerpt" class="glass-frame stage__card">
-        <div class="glass-frame__in stage__card-in">
-          <p>{{ lead.excerpt }}</p>
-        </div>
+        <p v-if="leadDescription" class="stage__excerpt">{{
+          leadDescription
+        }}</p>
+        <ul v-if="leadTags.length" class="stage__tags" aria-label="Story tags">
+          <li v-for="tag in leadTags" :key="tag">{{ tag }}</li>
+        </ul>
       </div>
     </div>
 
@@ -83,6 +83,19 @@ const { onMove, onLeave } = useTilt();
 const articles = computed(() => cms.publishedNews.slice(0, 3));
 const lead = computed(() => articles.value[0] ?? null);
 const rest = computed(() => articles.value.slice(1));
+
+/** Excerpt first; fall back to SEO description from the same news payload. */
+const leadDescription = computed(() => {
+  const item = lead.value;
+  if (!item) return "";
+  return item.excerpt?.trim() || item.seoDescription?.trim() || "";
+});
+
+/** Destination / category labels already present on the news row. */
+const leadTags = computed(() => {
+  const name = lead.value?.locationName?.trim();
+  return name ? [name] : [];
+});
 
 function dateLabel(value: string) {
   const loc = locale.value.startsWith("km") ? "km-KH" : "en-GB";
@@ -179,17 +192,23 @@ function dateLabel(value: string) {
   z-index: 2;
   top: 8%;
   left: 0;
-  width: min(62%, 680px);
+  display: grid;
+  gap: 0.85rem;
+  align-content: start;
+  width: min(42%, 480px);
+  max-width: calc(100% - 2rem);
 }
 
 .stage__meta {
   display: flex;
   flex-wrap: wrap;
   gap: 0.55rem 1rem;
+  margin: 0;
 }
 
 .stage__headline {
   display: block;
+  margin: 0;
   font-family: var(--font-display);
   font-size: var(--gy-text-4xl);
   font-weight: 700;
@@ -198,27 +217,34 @@ function dateLabel(value: string) {
   color: var(--gy-forest);
 }
 
-.stage__card {
-  position: absolute;
-  z-index: 3;
-  left: 30%;
-  bottom: 9%;
-  width: min(440px, 46%);
-  transform: rotate(-3deg);
-}
-
-.stage__card-in {
-  padding: 1.25rem 1.35rem;
-  color: #f6f1e7;
-}
-
-.stage__card-in p {
+.stage__excerpt {
   margin: 0;
   font-family: var(--font-body);
-  font-size: var(--gy-text-xl);
+  font-size: var(--gy-text-lead);
   font-weight: 400;
   letter-spacing: normal;
-  line-height: 1.35;
+  line-height: 1.5;
+  color: var(--gy-forest);
+}
+
+.stage__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stage__tags li {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gy-gold);
+  border-bottom: 1px solid var(--gy-gold);
+  padding-bottom: 0.15rem;
 }
 
 .news__rest {
@@ -291,25 +317,17 @@ function dateLabel(value: string) {
   .stage__copy {
     position: static;
     width: auto;
+    max-width: none;
     order: 1;
   }
 
   .stage__headline {
     font-size: var(--gy-text-4xl);
   }
-
-  .stage__card {
-    position: static;
-    width: 100%;
-    order: 3;
-    transform: none;
-    margin-top: -4.5rem;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .stage__photo,
-  .stage__card {
+  .stage__photo {
     transition: none;
     transform: none;
   }
