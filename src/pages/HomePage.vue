@@ -1,8 +1,8 @@
 <template>
   <q-page class="home-page">
     <SeoHead
-      title="Greyon | Hotels in Cambodia"
-      description="Discover and book Greyon hotels across Phnom Penh, Siem Reap, Sihanoukville, and more."
+      title="Greyon | Apartels in Cambodia"
+      description="Discover and book Greyon apartels across Phnom Penh, Siem Reap, Sihanoukville, and more."
       :image="heroImage"
     />
 
@@ -34,7 +34,7 @@
           class="home-hero__image"
           :class="{ 'is-active': i === heroIndex }"
           :src="slide.src"
-          :alt="slide.alt || 'Greyon hotel stay'"
+          :alt="slide.alt || 'Greyon apartel stay'"
         />
       </div>
       <div class="home-hero__veil" />
@@ -185,7 +185,7 @@ const heroSlides = computed<HomeHeroSlide[]>(() => {
     return published.map(slide => ({
       id: slide.id,
       src: slide.image,
-      alt: slide.title || "Greyon hotel stay",
+      alt: slide.title || "Greyon apartel stay",
       title: slide.title,
       subtitle: slide.subtitle,
       ctaLabel: slide.ctaLabel,
@@ -196,7 +196,7 @@ const heroSlides = computed<HomeHeroSlide[]>(() => {
   if (fallback.length) {
     return fallback.map(slide => ({
       src: slide.src,
-      alt: slide.alt || "Greyon hotel stay",
+      alt: slide.alt || "Greyon apartel stay",
       title: "",
       subtitle: "",
       ctaLabel: "",
@@ -206,7 +206,7 @@ const heroSlides = computed<HomeHeroSlide[]>(() => {
   return [
     {
       src: FALLBACK_HERO,
-      alt: "Greyon hotel stay",
+      alt: "Greyon apartel stay",
       title: "",
       subtitle: "",
       ctaLabel: "",

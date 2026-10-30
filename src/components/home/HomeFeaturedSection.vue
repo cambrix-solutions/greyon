@@ -83,7 +83,7 @@
               </span>
             </p>
             <router-link class="gy-btn gy-btn--light" :to="hotelPath(hotel)">
-              View Hotel
+              View Apartel
             </router-link>
           </div>
         </div>
