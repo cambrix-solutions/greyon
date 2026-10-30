@@ -83,7 +83,7 @@
               View rooms
             </button>
             <router-link to="/hotels" class="gy-btn gy-btn--outline">
-              All hotels
+              All apartels
             </router-link>
           </div>
         </div>
@@ -336,10 +336,10 @@
       </div>
     </section>
 
-    <section v-if="related.length" class="related" data-sheet="Nearby hotels">
+    <section v-if="related.length" class="related" data-sheet="Nearby apartels">
       <div class="gy-container">
         <p v-reveal class="eyebrow">{{ locationName }}</p>
-        <h2 v-reveal="{ delay: '60ms' }">Nearby Greyon hotels</h2>
+        <h2 v-reveal="{ delay: '60ms' }">Nearby Greyon apartels</h2>
         <div class="gy-grid-3">
           <HotelCard v-for="item in related" :key="item.id" :hotel="item" />
         </div>
@@ -378,8 +378,8 @@
     </div>
   </q-page>
   <q-page v-else class="hotel-missing gy-section gy-container">
-    <h1>Hotel not found</h1>
-    <router-link to="/hotels" class="gy-btn">Back to hotels</router-link>
+    <h1>Apartel not found</h1>
+    <router-link to="/hotels" class="gy-btn">Back to apartels</router-link>
   </q-page>
 </template>
 

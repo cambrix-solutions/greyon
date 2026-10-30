@@ -189,7 +189,7 @@ onMounted(load);
 watch(() => route.params.reference, load);
 
 function hotelLabel(hotelId: string) {
-  return cms.getHotelById(hotelId)?.name ?? "Greyon hotel";
+  return cms.getHotelById(hotelId)?.name ?? "Greyon apartel";
 }
 
 function roomLabel(roomTypeId: string) {

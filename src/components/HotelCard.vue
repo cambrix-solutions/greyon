@@ -41,7 +41,7 @@
           class="gy-btn gy-btn--light gy-btn--sm"
           :to="`/hotels/${hotel.slug}`"
         >
-          View Hotel
+          View Apartel
         </router-link>
       </div>
     </div>

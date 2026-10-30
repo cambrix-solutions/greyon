@@ -27,13 +27,7 @@ export function usePinScroll(
     }
     const distance = Math.max(0, row.scrollWidth - window.innerWidth + 48);
     const capped = Math.min(distance, Math.round(window.innerHeight * 2.4));
-    // Stick to content height (not a full viewport) so the cream band under the
-    // room cards stays tight before the next dark section.
-    const stickH = Math.max(
-      Math.ceil(row.getBoundingClientRect().height + 96),
-      Math.round(window.innerHeight * 0.5)
-    );
-    sec.style.height = `${stickH + capped}px`;
+    sec.style.height = `${window.innerHeight + capped}px`;
     const start = sec.getBoundingClientRect().top + window.scrollY;
     const progress = (window.scrollY - start) / Math.max(capped, 1);
     const p = Math.min(1, Math.max(0, progress));

@@ -183,7 +183,7 @@
       </div>
       <div class="dest-wrap index__more">
         <router-link class="gy-btn gy-btn--outline" to="/hotels">
-          View hotels
+          View apartels
         </router-link>
       </div>
     </section>

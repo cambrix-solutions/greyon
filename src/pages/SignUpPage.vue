@@ -1,7 +1,7 @@
 <template>
   <AuthShell
     image="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1800&q=80"
-    lede="Save your details for faster booking across Greyon hotels — cities, coast, and countryside."
+    lede="Save your details for faster booking across Greyon apartels — cities, coast, and countryside."
   >
     <form class="auth-card" @submit.prevent="onSubmit">
       <p class="gy-eyebrow auth-card__eyebrow">Join Greyon</p>

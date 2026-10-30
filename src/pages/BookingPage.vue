@@ -2,7 +2,7 @@
   <q-page class="gy-section booking-page">
     <SeoHead
       title="Booking | Greyon"
-      description="Search Greyon hotel availability and complete your reservation request."
+      description="Search Greyon apartel availability and complete your reservation request."
     />
     <div class="gy-container booking-shell">
       <header v-reveal class="booking-head">
@@ -343,7 +343,7 @@
             </p>
           </div>
           <div class="review-block">
-            <p class="review-label">Hotel & room</p>
+            <p class="review-label">Apartel & room</p>
             <p>{{ booking.selected.hotel.name }}</p>
             <p class="gy-muted">
               {{ booking.selected.roomType.name }} /
@@ -417,7 +417,7 @@
         <div class="success-mark" aria-hidden="true">✓</div>
         <h2 class="gy-display panel-title">Reservation received</h2>
         <p class="success-lead">
-          Thank you. Your request is with the hotel team for confirmation.
+          Thank you. Your request is with the apartel team for confirmation.
         </p>
 
         <div class="success-ref">
@@ -445,7 +445,7 @@
             <p class="review-label">Status</p>
             <p class="status-pill">{{ booking.confirmedBooking.status }}</p>
             <p class="gy-muted">
-              You’ll receive an email once the hotel confirms your stay.
+              You’ll receive an email once the apartel confirms your stay.
             </p>
           </div>
           <div class="review-block">
@@ -644,7 +644,7 @@ const stepTitle = computed(() => {
 const stepLead = computed(() => {
   switch (booking.step) {
     case 1:
-      return "Search Greyon hotels by dates and destination.";
+      return "Search Greyon apartels by dates and destination.";
     case 2:
       return "Compare available rooms for your dates.";
     case 6:

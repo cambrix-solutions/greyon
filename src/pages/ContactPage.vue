@@ -4,7 +4,7 @@
   >
     <SeoHead
       title="Contact | Greyon"
-      description="Contact Greyon hotels and send an enquiry."
+      description="Contact Greyon apartels and send an enquiry."
       :image="heroImage || undefined"
     />
 
