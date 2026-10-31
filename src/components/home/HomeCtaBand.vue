@@ -71,9 +71,10 @@ const image = computed(() => {
   display: flex;
   align-items: flex-end;
   min-height: min(72vh, 680px);
+  /* Flush cream→banner edge (no elliptical top / dark lid). */
   margin-top: -1px;
   overflow: hidden;
-  border-radius: 50% 50% 0 0 / 64px 64px 0 0;
+  border-radius: 0;
   color: #fff;
   background: #121413;
 }
@@ -164,10 +165,6 @@ const image = computed(() => {
 }
 
 @media (max-width: 700px) {
-  .cta {
-    border-radius: 40px 40px 0 0;
-  }
-
   .cta__title {
     max-width: none;
   }

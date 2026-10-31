@@ -333,6 +333,8 @@ function bedroomLabel(room: RoomType) {
 
 <style scoped>
 .featured {
+  /* Pull 1px into the cream story above so no page-bg hairline shows. */
+  margin-top: -1px;
   background: #121413;
   color: #f6f1e7;
 }

@@ -125,6 +125,8 @@ function iconFor(label: string) {
   display: flex;
   align-items: flex-end;
   min-height: 100vh;
+  /* Sit flush on destinations (same dark family) — no elliptical lid. */
+  margin-top: -1px;
   overflow: hidden;
   color: #fff;
   background: #0c0e0d;
@@ -159,19 +161,6 @@ function iconFor(label: string) {
       rgba(196, 163, 90, 0.22),
       transparent 70%
     );
-}
-
-.band::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -1px;
-  z-index: 2;
-  height: 48px;
-  background: #f7f3ec;
-  clip-path: ellipse(72% 100% at 50% 100%);
-  pointer-events: none;
 }
 
 .band__content {
