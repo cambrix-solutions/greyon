@@ -64,7 +64,7 @@ const photo = computed(() => {
   position: relative;
   overflow: hidden;
   padding: clamp(2.5rem, 5vw, 3.75rem) clamp(1.25rem, 6vw, 6rem)
-    clamp(1.5rem, 3vw, 2.25rem);
+    clamp(1.75rem, 3.5vw, 2.5rem);
   background:
     radial-gradient(
       900px 420px at 12% -10%,
@@ -78,19 +78,6 @@ const photo = computed(() => {
     ),
     #f7f3ec;
   color: var(--gy-forest);
-}
-
-.story::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -1px;
-  z-index: 2;
-  height: 36px;
-  background: #121413;
-  clip-path: ellipse(72% 100% at 50% 100%);
-  pointer-events: none;
 }
 
 .story__grid {

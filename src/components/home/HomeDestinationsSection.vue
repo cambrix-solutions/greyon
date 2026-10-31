@@ -104,6 +104,8 @@ function hotelsFor(locationId: string) {
 <style scoped>
 .dest {
   position: relative;
+  /* Kill the cream→dark hairline under the rooms band. */
+  margin-top: -1px;
   padding: clamp(2.25rem, 4.5vw, 3.25rem) 0 clamp(2.75rem, 5vw, 3.75rem);
   background:
     radial-gradient(
@@ -114,19 +116,6 @@ function hotelsFor(locationId: string) {
     #121413;
   color: #f6f1e7;
   overflow-x: clip;
-}
-
-.dest::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -1px;
-  z-index: 5;
-  height: 48px;
-  background: #0c0e0d;
-  clip-path: ellipse(74% 100% at 50% 100%);
-  pointer-events: none;
 }
 
 .dest__head {
