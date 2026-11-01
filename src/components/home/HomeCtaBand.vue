@@ -6,11 +6,20 @@
     aria-labelledby="home-cta-title"
   >
     <div ref="frame" class="cta__frame">
-      <img class="cta__img" :src="image" alt="" :style="imageStyle" />
+      <img
+        class="cta__img"
+        :src="image"
+        alt=""
+        :style="imageStyle"
+        width="1600"
+        height="900"
+        loading="lazy"
+        decoding="async"
+      />
     </div>
     <div class="cta__veil" />
     <div class="cta__copy">
-      <p v-reveal class="eyebrow">Greyon</p>
+      <p v-reveal class="eyebrow eyebrow--light">Greyon</p>
       <h2 id="home-cta-title" class="cta__title">{{ $t("home.stayWith") }}</h2>
       <p v-reveal="{ delay: '140ms' }" class="cta__lead">{{
         $t("home.subhead")
@@ -46,7 +55,7 @@ const frame = ref<HTMLElement | null>(null);
 const offset = useParallax(frame, 200);
 
 const imageStyle = computed(() => ({
-  transform: `translate3d(0, ${offset.value}px, 0) scale(1.18)`
+  transform: `translate3d(0, ${offset.value}px, 0) scale(1.06)`
 }));
 
 const image = computed(() => {

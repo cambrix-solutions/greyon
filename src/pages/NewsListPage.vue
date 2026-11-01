@@ -51,12 +51,18 @@
             v-if="featured.coverImage"
             class="mast__img"
             :src="featured.coverImage"
+            :srcset="imageSrcset(featured.coverImage)"
+            :sizes="
+              imageSrcset(featured.coverImage) ? CARD_IMAGE_SIZES : undefined
+            "
             alt=""
+            width="1600"
+            height="900"
             fetchpriority="high"
           />
           <div class="mast__veil" />
         </div>
-        <div class="dest-wrap mast__content">
+        <div class="dest-wrap mast__content gy-on-photo">
           <p v-if="featuredPlace" class="mast__chip">
             <router-link v-if="featuredPlacePath" :to="featuredPlacePath">{{
               featuredPlace
@@ -147,17 +153,22 @@
                 class="room-panel rooms-tilt glass-edge"
                 :class="{ 'is-active': activeIndex === index }"
               >
-                <router-link
-                  class="room-panel__hit"
-                  :to="`/news/${item.slug}`"
-                  :aria-label="`Read ${item.title}`"
-                >
+                <router-link class="room-panel__hit" :to="`/news/${item.slug}`">
                   <div class="room-panel__media">
                     <img
                       v-if="item.coverImage"
                       :src="item.coverImage"
+                      :srcset="imageSrcset(item.coverImage)"
+                      :sizes="
+                        imageSrcset(item.coverImage)
+                          ? CARD_IMAGE_SIZES
+                          : undefined
+                      "
                       alt=""
+                      width="800"
+                      height="500"
                       :loading="index < 2 ? 'eager' : 'lazy'"
+                      decoding="async"
                     />
                   </div>
                   <div class="room-panel__copy">
@@ -211,7 +222,18 @@
             :to="`/news/${item.slug}`"
           >
             <span v-if="item.coverImage" class="photo-reveal">
-              <img :src="item.coverImage" alt="" loading="lazy" />
+              <img
+                :src="item.coverImage"
+                :srcset="imageSrcset(item.coverImage)"
+                :sizes="
+                  imageSrcset(item.coverImage) ? CARD_IMAGE_SIZES : undefined
+                "
+                alt=""
+                width="800"
+                height="500"
+                loading="lazy"
+                decoding="async"
+              />
             </span>
             <span class="archive-card__body">
               <span
@@ -234,13 +256,15 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import HotelAmenityBand from "@/components/hotel/HotelAmenityBand.vue";
 import RevealWords from "@/components/home/RevealWords.vue";
 import { useParallax } from "@/components/home/useParallax";
 import { usePinnedRail } from "@/components/home/usePinnedRail";
 import SectionDivider from "@/components/hotel/SectionDivider.vue";
 import SeoHead from "@/components/SeoHead.vue";
+import { preloadImage } from "@/utils/preloadImage";
+import { CARD_IMAGE_SIZES, imageSrcset } from "@/utils/responsiveImage";
 import { useCmsStore } from "@/stores/cms-store";
 import type { NewsArticle } from "@/types/greyon";
 
@@ -252,6 +276,11 @@ onMounted(() => {
 
 const posts = computed(() => cms.publishedNews);
 const featured = computed(() => posts.value[0]);
+watch(
+  () => featured.value?.coverImage,
+  src => preloadImage(src),
+  { immediate: true }
+);
 
 const {
   canPin,

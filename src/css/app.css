@@ -1,8 +1,88 @@
+/* Self-hosted latin cuts. font-display: swap so text paints before the file arrives. */
+@font-face {
+  font-family: "Montserrat";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/montserrat-500.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Montserrat";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/montserrat-600.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Montserrat";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/montserrat-700.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Montserrat";
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("/fonts/montserrat-800.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Lora";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/lora-400.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Lora";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/lora-500.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Lora";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/lora-600.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Lora";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/lora-700.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Lora";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/lora-400i.woff2") format("woff2");
+}
+
 :root {
   /* Brand sheet (Website Feedback 5 Oct 2026) */
   --gy-white: #ffffff;
   --gy-gold: #c4a35a; /* Champagne brass support */
   --gy-gold-deep: #8f7340; /* Accent / gold — highlights on dark */
+  /* Darker gold for small text on cream and white (WCAG AA). */
+  --gy-gold-ink: #6b5424;
+  /* Fixed cookie bar. Hero padding uses the same length so it never shifts. */
+  --gy-cookie-bar: 4.5rem;
+  --gy-cookie-offset: calc(
+    var(--gy-cookie-bar) + env(safe-area-inset-bottom, 0px)
+  );
   --gy-ink: #454c4b; /* Dark / text — headings, icons, dark bars */
   --gy-muted: #7a736a; /* Secondary text */
   --gy-cream: #faf8f6; /* Background — page & card backgrounds */
@@ -62,6 +142,14 @@ a {
   text-decoration: none;
 }
 
+a[href^="tel:"],
+a[href^="mailto:"] {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  min-width: 44px;
+}
+
 .q-page a:where(:not(.gy-btn)) {
   color: var(--gy-gold);
 }
@@ -88,6 +176,19 @@ a {
   text-transform: uppercase;
   color: var(--gy-gold);
   margin: 0 0 0.65rem;
+}
+
+/*
+ * Scoped sheets paint eyebrows and search labels with var(--gy-gold).
+ * Override the variable on light surfaces so small text clears WCAG AA.
+ * .eyebrow--light stays on the brighter gold for photographs.
+ */
+.eyebrow:not(.eyebrow--light),
+.gy-eyebrow,
+.gy-seg__label,
+.fact__label,
+.assist-card__link {
+  --gy-gold: var(--gy-gold-ink);
 }
 
 .gy-btn {
@@ -701,4 +802,45 @@ img.gy-img--broken {
 .gy-select-menu .q-item--active .q-item__label--caption {
   background: var(--gy-forest) !important;
   color: var(--gy-white) !important;
+}
+
+/* Reserve the text block on photo heroes so late fonts do not change its box. */
+.hero__content {
+  min-height: 20rem;
+}
+
+/* Subtle scrim behind type that sits on a photograph. */
+.gy-on-photo {
+  position: relative;
+  isolation: isolate;
+}
+
+.gy-on-photo::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -1.1rem -7vw -1.4rem;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(18, 17, 16, 0) 0%,
+    rgba(18, 17, 16, 0.42) 46%,
+    rgba(18, 17, 16, 0.68) 100%
+  );
+}
+
+/* Keep the book bar above the cookie overlay without covering it. */
+body:has(.cookie-notice) :is(.room-sticky, .book-bar) {
+  bottom: var(--gy-cookie-offset);
+}
+
+@media (max-width: 760px) {
+  .hero__content {
+    min-height: 22rem;
+  }
+
+  .hero,
+  .mast {
+    padding-bottom: calc(var(--gy-cookie-bar) + 0.35rem);
+  }
 }

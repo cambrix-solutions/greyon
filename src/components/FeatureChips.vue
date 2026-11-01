@@ -262,7 +262,7 @@ function iconFor(label: string) {
   padding: 0.35rem 0.15rem;
   border: 0;
   background: transparent;
-  color: var(--gy-forest);
+  color: #455348;
   font: inherit;
   font-weight: 600;
   letter-spacing: 0.02em;

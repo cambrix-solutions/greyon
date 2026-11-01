@@ -59,7 +59,7 @@ const props = withDefaults(
   }>(),
   {
     eyebrow: "During your stay",
-    title: "Hotel features",
+    title: "Apartel features",
     lead: "Amenities guests can expect during their stay.",
     sheet: "Amenities",
     showCopy: true,

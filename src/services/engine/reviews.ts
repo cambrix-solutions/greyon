@@ -72,7 +72,15 @@ function mapReview(row: EngineReview): GuestReview | null {
  * Missing routes return an empty list (section stays hidden). Never fabricates
  * reviews. Errors are swallowed into [] so the UI never shows raw failures.
  */
+/** TODO: set true when greyon-engine serves public GET /reviews. */
+function reviewsEndpointReady(): boolean {
+  return false;
+}
+
 export async function fetchPublicReviews(): Promise<GuestReview[]> {
+  // TODO: remove this guard when GET /reviews exists. The route 404s today,
+  // and the browser logs that failure. Returning [] keeps the section hidden.
+  if (!reviewsEndpointReady()) return [];
   try {
     const payload = await engineAPI.get<{
       reviews?: EngineReview[];

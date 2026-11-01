@@ -42,7 +42,10 @@
               v-if="loc.heroImage"
               :src="loc.heroImage"
               :alt="loc.name"
+              width="640"
+              height="800"
               loading="lazy"
+              decoding="async"
             />
             <span class="stack__index" aria-hidden="true">{{
               String(i + 1).padStart(2, "0")

@@ -30,7 +30,7 @@ export default {
     stayWith: "ស្នាក់នៅជាមួយ Greyon",
     exploreBy: "រុករកតាមទីតាំង",
     destinationsCount: "គ្មានទីតាំង | ទីតាំង ១ | ទីតាំង {n}",
-    storyEyebrow: "រឿងរ៉ាវ Greyon",
+    storyEyebrow: "ដំណើររបស់យើង",
     storyTitle: "សេវាភ្ញៀវថ្នាក់ខ្ពស់ ជាប់នឹងមូលដ្ឋាន",
     storyBody:
       "Greyon បង្ហាញសណ្ឋាគារដែលបានជ្រើសរើសនៅទូទាំងកម្ពុជា។ MVP នេះផ្តោតលើសណ្ឋាគារ — បទពិសោធន៍ស្វែងរក និងការកក់ដែលជឿទុកចិត្ត។",

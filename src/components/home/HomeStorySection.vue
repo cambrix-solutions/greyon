@@ -29,6 +29,8 @@
         <img
           :src="photo.src"
           :alt="photo.name"
+          width="800"
+          height="1000"
           loading="lazy"
           decoding="async"
         />

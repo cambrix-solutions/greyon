@@ -27,7 +27,17 @@
         @pointermove="onMove"
         @pointerleave="onLeave"
       >
-        <img v-if="lead.coverImage" :src="lead.coverImage" :alt="lead.title" />
+        <img
+          v-if="lead.coverImage"
+          :src="lead.coverImage"
+          :alt="lead.title"
+          :srcset="imageSrcset(lead.coverImage)"
+          :sizes="imageSrcset(lead.coverImage) ? CARD_IMAGE_SIZES : undefined"
+          width="960"
+          height="1200"
+          loading="lazy"
+          decoding="async"
+        />
       </router-link>
       <div class="stage__copy">
         <p class="stage__meta">
@@ -59,7 +69,12 @@
             v-if="item.coverImage"
             :src="item.coverImage"
             :alt="item.title"
+            :srcset="imageSrcset(item.coverImage)"
+            :sizes="imageSrcset(item.coverImage) ? CARD_IMAGE_SIZES : undefined"
+            width="800"
+            height="500"
             loading="lazy"
+            decoding="async"
           />
         </span>
         <span class="news__card-title">{{ item.title }}</span>
@@ -75,6 +90,7 @@ import RevealWords from "@/components/home/RevealWords.vue";
 import { useTilt } from "@/components/home/useTilt";
 import { useCmsStore } from "@/stores/cms-store";
 import { formatDate } from "@/utils/datetime";
+import { CARD_IMAGE_SIZES, imageSrcset } from "@/utils/responsiveImage";
 
 const cms = useCmsStore();
 const { locale } = useI18n();

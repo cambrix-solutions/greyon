@@ -9,11 +9,19 @@
 
     <section class="hero" data-sheet="Hero">
       <div class="hero__media">
-        <img v-if="coverImage" class="hero__img" :src="coverImage" alt="" />
+        <img
+          v-if="coverImage"
+          class="hero__img"
+          :src="coverImage"
+          alt=""
+          width="1600"
+          height="900"
+          fetchpriority="high"
+        />
         <div class="hero__veil" />
       </div>
 
-      <div class="gy-container hero__content">
+      <div class="gy-container hero__content gy-on-photo">
         <p v-reveal class="eyebrow eyebrow--light">{{ locationName }}</p>
         <h1 v-reveal="{ delay: '80ms' }">{{ hotel.name }}</h1>
         <div
@@ -97,6 +105,10 @@
               :src="portraitImage"
               :alt="hotel.name"
               :style="portraitStyle"
+              width="800"
+              height="1000"
+              loading="lazy"
+              decoding="async"
             />
           </div>
         </figure>
@@ -149,7 +161,10 @@
                 v-if="product.imageUrl"
                 :src="product.imageUrl"
                 :alt="product.name"
+                width="640"
+                height="480"
                 loading="lazy"
+                decoding="async"
               />
               <div v-else class="product-card__placeholder" aria-hidden="true">
                 <q-icon :name="product.icon || 'storefront'" size="28px" />
@@ -395,6 +410,7 @@ import MapEmbed from "@/components/MapEmbed.vue";
 import RoomCardSkeleton from "@/components/RoomCardSkeleton.vue";
 import RoomOfferCard from "@/components/RoomOfferCard.vue";
 import SeoHead from "@/components/SeoHead.vue";
+import { preloadImage } from "@/utils/preloadImage";
 import { useBookingStore } from "@/stores/booking-store";
 import { useCmsStore } from "@/stores/cms-store";
 import type { HotelProductRef, RoomType } from "@/types/greyon";
@@ -489,6 +505,7 @@ const coverImage = computed(
     hotel.value?.gallery.find(src => src.trim()) ||
     ""
 );
+watch(coverImage, src => preloadImage(src), { immediate: true });
 const gallery = computed(() => {
   if (!hotel.value) return [];
   const urls = [hotel.value.heroImage, ...hotel.value.gallery]
@@ -1345,7 +1362,7 @@ async function openRoom(roomTypeId: string) {
     transform: scale(1);
   }
   to {
-    transform: scale(1.12);
+    transform: scale(1.04);
   }
 }
 
@@ -1407,7 +1424,12 @@ async function openRoom(roomTypeId: string) {
 
 @media (max-width: 599px) {
   .hotel-luxe {
-    padding-bottom: 5.75rem;
+    padding-bottom: calc(5.75rem + var(--gy-cookie-bar));
+  }
+
+  /* Facts sit above the book bar and the cookie overlay. */
+  .hero {
+    padding-bottom: calc(5.75rem + var(--gy-cookie-bar));
   }
 
   .summary {

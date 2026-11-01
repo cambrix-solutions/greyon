@@ -17,7 +17,6 @@
       :is="detailTo ? 'router-link' : 'div'"
       class="room-offer__media"
       :to="detailTo || undefined"
-      :aria-label="detailTo ? `View details for ${title}` : undefined"
     >
       <RoomMediaCarousel
         :images="images"

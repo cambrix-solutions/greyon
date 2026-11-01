@@ -14,6 +14,9 @@
           :src="mastImage"
           alt=""
           :style="mastStyle"
+          width="1600"
+          height="900"
+          fetchpriority="high"
         />
         <div class="mast__veil" />
       </div>
@@ -106,14 +109,16 @@
                 v-if="pathOf(room)"
                 class="room-panel__hit"
                 :to="pathOf(room)"
-                :aria-label="`View ${room.name}`"
               >
                 <div class="room-panel__media">
                   <img
                     v-if="coverOf(room)"
                     :src="coverOf(room)"
                     :alt="room.name"
+                    width="800"
+                    height="500"
                     :loading="index < 2 ? 'eager' : 'lazy'"
+                    decoding="async"
                   />
                 </div>
                 <div class="room-panel__copy">

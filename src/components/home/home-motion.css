@@ -1,8 +1,8 @@
 /* Motion for sections below the hero. The hero, navbar, and footer do not use this class. */
 
 .home-motion .gy-reveal {
-  transform: translateY(72px);
-  transition-duration: 1.05s;
+  transform: translateY(16px);
+  transition-duration: 0.55s;
 }
 
 .home-motion .gy-reveal.gy-reveal--in {
@@ -43,7 +43,7 @@
 
 @media (hover: hover) {
   .home-motion .gy-btn:hover {
-    transform: translateY(-6px);
+    transform: translateY(-2px);
   }
 }
 

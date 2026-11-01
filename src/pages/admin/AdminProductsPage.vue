@@ -47,7 +47,12 @@
     <div v-else v-reveal class="prod-grid">
       <article v-for="item in filtered" :key="item.id" class="prod-card">
         <div v-if="item.imageUrl" class="prod-card__media">
-          <img :src="item.imageUrl" :alt="item.name" loading="lazy" />
+          <img
+            :src="item.imageUrl"
+            :alt="item.name"
+            loading="lazy"
+            decoding="async"
+          />
         </div>
         <div v-else class="prod-card__media prod-card__media--icon">
           <q-icon :name="item.icon || 'storefront'" size="28px" />

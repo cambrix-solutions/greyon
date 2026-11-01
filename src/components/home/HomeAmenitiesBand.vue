@@ -6,11 +6,20 @@
     :aria-label="amenities.length ? $t('home.amenities') : $t('home.exploreBy')"
   >
     <div ref="frame" class="band__frame">
-      <img class="band__img" :src="image" alt="" :style="imageStyle" />
+      <img
+        class="band__img"
+        :src="image"
+        alt=""
+        :style="imageStyle"
+        width="1600"
+        height="900"
+        loading="lazy"
+        decoding="async"
+      />
     </div>
     <div class="band__veil" />
     <div class="band__content">
-      <p class="eyebrow">Greyon</p>
+      <p class="eyebrow eyebrow--light">Greyon</p>
       <h2 id="home-amenities-title" class="band__title">
         {{ $t("home.amenities") }}
       </h2>
@@ -59,7 +68,7 @@ const frame = ref<HTMLElement | null>(null);
 const offset = useParallax(frame, 180);
 
 const imageStyle = computed(() => ({
-  transform: `translate3d(0, ${offset.value}px, 0) scale(1.15)`
+  transform: `translate3d(0, ${offset.value}px, 0) scale(1.06)`
 }));
 
 /** Client-supplied drone photo of the Greyon building (replaces the 3D render). */

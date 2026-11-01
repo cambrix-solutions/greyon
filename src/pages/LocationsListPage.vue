@@ -9,6 +9,9 @@
           class="mast__img"
           :src="mastBase.heroImage"
           alt=""
+          width="1600"
+          height="900"
+          fetchpriority="high"
         />
         <div class="mast__veil" />
       </div>
@@ -91,7 +94,10 @@
                   v-if="loc.heroImage"
                   :src="loc.heroImage"
                   alt=""
+                  width="960"
+                  height="600"
                   :loading="i === 0 ? 'eager' : 'lazy'"
+                  decoding="async"
                 />
               </div>
               <div class="journey__copy">
@@ -152,7 +158,10 @@
                 v-if="loc.heroImage"
                 :src="loc.heroImage"
                 :alt="loc.name"
+                width="640"
+                height="480"
                 loading="lazy"
+                decoding="async"
               />
             </div>
             <div class="index-card__body">

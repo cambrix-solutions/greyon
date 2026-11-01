@@ -13,7 +13,12 @@
     @drop.prevent="onDrop"
   >
     <div v-if="displayPreview" class="image-drop__preview">
-      <img :src="displayPreview" :alt="altHint || 'Preview'" />
+      <img
+        :src="displayPreview"
+        :alt="altHint || 'Preview'"
+        loading="lazy"
+        decoding="async"
+      />
       <div v-if="isBusy" class="image-drop__overlay">
         <div class="image-drop__progress-wrap">
           <q-linear-progress

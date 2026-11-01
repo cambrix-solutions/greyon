@@ -23,7 +23,6 @@
         class="shot"
         :data-shot="index"
         :class="{ 'is-pinned': pinned === index }"
-        :aria-label="`Open photo ${index + 1} of ${images.length}`"
         @mouseenter="pinned = index"
         @focus="pinned = index"
         @click="openAt(index)"
@@ -31,7 +30,10 @@
         <img
           :src="src"
           :alt="`${name} gallery ${index + 1}`"
+          width="960"
+          height="720"
           :loading="index < 2 ? 'eager' : 'lazy'"
+          decoding="async"
         />
         <span class="shot__meta">
           <em>{{ String(index + 1).padStart(2, "0") }}</em>
@@ -66,6 +68,9 @@
             class="lb__img"
             :src="images[active]"
             :alt="`${name} gallery ${active + 1}`"
+            width="1600"
+            height="1000"
+            decoding="async"
           />
         </figure>
         <button

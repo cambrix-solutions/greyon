@@ -88,7 +88,10 @@
               :src="frame.src"
               :alt="frame.name"
               :style="layerStyle(frame)"
+              width="800"
+              height="1000"
               loading="lazy"
+              decoding="async"
             />
             <figcaption class="layers__name">{{ frame.name }}</figcaption>
           </figure>
@@ -104,7 +107,16 @@
       >
         <span v-if="showSheets" class="sheet-label">Lens</span>
         <div ref="lensFrame" class="stage__media">
-          <img class="stage__img" :src="lens.src" alt="" :style="lensStyle" />
+          <img
+            class="stage__img"
+            :src="lens.src"
+            alt=""
+            :style="lensStyle"
+            width="1600"
+            height="900"
+            loading="lazy"
+            decoding="async"
+          />
           <div class="stage__veil" />
         </div>
         <div class="dest-wrap stage__content">
@@ -198,7 +210,10 @@
                 <img
                   :src="hostedImage(loc.heroImage)"
                   :alt="loc.name"
+                  width="640"
+                  height="480"
                   loading="lazy"
+                  decoding="async"
                 />
               </div>
               <div class="place-card__body">
@@ -289,7 +304,10 @@
                       v-if="hostedImage(hotel.heroImage)"
                       :src="hostedImage(hotel.heroImage)"
                       alt=""
+                      width="800"
+                      height="500"
                       :loading="index < 2 ? 'eager' : 'lazy'"
+                      decoding="async"
                     />
                   </div>
                   <div class="room-panel__copy">

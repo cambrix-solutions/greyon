@@ -438,6 +438,10 @@
             <img
               :src="roomCover(booking.selected.roomType)"
               :alt="booking.selected.roomType.name"
+              width="800"
+              height="500"
+              loading="lazy"
+              decoding="async"
             />
           </div>
           <p class="review-label">Selected room</p>

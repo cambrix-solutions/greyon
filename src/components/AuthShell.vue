@@ -12,7 +12,7 @@
       <aside v-reveal class="auth-shell__brand">
         <img
           class="auth-shell__logo"
-          src="/logo/Logo white V1-05.png"
+          src="/logo/logo-mark-light.webp"
           alt="Greyon"
           width="200"
           height="72"

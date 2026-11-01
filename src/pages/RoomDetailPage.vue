@@ -24,6 +24,9 @@
           class="stage__img"
           :src="activeSrc"
           :alt="`${room.name} photo ${activePhoto + 1}`"
+          width="1600"
+          height="900"
+          fetchpriority="high"
         />
         <div class="stage__veil" />
         <button
@@ -84,7 +87,14 @@
               :aria-current="activePhoto === index ? 'true' : undefined"
               @click="activePhoto = index"
             >
-              <img :src="src" alt="" />
+              <img
+                :src="src"
+                alt=""
+                width="160"
+                height="120"
+                loading="lazy"
+                decoding="async"
+              />
             </button>
           </li>
         </ul>
@@ -176,14 +186,20 @@
                     v-if="coverOf(other)"
                     :src="coverOf(other)"
                     :alt="other.name"
+                    width="640"
+                    height="480"
                     loading="lazy"
+                    decoding="async"
                   />
                   <img
                     v-if="revealOf(other)"
                     class="photo-reveal__alt"
                     :src="revealOf(other)"
                     alt=""
+                    width="640"
+                    height="480"
                     loading="lazy"
+                    decoding="async"
                   />
                 </router-link>
                 <div class="other-card__body">
@@ -354,6 +370,9 @@
             v-if="activeSrc"
             :src="activeSrc"
             :alt="`${room.name} photo ${activePhoto + 1}`"
+            width="1600"
+            height="1000"
+            decoding="async"
           />
         </figure>
         <button

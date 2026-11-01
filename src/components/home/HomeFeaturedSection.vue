@@ -21,6 +21,10 @@
           class="property__img"
           :src="photoFor(hotel)"
           :alt="hotel.name"
+          width="1600"
+          height="1000"
+          loading="lazy"
+          decoding="async"
         />
         <div class="property__veil" />
         <template v-if="photosFor(hotel).length > 1">
@@ -130,7 +134,10 @@
                 v-if="roomImage(room)"
                 :src="roomImage(room)"
                 :alt="room.name"
+                width="800"
+                height="500"
                 loading="lazy"
+                decoding="async"
               />
             </span>
             <span class="room__shade">
@@ -638,7 +645,7 @@ function bedroomLabel(room: RoomType) {
     transform: scale(1);
   }
   to {
-    transform: scale(1.1);
+    transform: scale(1.04);
   }
 }
 

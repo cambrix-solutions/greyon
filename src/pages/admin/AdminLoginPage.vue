@@ -9,7 +9,7 @@
         <form v-reveal class="login-card" @submit.prevent="onSubmit">
           <img
             class="login-card__logo"
-            src="/logo/Logo V1-04-04.png"
+            src="/logo/logo-mark-dark.webp"
             alt="Greyon"
             width="160"
             height="56"

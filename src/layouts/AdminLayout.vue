@@ -21,7 +21,7 @@
           >
             <img
               class="admin-brand__logo"
-              src="/logo/Logo V1-04-04.png"
+              src="/logo/logo-mark-dark.webp"
               alt="Greyon"
               width="120"
               height="40"

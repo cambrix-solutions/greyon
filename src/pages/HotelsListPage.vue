@@ -13,11 +13,14 @@
           :src="mastImage"
           alt=""
           :style="mastStyle"
+          width="1600"
+          height="900"
+          fetchpriority="high"
         />
         <div class="mast__veil" />
       </div>
 
-      <div class="listing-wrap mast__content">
+      <div class="listing-wrap mast__content gy-on-photo">
         <p v-reveal class="eyebrow eyebrow--light">Portfolio</p>
         <RevealWords tag="h1" text="Greyon apartels" />
         <p v-reveal="{ delay: '140ms' }" class="mast__lead">
@@ -82,7 +85,10 @@
               v-if="loc.heroImage"
               :src="loc.heroImage"
               :alt="loc.name"
+              width="640"
+              height="853"
               loading="lazy"
+              decoding="async"
             />
           </span>
           <span class="dest-card__name">{{ loc.name }}</span>
@@ -248,6 +254,7 @@ import { useParallax } from "@/components/home/useParallax";
 import SectionDivider from "@/components/hotel/SectionDivider.vue";
 import HotelCard from "@/components/HotelCard.vue";
 import SeoHead from "@/components/SeoHead.vue";
+import { preloadImage } from "@/utils/preloadImage";
 import { useBookingStore } from "@/stores/booking-store";
 import { useCmsStore } from "@/stores/cms-store";
 import type { Hotel } from "@/types/greyon";
@@ -357,6 +364,7 @@ const mastImage = computed(() => {
       ?.heroImage.trim() ?? ""
   );
 });
+watch(mastImage, src => preloadImage(src), { immediate: true });
 
 const mapAvailable = computed(() => cms.publishedHotels.some(hasCoords));
 

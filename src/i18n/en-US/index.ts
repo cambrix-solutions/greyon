@@ -33,7 +33,7 @@ export default {
     stayWith: "Stay with Greyon",
     exploreBy: "Explore by destination",
     destinationsCount: "0 destinations | 1 destination | {n} destinations",
-    storyEyebrow: "The Greyon story",
+    storyEyebrow: "Our Journey",
     storyTitle: "Premium hospitality, locally rooted",
     storyBody:
       "Greyon presents carefully selected apartel properties across Cambodia — spacious presentation, practical discovery, and a reliable reservation experience.",

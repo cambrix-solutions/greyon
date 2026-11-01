@@ -9,14 +9,20 @@
         class="hotel-card__cover"
         :src="coverImage"
         :alt="hotel.name"
+        width="800"
+        height="1000"
         loading="lazy"
+        decoding="async"
       />
       <img
         v-if="live && revealImage"
         class="hotel-card__reveal"
         :src="revealImage"
         :alt="`${hotel.name} photograph`"
+        width="800"
+        height="1000"
         loading="lazy"
+        decoding="async"
       />
       <span class="hotel-card__loc">{{ locationName }}</span>
     </router-link>

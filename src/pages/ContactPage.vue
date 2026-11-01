@@ -34,11 +34,13 @@
             class="stage__img"
             :src="heroImage"
             alt=""
+            width="1600"
+            height="900"
             fetchpriority="high"
           />
           <div class="stage__veil" />
         </div>
-        <div class="dest-wrap stage__content">
+        <div class="dest-wrap stage__content gy-on-photo">
           <p v-reveal class="eyebrow eyebrow--light">Get in touch</p>
           <h1 id="contact-title" v-reveal="{ delay: '70ms' }">Contact</h1>
           <p v-reveal="{ delay: '120ms' }" class="stage__lead">{{

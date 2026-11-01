@@ -16,12 +16,12 @@
             class="gy-logo__img"
             :src="
               solidHeader
-                ? '/logo/Logo V1-04-04.png'
-                : '/logo/Logo white V1-05.png'
+                ? '/logo/logo-mark-dark.webp'
+                : '/logo/logo-mark-light.webp'
             "
             alt="Greyon"
-            width="240"
-            height="84"
+            width="1194"
+            height="1200"
           />
         </router-link>
 
@@ -167,10 +167,12 @@
             @click="drawerOpen = false"
           >
             <img
-              src="/logo/Logo V1-04-04.png"
+              src="/logo/logo-mark-dark.webp"
               alt="Greyon"
-              width="140"
-              height="48"
+              width="1194"
+              height="1200"
+              loading="lazy"
+              decoding="async"
             />
           </router-link>
           <button
@@ -1356,9 +1358,7 @@ onUnmounted(() => {
   background: var(--gy-white);
 }
 
-.gy-layout:has(.cookie-notice) {
-  --gy-cookie-clearance: 7.5rem;
-}
+/* Cookie bar overlays the viewport. Do not grow the drawer when it is present. */
 
 .gy-drawer__cta {
   width: 100%;

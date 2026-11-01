@@ -28,12 +28,18 @@
             v-if="article.coverImage"
             class="stage__img"
             :src="article.coverImage"
+            :srcset="imageSrcset(article.coverImage)"
+            :sizes="
+              imageSrcset(article.coverImage) ? CARD_IMAGE_SIZES : undefined
+            "
             alt=""
+            width="1600"
+            height="900"
             fetchpriority="high"
           />
           <div class="stage__veil" />
         </div>
-        <div class="dest-wrap stage__content">
+        <div class="dest-wrap stage__content gy-on-photo">
           <nav class="crumb" aria-label="Breadcrumb">
             <router-link to="/news">News</router-link>
             <span aria-hidden="true">/</span>
@@ -166,12 +172,19 @@ import RevealWords from "@/components/home/RevealWords.vue";
 import { useParallax } from "@/components/home/useParallax";
 import SectionDivider from "@/components/hotel/SectionDivider.vue";
 import SeoHead from "@/components/SeoHead.vue";
+import { preloadImage } from "@/utils/preloadImage";
+import { CARD_IMAGE_SIZES, imageSrcset } from "@/utils/responsiveImage";
 import { useCmsStore } from "@/stores/cms-store";
 
 const route = useRoute();
 const cms = useCmsStore();
 
 const article = computed(() => cms.getNewsBySlug(String(route.params.slug)));
+watch(
+  () => article.value?.coverImage,
+  src => preloadImage(src),
+  { immediate: true }
+);
 const pending = computed(() => cms.catalogSyncing && !cms.publishedNews.length);
 
 const stageFrame = ref<HTMLElement | null>(null);

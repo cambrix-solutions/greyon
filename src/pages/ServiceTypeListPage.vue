@@ -10,6 +10,9 @@
           :src="mastImage"
           alt=""
           :style="mastStyle"
+          width="1600"
+          height="900"
+          fetchpriority="high"
         />
         <div class="mast__veil" />
       </div>

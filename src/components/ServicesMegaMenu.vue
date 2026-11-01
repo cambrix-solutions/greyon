@@ -40,7 +40,10 @@
               class="svc-mega__thumb"
               :src="item.thumb"
               :alt="item.name"
+              width="96"
+              height="72"
               loading="lazy"
+              decoding="async"
             />
             <span class="svc-mega__meta">
               <strong>{{ item.name }}</strong>

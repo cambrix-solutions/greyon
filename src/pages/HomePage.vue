@@ -14,6 +14,9 @@
           class="home-hero__image home-hero__video is-static"
           :src="HERO_POSTER"
           alt=""
+          width="1280"
+          height="720"
+          fetchpriority="high"
         />
         <video
           v-else
@@ -25,6 +28,7 @@
           loop
           playsinline
           preload="metadata"
+          fetchpriority="high"
         />
       </div>
       <div v-else class="home-hero__slides" aria-hidden="true">
@@ -35,18 +39,23 @@
           :class="{ 'is-active': i === heroIndex }"
           :src="slide.src"
           :alt="slide.alt || 'Greyon apartel stay'"
+          width="1600"
+          height="900"
+          :fetchpriority="i === 0 ? 'high' : 'auto'"
+          :loading="i === 0 ? 'eager' : 'lazy'"
+          :decoding="i === 0 ? 'auto' : 'async'"
         />
       </div>
       <div class="home-hero__veil" />
       <div class="gy-container home-hero__content">
-        <div v-reveal class="home-hero__intro">
+        <div v-reveal class="home-hero__intro gy-on-photo">
           <h1 class="home-hero__brand">
             <img
               class="home-hero__logo"
-              src="/logo/Logo white V1-05.png"
+              src="/logo/logo-mark-light.webp"
               alt="Greyon"
-              width="280"
-              height="100"
+              width="1194"
+              height="1200"
             />
           </h1>
           <p class="home-hero__tagline">Always on, always home</p>
@@ -142,6 +151,7 @@ import HomeFeaturedSection from "@/components/home/HomeFeaturedSection.vue";
 import HomeNewsSection from "@/components/home/HomeNewsSection.vue";
 import HomeStorySection from "@/components/home/HomeStorySection.vue";
 import SeoHead from "@/components/SeoHead.vue";
+import { preloadImage } from "@/utils/preloadImage";
 import {
   fetchPublicHeroSlides,
   type PublicHeroSlide
@@ -152,6 +162,7 @@ import { useCmsStore } from "@/stores/cms-store";
 /** Show the client hero video instead of the image slider (slider code kept below). */
 const HERO_VIDEO = true;
 const HERO_POSTER = "/videos/hero-poster.jpg";
+preloadImage(HERO_POSTER);
 const heroVideoSrc = ref("");
 const reduceMotion = ref(false);
 let smallQuery: MediaQueryList | null = null;
@@ -408,11 +419,12 @@ onUnmounted(() => {
   z-index: 1;
   display: grid;
   gap: clamp(1rem, 2.2vh, 1.75rem);
-  padding: clamp(5.5rem, 10vh, 7rem) 0 clamp(1.1rem, 2.5vh, 1.75rem);
+  padding: clamp(5.5rem, 10vh, 7rem) 0 calc(var(--gy-cookie-bar) + 0.85rem);
 }
 
 .home-hero__intro {
   max-width: min(34rem, 100%);
+  min-height: 12.5rem;
 }
 
 .home-hero__brand {
@@ -495,7 +507,7 @@ onUnmounted(() => {
     transform: scale(1.04);
   }
   to {
-    transform: scale(1.12);
+    transform: scale(1.04);
   }
 }
 
@@ -507,7 +519,11 @@ onUnmounted(() => {
   }
 
   .home-hero__content {
-    padding-bottom: 1.25rem;
+    padding-bottom: calc(var(--gy-cookie-bar) + 0.65rem);
+  }
+
+  .home-hero__intro {
+    min-height: 11rem;
   }
 
   .home-hero__cta {

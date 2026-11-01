@@ -14,10 +14,13 @@
           :src="heroImage"
           alt=""
           :style="heroStyle"
+          width="1600"
+          height="900"
+          fetchpriority="high"
         />
         <div class="hero__veil" />
       </div>
-      <div class="dest-wrap hero__content">
+      <div class="dest-wrap hero__content gy-on-photo">
         <p v-reveal class="eyebrow eyebrow--light">Destination</p>
         <RevealWords tag="h1" :text="location.name" />
         <div v-reveal="{ delay: '160ms' }" class="hero__actions">
@@ -72,6 +75,10 @@
               :src="portraitImage"
               :alt="location.name"
               :style="portraitStyle"
+              width="800"
+              height="1067"
+              loading="lazy"
+              decoding="async"
             />
           </div>
         </figure>
@@ -149,7 +156,10 @@
             <img
               :src="src"
               :alt="`${location.name} photograph ${index + 1}`"
+              width="960"
+              height="720"
               loading="lazy"
+              decoding="async"
             />
             <p class="photo-card__meta">
               <span>{{ pad(index + 1) }}</span>
@@ -276,7 +286,10 @@
                 v-if="loc.heroImage"
                 :src="loc.heroImage"
                 alt=""
+                width="640"
+                height="480"
                 loading="lazy"
+                decoding="async"
               />
             </span>
             <span class="else-card__name">{{ loc.name }}</span>
@@ -310,7 +323,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import RevealWords from "@/components/home/RevealWords.vue";
 import { useDragScroll } from "@/components/home/useDragScroll";
@@ -319,6 +332,7 @@ import SectionDivider from "@/components/hotel/SectionDivider.vue";
 import HotelCard from "@/components/HotelCard.vue";
 import MapEmbed from "@/components/MapEmbed.vue";
 import SeoHead from "@/components/SeoHead.vue";
+import { preloadImage } from "@/utils/preloadImage";
 import { useBookingStore } from "@/stores/booking-store";
 import { useCmsStore } from "@/stores/cms-store";
 
@@ -353,6 +367,7 @@ const location = computed(() =>
 
 const description = computed(() => location.value?.description.trim() ?? "");
 const heroImage = computed(() => location.value?.heroImage.trim() ?? "");
+watch(heroImage, src => preloadImage(src), { immediate: true });
 const gallery = computed(() =>
   (location.value?.gallery ?? []).map(src => src.trim()).filter(Boolean)
 );
