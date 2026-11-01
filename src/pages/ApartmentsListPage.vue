@@ -118,10 +118,9 @@
                 </div>
                 <div class="room-panel__copy">
                   <span class="room-panel__index">{{ pad(index + 1) }}</span>
-                  <p v-if="hotelFor(room)" class="room-panel__where">
-                    {{ hotelFor(room)?.name }}
-                  </p>
-                  <h3>{{ room.name }}</h3>
+                  <h3>{{
+                    roomWithPropertyLabel(hotelFor(room)?.name, room.name)
+                  }}</h3>
                   <RoomFacts
                     tone="light"
                     compact
@@ -249,6 +248,7 @@ import {
   searchParamsFromQuery
 } from "@/utils/bookingSearchQuery";
 import { isApartmentProperty } from "@/utils/propertyKind";
+import { roomWithPropertyLabel } from "@/utils/roomLabel";
 import { roomDetailPath } from "@/utils/roomPath";
 
 const cms = useCmsStore();

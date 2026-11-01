@@ -41,7 +41,11 @@
         <p v-if="leadDescription" class="stage__excerpt">{{
           leadDescription
         }}</p>
-        <ul v-if="leadTags.length" class="stage__tags" aria-label="Story tags">
+        <ul
+          v-if="leadTags.length"
+          class="stage__tags"
+          :aria-label="leadHasTags ? 'Story tags' : 'Destination'"
+        >
           <li v-for="tag in leadTags" :key="tag">{{ tag }}</li>
         </ul>
       </div>
@@ -62,7 +66,19 @@
             loading="lazy"
           />
         </span>
-        <span class="news__card-title">{{ item.title }}</span>
+        <span class="news__card-copy">
+          <span class="news__card-title">{{ item.title }}</span>
+          <span v-if="previewOf(item)" class="news__card-excerpt">{{
+            previewOf(item)
+          }}</span>
+          <ul
+            v-if="tagsOf(item).length"
+            class="news__card-tags"
+            :aria-label="item.tags?.length ? 'Story tags' : 'Destination'"
+          >
+            <li v-for="tag in tagsOf(item)" :key="tag">{{ tag }}</li>
+          </ul>
+        </span>
       </router-link>
     </div>
   </section>
@@ -74,7 +90,9 @@ import { useI18n } from "vue-i18n";
 import RevealWords from "@/components/home/RevealWords.vue";
 import { useTilt } from "@/components/home/useTilt";
 import { useCmsStore } from "@/stores/cms-store";
+import type { NewsArticle } from "@/types/greyon";
 import { formatDate } from "@/utils/datetime";
+import { newsPreviewTags, newsPreviewText } from "@/utils/newsPreview";
 
 const cms = useCmsStore();
 const { locale } = useI18n();
@@ -84,18 +102,21 @@ const articles = computed(() => cms.publishedNews.slice(0, 3));
 const lead = computed(() => articles.value[0] ?? null);
 const rest = computed(() => articles.value.slice(1));
 
-/** Excerpt first; fall back to SEO description from the same news payload. */
-const leadDescription = computed(() => {
-  const item = lead.value;
-  if (!item) return "";
-  return item.excerpt?.trim() || item.seoDescription?.trim() || "";
-});
+/** Excerpt, summary, or SEO description; otherwise a truncated body. */
+const leadDescription = computed(() => newsPreviewText(lead.value));
 
-/** Destination / category labels already present on the news row. */
-const leadTags = computed(() => {
-  const name = lead.value?.locationName?.trim();
-  return name ? [name] : [];
-});
+const leadHasTags = computed(() => Boolean(lead.value?.tags?.length));
+
+/** Engine tags when present; otherwise the article's destination name. */
+const leadTags = computed(() => newsPreviewTags(lead.value));
+
+function previewOf(item: NewsArticle) {
+  return newsPreviewText(item);
+}
+
+function tagsOf(item: NewsArticle) {
+  return newsPreviewTags(item);
+}
 
 function dateLabel(value: string) {
   const loc = locale.value.startsWith("km") ? "km-KH" : "en-GB";
@@ -257,6 +278,8 @@ function dateLabel(value: string) {
 
 .news__card {
   flex: 0 0 min(70vw, 24rem);
+  min-width: 0;
+  max-width: 100%;
   color: inherit;
 }
 
@@ -274,15 +297,50 @@ function dateLabel(value: string) {
   object-fit: cover;
 }
 
+.news__card-copy {
+  display: grid;
+  gap: 0.45rem;
+  margin-top: 0.75rem;
+  min-width: 0;
+}
+
 .news__card-title {
   display: block;
-  margin-top: 0.75rem;
   font-family: var(--font-display);
   font-size: 1.2rem;
   font-weight: 700;
   letter-spacing: normal;
   line-height: 1.3;
   color: var(--gy-forest);
+  overflow-wrap: break-word;
+}
+
+.news__card-excerpt {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--gy-forest);
+  overflow-wrap: break-word;
+}
+
+.news__card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.7rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.news__card-tags li {
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gy-gold);
 }
 
 .stage__photo:focus-visible,

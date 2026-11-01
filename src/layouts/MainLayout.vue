@@ -341,7 +341,7 @@ import { useBookingStore } from "@/stores/booking-store";
 import { useCmsStore } from "@/stores/cms-store";
 import { useCustomerStore } from "@/stores/customer-store";
 import { parseYmd } from "@/utils/datetime";
-import { SERVICE_TYPE_ITEMS } from "@/utils/propertyKind";
+import { ourServicesMenu } from "@/utils/serviceNav";
 
 const auth = useAuthStore();
 const cms = useCmsStore();
@@ -359,7 +359,7 @@ const drawerServicesOpen = ref(false);
 const homePastHero = ref(false);
 const openNavMenu = ref<NavMenuId | null>(null);
 const headerSearchOpen = ref(false);
-const serviceTypeItems = SERVICE_TYPE_ITEMS;
+const serviceTypeItems = ourServicesMenu;
 
 const CLOSE_DELAY_MS = 240;
 let closeServicesTimer: ReturnType<typeof setTimeout> | null = null;
@@ -550,16 +550,22 @@ watch(showCompactSearch, visible => {
   if (!visible) headerSearchOpen.value = false;
 });
 
+function onEscapeClose(event: KeyboardEvent) {
+  if (event.key === "Escape") closeAllNavMenus();
+}
+
 onMounted(async () => {
   void refreshCatalogIfNeeded(true);
   await nextTick();
   bindHeroScroll();
   document.addEventListener("pointerdown", onDocumentPointerDown);
+  document.addEventListener("keydown", onEscapeClose);
 });
 
 onUnmounted(() => {
   unbindHeroScroll();
   document.removeEventListener("pointerdown", onDocumentPointerDown);
+  document.removeEventListener("keydown", onEscapeClose);
   clearCloseServicesTimer();
 });
 </script>
@@ -1026,11 +1032,21 @@ onUnmounted(() => {
 
 .gy-nav__mega-wrap {
   position: absolute;
-  top: calc(100% + 0.55rem);
+  top: calc(100% + 0.35rem);
   left: 50%;
   transform: translateX(-50%);
   z-index: 40;
-  padding-top: 0.15rem;
+  padding-top: 0.35rem;
+}
+
+/* Invisible bridge so the pointer can move from the label onto the menu. */
+.gy-nav__mega-wrap::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 0.45rem;
 }
 
 .gy-header__actions {

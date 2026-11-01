@@ -23,9 +23,9 @@
 </template>
 
 <script setup lang="ts">
-import { SERVICE_TYPE_ITEMS } from "@/utils/propertyKind";
+import { ourServicesMenu } from "@/utils/serviceNav";
 
-const items = SERVICE_TYPE_ITEMS;
+const items = ourServicesMenu;
 
 const emit = defineEmits<{
   (e: "keep-open"): void;

@@ -134,11 +134,8 @@
               />
             </span>
             <span class="room__shade">
-              <span v-if="propertyName(room)" class="room__property">{{
-                propertyName(room)
-              }}</span>
-              <span class="room__name">{{ room.name }}</span>
-              <span v-if="bedroomLabel(room)" class="room__beds">{{
+              <span class="room__name">{{ cardLabel(room) }}</span>
+              <span v-if="showBed(room)" class="room__beds">{{
                 bedroomLabel(room)
               }}</span>
             </span>
@@ -167,6 +164,7 @@ import { useCmsStore } from "@/stores/cms-store";
 import type { Hotel, RoomType } from "@/types/greyon";
 import { formatTime } from "@/utils/datetime";
 import { hostedImage } from "@/utils/hostedImage";
+import { bedLabelAddsDetail, roomWithPropertyLabel } from "@/utils/roomLabel";
 import { roomDetailPath } from "@/utils/roomPath";
 
 const SWIPE_PX = 48;
@@ -320,14 +318,18 @@ function roomImage(room: RoomType) {
   return "";
 }
 
-/** Property name from the linked hotel (API catalog). */
-function propertyName(room: RoomType) {
-  return hotelForRoom(room)?.name?.trim() ?? "";
+/** "{Apartel name} — {room name}" from the room's hotel relation. */
+function cardLabel(room: RoomType) {
+  return roomWithPropertyLabel(hotelForRoom(room)?.name, room.name);
 }
 
 /** Bedroom count / bed label from room.bedType (e.g. "1 bedroom"). */
 function bedroomLabel(room: RoomType) {
   return room.bedType?.trim() ?? "";
+}
+
+function showBed(room: RoomType) {
+  return bedLabelAddsDetail(room.name, room.bedType);
 }
 </script>
 
@@ -335,6 +337,9 @@ function bedroomLabel(room: RoomType) {
 .featured {
   /* Pull 1px into the cream story above so no page-bg hairline shows. */
   margin-top: -1px;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: clip;
   background: #121413;
   color: #f6f1e7;
 }
@@ -470,6 +475,8 @@ function bedroomLabel(room: RoomType) {
 
 .rooms {
   position: relative;
+  max-width: 100%;
+  min-width: 0;
   background: #f4efe6;
   color: var(--gy-forest);
   padding-bottom: 0.65rem;
@@ -500,6 +507,8 @@ function bedroomLabel(room: RoomType) {
 
 .rooms__slider {
   position: relative;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .rooms__track {
@@ -600,22 +609,14 @@ function bedroomLabel(room: RoomType) {
   background: linear-gradient(to top, rgba(8, 8, 7, 0.82), transparent 62%);
 }
 
-.room__property {
-  font-family: var(--font-display);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--gy-gold);
-}
-
 .room__name {
   font-family: var(--font-display);
   font-weight: 700;
   letter-spacing: normal;
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   line-height: 1.3;
   color: var(--gy-white);
+  overflow-wrap: break-word;
 }
 
 .room__beds {

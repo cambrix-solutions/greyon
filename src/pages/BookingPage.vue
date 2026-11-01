@@ -52,7 +52,7 @@
                 v-for="(result, idx) in booking.results"
                 :key="idx"
                 variant="result"
-                :title="result.roomType.name"
+                :title="resultRoomTitle(result)"
                 :subtitle="resultRoomSubtitle(result)"
                 :images="result.roomType.images"
                 :bed-type="result.roomType.bedType"
@@ -93,10 +93,6 @@
                 {{ formatStayShort(booking.search.checkIn) }} –
                 {{ formatStayShort(booking.search.checkOut) }}
               </p>
-              <p class="stay-card__times">
-                Check-in {{ staySidebar.checkInTime }} · Check-out
-                {{ staySidebar.checkOutTime }}
-              </p>
               <div v-if="staySidebar.priced" class="stay-card__price">
                 <strong>${{ staySidebar.priced.total.toFixed(0) }}</strong>
                 <span>
@@ -119,8 +115,19 @@
               </button>
             </div>
 
+            <div class="stay-card">
+              <p class="stay-card__eyebrow">Flexible check-in / out</p>
+              <p class="stay-card__times">{{ flexibleSchedule }}</p>
+            </div>
+
+            <!--
+              TODO: Direct-booking benefits and promotional offers are not in
+              the catalog (meal benefit and cancellation are empty) and are not
+              in existing UI copy. Do not invent rate guarantees or discounts.
+            -->
+
             <div class="assist-card">
-              <p class="stay-card__eyebrow">Need assistance</p>
+              <p class="stay-card__eyebrow">Reservations</p>
               <p class="assist-card__copy">
                 Our reservations team can help with availability and special
                 requests.
@@ -246,11 +253,8 @@
               {{ formatStayShort(booking.search.checkIn) }} –
               {{ formatStayShort(booking.search.checkOut) }}
             </p>
-            <p class="stay-card__times">
-              Check-in
-              {{ hotelCheckInTime(booking.selected.hotel.checkInTime) }}
-              · Check-out
-              {{ hotelCheckOutTime(booking.selected.hotel.checkOutTime) }}
+            <p v-if="selectedSchedule" class="stay-card__times">
+              {{ selectedSchedule }}
             </p>
             <p class="stay-card__room-line">
               {{ booking.selected.roomType.name }}
@@ -555,13 +559,11 @@
             <p class="review-label">Stay</p>
             <p>
               {{
-                formatStayRange(
+                rangeWithRealTimes(
                   booking.confirmedBooking.checkIn,
                   booking.confirmedBooking.checkOut,
-                  {
-                    checkInTime: confirmHotel?.checkInTime,
-                    checkOutTime: confirmHotel?.checkOutTime
-                  }
+                  formatTime(confirmHotel?.checkInTime),
+                  formatTime(confirmHotel?.checkOutTime)
                 )
               }}
             </p>
@@ -643,11 +645,8 @@ import {
   searchParamsFromQuery,
   searchParamsToQuery
 } from "@/utils/bookingSearchQuery";
-import {
-  formatStayRange,
-  hotelCheckInTime,
-  hotelCheckOutTime
-} from "@/utils/datetime";
+import { formatDate, formatTime } from "@/utils/datetime";
+import { roomWithPropertyLabel } from "@/utils/roomLabel";
 import { roomDetailPath } from "@/utils/roomPath";
 
 const booking = useBookingStore();
@@ -710,11 +709,12 @@ function roomFactsLine(room: RoomType) {
     .join(" · ");
 }
 
+function resultRoomTitle(result: AvailabilityResult) {
+  return roomWithPropertyLabel(result.hotel.name, result.roomType.name);
+}
+
 function resultRoomSubtitle(result: AvailabilityResult) {
-  const hotel = result.hotel.name?.trim() || "";
-  const rate = result.ratePlan.name?.trim() || "";
-  if (hotel && rate) return `${hotel} · ${rate}`;
-  return hotel || rate || "Available room";
+  return result.ratePlan.name?.trim() || "";
 }
 
 function resultUrgencyBadge(result: AvailabilityResult) {
@@ -798,20 +798,28 @@ const stepLead = computed(() => {
   }
 });
 
-const staySummary = computed(() =>
-  formatStayRange(booking.search.checkIn, booking.search.checkOut, {
-    checkInTime: hotelCheckInTime(),
-    checkOutTime: hotelCheckOutTime()
-  })
-);
-
-/** Sidebar preview: selected result, else first availability hit. */
+/** Sidebar preview: selected result, else the hotel the search actually names. */
 const staySidebar = computed(() => {
   const priced = booking.selected ?? booking.results[0] ?? null;
   const hotelFromSearch = booking.search.hotelSlug
     ? cms.getHotelBySlug(booking.search.hotelSlug)
     : undefined;
-  const hotel = priced?.hotel ?? hotelFromSearch;
+  const locationHotels = booking.search.locationSlug
+    ? cms.publishedHotels.filter(hotel => {
+        const loc = cms.getLocationById(hotel.locationId);
+        return loc?.slug === booking.search.locationSlug;
+      })
+    : [];
+  const soleLocationHotel =
+    locationHotels.length === 1 ? locationHotels[0] : undefined;
+  const soleCatalogHotel =
+    !booking.search.hotelSlug &&
+    !booking.search.locationSlug &&
+    cms.publishedHotels.length === 1
+      ? cms.publishedHotels[0]
+      : undefined;
+  const hotel =
+    priced?.hotel ?? hotelFromSearch ?? soleLocationHotel ?? soleCatalogHotel;
   const loc = hotel
     ? cms.getLocationById(hotel.locationId)
     : booking.search.locationSlug
@@ -821,24 +829,58 @@ const staySidebar = computed(() => {
     priced,
     hotelName: hotel?.name || "Greyon apartel",
     city: (loc?.name || "").trim(),
-    checkInTime: hotelCheckInTime(hotel?.checkInTime),
-    checkOutTime: hotelCheckOutTime(hotel?.checkOutTime)
+    checkInTime: formatTime(hotel?.checkInTime),
+    checkOutTime: formatTime(hotel?.checkOutTime),
+    phone: hotel?.phone?.trim() || "",
+    email: hotel?.email?.trim() || ""
   };
 });
 
-const assistPhone = computed(
-  () =>
-    staySidebar.value.priced?.hotel.phone?.trim() ||
-    cms.settings.contactPhone?.trim() ||
-    ""
+function rangeWithRealTimes(
+  checkIn: string,
+  checkOut: string,
+  checkInTime: string,
+  checkOutTime: string
+) {
+  if (!checkIn || !checkOut) return "";
+  const left = checkInTime
+    ? `${formatDate(checkIn)} · ${checkInTime}`
+    : formatDate(checkIn);
+  const right = checkOutTime
+    ? `${formatDate(checkOut)} · ${checkOutTime}`
+    : formatDate(checkOut);
+  return `${left} → ${right}`;
+}
+
+const staySummary = computed(() =>
+  rangeWithRealTimes(
+    booking.search.checkIn,
+    booking.search.checkOut,
+    staySidebar.value.checkInTime,
+    staySidebar.value.checkOutTime
+  )
 );
 
-const assistEmail = computed(
-  () =>
-    staySidebar.value.priced?.hotel.email?.trim() ||
-    cms.settings.contactEmail?.trim() ||
-    ""
-);
+/**
+ * Real apartel times when the hotel record has them.
+ * Otherwise the existing search hint — the engine often leaves both times empty.
+ * TODO: direct-booking benefit bullets and offers have no source copy.
+ */
+const flexibleSchedule = computed(() => {
+  const { checkInTime, checkOutTime } = staySidebar.value;
+  if (!checkInTime && !checkOutTime) {
+    return "Stay dates only — apartel check-in / out times apply (typically 14:00 / 12:00).";
+  }
+  return [
+    checkInTime ? `Check-in ${checkInTime}` : "",
+    checkOutTime ? `Check-out ${checkOutTime}` : ""
+  ]
+    .filter(Boolean)
+    .join(" · ");
+});
+
+const assistPhone = computed(() => staySidebar.value.phone);
+const assistEmail = computed(() => staySidebar.value.email);
 
 function bookFromSidebar() {
   const priced = staySidebar.value.priced;
@@ -848,10 +890,24 @@ function bookFromSidebar() {
 
 const reviewStay = computed(() => {
   const hotel = booking.selected?.hotel;
-  return formatStayRange(booking.search.checkIn, booking.search.checkOut, {
-    checkInTime: hotel?.checkInTime,
-    checkOutTime: hotel?.checkOutTime
-  });
+  return rangeWithRealTimes(
+    booking.search.checkIn,
+    booking.search.checkOut,
+    formatTime(hotel?.checkInTime),
+    formatTime(hotel?.checkOutTime)
+  );
+});
+
+const selectedSchedule = computed(() => {
+  const hotel = booking.selected?.hotel;
+  const checkInTime = formatTime(hotel?.checkInTime);
+  const checkOutTime = formatTime(hotel?.checkOutTime);
+  return [
+    checkInTime ? `Check-in ${checkInTime}` : "",
+    checkOutTime ? `Check-out ${checkOutTime}` : ""
+  ]
+    .filter(Boolean)
+    .join(" · ");
 });
 
 const confirmHotel = computed(() =>
@@ -1047,6 +1103,7 @@ function showGuestError(
   font-size: 0.82rem;
   line-height: 1.45;
   color: var(--gy-forest);
+  overflow-wrap: break-word;
 }
 
 .stay-card__price {
@@ -1084,11 +1141,13 @@ function showGuestError(
 
 .assist-card__link {
   display: block;
+  min-width: 0;
   font-family: var(--font-display);
   font-size: 0.88rem;
   font-weight: 600;
   color: var(--gy-gold);
   text-decoration: none;
+  overflow-wrap: anywhere;
 }
 
 .assist-card__link:hover {
