@@ -1,5 +1,18 @@
 import type { Hotel } from "@/types/greyon";
-import { isApartmentProperty, isHotelProperty } from "@/utils/propertyKind";
+import type { ServiceTypeNavItem } from "@/utils/propertyKind";
+import {
+  SERVICE_TYPE_ITEMS,
+  isApartmentProperty,
+  isHotelProperty
+} from "@/utils/propertyKind";
+
+/**
+ * Header “Our Services” entries. Always the four public types — the listing
+ * page filters published properties by `propertyType`. Empty types stay in
+ * the menu so Boutique / Resort are reachable even before any match exists.
+ */
+export const ourServicesMenu: readonly ServiceTypeNavItem[] =
+  SERVICE_TYPE_ITEMS;
 
 export type ServiceNavItem = {
   id: string;

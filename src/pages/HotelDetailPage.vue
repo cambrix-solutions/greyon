@@ -267,7 +267,7 @@
               >
                 <RoomOfferCard
                   variant="detail"
-                  :title="room.name"
+                  :title="roomCardTitle(room)"
                   :subtitle="roomSubtitle(room)"
                   :images="room.images"
                   :bed-type="room.bedType"
@@ -398,6 +398,7 @@ import SeoHead from "@/components/SeoHead.vue";
 import { useBookingStore } from "@/stores/booking-store";
 import { useCmsStore } from "@/stores/cms-store";
 import type { HotelProductRef, RoomType } from "@/types/greyon";
+import { roomWithPropertyLabel } from "@/utils/roomLabel";
 import { roomDetailPath } from "@/utils/roomPath";
 
 const route = useRoute();
@@ -560,6 +561,10 @@ function pricedRoom(roomTypeId: string) {
   );
 }
 
+function roomCardTitle(room: RoomType) {
+  return roomWithPropertyLabel(hotel.value?.name, room.name);
+}
+
 /** Avoid repeating the room name / bed type already shown in facts. */
 function roomSubtitle(room: RoomType) {
   const desc = room.description?.trim() || "";
@@ -579,8 +584,7 @@ function roomSubtitle(room: RoomType) {
     return `${bed} · ${size}`;
   }
   if (size) return size;
-  if (room.maxGuests) return `Sleeps up to ${room.maxGuests}`;
-  return "Comfortable Greyon stay";
+  return "";
 }
 
 function roomBadge(roomTypeId: string, room: RoomType) {

@@ -438,9 +438,12 @@ export interface EngineNews {
   slug: string;
   coverImage?: string | null;
   excerpt?: string | null;
+  summary?: string | null;
   body?: string | null;
   publishedAt?: string | null;
   status: string;
+  /** String array, or a comma-separated string, when the engine sends tags. */
+  tags?: string[] | string | null;
   seoTitle?: string | null;
   seoDescription?: string | null;
 }
@@ -619,6 +622,19 @@ function asFeatureCategory(value: string | undefined): FeatureCategory {
   return value === "public" ? "public" : "admin";
 }
 
+function asNewsTags(value: EngineNews["tags"]): string[] {
+  if (Array.isArray(value)) {
+    return value.map(tag => String(tag).trim()).filter(Boolean);
+  }
+  if (typeof value === "string") {
+    return value
+      .split(",")
+      .map(tag => tag.trim())
+      .filter(Boolean);
+  }
+  return [];
+}
+
 export function mapEngineNews(row: EngineNews): NewsArticle {
   const article: NewsArticle = {
     id: String(row.id),
@@ -630,6 +646,10 @@ export function mapEngineNews(row: EngineNews): NewsArticle {
     publishedAt: row.publishedAt ?? "",
     status: asStatus(row.status)
   };
+  const summary = row.summary?.trim();
+  if (summary) article.summary = summary;
+  const tags = asNewsTags(row.tags);
+  if (tags.length) article.tags = tags;
   if (row.locationId != null) article.locationId = String(row.locationId);
   if (row.locationName) article.locationName = row.locationName;
   if (row.seoTitle) article.seoTitle = row.seoTitle;
