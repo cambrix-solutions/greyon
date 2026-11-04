@@ -125,12 +125,16 @@ export function createApiClient(
   const root = baseURL.replace(/\/$/, "");
 
   async function request<T>(path: string, init?: RequestInit): Promise<T> {
+    const isFormData =
+      typeof FormData !== "undefined" && init?.body instanceof FormData;
     const headers: Record<string, string> = {
       Accept: "application/json",
-      "Content-Type": "application/json",
+      ...(isFormData ? {} : { "Content-Type": "application/json" }),
       "X-Requested-With": "XMLHttpRequest",
       ...(init?.headers as Record<string, string> | undefined)
     };
+    // The browser must set the multipart boundary itself.
+    if (isFormData) delete headers["Content-Type"];
 
     if (bearerStorageKey && typeof localStorage !== "undefined") {
       const token = localStorage.getItem(bearerStorageKey);

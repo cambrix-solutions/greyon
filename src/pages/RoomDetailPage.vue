@@ -53,21 +53,28 @@
           :room-size="room.roomSize"
           :max-guests="room.maxGuests"
         />
-        <div v-if="photos.length > 1" class="stage__tools">
-          <p class="stage__pos" aria-live="polite">
+        <div v-if="photos.length > 1 || panoramaUrl" class="stage__tools">
+          <p v-if="photos.length > 1" class="stage__pos" aria-live="polite">
             {{ pad(activePhoto + 1) }} / {{ pad(photos.length) }}
           </p>
           <div class="stage__nav">
-            <button
-              type="button"
-              aria-label="Previous photo"
-              @click="stepPhoto(-1)"
-            >
-              <q-icon name="chevron_left" size="22px" />
-            </button>
-            <button type="button" aria-label="Next photo" @click="stepPhoto(1)">
-              <q-icon name="chevron_right" size="22px" />
-            </button>
+            <RoomPanoramaButton v-if="panoramaUrl" @open="panoOpen = true" />
+            <template v-if="photos.length > 1">
+              <button
+                type="button"
+                aria-label="Previous photo"
+                @click="stepPhoto(-1)"
+              >
+                <q-icon name="chevron_left" size="22px" />
+              </button>
+              <button
+                type="button"
+                aria-label="Next photo"
+                @click="stepPhoto(1)"
+              >
+                <q-icon name="chevron_right" size="22px" />
+              </button>
+            </template>
           </div>
         </div>
         <ul
@@ -366,8 +373,20 @@
           <q-icon name="chevron_right" size="28px" />
         </button>
         <p class="lb__count">{{ activePhoto + 1 }} / {{ photos.length }}</p>
+        <RoomPanoramaButton
+          v-if="panoramaUrl"
+          class="lb__pano"
+          @open="panoOpen = true"
+        />
       </div>
     </q-dialog>
+
+    <RoomPanoramaDialog
+      v-if="panoramaUrl"
+      v-model="panoOpen"
+      :src="panoramaUrl"
+      :title="room.name"
+    />
   </q-page>
 
   <q-page v-else-if="catalogReady" class="dest-luxe rooms-luxe room-state">
@@ -415,6 +434,8 @@ import BookingSearchWidget from "@/components/BookingSearchWidget.vue";
 import HotelAmenityBand from "@/components/hotel/HotelAmenityBand.vue";
 import SectionDivider from "@/components/hotel/SectionDivider.vue";
 import RoomFacts from "@/components/RoomFacts.vue";
+import RoomPanoramaButton from "@/components/RoomPanoramaButton.vue";
+import RoomPanoramaDialog from "@/components/RoomPanoramaDialog.vue";
 import SeoHead from "@/components/SeoHead.vue";
 import { useBookingStore } from "@/stores/booking-store";
 import { useCmsStore } from "@/stores/cms-store";
@@ -428,6 +449,7 @@ const cms = useCmsStore();
 const catalogReady = ref(false);
 const activePhoto = ref(0);
 const galleryOpen = ref(false);
+const panoOpen = ref(false);
 
 const stageFrame = ref<HTMLElement | null>(null);
 const stageOffset = useParallax(stageFrame, 120);
@@ -486,6 +508,7 @@ watch(
 watch(room, () => {
   activePhoto.value = 0;
   galleryOpen.value = false;
+  panoOpen.value = false;
 });
 
 const photos = computed(() => {
@@ -496,6 +519,7 @@ const photos = computed(() => {
 });
 
 const activeSrc = computed(() => photos.value[activePhoto.value] ?? "");
+const panoramaUrl = computed(() => room.value?.panoramaUrl?.trim() || "");
 
 const coverImage = computed(
   () => photos.value[0] || hotel.value?.heroImage || ""

@@ -55,6 +55,7 @@
                 :title="resultRoomTitle(result)"
                 :subtitle="resultRoomSubtitle(result)"
                 :images="result.roomType.images"
+                :panorama-url="result.roomType.panoramaUrl"
                 :bed-type="result.roomType.bedType"
                 :room-size="result.roomType.roomSize"
                 :max-guests="result.roomType.maxGuests"
@@ -165,6 +166,7 @@
               <RoomMediaCarousel
                 :images="booking.selected.roomType.images"
                 :alt="booking.selected.roomType.name"
+                :panorama-url="booking.selected.roomType.panoramaUrl"
                 fill
                 lightbox
               />

@@ -17,6 +17,17 @@ import type {
   RoomType
 } from "@/types/greyon";
 
+/** Room row was saved; the follow-up multipart `panorama` upload failed. */
+export class RoomPanoramaUploadError extends Error {
+  readonly room: RoomType;
+
+  constructor(message: string, room: RoomType) {
+    super(message);
+    this.name = "RoomPanoramaUploadError";
+    this.room = room;
+  }
+}
+
 export type AdminCatalog = {
   locations: Location[];
   hotels: Hotel[];
@@ -122,6 +133,16 @@ export type RoomTypeInput = {
   amenities?: string[];
   baseInventory?: number;
   status?: ContentStatus;
+  /**
+   * JPG or WebP, max 15 MB. Multipart field `panorama` on
+   * POST /admin/room-types and PATCH /admin/room-types/{id}.
+   */
+  panoramaFile?: File;
+  /**
+   * PATCH only. JSON `remove_panorama: 1` deletes the stored photo.
+   * Ignored when `panoramaFile` is set (a new file wins).
+   */
+  removePanorama?: boolean;
 };
 
 export type RatePlanInput = {
@@ -205,10 +226,79 @@ export async function destroyHotel(id: string) {
   await engineAPI.delete(`/admin/hotels/${numId(id)}`);
 }
 
+function roomJsonBody(
+  input: Partial<RoomTypeInput>,
+  withHotelId: boolean
+): Record<string, unknown> {
+  const { panoramaFile: _file, removePanorama, ...rest } = input;
+  const body: Record<string, unknown> = { ...rest };
+  if (withHotelId && rest.hotelId !== undefined) {
+    body.hotelId = numId(String(rest.hotelId));
+  }
+  // Engine boolean rule. A new file is sent separately and wins, so this
+  // flag is omitted when a panorama file is attached.
+  if (removePanorama) body.remove_panorama = 1;
+  return body;
+}
+
+/** Scalar room fields plus images[n] / amenities[n]. Empty lists are omitted. */
+function appendRoomFields(form: FormData, input: Partial<RoomTypeInput>) {
+  const { panoramaFile: _file, removePanorama: _remove, ...rest } = input;
+  for (const [key, value] of Object.entries(rest)) {
+    if (value === undefined || value === null) continue;
+    if (key === "hotelId") {
+      form.append(key, String(numId(String(value))));
+      continue;
+    }
+    if (key === "images" || key === "amenities") {
+      const list = (Array.isArray(value) ? value : [])
+        .map(item => String(item).trim())
+        .filter(Boolean);
+      list.forEach((item, index) => form.append(`${key}[${index}]`, item));
+      continue;
+    }
+    form.append(key, String(value));
+  }
+}
+
+/** Multipart field `panorama` on PATCH /admin/room-types/{id}. */
+async function uploadRoomPanorama(id: string, file: File): Promise<RoomType> {
+  const form = new FormData();
+  form.append("panorama", file, file.name);
+  const { roomType } = await engineAPI.request<{ roomType: EngineRoomType }>(
+    `/admin/room-types/${numId(id)}`,
+    { method: "PATCH", body: form }
+  );
+  return mapEngineRoomType(roomType);
+}
+
+function panoramaUploadFailed(
+  error: unknown,
+  room: RoomType
+): RoomPanoramaUploadError {
+  const detail =
+    error instanceof Error && error.message ? error.message : "Upload failed.";
+  return new RoomPanoramaUploadError(
+    `The room was saved, but the 360° photo was not. ${detail}`,
+    room
+  );
+}
+
 export async function createRoomType(input: RoomTypeInput) {
+  const file = input.panoramaFile instanceof File ? input.panoramaFile : null;
+  if (file) {
+    const form = new FormData();
+    appendRoomFields(form, input);
+    form.append("panorama", file, file.name);
+    const { roomType } = await engineAPI.request<{ roomType: EngineRoomType }>(
+      "/admin/room-types",
+      { method: "POST", body: form }
+    );
+    return mapEngineRoomType(roomType);
+  }
   const { roomType } = await engineAPI.post<{ roomType: EngineRoomType }>(
     "/admin/room-types",
-    { ...input, hotelId: numId(input.hotelId) }
+    roomJsonBody(input, true)
   );
   return mapEngineRoomType(roomType);
 }
@@ -217,13 +307,24 @@ export async function updateRoomType(
   id: string,
   input: Partial<RoomTypeInput>
 ) {
-  const body: Record<string, unknown> = { ...input };
-  if (input.hotelId !== undefined) body.hotelId = numId(input.hotelId);
+  const file = input.panoramaFile instanceof File ? input.panoramaFile : null;
   const { roomType } = await engineAPI.patch<{ roomType: EngineRoomType }>(
     `/admin/room-types/${numId(id)}`,
-    body
+    roomJsonBody(
+      {
+        ...input,
+        removePanorama: Boolean(input.removePanorama) && !file
+      },
+      input.hotelId !== undefined
+    )
   );
-  return mapEngineRoomType(roomType);
+  const mapped = mapEngineRoomType(roomType);
+  if (!file) return mapped;
+  try {
+    return await uploadRoomPanorama(id, file);
+  } catch (error) {
+    throw panoramaUploadFailed(error, mapped);
+  }
 }
 
 export async function destroyRoomType(id: string) {

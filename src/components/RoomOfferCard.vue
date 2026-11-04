@@ -13,20 +13,32 @@
     @pointerleave="pressed = false"
     @pointercancel="pressed = false"
   >
-    <component
-      :is="detailTo ? 'router-link' : 'div'"
-      class="room-offer__media"
-      :to="detailTo || undefined"
-      :aria-label="detailTo ? `View details for ${title}` : undefined"
-    >
-      <RoomMediaCarousel
-        :images="images"
-        :alt="title"
-        :badge="badge"
-        fill
-        :lightbox="!detailTo"
+    <div class="room-offer__media">
+      <component
+        :is="detailTo ? 'router-link' : 'div'"
+        class="room-offer__hit"
+        :to="detailTo || undefined"
+        :aria-label="detailTo ? `View details for ${title}` : undefined"
+      >
+        <RoomMediaCarousel
+          ref="media"
+          :images="images"
+          :alt="title"
+          :badge="badge"
+          fill
+          :lightbox="!detailTo"
+          :reserve-controls="Boolean(panoramaUrl)"
+        />
+      </component>
+      <RoomViewControls
+        v-if="panoramaUrl"
+        class="room-offer__controls"
+        :show-arrows="images.length > 1"
+        @panorama="panoOpen = true"
+        @prev="media?.step(-1)"
+        @next="media?.step(1)"
       />
-    </component>
+    </div>
 
     <div class="room-offer__body">
       <div class="room-offer__copy">
@@ -85,6 +97,12 @@
       </div>
     </div>
   </article>
+  <RoomPanoramaDialog
+    v-if="panoramaUrl"
+    v-model="panoOpen"
+    :src="panoramaUrl"
+    :title="title"
+  />
 </template>
 
 <script setup lang="ts">
@@ -93,6 +111,8 @@ import type { RouteLocationRaw } from "vue-router";
 import FeatureChips from "@/components/FeatureChips.vue";
 import RoomFacts from "@/components/RoomFacts.vue";
 import RoomMediaCarousel from "@/components/RoomMediaCarousel.vue";
+import RoomPanoramaDialog from "@/components/RoomPanoramaDialog.vue";
+import RoomViewControls from "@/components/RoomViewControls.vue";
 
 const props = withDefaults(
   defineProps<{
@@ -116,6 +136,8 @@ const props = withDefaults(
     detailTo?: RouteLocationRaw | "";
     /** Show the secondary View details action (hotel page). */
     showViewDetails?: boolean;
+    /** Equirectangular photo. Hidden when empty. */
+    panoramaUrl?: string | null;
   }>(),
   {
     variant: "detail",
@@ -133,16 +155,20 @@ const props = withDefaults(
     ctaLabel: "Check availability",
     ctaOutline: false,
     detailTo: "",
-    showViewDetails: false
+    showViewDetails: false,
+    panoramaUrl: null
   }
 );
 
 const emit = defineEmits<{ (e: "cta"): void }>();
 
 const pressed = ref(false);
+const panoOpen = ref(false);
+const media = ref<{ step: (delta: number) => void } | null>(null);
 
 const images = computed(() => props.images ?? []);
 const amenities = computed(() => props.amenities ?? []);
+const panoramaUrl = computed(() => props.panoramaUrl?.trim() || "");
 </script>
 
 <style scoped>
@@ -194,6 +220,23 @@ const amenities = computed(() => props.amenities ?? []);
   isolation: isolate;
   color: inherit;
   text-decoration: none;
+}
+
+.room-offer__hit {
+  display: block;
+  height: 100%;
+  min-width: 0;
+  max-width: 100%;
+  color: inherit;
+  text-decoration: none;
+}
+
+.room-offer__controls {
+  position: absolute;
+  right: 0.55rem;
+  bottom: 0.55rem;
+  z-index: 5;
+  max-width: calc(100% - 1.1rem);
 }
 
 /* Stacked: fixed 16:10 plane — never stretch/fill the whole card. */
