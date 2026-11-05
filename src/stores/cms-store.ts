@@ -7,6 +7,7 @@ import {
   createRatePlan,
   createRoomType,
   destroyHotel,
+  RoomPanoramaUploadError,
   destroyLocation,
   destroyRatePlan,
   destroyRoomType,
@@ -724,6 +725,10 @@ export const useCmsStore = defineStore("cms", () => {
     amenities?: string[];
     baseInventory?: number;
     status?: ContentStatus;
+    /** New 360° file. Sent as multipart field `panorama`. */
+    panoramaFile?: File | null;
+    /** PATCH `remove_panorama=1`. Ignored when a new file is sent. */
+    removePanorama?: boolean;
   }) {
     const payload = omitUndefined({
       name: input.name,
@@ -740,13 +745,26 @@ export const useCmsStore = defineStore("cms", () => {
       baseInventory: input.baseInventory,
       status: input.status
     });
-    const saved = input.id
-      ? await updateRoomType(
-          input.id,
-          payload as Parameters<typeof updateRoomType>[1]
-        )
-      : await createRoomType(payload as Parameters<typeof createRoomType>[0]);
-    return patchList(roomTypes, saved);
+    const file = input.panoramaFile instanceof File ? input.panoramaFile : null;
+    const write = {
+      ...payload,
+      ...(file ? { panoramaFile: file } : {}),
+      ...(input.removePanorama && !file ? { removePanorama: true } : {})
+    };
+    try {
+      const saved = input.id
+        ? await updateRoomType(
+            input.id,
+            write as Parameters<typeof updateRoomType>[1]
+          )
+        : await createRoomType(write as Parameters<typeof createRoomType>[0]);
+      return patchList(roomTypes, saved);
+    } catch (error) {
+      if (error instanceof RoomPanoramaUploadError) {
+        patchList(roomTypes, error.room);
+      }
+      throw error;
+    }
   }
 
   async function deleteRoom(id: string) {

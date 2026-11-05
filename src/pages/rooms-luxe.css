@@ -725,10 +725,12 @@
 
 .rooms-luxe .stage__nav {
   display: flex;
+  align-items: center;
   gap: 0.45rem;
+  margin-left: auto;
 }
 
-.rooms-luxe .stage__nav button,
+.rooms-luxe .stage__nav button:not(.pano-btn),
 .rooms-luxe .lb__close,
 .rooms-luxe .lb__nav {
   display: inline-flex;
@@ -823,6 +825,13 @@
   width: 100%;
   max-height: calc(100svh - 7rem);
   object-fit: contain;
+}
+
+.rooms-luxe .lb__pano {
+  position: absolute;
+  right: 1rem;
+  bottom: max(3.4rem, calc(env(safe-area-inset-bottom) + 2.8rem));
+  z-index: 3;
 }
 
 .rooms-luxe .lb__count {

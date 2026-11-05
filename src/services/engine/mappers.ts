@@ -377,6 +377,13 @@ export interface EngineRoomType {
   amenities?: string[];
   baseInventory?: number | null;
   status: string;
+  /**
+   * RoomTypeResource. Full equirectangular URL, or null when the room has
+   * no 360° photo. Absent on older payloads — treat that as null.
+   * Present on GET /catalog roomTypes[], availability roomType, and
+   * GET /admin/room-types(/{id}).
+   */
+  panoramaUrl?: string | null;
 }
 
 export interface EngineRatePlan {
@@ -390,6 +397,13 @@ export interface EngineRatePlan {
   taxPercent?: number | null;
   serviceFeePercent?: number | null;
   status: string;
+}
+
+/** Keep a hosted URL. Anything missing, blank, or non-string becomes null. */
+function mapOptionalUrl(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return trimmed || null;
 }
 
 export function mapEngineRoomType(row: EngineRoomType): RoomType {
@@ -411,7 +425,8 @@ export function mapEngineRoomType(row: EngineRoomType): RoomType {
     maxGuests: row.maxGuests ?? 2,
     amenities: row.amenities ?? [],
     baseInventory: row.baseInventory ?? 0,
-    status: asStatus(row.status)
+    status: asStatus(row.status),
+    panoramaUrl: mapOptionalUrl(row.panoramaUrl)
   };
 }
 

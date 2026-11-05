@@ -564,6 +564,17 @@
           :folder="roomUploadFolder"
         />
       </AdminFormSection>
+      <AdminFormSection
+        title="360° photo"
+        hint="Optional equirectangular photo. Guests can look around the room when this is set."
+      >
+        <AdminPanoramaField
+          v-if="roomDialog"
+          :key="`${roomEditing ?? 'new'}-${roomDialog}`"
+          :existing-url="roomPanoramaExisting"
+          @change="onRoomPanoramaChange"
+        />
+      </AdminFormSection>
       <AdminFormSection title="Details">
         <q-input
           v-model="roomForm.description"
@@ -642,6 +653,7 @@ import AdminFormSection from "@/components/admin/AdminFormSection.vue";
 import AdminPageHeader from "@/components/admin/AdminPageHeader.vue";
 import AmenitiesEditor from "@/components/admin/AmenitiesEditor.vue";
 import CatalogChipSelect from "@/components/admin/CatalogChipSelect.vue";
+import AdminPanoramaField from "@/components/admin/AdminPanoramaField.vue";
 import GalleryEditor from "@/components/admin/GalleryEditor.vue";
 import ImageDropField from "@/components/admin/ImageDropField.vue";
 import LandmarksEditor from "@/components/admin/LandmarksEditor.vue";
@@ -653,6 +665,7 @@ import {
   type CatalogService
 } from "@/services/engine/adminCatalogEntities";
 import { useAuthStore } from "@/stores/auth-store";
+import { RoomPanoramaUploadError } from "@/services/engine/adminCatalog";
 import { useCmsStore } from "@/stores/cms-store";
 import type {
   ContentStatus,
@@ -1058,6 +1071,9 @@ const roomDialog = ref(false);
 const roomEditing = ref<string | null>(null);
 const roomImages = ref<string[]>([]);
 const roomAmenities = ref<string[]>([]);
+const roomPanoramaFile = ref<File | null>(null);
+const roomRemovePanorama = ref(false);
+const roomPanoramaExisting = ref<string | null>(null);
 const roomForm = reactive({
   hotelId: "",
   name: "",
@@ -1090,6 +1106,9 @@ function openCreateRoom(hotelId: string) {
   roomForm.status = "draft";
   roomImages.value = [];
   roomAmenities.value = [];
+  roomPanoramaFile.value = null;
+  roomRemovePanorama.value = false;
+  roomPanoramaExisting.value = null;
   roomDialog.value = true;
 }
 
@@ -1107,7 +1126,15 @@ function openEditRoom(room: RoomType) {
   roomForm.status = room.status;
   roomImages.value = [...room.images];
   roomAmenities.value = [...room.amenities];
+  roomPanoramaFile.value = null;
+  roomRemovePanorama.value = false;
+  roomPanoramaExisting.value = room.panoramaUrl;
   roomDialog.value = true;
+}
+
+function onRoomPanoramaChange(payload: { file: File | null; clear: boolean }) {
+  roomPanoramaFile.value = payload.file;
+  roomRemovePanorama.value = payload.clear && !payload.file;
 }
 
 function saveRoom() {
@@ -1121,11 +1148,20 @@ function saveRoom() {
         ...(roomEditing.value ? { id: roomEditing.value } : {}),
         ...roomForm,
         images: roomImages.value.filter(Boolean),
-        amenities: roomAmenities.value
+        amenities: roomAmenities.value,
+        ...(roomPanoramaFile.value
+          ? { panoramaFile: roomPanoramaFile.value }
+          : {}),
+        ...(roomRemovePanorama.value && !roomPanoramaFile.value
+          ? { removePanorama: true }
+          : {})
       });
       roomDialog.value = false;
       $q.notify({ type: "positive", message: "Room saved." });
     } catch (e) {
+      if (e instanceof RoomPanoramaUploadError && !roomEditing.value) {
+        roomEditing.value = e.room.id;
+      }
       $q.notify({
         type: "negative",
         message: e instanceof Error ? e.message : "Save failed."
