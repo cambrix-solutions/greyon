@@ -11,6 +11,9 @@ declare module "*.png" {
   export default src;
 }
 
+declare module "pannellum";
+declare module "pannellum/build/pannellum.css";
+
 interface ImportMetaEnv {
   readonly VITE_USE_API?: string;
   readonly VITE_APP_MODE?: string;

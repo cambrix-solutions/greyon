@@ -189,7 +189,10 @@ export const useBookingStore = defineStore("booking", () => {
       errorMessage.value = "";
 
       // Legacy drafts that still point at Find a stay (step 1) land on Choose a room.
-      let nextStep = Math.min(Math.max(2, draft.step === 1 ? 2 : draft.step), 5);
+      let nextStep = Math.min(
+        Math.max(2, draft.step === 1 ? 2 : draft.step),
+        5
+      );
       if (nextStep >= 3 && !selected.value) nextStep = 2;
       if (!results.value.length && !selected.value) nextStep = 2;
       step.value = nextStep;

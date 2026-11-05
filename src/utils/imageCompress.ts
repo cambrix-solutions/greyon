@@ -117,3 +117,42 @@ export async function prepareImageForUpload(
     lastModified: Date.now()
   });
 }
+
+/** Equirectangular photos need a longer edge than a gallery still. */
+export const PANORAMA_LONG_EDGE = 4096;
+/** Engine limit for multipart field `panorama`. */
+export const PANORAMA_MAX_BYTES = 15 * 1024 * 1024;
+export const PANORAMA_ACCEPT_ATTR = "image/jpeg,image/webp,.jpg,.jpeg,.webp";
+
+function isPanoramaFile(file: File): boolean {
+  const type = (file.type || "").toLowerCase();
+  if (type === "image/jpeg" || type === "image/webp") return true;
+  if (type === "image/png") return false;
+  return /\.(jpe?g|webp)$/i.test(file.name);
+}
+
+/** JPG or WebP, at most 15 MB — the engine rejects anything else. */
+export function validatePanoramaFile(file: File): string | null {
+  if (!isPanoramaFile(file)) return "Use a JPG or WebP 360° photo.";
+  if (file.size > PANORAMA_MAX_BYTES) {
+    return "That 360° photo is too large (max 15 MB).";
+  }
+  return null;
+}
+
+/**
+ * JPG/WebP only, 15 MB cap, 4096px long edge so a 360° photo stays usable.
+ * Returns a file ready for the multipart `panorama` part.
+ */
+export async function preparePanoramaFile(file: File): Promise<File> {
+  const validation = validatePanoramaFile(file);
+  if (validation) throw new Error(validation);
+  const prepared = await prepareImageForUpload(file, {
+    longEdge: PANORAMA_LONG_EDGE,
+    quality: 0.86
+  });
+  if (!isPanoramaFile(prepared) || prepared.size > PANORAMA_MAX_BYTES) {
+    throw new Error("That 360° photo is too large (max 15 MB).");
+  }
+  return prepared;
+}

@@ -180,6 +180,11 @@ export interface RoomType {
   amenities: string[];
   baseInventory: number;
   status: ContentStatus;
+  /**
+   * Equirectangular 360° photo. Null when the engine omits `panoramaUrl`
+   * or sends null/blank. The write field is multipart `panorama`, not this URL.
+   */
+  panoramaUrl: string | null;
 }
 
 export interface RatePlan {

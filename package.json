@@ -23,6 +23,7 @@
   "dependencies": {
     "@quasar/extras": "^2.0.4",
     "leaflet": "^1.9.4",
+    "pannellum": "^2.5.6",
     "pinia": "^4.0.2",
     "quasar": "^2.30.0",
     "vue": "^3.5.22",

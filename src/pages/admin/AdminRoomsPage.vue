@@ -296,6 +296,17 @@
           :folder="roomUploadFolder"
         />
       </AdminFormSection>
+      <AdminFormSection
+        title="360° photo"
+        hint="Optional equirectangular photo. Guests can look around the room when this is set."
+      >
+        <AdminPanoramaField
+          v-if="dialog"
+          :key="`${editing ?? 'new'}-${dialog}`"
+          :existing-url="panoramaExisting"
+          @change="onPanoramaChange"
+        />
+      </AdminFormSection>
       <template #actions>
         <q-btn flat no-caps label="Cancel" v-close-popup />
         <q-btn
@@ -324,9 +335,11 @@ import AdminDialog from "@/components/admin/AdminDialog.vue";
 import AdminEntityActions from "@/components/admin/AdminEntityActions.vue";
 import AdminFormSection from "@/components/admin/AdminFormSection.vue";
 import AdminPageHeader from "@/components/admin/AdminPageHeader.vue";
+import AdminPanoramaField from "@/components/admin/AdminPanoramaField.vue";
 import AmenitiesEditor from "@/components/admin/AmenitiesEditor.vue";
 import GalleryEditor from "@/components/admin/GalleryEditor.vue";
 import { useAuthStore } from "@/stores/auth-store";
+import { RoomPanoramaUploadError } from "@/services/engine/adminCatalog";
 import { useCmsStore } from "@/stores/cms-store";
 import type { ContentStatus, RoomType } from "@/types/greyon";
 import { uploadFolder } from "@/utils/uploadFolder";
@@ -340,6 +353,9 @@ const dialog = ref(false);
 const editing = ref<string | null>(null);
 const images = ref<string[]>([]);
 const amenities = ref<string[]>([]);
+const panoramaFile = ref<File | null>(null);
+const removePanorama = ref(false);
+const panoramaExisting = ref<string | null>(null);
 const query = ref("");
 const hotelFilter = ref("all");
 const statusFilter = ref("all");
@@ -450,6 +466,14 @@ function resetForm(hotelId?: string) {
   form.status = "draft";
   images.value = [];
   amenities.value = [];
+  panoramaFile.value = null;
+  removePanorama.value = false;
+  panoramaExisting.value = null;
+}
+
+function onPanoramaChange(payload: { file: File | null; clear: boolean }) {
+  panoramaFile.value = payload.file;
+  removePanorama.value = payload.clear && !payload.file;
 }
 
 function openEdit(room: RoomType) {
@@ -466,6 +490,9 @@ function openEdit(room: RoomType) {
   form.status = room.status;
   images.value = [...room.images];
   amenities.value = [...room.amenities];
+  panoramaFile.value = null;
+  removePanorama.value = false;
+  panoramaExisting.value = room.panoramaUrl;
   dialog.value = true;
 }
 
@@ -480,11 +507,18 @@ function save() {
         ...(editing.value ? { id: editing.value } : {}),
         ...form,
         images: images.value.filter(Boolean),
-        amenities: amenities.value
+        amenities: amenities.value,
+        ...(panoramaFile.value ? { panoramaFile: panoramaFile.value } : {}),
+        ...(removePanorama.value && !panoramaFile.value
+          ? { removePanorama: true }
+          : {})
       });
       dialog.value = false;
       $q.notify({ type: "positive", message: "Room saved." });
     } catch (e) {
+      if (e instanceof RoomPanoramaUploadError && !editing.value) {
+        editing.value = e.room.id;
+      }
       $q.notify({
         type: "negative",
         message: e instanceof Error ? e.message : "Save failed."

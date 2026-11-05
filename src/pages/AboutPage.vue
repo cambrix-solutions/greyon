@@ -39,8 +39,8 @@
           </h1>
           <p v-reveal="{ delay: '80ms' }" class="mask__lead">
             Greyon is a Cambodia hospitality brand focused on calm, modern stays
-            — from city apartels to serviced apartments — with booking that stays
-            simple for guests and teams.
+            — from city apartels to serviced apartments — with booking that
+            stays simple for guests and teams.
           </p>
           <p v-reveal="{ delay: '140ms' }" class="mask__body">
             We design each property around the destination: clear rooms,

@@ -433,6 +433,21 @@ Scoped via `hotelId`.
 
 Fields: `hotelId`, `name`, `slug`, `description`, `images[]`, `bedType`, `roomSize`, `maxAdults`, `maxChildren`, `maxGuests`, `amenities[]`, `baseInventory`, `status`
 
+**360° photo** (`room_types`, RoomTypeResource)
+
+Read `panoramaUrl`: full URL or `null` (omit is treated as null).
+
+- `GET /catalog` → `roomTypes[].panoramaUrl`
+- `GET /availability` → `results[].roomType.panoramaUrl`
+- `GET /admin/room-types` and `GET /admin/room-types/{id}`
+
+Write (`room_types`):
+
+- `POST /admin/room-types` and `PATCH /admin/room-types/{id}` accept multipart field `panorama` (jpg/jpeg/webp, max 15 MB). A new file replaces the stored photo.
+- `PATCH /admin/room-types/{id}` with `remove_panorama=1` (JSON `1` or form field) deletes it. A file in the same request wins.
+- Omit both to leave the stored photo unchanged.
+- Response `roomType.panoramaUrl` is the new full URL or `null`.
+
 ### Rate plans — perm `rates`
 
 Scoped via room → hotel.
