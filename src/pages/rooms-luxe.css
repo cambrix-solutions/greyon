@@ -730,9 +730,7 @@
   margin-left: auto;
 }
 
-.rooms-luxe .stage__nav button:not(.pano-btn),
-.rooms-luxe .lb__close,
-.rooms-luxe .lb__nav {
+.rooms-luxe .stage__nav button:not(.pano-btn) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -796,56 +794,198 @@
   object-fit: cover;
 }
 
-.rooms-luxe .lb {
+/* q-dialog teleports to <body>, so these rules must not depend on .rooms-luxe. */
+.q-dialog:has(.room-lb) {
+  z-index: 8000 !important;
+}
+
+.q-dialog:has(.room-lb) .q-dialog__backdrop {
+  background: var(--gy-forest);
+}
+
+.q-dialog:has(.room-lb) .q-dialog__inner {
+  overflow: hidden;
+}
+
+.q-dialog:has(.room-lb) .q-dialog__inner > .room-lb {
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+  max-height: 100dvh !important;
+  overflow: hidden !important;
+  background: var(--gy-forest);
+  box-shadow: none;
+  border-radius: 0;
+}
+
+html:has(.room-lb),
+body:has(.room-lb) {
+  overflow: hidden !important;
+}
+
+.room-lb {
+  --lb-pad-x: 4.5rem;
+  --lb-pad-y: 5rem;
   position: relative;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 0.5rem;
+  place-items: center;
+  box-sizing: border-box;
   width: 100%;
   height: 100%;
-  padding: 1rem;
-  background: #100e0c;
-}
-
-.rooms-luxe .lb__close {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  z-index: 2;
-}
-
-.rooms-luxe .lb figure {
-  margin: 0;
   min-width: 0;
+  min-height: 0;
+  max-width: 100vw;
+  max-height: 100vh;
+  max-height: 100dvh;
+  padding: var(--lb-pad-y) var(--lb-pad-x);
+  overflow: hidden;
+  background: var(--gy-forest);
+  color: var(--gy-gold);
 }
 
-.rooms-luxe .lb img {
-  display: block;
+.room-lb .lb__stage {
+  display: grid;
+  place-items: center;
   width: 100%;
-  max-height: calc(100svh - 7rem);
-  object-fit: contain;
-}
-
-.rooms-luxe .lb__pano {
-  position: absolute;
-  right: 1rem;
-  bottom: max(3.4rem, calc(env(safe-area-inset-bottom) + 2.8rem));
-  z-index: 3;
-}
-
-.rooms-luxe .lb__count {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 1rem;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
   margin: 0;
-  text-align: center;
+}
+
+.room-lb .lb__img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: min(100%, calc(100vw - (2 * var(--lb-pad-x))));
+  max-height: min(100%, calc(100vh - (2 * var(--lb-pad-y))));
+  max-height: min(100%, calc(100dvh - (2 * var(--lb-pad-y))));
+  object-fit: contain;
+  object-position: center center;
+  animation: room-lb-settle 0.28s ease;
+}
+
+.room-lb .lb__close,
+.room-lb .lb__nav {
+  position: absolute;
+  z-index: 2;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--gy-gold);
+  border-radius: 999px;
+  background: var(--gy-forest);
+  color: var(--gy-gold);
+  cursor: pointer;
+  transition:
+    background-color 0.18s ease,
+    color 0.18s ease;
+}
+
+.room-lb .lb__close:hover,
+.room-lb .lb__close:focus-visible,
+.room-lb .lb__nav:hover,
+.room-lb .lb__nav:focus-visible {
+  background: var(--gy-gold);
+  color: var(--gy-forest);
+}
+
+.room-lb .lb__close:focus-visible,
+.room-lb .lb__nav:focus-visible {
+  outline: 2px solid var(--gy-gold);
+  outline-offset: 3px;
+}
+
+.room-lb .lb__close {
+  top: max(0.75rem, env(safe-area-inset-top));
+  right: max(0.75rem, env(safe-area-inset-right));
+}
+
+.room-lb .lb__nav--prev {
+  top: 50%;
+  left: max(0.75rem, env(safe-area-inset-left));
+  transform: translateY(-50%);
+}
+
+.room-lb .lb__nav--next {
+  top: 50%;
+  right: max(0.75rem, env(safe-area-inset-right));
+  transform: translateY(-50%);
+}
+
+.room-lb .lb__count {
+  position: absolute;
+  left: 50%;
+  bottom: max(0.85rem, env(safe-area-inset-bottom));
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  max-width: calc(100% - 8rem);
+  min-height: 44px;
+  margin: 0;
+  padding: 0 0.5rem;
+  transform: translateX(-50%);
   font-family: var(--font-display);
+  font-size: 1rem;
   font-weight: 700;
+  line-height: 1;
   letter-spacing: -0.02em;
-  font-size: 1.3rem;
-  color: #fff;
+  color: var(--gy-gold);
+  pointer-events: none;
+}
+
+.room-lb button.lb__pano {
+  position: absolute;
+  right: max(0.75rem, env(safe-area-inset-right));
+  bottom: max(0.85rem, env(safe-area-inset-bottom));
+  z-index: 3;
+  box-sizing: border-box;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  background: var(--gy-forest);
+  color: var(--gy-gold);
+  border-color: var(--gy-gold);
+  box-shadow: none;
+}
+
+@media (max-width: 480px) {
+  .room-lb {
+    --lb-pad-x: 0.75rem;
+    --lb-pad-y: 4.5rem;
+  }
+}
+
+@keyframes room-lb-settle {
+  from {
+    opacity: 0.65;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .room-lb .lb__img {
+    animation-duration: 0.01s;
+  }
+
+  .room-lb .lb__close,
+  .room-lb .lb__nav,
+  .room-lb button.lb__pano {
+    transition-duration: 0.01s;
+  }
 }
 
 /* ---- Dossier + sticky price ---- */

@@ -334,7 +334,7 @@
       transition-hide="fade"
     >
       <div
-        class="lb"
+        class="lb room-lb"
         role="dialog"
         aria-label="Room photo gallery"
         @keydown="onStageKey"
@@ -350,15 +350,17 @@
         <button
           v-if="photos.length > 1"
           type="button"
-          class="lb__nav"
+          class="lb__nav lb__nav--prev"
           aria-label="Previous photo"
           @click="stepPhoto(-1)"
         >
           <q-icon name="chevron_left" size="28px" />
         </button>
-        <figure>
+        <figure class="lb__stage">
           <img
             v-if="activeSrc"
+            :key="activeSrc"
+            class="lb__img"
             :src="activeSrc"
             :alt="`${room.name} photo ${activePhoto + 1}`"
           />
@@ -366,13 +368,15 @@
         <button
           v-if="photos.length > 1"
           type="button"
-          class="lb__nav"
+          class="lb__nav lb__nav--next"
           aria-label="Next photo"
           @click="stepPhoto(1)"
         >
           <q-icon name="chevron_right" size="28px" />
         </button>
-        <p class="lb__count">{{ activePhoto + 1 }} / {{ photos.length }}</p>
+        <p class="lb__count" aria-live="polite">
+          {{ activePhoto + 1 }} / {{ photos.length }}
+        </p>
         <RoomPanoramaButton class="lb__pano" @open="openPanorama" />
       </div>
     </q-dialog>
