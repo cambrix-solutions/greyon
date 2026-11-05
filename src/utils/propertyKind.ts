@@ -42,7 +42,9 @@ export const SERVICE_TYPE_ITEMS: readonly ServiceTypeNavItem[] = [
 ] as const;
 
 export function serviceTypeLabel(slug: string): string {
-  return SERVICE_TYPE_ITEMS.find(item => item.slug === slug)?.label ?? "Services";
+  return (
+    SERVICE_TYPE_ITEMS.find(item => item.slug === slug)?.label ?? "Services"
+  );
 }
 
 export function isServiceTypeSlug(value: string): value is ServiceTypeSlug {
