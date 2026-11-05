@@ -53,12 +53,12 @@
           :room-size="room.roomSize"
           :max-guests="room.maxGuests"
         />
-        <div v-if="photos.length > 1 || panoramaUrl" class="stage__tools">
+        <div class="stage__tools">
           <p v-if="photos.length > 1" class="stage__pos" aria-live="polite">
             {{ pad(activePhoto + 1) }} / {{ pad(photos.length) }}
           </p>
           <div class="stage__nav">
-            <RoomPanoramaButton v-if="panoramaUrl" @open="panoOpen = true" />
+            <RoomPanoramaButton @open="openPanorama" />
             <template v-if="photos.length > 1">
               <button
                 type="button"
@@ -373,11 +373,7 @@
           <q-icon name="chevron_right" size="28px" />
         </button>
         <p class="lb__count">{{ activePhoto + 1 }} / {{ photos.length }}</p>
-        <RoomPanoramaButton
-          v-if="panoramaUrl"
-          class="lb__pano"
-          @open="panoOpen = true"
-        />
+        <RoomPanoramaButton class="lb__pano" @open="openPanorama" />
       </div>
     </q-dialog>
 
@@ -387,6 +383,7 @@
       :src="panoramaUrl"
       :title="room.name"
     />
+    <RoomPanoramaSoonDialog v-else v-model="panoSoonOpen" />
   </q-page>
 
   <q-page v-else-if="catalogReady" class="dest-luxe rooms-luxe room-state">
@@ -436,6 +433,7 @@ import SectionDivider from "@/components/hotel/SectionDivider.vue";
 import RoomFacts from "@/components/RoomFacts.vue";
 import RoomPanoramaButton from "@/components/RoomPanoramaButton.vue";
 import RoomPanoramaDialog from "@/components/RoomPanoramaDialog.vue";
+import RoomPanoramaSoonDialog from "@/components/RoomPanoramaSoonDialog.vue";
 import SeoHead from "@/components/SeoHead.vue";
 import { useBookingStore } from "@/stores/booking-store";
 import { useCmsStore } from "@/stores/cms-store";
@@ -450,6 +448,7 @@ const catalogReady = ref(false);
 const activePhoto = ref(0);
 const galleryOpen = ref(false);
 const panoOpen = ref(false);
+const panoSoonOpen = ref(false);
 
 const stageFrame = ref<HTMLElement | null>(null);
 const stageOffset = useParallax(stageFrame, 120);
@@ -509,6 +508,7 @@ watch(room, () => {
   activePhoto.value = 0;
   galleryOpen.value = false;
   panoOpen.value = false;
+  panoSoonOpen.value = false;
 });
 
 const photos = computed(() => {
@@ -520,6 +520,14 @@ const photos = computed(() => {
 
 const activeSrc = computed(() => photos.value[activePhoto.value] ?? "");
 const panoramaUrl = computed(() => room.value?.panoramaUrl?.trim() || "");
+
+function openPanorama() {
+  if (panoramaUrl.value) {
+    panoOpen.value = true;
+    return;
+  }
+  panoSoonOpen.value = true;
+}
 
 const coverImage = computed(
   () => photos.value[0] || hotel.value?.heroImage || ""
