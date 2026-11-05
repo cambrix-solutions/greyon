@@ -277,8 +277,12 @@
   margin-top: 1.2rem;
 }
 
-.story-luxe .service-card,
-.story-luxe .reach-card {
+.story-luxe .reach__grid {
+  gap: clamp(1.4rem, 3vw, 2.4rem);
+  margin-top: 1.5rem;
+}
+
+.story-luxe .service-card {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -290,6 +294,20 @@
   background: rgba(255, 252, 247, 0.82);
   box-shadow: 0 22px 48px rgba(22, 19, 16, 0.1);
   backdrop-filter: blur(16px) saturate(1.2);
+}
+
+.story-luxe .reach-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.65rem;
+  min-width: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
 .story-luxe .service-card h3,
@@ -338,6 +356,10 @@
 
 .story-luxe .reach__head {
   margin-bottom: 0.2rem;
+}
+
+.story-luxe .reach__social {
+  margin-top: 1rem;
 }
 
 /* ---- Contact band ---- */

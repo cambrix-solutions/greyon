@@ -2,7 +2,7 @@
   <q-page class="gy-section sitemap-page">
     <SeoHead
       title="Sitemap | Greyon"
-      description="Browse every public Greyon page — hotels, apartments, destinations, booking, and policies."
+      description="Browse every public Greyon page — apartels, apartments, destinations, booking, and policies."
       url="https://greyon.site/sitemap"
     />
     <div class="gy-container">
@@ -11,7 +11,7 @@
         <h1 class="gy-display page-title">Sitemap</h1>
         <p class="lead">
           Every public page on Greyon, grouped the way you’d look for a stay.
-          Hotels, apartments, destinations, and news come from the published
+          Apartels, apartments, destinations, and news come from the published
           catalog. Pages that are turned off are left out.
         </p>
         <p class="canonical-row">
@@ -124,7 +124,11 @@ const groups = computed<SitemapGroup[]>(() => {
   }
 
   const hotels: SitemapLink[] = [
-    { label: "Hotels", path: "/hotels" },
+    { label: "Apartels", path: "/hotels" },
+    { label: "Serviced Apartment", path: "/services/serviced-apartment" },
+    { label: "Apartel", path: "/services/apartel" },
+    { label: "Boutique", path: "/services/boutique" },
+    { label: "Resort", path: "/services/resort" },
     ...propertyLinks(filterHotelServices(cms.publishedHotels))
   ];
   const apartments: SitemapLink[] = [
@@ -169,8 +173,8 @@ const groups = computed<SitemapGroup[]>(() => {
     { id: "main", title: "Main pages", icon: "home", links: main },
     {
       id: "hotels",
-      title: "Services / Hotels",
-      icon: "hotel",
+      title: "Services / Apartels",
+      icon: "apartment",
       links: hotels
     },
     {

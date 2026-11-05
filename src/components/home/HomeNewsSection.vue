@@ -34,16 +34,20 @@
           <time v-if="lead.publishedAt" :datetime="lead.publishedAt">{{
             dateLabel(lead.publishedAt)
           }}</time>
-          <span v-if="lead.locationName">{{ lead.locationName }}</span>
         </p>
         <router-link :to="`/news/${lead.slug}`" class="stage__headline">
           {{ lead.title }}
         </router-link>
-      </div>
-      <div v-if="lead.excerpt" class="glass-frame stage__card">
-        <div class="glass-frame__in stage__card-in">
-          <p>{{ lead.excerpt }}</p>
-        </div>
+        <p v-if="leadDescription" class="stage__excerpt">{{
+          leadDescription
+        }}</p>
+        <ul
+          v-if="leadTags.length"
+          class="stage__tags"
+          :aria-label="leadHasTags ? 'Story tags' : 'Destination'"
+        >
+          <li v-for="tag in leadTags" :key="tag">{{ tag }}</li>
+        </ul>
       </div>
     </div>
 
@@ -62,7 +66,19 @@
             loading="lazy"
           />
         </span>
-        <span class="news__card-title">{{ item.title }}</span>
+        <span class="news__card-copy">
+          <span class="news__card-title">{{ item.title }}</span>
+          <span v-if="previewOf(item)" class="news__card-excerpt">{{
+            previewOf(item)
+          }}</span>
+          <ul
+            v-if="tagsOf(item).length"
+            class="news__card-tags"
+            :aria-label="item.tags?.length ? 'Story tags' : 'Destination'"
+          >
+            <li v-for="tag in tagsOf(item)" :key="tag">{{ tag }}</li>
+          </ul>
+        </span>
       </router-link>
     </div>
   </section>
@@ -74,7 +90,9 @@ import { useI18n } from "vue-i18n";
 import RevealWords from "@/components/home/RevealWords.vue";
 import { useTilt } from "@/components/home/useTilt";
 import { useCmsStore } from "@/stores/cms-store";
+import type { NewsArticle } from "@/types/greyon";
 import { formatDate } from "@/utils/datetime";
+import { newsPreviewTags, newsPreviewText } from "@/utils/newsPreview";
 
 const cms = useCmsStore();
 const { locale } = useI18n();
@@ -83,6 +101,22 @@ const { onMove, onLeave } = useTilt();
 const articles = computed(() => cms.publishedNews.slice(0, 3));
 const lead = computed(() => articles.value[0] ?? null);
 const rest = computed(() => articles.value.slice(1));
+
+/** Excerpt, summary, or SEO description; otherwise a truncated body. */
+const leadDescription = computed(() => newsPreviewText(lead.value));
+
+const leadHasTags = computed(() => Boolean(lead.value?.tags?.length));
+
+/** Engine tags when present; otherwise the article's destination name. */
+const leadTags = computed(() => newsPreviewTags(lead.value));
+
+function previewOf(item: NewsArticle) {
+  return newsPreviewText(item);
+}
+
+function tagsOf(item: NewsArticle) {
+  return newsPreviewTags(item);
+}
 
 function dateLabel(value: string) {
   const loc = locale.value.startsWith("km") ? "km-KH" : "en-GB";
@@ -93,7 +127,7 @@ function dateLabel(value: string) {
 <style scoped>
 .news {
   position: relative;
-  padding: clamp(4.5rem, 8vw, 6.5rem) 0 clamp(4rem, 8vw, 6rem);
+  padding: clamp(3rem, 6vw, 4.5rem) 0 clamp(2.75rem, 5.5vw, 4rem);
   background:
     radial-gradient(
       640px 280px at 0% 20%,
@@ -179,17 +213,23 @@ function dateLabel(value: string) {
   z-index: 2;
   top: 8%;
   left: 0;
-  width: min(62%, 680px);
+  display: grid;
+  gap: 0.85rem;
+  align-content: start;
+  width: min(42%, 480px);
+  max-width: calc(100% - 2rem);
 }
 
 .stage__meta {
   display: flex;
   flex-wrap: wrap;
   gap: 0.55rem 1rem;
+  margin: 0;
 }
 
 .stage__headline {
   display: block;
+  margin: 0;
   font-family: var(--font-display);
   font-size: var(--gy-text-4xl);
   font-weight: 700;
@@ -198,27 +238,34 @@ function dateLabel(value: string) {
   color: var(--gy-forest);
 }
 
-.stage__card {
-  position: absolute;
-  z-index: 3;
-  left: 30%;
-  bottom: 9%;
-  width: min(440px, 46%);
-  transform: rotate(-3deg);
-}
-
-.stage__card-in {
-  padding: 1.25rem 1.35rem;
-  color: #f6f1e7;
-}
-
-.stage__card-in p {
+.stage__excerpt {
   margin: 0;
   font-family: var(--font-body);
-  font-size: var(--gy-text-xl);
+  font-size: var(--gy-text-lead);
   font-weight: 400;
   letter-spacing: normal;
-  line-height: 1.35;
+  line-height: 1.5;
+  color: var(--gy-forest);
+}
+
+.stage__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stage__tags li {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gy-gold);
+  border-bottom: 1px solid var(--gy-gold);
+  padding-bottom: 0.15rem;
 }
 
 .news__rest {
@@ -231,6 +278,8 @@ function dateLabel(value: string) {
 
 .news__card {
   flex: 0 0 min(70vw, 24rem);
+  min-width: 0;
+  max-width: 100%;
   color: inherit;
 }
 
@@ -248,15 +297,50 @@ function dateLabel(value: string) {
   object-fit: cover;
 }
 
+.news__card-copy {
+  display: grid;
+  gap: 0.45rem;
+  margin-top: 0.75rem;
+  min-width: 0;
+}
+
 .news__card-title {
   display: block;
-  margin-top: 0.75rem;
   font-family: var(--font-display);
   font-size: 1.2rem;
   font-weight: 700;
   letter-spacing: normal;
   line-height: 1.3;
   color: var(--gy-forest);
+  overflow-wrap: break-word;
+}
+
+.news__card-excerpt {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--gy-forest);
+  overflow-wrap: break-word;
+}
+
+.news__card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.7rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.news__card-tags li {
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gy-gold);
 }
 
 .stage__photo:focus-visible,
@@ -291,25 +375,17 @@ function dateLabel(value: string) {
   .stage__copy {
     position: static;
     width: auto;
+    max-width: none;
     order: 1;
   }
 
   .stage__headline {
     font-size: var(--gy-text-4xl);
   }
-
-  .stage__card {
-    position: static;
-    width: 100%;
-    order: 3;
-    transform: none;
-    margin-top: -4.5rem;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .stage__photo,
-  .stage__card {
+  .stage__photo {
     transition: none;
     transform: none;
   }

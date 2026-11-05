@@ -158,7 +158,7 @@
           >
             <header class="account-block__head account-block__head--pad">
               <div>
-                <p class="gy-eyebrow">Greyon hotels</p>
+                <p class="gy-eyebrow">Greyon apartels</p>
                 <h2 class="gy-display account-block__title"
                   >Stay inspiration</h2
                 >
@@ -254,7 +254,7 @@ function locationName(locationId: string) {
 }
 
 function hotelLabel(hotelId: string) {
-  return cms.getHotelById(hotelId)?.name ?? "Greyon hotel";
+  return cms.getHotelById(hotelId)?.name ?? "Greyon apartel";
 }
 
 function roomLabel(roomTypeId: string) {

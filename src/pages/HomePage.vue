@@ -1,20 +1,40 @@
 <template>
   <q-page class="home-page">
     <SeoHead
-      title="Greyon | Hotels in Cambodia"
-      description="Discover and book Greyon hotels across Phnom Penh, Siem Reap, Sihanoukville, and more."
+      title="Greyon | Apartels in Cambodia"
+      description="Discover and book Greyon apartels across Phnom Penh, Siem Reap, Sihanoukville, and more."
       :image="heroImage"
     />
 
     <section id="home-hero" class="home-hero">
-      <div class="home-hero__slides" aria-hidden="true">
+      <!-- Client video "for now". Set HERO_VIDEO = false to bring the slider back. -->
+      <div v-if="HERO_VIDEO" class="home-hero__slides" aria-hidden="true">
+        <img
+          v-if="reduceMotion"
+          class="home-hero__image home-hero__video is-static"
+          :src="HERO_POSTER"
+          alt=""
+        />
+        <video
+          v-else
+          class="home-hero__image home-hero__video is-static"
+          :src="heroVideoSrc"
+          :poster="HERO_POSTER"
+          autoplay
+          muted
+          loop
+          playsinline
+          preload="metadata"
+        />
+      </div>
+      <div v-else class="home-hero__slides" aria-hidden="true">
         <img
           v-for="(slide, i) in heroSlides"
           :key="`${slide.id || i}-${slide.src}`"
           class="home-hero__image"
           :class="{ 'is-active': i === heroIndex }"
           :src="slide.src"
-          :alt="slide.alt || 'Greyon hotel stay'"
+          :alt="slide.alt || 'Greyon apartel stay'"
         />
       </div>
       <div class="home-hero__veil" />
@@ -81,7 +101,7 @@
           class="home-hero__search"
         />
         <div
-          v-if="heroSlides.length > 1"
+          v-if="!HERO_VIDEO && heroSlides.length > 1"
           class="home-hero__dots"
           role="tablist"
           aria-label="Hero slides"
@@ -129,6 +149,19 @@ import {
 import { useAuthStore } from "@/stores/auth-store";
 import { useCmsStore } from "@/stores/cms-store";
 
+/** Show the client hero video instead of the image slider (slider code kept below). */
+const HERO_VIDEO = true;
+const HERO_POSTER = "/videos/hero-poster.jpg";
+const heroVideoSrc = ref("");
+const reduceMotion = ref(false);
+let smallQuery: MediaQueryList | null = null;
+
+function pickHeroVideo() {
+  heroVideoSrc.value = smallQuery?.matches
+    ? "/videos/hero-720.mp4"
+    : "/videos/hero-1080.mp4";
+}
+
 const FALLBACK_HERO =
   "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=2000&q=80";
 
@@ -152,7 +185,7 @@ const heroSlides = computed<HomeHeroSlide[]>(() => {
     return published.map(slide => ({
       id: slide.id,
       src: slide.image,
-      alt: slide.title || "Greyon hotel stay",
+      alt: slide.title || "Greyon apartel stay",
       title: slide.title,
       subtitle: slide.subtitle,
       ctaLabel: slide.ctaLabel,
@@ -163,7 +196,7 @@ const heroSlides = computed<HomeHeroSlide[]>(() => {
   if (fallback.length) {
     return fallback.map(slide => ({
       src: slide.src,
-      alt: slide.alt || "Greyon hotel stay",
+      alt: slide.alt || "Greyon apartel stay",
       title: "",
       subtitle: "",
       ctaLabel: "",
@@ -173,7 +206,7 @@ const heroSlides = computed<HomeHeroSlide[]>(() => {
   return [
     {
       src: FALLBACK_HERO,
-      alt: "Greyon hotel stay",
+      alt: "Greyon apartel stay",
       title: "",
       subtitle: "",
       ctaLabel: "",
@@ -213,7 +246,7 @@ function clearTimer() {
 
 function startTimer() {
   clearTimer();
-  if (heroSlides.value.length < 2) return;
+  if (HERO_VIDEO || heroSlides.value.length < 2) return;
   timer = setInterval(() => {
     heroIndex.value = (heroIndex.value + 1) % heroSlides.value.length;
   }, 6500);
@@ -234,6 +267,14 @@ watch(
 );
 
 onMounted(() => {
+  if (HERO_VIDEO) {
+    reduceMotion.value = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+    smallQuery = window.matchMedia("(max-width: 768px)");
+    pickHeroVideo();
+    smallQuery.addEventListener("change", pickHeroVideo);
+  }
   void cms.ensurePublicCatalog();
   void loadPublicHero();
   startTimer();
@@ -248,7 +289,10 @@ async function loadPublicHero() {
   }
 }
 
-onUnmounted(() => clearTimer());
+onUnmounted(() => {
+  clearTimer();
+  smallQuery?.removeEventListener("change", pickHeroVideo);
+});
 </script>
 
 <style scoped>
@@ -291,6 +335,12 @@ onUnmounted(() => clearTimer());
   opacity: 1;
   animation: hero-ken 22s ease-out forwards;
   z-index: 0;
+}
+
+.home-hero__video.is-static {
+  opacity: 1;
+  transform: none;
+  animation: none;
 }
 
 .home-hero__dots {

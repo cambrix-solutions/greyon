@@ -63,8 +63,8 @@ const photo = computed(() => {
 .story {
   position: relative;
   overflow: hidden;
-  padding: clamp(3.5rem, 7vw, 5.5rem) clamp(1.25rem, 6vw, 6rem)
-    clamp(5rem, 8vw, 6.5rem);
+  padding: clamp(2.5rem, 5vw, 3.75rem) clamp(1.25rem, 6vw, 6rem)
+    clamp(1.75rem, 3.5vw, 2.5rem);
   background:
     radial-gradient(
       900px 420px at 12% -10%,
@@ -78,19 +78,6 @@ const photo = computed(() => {
     ),
     #f7f3ec;
   color: var(--gy-forest);
-}
-
-.story::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -1px;
-  z-index: 2;
-  height: 84px;
-  background: #121413;
-  clip-path: ellipse(72% 100% at 50% 100%);
-  pointer-events: none;
 }
 
 .story__grid {
@@ -203,12 +190,12 @@ const photo = computed(() => {
 
 @media (max-width: 860px) {
   .story {
-    padding: 3rem 1.15rem 4.5rem;
+    padding: 2.25rem 1.15rem 1.5rem;
   }
 
   .story__grid {
     grid-template-columns: 1fr;
-    gap: 1.75rem;
+    gap: 1.25rem;
   }
 
   .story__media {

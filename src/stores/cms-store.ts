@@ -100,7 +100,7 @@ export type { MediaItem, SiteSettings };
 const defaultSettings: SiteSettings = {
   siteName: "Greyon",
   defaultTitle: "Greyon | Hotels in Cambodia",
-  defaultDescription: "Discover and book Greyon hotels across Cambodia.",
+  defaultDescription: "Discover and book Greyon apartels across Cambodia.",
   ogImage:
     "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80",
   heroSlides: [

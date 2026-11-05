@@ -5,47 +5,48 @@ export default {
   nav: {
     home: "Home",
     news: "News",
-    hotels: "Hotels",
+    hotels: "Apartels",
     portfolios: "Portfolios",
     location: "Destination",
     booking: "Booking",
     contact: "Contact",
-    bookNow: "Book Now"
+    bookNow: "Book Now",
+    services: "Our Services"
   },
   portfolios: {
-    hotel: "Hotel",
-    serviceApartment: "Service Apartment",
+    hotel: "Apartel",
+    serviceApartment: "Serviced Apartment",
     boutique: "Boutique",
     resort: "Resort",
     comingSoon: "Coming soon",
     comingSoonLead:
       "This portfolio category is planned for a future Greyon release.",
     comingSoonBody:
-      "MVP focuses on Hotel properties only. Service Apartment, Boutique, and Resort will open here once approved for a later phase.",
-    browseHotels: "Browse hotels"
+      "Browse published Greyon stays by service type. Serviced Apartment, Apartel, Boutique, and Resort list properties from the catalog when their type field matches.",
+    browseHotels: "Browse apartels"
   },
   home: {
     subhead:
       "Calm stays across Cambodia’s city lights, coastlines, and quiet countryside.",
-    viewHotels: "View Hotels",
-    featured: "Featured hotels",
+    viewHotels: "View Apartels",
+    featured: "Featured apartels",
     stayWith: "Stay with Greyon",
     exploreBy: "Explore by destination",
     destinationsCount: "0 destinations | 1 destination | {n} destinations",
     storyEyebrow: "The Greyon story",
     storyTitle: "Premium hospitality, locally rooted",
     storyBody:
-      "Greyon presents carefully selected hotel properties across Cambodia. This MVP focuses on hotels — spacious presentation, practical discovery, and a reliable reservation experience.",
-    hotelPortfolio: "Hotel portfolio",
+      "Greyon presents carefully selected apartel properties across Cambodia — spacious presentation, practical discovery, and a reliable reservation experience.",
+    hotelPortfolio: "Apartel portfolio",
     laterPhase:
-      "Service Apartment, Boutique, and Resort categories arrive in a later phase.",
+      "Serviced Apartment, Boutique, and Resort categories appear under Our Services when properties are published with matching types.",
     enquire: "Enquire",
     latestNews: "Latest news",
     fromGreyon: "From Greyon",
     allNews: "All news",
     allFeatured: "All",
     allDestinations: "All destinations",
-    hotelsCount: "0 hotels | 1 hotel | {n} hotels",
+    hotelsCount: "0 apartels | 1 apartel | {n} apartels",
     rooms: "Rooms",
     starClass: "{n}-star",
     checkIn: "Check-in",
@@ -54,7 +55,7 @@ export default {
   },
   booking: {
     paymentNotice:
-      "Online payment is not enabled for this MVP. Submitting creates a reservation request; the hotel confirms your stay and payment is handled offline according to hotel policy.",
+      "Online payment is not enabled for this MVP. Submitting creates a reservation request; the apartel confirms your stay and payment is handled offline according to apartel policy.",
     reservationOnly: "Reservation request (no online payment)"
   },
   lang: {

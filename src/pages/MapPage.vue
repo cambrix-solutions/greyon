@@ -2,7 +2,7 @@
   <q-page class="gy-section map-page">
     <SeoHead
       title="Map | Greyon"
-      description="Explore Greyon hotels across Cambodia on the map. Filter by destination."
+      description="Explore Greyon apartels across Cambodia on the map. Filter by destination."
     />
     <div class="gy-container">
       <header v-reveal class="map-page__head">

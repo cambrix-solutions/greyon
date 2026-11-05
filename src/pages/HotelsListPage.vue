@@ -1,8 +1,8 @@
 <template>
   <q-page class="listing-luxe home-motion">
     <SeoHead
-      title="Hotels | Greyon"
-      description="Browse Greyon hotel portfolio across Cambodia."
+      title="Apartels | Greyon"
+      description="Browse Greyon apartel portfolio across Cambodia."
     />
 
     <section class="mast" data-sheet="Masthead">
@@ -19,7 +19,7 @@
 
       <div class="listing-wrap mast__content">
         <p v-reveal class="eyebrow eyebrow--light">Portfolio</p>
-        <RevealWords tag="h1" text="Greyon hotels" />
+        <RevealWords tag="h1" text="Greyon apartels" />
         <p v-reveal="{ delay: '140ms' }" class="mast__lead">
           Published properties, ready to filter by destination or name.
         </p>
@@ -101,7 +101,7 @@
               <input
                 v-model="keyword"
                 type="search"
-                placeholder="Hotel name"
+                placeholder="Apartel name"
                 autocomplete="off"
                 enterkeyhint="search"
               />
@@ -228,7 +228,7 @@
                   </div>
                 </div>
               </TransitionGroup>
-              <p v-else class="empty">No hotels found.</p>
+              <p v-else class="empty">No apartels found.</p>
             </div>
           </Transition>
         </div>

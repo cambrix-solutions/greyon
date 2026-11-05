@@ -37,7 +37,7 @@
 
       <div class="dest-wrap stage__content">
         <nav class="crumb" aria-label="Breadcrumb">
-          <router-link to="/hotels">Hotels</router-link>
+          <router-link to="/hotels">Apartels</router-link>
           <span aria-hidden="true">/</span>
           <router-link :to="`/hotels/${hotel.slug}`">{{
             hotel.name
@@ -158,7 +158,7 @@
           >
             <p v-reveal class="eyebrow">Also here</p>
             <h2 id="others-title" v-reveal="{ delay: '60ms' }">
-              Other rooms at this hotel
+              Other rooms at this apartel
             </h2>
             <ul ref="otherRail" class="other-rail">
               <li
@@ -373,14 +373,14 @@
   <q-page v-else-if="catalogReady" class="dest-luxe rooms-luxe room-state">
     <SeoHead
       title="Room not found | Greyon"
-      description="We couldn’t find that room. Browse Greyon hotels to continue."
+      description="We couldn’t find that room. Browse Greyon apartels to continue."
     />
     <div class="dest-wrap">
       <p class="eyebrow">Room</p>
       <h1>We couldn’t find that room</h1>
       <p>
         It may have been removed or the link is out of date. Head back to the
-        hotel or browse all Greyon properties.
+        apartel or browse all Greyon properties.
       </p>
       <div class="room-state__actions">
         <router-link
@@ -391,7 +391,7 @@
           Back to {{ hotel.name }}
         </router-link>
         <router-link to="/hotels" class="gy-btn gy-btn--outline">
-          All hotels
+          All apartels
         </router-link>
       </div>
     </div>

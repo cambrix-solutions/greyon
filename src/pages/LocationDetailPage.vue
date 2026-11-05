@@ -36,7 +36,7 @@
             type="button"
             @click="scrollToId('dest-hotels')"
           >
-            See hotels
+            See apartels
           </button>
         </div>
       </div>
@@ -174,14 +174,14 @@
         <div class="stays__intro">
           <p v-reveal class="eyebrow">Stay</p>
           <h2 id="stays-title" v-reveal="{ delay: '60ms' }">
-            Greyon hotels here
+            Greyon apartels here
           </h2>
           <p v-reveal="{ delay: '110ms' }" class="section-lead">
             <template v-if="hotelsHere.length">
               Published properties in {{ location.name }}.
             </template>
             <template v-else>
-              Hotels for this destination will appear once published.
+              Apartels for this destination will appear once published.
             </template>
           </p>
         </div>
@@ -1019,6 +1019,8 @@ function bookHere() {
   }
 
   .photo-card {
+    position: relative;
+    top: auto;
     height: min(58vh, 460px);
     margin-bottom: 2.5rem;
   }

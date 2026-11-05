@@ -2,7 +2,7 @@
   <q-page class="dest-luxe home-motion rooms-luxe news-luxe story-luxe">
     <SeoHead
       title="About | Greyon"
-      description="Greyon is a Cambodia hospitality brand offering hotels and serviced stays."
+      description="Greyon is a Cambodia hospitality brand offering apartels and serviced stays."
       :image="maskImage || undefined"
     />
 
@@ -39,7 +39,7 @@
           </h1>
           <p v-reveal="{ delay: '80ms' }" class="mask__lead">
             Greyon is a Cambodia hospitality brand focused on calm, modern stays
-            — from city hotels to serviced apartments — with booking that stays
+            — from city apartels to serviced apartments — with booking that stays
             simple for guests and teams.
           </p>
           <p v-reveal="{ delay: '140ms' }" class="mask__body">

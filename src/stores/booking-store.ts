@@ -58,7 +58,8 @@ function composeFullName(guest: BookingGuest) {
 }
 
 export const useBookingStore = defineStore("booking", () => {
-  const step = ref(1);
+  // Step 1 (Find a stay) is merged into step 2 (Choose a room).
+  const step = ref(2);
   const search = ref<BookingSearchParams>({
     locationSlug: "",
     hotelSlug: "",
@@ -142,7 +143,7 @@ export const useBookingStore = defineStore("booking", () => {
       clearDraft();
       return;
     }
-    if (step.value <= 1 && !selected.value && !results.value.length) {
+    if (step.value <= 2 && !selected.value && !results.value.length) {
       clearDraft();
       return;
     }
@@ -187,11 +188,10 @@ export const useBookingStore = defineStore("booking", () => {
       guestAttempted.value = false;
       errorMessage.value = "";
 
-      let nextStep = Math.min(Math.max(1, draft.step), 5);
-      if (nextStep >= 3 && !selected.value)
-        nextStep = results.value.length ? 2 : 1;
-      if (nextStep >= 2 && !results.value.length && !selected.value)
-        nextStep = 1;
+      // Legacy drafts that still point at Find a stay (step 1) land on Choose a room.
+      let nextStep = Math.min(Math.max(2, draft.step === 1 ? 2 : draft.step), 5);
+      if (nextStep >= 3 && !selected.value) nextStep = 2;
+      if (!results.value.length && !selected.value) nextStep = 2;
       step.value = nextStep;
       void applyCustomerToGuest();
       return true;
@@ -356,7 +356,7 @@ export const useBookingStore = defineStore("booking", () => {
   }
 
   function resetFlow() {
-    step.value = 1;
+    step.value = 2;
     selected.value = null;
     confirmedBooking.value = null;
     acceptedPolicy.value = false;
@@ -367,7 +367,7 @@ export const useBookingStore = defineStore("booking", () => {
 
   function startFromHotel(hotelSlug: string, locationSlug = "") {
     setSearch({ hotelSlug, locationSlug });
-    step.value = 1;
+    step.value = 2;
     persistDraft();
   }
 

@@ -223,9 +223,13 @@ export interface NewsArticle {
   slug: string;
   coverImage: string;
   excerpt: string;
+  /** Engine `summary` when the payload includes it. */
+  summary?: string;
   body: string;
   publishedAt: string;
   status: ContentStatus;
+  /** Engine `tags` when the payload includes them. */
+  tags?: string[];
   seoTitle?: string;
   seoDescription?: string;
 }

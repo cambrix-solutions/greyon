@@ -194,6 +194,8 @@ function openGallery(idx: number) {
   isolation: isolate;
   width: 100%;
   max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   background: var(--gy-sand);
   aspect-ratio: 16 / 10;
   border-radius: 12px;
@@ -211,8 +213,22 @@ function openGallery(idx: number) {
 .room-media__carousel {
   position: relative;
   z-index: 1;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   height: 100%;
+  overflow: hidden;
   background: transparent;
+}
+
+/* Quasar panels/slides inherit min-width:auto; pin them to the media box. */
+.room-media__carousel :deep(.q-carousel__slides-container),
+.room-media__carousel :deep(.q-panel-parent),
+.room-media__carousel :deep(.q-panel) {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .room-media__carousel :deep(.q-carousel__navigation) {
@@ -246,17 +262,25 @@ function openGallery(idx: number) {
 
 .room-media__slide {
   padding: 0;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   height: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .room-media__tap {
   display: block;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   height: 100%;
   padding: 0;
   border: 0;
   background: transparent;
   cursor: zoom-in;
+  overflow: hidden;
 }
 
 .room-media__tap--static {
@@ -268,6 +292,7 @@ function openGallery(idx: number) {
 .room-gallery__slide img {
   display: block;
   width: 100%;
+  max-width: 100%;
   height: 100%;
   object-fit: cover;
 }

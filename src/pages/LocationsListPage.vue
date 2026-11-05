@@ -138,6 +138,7 @@
         <article
           v-for="(loc, i) in locations"
           :key="loc.id"
+          v-reveal="{ delay: '60ms' }"
           class="index-card glass-edge"
           :style="stackStyle(i)"
         >
@@ -182,7 +183,7 @@
       </div>
       <div class="dest-wrap index__more">
         <router-link class="gy-btn gy-btn--outline" to="/hotels">
-          View hotels
+          View apartels
         </router-link>
       </div>
     </section>
@@ -649,7 +650,9 @@ function scrollToJourney() {
   gap: 1rem;
 }
 
-.index-card {
+/* .dest-luxe .glass-edge sets position: relative, which turned the inline
+   sticky top into a downward offset that pushed cards onto the footer. */
+.dest-luxe .index-card {
   position: sticky;
   overflow: hidden;
   border-radius: 26px;
@@ -828,13 +831,36 @@ function scrollToJourney() {
   }
 }
 
+@media (min-width: 721px) {
+  /* Desktop keeps the sticky stack; only fade so transforms never fight it. */
+  .dest-luxe .index-card.gy-reveal {
+    transform: none;
+  }
+}
+
 @media (max-width: 720px) {
+  /* Sticky stacking flickered on mobile Chrome (toolbar resize + tall cards),
+     so cards sit in normal flow with a short reveal instead. */
+  .dest-luxe .index-card {
+    position: relative;
+    top: auto !important;
+  }
+
+  .dest-luxe .index-card.gy-reveal {
+    transform: translateY(24px);
+  }
+
+  .dest-luxe .index-card.gy-reveal.gy-reveal--in {
+    transform: none;
+  }
+
   .index-card__main {
     grid-template-columns: 1fr;
     min-height: 0;
   }
 
   .index-card__media {
+    width: 100%;
     aspect-ratio: 16 / 10;
     min-height: 0;
     max-height: 14rem;
@@ -860,6 +886,11 @@ function scrollToJourney() {
 
   .journey.is-pin .journey__panel {
     opacity: 1;
+  }
+
+  .dest-luxe .index-card {
+    position: relative;
+    top: auto !important;
   }
 }
 </style>

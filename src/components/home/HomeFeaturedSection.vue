@@ -83,7 +83,7 @@
               </span>
             </p>
             <router-link class="gy-btn gy-btn--light" :to="hotelPath(hotel)">
-              View Hotel
+              View Apartel
             </router-link>
           </div>
         </div>
@@ -93,20 +93,32 @@
     <div
       v-if="rooms.length"
       id="home-rooms"
-      ref="pinSection"
       class="rooms"
-      :class="{ 'is-pinned': pinned }"
       aria-roledescription="carousel"
       :aria-label="$t('home.rooms')"
     >
-      <div class="rooms__sticky">
-        <div class="rooms__head">
-          <p class="eyebrow">{{ $t("home.featured") }}</p>
-          <h2 id="home-rooms-title" class="rooms__title">{{
-            $t("home.rooms")
-          }}</h2>
-        </div>
-        <div ref="roomTrack" class="rooms__track" :style="trackStyle">
+      <div class="rooms__head">
+        <p class="eyebrow">{{ $t("home.featured") }}</p>
+        <h2 id="home-rooms-title" class="rooms__title">{{
+          $t("home.rooms")
+        }}</h2>
+      </div>
+      <div class="rooms__slider">
+        <button
+          type="button"
+          class="rooms-nav rooms-nav--prev"
+          aria-label="Previous rooms"
+          :disabled="!canPrev"
+          @click="scrollRooms(-1)"
+        >
+          <q-icon name="chevron_left" size="26px" />
+        </button>
+        <div
+          ref="roomTrack"
+          class="rooms__track"
+          tabindex="0"
+          @scroll.passive="syncNav"
+        >
           <router-link
             v-for="room in rooms"
             :key="room.id"
@@ -122,27 +134,37 @@
               />
             </span>
             <span class="room__shade">
-              <span class="room__name">{{ room.name }}</span>
-              <span v-if="roomDetail(room)" class="room__detail">{{
-                roomDetail(room)
+              <span class="room__name">{{ cardLabel(room) }}</span>
+              <span v-if="showBed(room)" class="room__beds">{{
+                bedroomLabel(room)
               }}</span>
             </span>
           </router-link>
         </div>
+        <button
+          type="button"
+          class="rooms-nav rooms-nav--next"
+          aria-label="Next rooms"
+          :disabled="!canNext"
+          @click="scrollRooms(1)"
+        >
+          <q-icon name="chevron_right" size="26px" />
+        </button>
       </div>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import FeatureChips from "@/components/FeatureChips.vue";
 import { useDragScroll } from "@/components/home/useDragScroll";
-import { usePinScroll } from "@/components/home/usePinScroll";
 import { useCmsStore } from "@/stores/cms-store";
 import type { Hotel, RoomType } from "@/types/greyon";
 import { formatTime } from "@/utils/datetime";
+import { hostedImage } from "@/utils/hostedImage";
+import { bedLabelAddsDetail, roomWithPropertyLabel } from "@/utils/roomLabel";
 import { roomDetailPath } from "@/utils/roomPath";
 
 const SWIPE_PX = 48;
@@ -150,18 +172,12 @@ const SWIPE_PX = 48;
 const cms = useCmsStore();
 const { t } = useI18n();
 const photoIndex = ref<Record<string, number>>({});
-const pinSection = ref<HTMLElement | null>(null);
 const roomTrack = ref<HTMLElement | null>(null);
-const { shift, pinned } = usePinScroll(pinSection, roomTrack);
+const canPrev = ref(false);
+const canNext = ref(false);
 let touchX: number | null = null;
 
 useDragScroll(roomTrack, { momentum: true });
-
-const trackStyle = computed(() =>
-  pinned.value
-    ? { transform: `translate3d(${shift.value}px, 0, 0)` }
-    : undefined
-);
 
 const featuredHotels = computed(() =>
   cms.publishedHotels.filter(hotel => hotel.featured)
@@ -170,8 +186,47 @@ const featuredHotels = computed(() =>
 const rooms = computed(() => {
   const ids = new Set(featuredHotels.value.map(hotel => hotel.id));
   return cms.roomTypes.filter(
-    room => ids.has(room.hotelId) && room.status === "published"
+    room =>
+      ids.has(room.hotelId) &&
+      room.status === "published" &&
+      Boolean(roomImage(room))
   );
+});
+
+function syncNav() {
+  const node = roomTrack.value;
+  if (!node) {
+    canPrev.value = false;
+    canNext.value = false;
+    return;
+  }
+  const max = node.scrollWidth - node.clientWidth;
+  canPrev.value = node.scrollLeft > 4;
+  canNext.value = node.scrollLeft < max - 4;
+}
+
+function scrollRooms(dir: -1 | 1) {
+  const node = roomTrack.value;
+  if (!node) return;
+  const card = node.querySelector(".room") as HTMLElement | null;
+  const step = card
+    ? card.offsetWidth + 16
+    : Math.round(node.clientWidth * 0.8);
+  node.scrollBy({ left: dir * step, behavior: "smooth" });
+}
+
+watch(rooms, async () => {
+  await nextTick();
+  syncNav();
+});
+
+onMounted(() => {
+  syncNav();
+  window.addEventListener("resize", syncNav);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("resize", syncNav);
 });
 
 function photosFor(hotel: Hotel) {
@@ -244,7 +299,10 @@ function hotelPath(hotel: Hotel) {
 }
 
 function hotelForRoom(room: RoomType) {
-  return featuredHotels.value.find(hotel => hotel.id === room.hotelId);
+  return (
+    cms.getHotelById(room.hotelId) ??
+    featuredHotels.value.find(hotel => hotel.id === room.hotelId)
+  );
 }
 
 function roomLink(room: RoomType) {
@@ -253,27 +311,43 @@ function roomLink(room: RoomType) {
 }
 
 function roomImage(room: RoomType) {
-  return room.images.find(src => src.trim())?.trim() ?? "";
+  for (const src of room.images) {
+    const real = hostedImage(src);
+    if (real) return real;
+  }
+  return "";
 }
 
-function roomDetail(room: RoomType) {
-  const hotel = hotelForRoom(room);
-  const bits = [room.bedType.trim(), room.roomSize.trim()].filter(Boolean);
-  if (featuredHotels.value.length > 1 && hotel) bits.unshift(hotel.name);
-  return bits.join("  ·  ");
+/** "{Apartel name} — {room name}" from the room's hotel relation. */
+function cardLabel(room: RoomType) {
+  return roomWithPropertyLabel(hotelForRoom(room)?.name, room.name);
+}
+
+/** Bedroom count / bed label from room.bedType (e.g. "1 bedroom"). */
+function bedroomLabel(room: RoomType) {
+  return room.bedType?.trim() ?? "";
+}
+
+function showBed(room: RoomType) {
+  return bedLabelAddsDetail(room.name, room.bedType);
 }
 </script>
 
 <style scoped>
 .featured {
+  /* Pull 1px into the cream story above so no page-bg hairline shows. */
+  margin-top: -1px;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: clip;
   background: #121413;
   color: #f6f1e7;
 }
 
 .property__media {
   position: relative;
-  height: min(92vh, 920px);
-  min-height: 560px;
+  height: min(82vh, 780px);
+  min-height: 480px;
   overflow: hidden;
   background: #1a1c1b;
 }
@@ -355,8 +429,8 @@ function roomDetail(room: RoomType) {
   position: relative;
   z-index: 4;
   width: min(760px, calc(100% - 2rem));
-  margin: -13rem auto 0;
-  padding-bottom: 1rem;
+  margin: -11rem auto 0;
+  padding-bottom: 0.25rem;
 }
 
 .property__card {
@@ -401,22 +475,15 @@ function roomDetail(room: RoomType) {
 
 .rooms {
   position: relative;
+  max-width: 100%;
+  min-width: 0;
   background: #f4efe6;
   color: var(--gy-forest);
-}
-
-.rooms.is-pinned .rooms__sticky {
-  position: sticky;
-  top: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  height: 100vh;
-  overflow: hidden;
+  padding-bottom: 0.65rem;
 }
 
 .rooms__head {
-  padding: 1.5rem clamp(1.2rem, 4vw, 3rem) 0.6rem;
+  padding: 1.15rem clamp(1.2rem, 4vw, 3rem) 0.5rem;
 }
 
 .eyebrow {
@@ -438,33 +505,80 @@ function roomDetail(room: RoomType) {
   line-height: 1;
 }
 
+.rooms__slider {
+  position: relative;
+  max-width: 100%;
+  min-width: 0;
+}
+
 .rooms__track {
   display: flex;
   gap: 1rem;
-  padding: 0.6rem clamp(1.2rem, 4vw, 3rem) 1.4rem;
-}
-
-.rooms.is-pinned .rooms__track {
-  width: max-content;
-  overflow: visible;
-}
-
-.rooms:not(.is-pinned) .rooms__track {
+  padding: 0.5rem clamp(1.2rem, 4vw, 3rem) 0.4rem;
   overflow-x: auto;
+  overscroll-behavior-x: contain;
   scroll-snap-type: x mandatory;
   scroll-padding-inline: clamp(1.2rem, 4vw, 3rem);
+  scroll-behavior: smooth;
   scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 .rooms__track::-webkit-scrollbar {
   display: none;
 }
 
+.rooms__track.is-dragging,
+.rooms__track.is-coasting {
+  scroll-behavior: auto;
+  scroll-snap-type: none;
+  cursor: grabbing;
+}
+
+.rooms-nav {
+  position: absolute;
+  z-index: 3;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 1.5px solid var(--q-secondary, var(--gy-gold));
+  border-radius: 999px;
+  background: var(--q-primary, var(--gy-forest));
+  color: var(--q-secondary, var(--gy-gold));
+  box-shadow: 0 10px 24px rgba(69, 76, 75, 0.18);
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease,
+    background-color 0.25s ease;
+}
+
+.rooms-nav--prev {
+  left: 0.75rem;
+}
+
+.rooms-nav--next {
+  right: 0.75rem;
+}
+
+.rooms-nav:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--q-primary, var(--gy-forest)) 88%, #000);
+  transform: translateY(-50%) scale(1.04);
+}
+
+.rooms-nav:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
 .room {
   position: relative;
   flex: 0 0 min(68vw, 28rem);
-  height: min(58vh, 460px);
-  min-height: 280px;
+  height: min(48vh, 400px);
+  min-height: 260px;
   overflow: hidden;
   border-radius: 22px;
   color: #fff;
@@ -499,16 +613,19 @@ function roomDetail(room: RoomType) {
   font-family: var(--font-display);
   font-weight: 700;
   letter-spacing: normal;
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   line-height: 1.3;
+  color: var(--gy-white);
+  overflow-wrap: break-word;
 }
 
-.room__detail {
-  font-family: var(--font-display);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
+.room__beds {
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  font-weight: 400;
+  letter-spacing: normal;
+  line-height: 1.35;
+  color: var(--gy-gold);
 }
 
 @media (hover: hover) {
@@ -528,17 +645,29 @@ function roomDetail(room: RoomType) {
 
 @media (max-width: 860px) {
   .property__media {
-    height: 78vh;
-    min-height: 520px;
+    height: 68vh;
+    min-height: 420px;
   }
 
   .property__float {
-    margin-top: -7.5rem;
+    margin-top: -6.5rem;
+  }
+
+  .rooms-nav {
+    display: none;
   }
 
   .room {
     flex-basis: 82vw;
-    height: 58vh;
+    height: 46vh;
+  }
+
+  .rooms__head {
+    padding-top: 1rem;
+  }
+
+  .rooms__track {
+    padding-bottom: 0.5rem;
   }
 }
 
@@ -548,6 +677,14 @@ function roomDetail(room: RoomType) {
     animation: none !important;
     transition: none !important;
     transform: none !important;
+  }
+
+  .rooms__track {
+    scroll-behavior: auto;
+  }
+
+  .rooms-nav {
+    transition: none !important;
   }
 }
 </style>

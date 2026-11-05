@@ -29,13 +29,13 @@ const routes: RouteRecordRaw[] = [
         path: "hotels",
         name: "hotels",
         component: () => import("@/pages/HotelsListPage.vue"),
-        meta: { title: "Hotels | Greyon", solidHeader: true }
+        meta: { title: "Apartels | Greyon", solidHeader: true }
       },
       {
         path: "hotels/:slug",
         name: "hotel-detail",
         component: () => import("@/pages/HotelDetailPage.vue"),
-        meta: { title: "Hotel | Greyon", solidHeader: true }
+        meta: { title: "Apartel | Greyon", solidHeader: true }
       },
       {
         path: "hotels/:hotelSlug/rooms/:roomSlug",
@@ -47,7 +47,26 @@ const routes: RouteRecordRaw[] = [
         path: "apartments",
         name: "apartments",
         component: () => import("@/pages/ApartmentsListPage.vue"),
-        meta: { title: "Apartments | Greyon", solidHeader: true }
+        meta: { title: "Serviced Apartments | Greyon", solidHeader: true }
+      },
+      {
+        path: "services/:kind",
+        name: "service-type",
+        component: () => import("@/pages/ServiceTypeListPage.vue"),
+        meta: { title: "Services | Greyon", solidHeader: true },
+        beforeEnter(to) {
+          const kind = String(to.params.kind || "");
+          const allowed = [
+            "serviced-apartment",
+            "apartel",
+            "boutique",
+            "resort"
+          ];
+          if (!allowed.includes(kind)) {
+            return { name: "service-type", params: { kind: "apartel" } };
+          }
+          return true;
+        }
       },
       {
         path: "about",
@@ -58,32 +77,20 @@ const routes: RouteRecordRaw[] = [
       {
         path: "portfolios/service-apartment",
         name: "portfolio-service-apartment",
-        component: () => import("@/pages/PortfolioComingSoonPage.vue"),
-        meta: {
-          title: "Service Apartment | Greyon",
-          solidHeader: true,
-          portfolioKind: "service-apartment"
+        redirect: {
+          name: "service-type",
+          params: { kind: "serviced-apartment" }
         }
       },
       {
         path: "portfolios/boutique",
         name: "portfolio-boutique",
-        component: () => import("@/pages/PortfolioComingSoonPage.vue"),
-        meta: {
-          title: "Boutique | Greyon",
-          solidHeader: true,
-          portfolioKind: "boutique"
-        }
+        redirect: { name: "service-type", params: { kind: "boutique" } }
       },
       {
         path: "portfolios/resort",
         name: "portfolio-resort",
-        component: () => import("@/pages/PortfolioComingSoonPage.vue"),
-        meta: {
-          title: "Resort | Greyon",
-          solidHeader: true,
-          portfolioKind: "resort"
-        }
+        redirect: { name: "service-type", params: { kind: "resort" } }
       },
       {
         path: "locations",

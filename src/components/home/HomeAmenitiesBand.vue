@@ -62,18 +62,8 @@ const imageStyle = computed(() => ({
   transform: `translate3d(0, ${offset.value}px, 0) scale(1.15)`
 }));
 
-const featured = computed(() =>
-  cms.publishedHotels.find(hotel => hotel.featured)
-);
-
-const image = computed(() => {
-  const gallery = featured.value?.gallery.find(src => src.trim())?.trim();
-  if (gallery) return gallery;
-  const other = cms.publishedLocations.find(
-    loc => loc.heroImage && loc.id !== featured.value?.locationId
-  );
-  return other?.heroImage || featured.value?.heroImage || "";
-});
+/** Client-supplied drone photo of the Greyon building (replaces the 3D render). */
+const image = "/images/greyon-building.webp";
 
 const words = computed(() =>
   cms.publishedLocations.flatMap(loc =>
@@ -135,6 +125,8 @@ function iconFor(label: string) {
   display: flex;
   align-items: flex-end;
   min-height: 100vh;
+  /* Sit flush on destinations (same dark family) — no elliptical lid. */
+  margin-top: -1px;
   overflow: hidden;
   color: #fff;
   background: #0c0e0d;
@@ -149,6 +141,8 @@ function iconFor(label: string) {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  /* Keep the rooftop GREYON sign in frame. */
+  object-position: 58% 34%;
   will-change: transform;
 }
 
@@ -169,24 +163,11 @@ function iconFor(label: string) {
     );
 }
 
-.band::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -1px;
-  z-index: 2;
-  height: 74px;
-  background: #f7f3ec;
-  clip-path: ellipse(72% 100% at 50% 100%);
-  pointer-events: none;
-}
-
 .band__content {
   position: relative;
   z-index: 1;
   width: 100%;
-  padding: 18vh 0 11vh;
+  padding: clamp(4.5rem, 10vh, 7rem) 0 clamp(3.5rem, 7vh, 5rem);
 }
 
 .eyebrow {
@@ -250,7 +231,7 @@ function iconFor(label: string) {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem 1.5rem;
-  margin-top: clamp(2rem, 5vw, 3.4rem);
+  margin-top: clamp(1.35rem, 3.5vw, 2.25rem);
   padding-inline: clamp(1.25rem, 6vw, 5rem);
 }
 
@@ -293,6 +274,12 @@ function iconFor(label: string) {
 
   .marquee__clone {
     display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .band__img {
+    object-position: 60% 38%;
   }
 }
 </style>

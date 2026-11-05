@@ -83,7 +83,7 @@
               View rooms
             </button>
             <router-link to="/hotels" class="gy-btn gy-btn--outline">
-              All hotels
+              All apartels
             </router-link>
           </div>
         </div>
@@ -174,21 +174,18 @@
         <p v-reveal="{ delay: '100ms' }" class="panel__lead">
           Distances from the property to places guests ask about most.
         </p>
+        <ul class="landmark-list">
+          <li
+            v-for="(item, index) in landmarks"
+            :key="`${item.place}-${item.distance}`"
+            v-reveal="{ delay: `${140 + index * 35}ms` }"
+            class="landmark"
+          >
+            <span class="landmark__place">{{ item.place }}</span>
+            <span class="landmark__meta">{{ item.distance }}</span>
+          </li>
+        </ul>
       </div>
-      <ul ref="landmarkTrack" class="landmark-rail">
-        <li
-          v-for="(item, index) in landmarks"
-          :key="`${item.place}-${item.distance}`"
-          v-tilt="{ max: 6 }"
-          class="landmark hd-tilt glass-edge"
-        >
-          <span class="landmark__index">{{
-            String(index + 1).padStart(2, "0")
-          }}</span>
-          <span class="landmark__place">{{ item.place }}</span>
-          <span class="landmark__distance">{{ item.distance }}</span>
-        </li>
-      </ul>
     </section>
 
     <HotelGallery :images="gallery" :name="hotel.name" />
@@ -270,7 +267,7 @@
               >
                 <RoomOfferCard
                   variant="detail"
-                  :title="room.name"
+                  :title="roomCardTitle(room)"
                   :subtitle="roomSubtitle(room)"
                   :images="room.images"
                   :bed-type="room.bedType"
@@ -336,10 +333,10 @@
       </div>
     </section>
 
-    <section v-if="related.length" class="related" data-sheet="Nearby hotels">
+    <section v-if="related.length" class="related" data-sheet="Nearby apartels">
       <div class="gy-container">
         <p v-reveal class="eyebrow">{{ locationName }}</p>
-        <h2 v-reveal="{ delay: '60ms' }">Nearby Greyon hotels</h2>
+        <h2 v-reveal="{ delay: '60ms' }">Nearby Greyon apartels</h2>
         <div class="gy-grid-3">
           <HotelCard v-for="item in related" :key="item.id" :hotel="item" />
         </div>
@@ -378,8 +375,8 @@
     </div>
   </q-page>
   <q-page v-else class="hotel-missing gy-section gy-container">
-    <h1>Hotel not found</h1>
-    <router-link to="/hotels" class="gy-btn">Back to hotels</router-link>
+    <h1>Apartel not found</h1>
+    <router-link to="/hotels" class="gy-btn">Back to apartels</router-link>
   </q-page>
 </template>
 
@@ -390,7 +387,6 @@ import { useRoute, useRouter } from "vue-router";
 import BookingSearchWidget from "@/components/BookingSearchWidget.vue";
 import FeatureChips from "@/components/FeatureChips.vue";
 import HotelCard from "@/components/HotelCard.vue";
-import { useDragScroll } from "@/components/home/useDragScroll";
 import { useParallax } from "@/components/home/useParallax";
 import HotelAmenityBand from "@/components/hotel/HotelAmenityBand.vue";
 import HotelGallery from "@/components/hotel/HotelGallery.vue";
@@ -402,6 +398,7 @@ import SeoHead from "@/components/SeoHead.vue";
 import { useBookingStore } from "@/stores/booking-store";
 import { useCmsStore } from "@/stores/cms-store";
 import type { HotelProductRef, RoomType } from "@/types/greyon";
+import { roomWithPropertyLabel } from "@/utils/roomLabel";
 import { roomDetailPath } from "@/utils/roomPath";
 
 const route = useRoute();
@@ -412,8 +409,6 @@ const cms = useCmsStore();
 
 const portraitFrame = ref<HTMLElement | null>(null);
 const portraitOffset = useParallax(portraitFrame, 110);
-const landmarkTrack = ref<HTMLElement | null>(null);
-useDragScroll(landmarkTrack, { momentum: true });
 
 const portraitStyle = computed(() => ({
   transform: `translate3d(0, ${portraitOffset.value}px, 0)`
@@ -566,6 +561,10 @@ function pricedRoom(roomTypeId: string) {
   );
 }
 
+function roomCardTitle(room: RoomType) {
+  return roomWithPropertyLabel(hotel.value?.name, room.name);
+}
+
 /** Avoid repeating the room name / bed type already shown in facts. */
 function roomSubtitle(room: RoomType) {
   const desc = room.description?.trim() || "";
@@ -585,8 +584,7 @@ function roomSubtitle(room: RoomType) {
     return `${bed} · ${size}`;
   }
   if (size) return size;
-  if (room.maxGuests) return `Sleeps up to ${room.maxGuests}`;
-  return "Comfortable Greyon stay";
+  return "";
 }
 
 function roomBadge(roomTypeId: string, room: RoomType) {
@@ -1056,73 +1054,55 @@ async function openRoom(roomTypeId: string) {
 }
 
 .landmarks {
-  padding: clamp(2rem, 5vw, 3.5rem) 0 0.5rem;
-  overflow: hidden;
+  padding: clamp(2.5rem, 5vw, 4rem) 0;
 }
 
-.landmark-rail {
-  display: flex;
-  gap: 0.85rem;
-  margin: 0.4rem 0 0;
-  padding: 0.75rem clamp(1rem, 4vw, 3rem) 1.6rem;
+.landmark-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  column-gap: clamp(1.5rem, 3vw, 2.75rem);
+  row-gap: 0;
+  margin: 0.5rem 0 0;
+  padding: 0;
   list-style: none;
-  overflow-x: auto;
-  scroll-snap-type: x proximity;
-  overscroll-behavior-x: contain;
-  scrollbar-width: none;
-  cursor: grab;
-}
-
-.landmark-rail::-webkit-scrollbar {
-  display: none;
-}
-
-.landmark-rail.is-dragging,
-.landmark-rail.is-coasting {
-  cursor: grabbing;
-  scroll-snap-type: none;
 }
 
 .landmark {
-  display: flex;
-  flex: 0 0 min(72vw, 18.5rem);
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 1.4rem;
-  min-height: 15rem;
-  padding: 1.15rem 1.15rem 1.1rem;
-  scroll-snap-align: start;
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.8);
-  box-shadow: 0 18px 40px rgba(36, 48, 42, 0.08);
-  backdrop-filter: blur(10px);
-}
-
-.landmark__index {
-  font-family: var(--font-display);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  font-size: 2rem;
-  line-height: 1.05;
-  color: var(--gy-gold);
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--gy-forest) 18%, transparent);
 }
 
 .landmark__place {
+  margin: 0;
   font-family: var(--font-display);
   font-weight: 700;
-  letter-spacing: normal;
-  font-size: 1.2rem;
+  font-size: 1.02rem;
+  letter-spacing: -0.01em;
   line-height: 1.3;
+  color: var(--gy-forest);
 }
 
-.landmark__distance {
-  font-family: var(--font-display);
-  font-size: 0.72rem;
-  font-style: normal;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
+.landmark__meta {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  font-weight: 400;
+  line-height: 1.45;
   color: var(--gy-gold);
+}
+
+@media (min-width: 700px) {
+  .landmark-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) {
+  .landmark-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 .rooms {
