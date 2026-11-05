@@ -1,12 +1,12 @@
 <template>
   <section
-    v-if="featuredHotels.length"
+    v-if="showcaseHotels.length"
     id="home-featured"
     class="featured home-motion"
     aria-labelledby="home-featured-title"
   >
     <article
-      v-for="(hotel, hotelIndex) in featuredHotels"
+      v-for="(hotel, hotelIndex) in showcaseHotels"
       :key="hotel.id"
       class="property"
     >
@@ -179,6 +179,9 @@ let touchX: number | null = null;
 
 useDragScroll(roomTrack, { momentum: true });
 
+/** One property block: the first published hotel in catalog order. */
+const showcaseHotels = computed(() => cms.publishedHotels.slice(0, 1));
+
 const featuredHotels = computed(() =>
   cms.publishedHotels.filter(hotel => hotel.featured)
 );
@@ -265,7 +268,7 @@ function onTouchEnd(event: TouchEvent, id: string) {
   const endX = event.changedTouches[0]?.clientX ?? touchX;
   const delta = endX - touchX;
   touchX = null;
-  const hotel = featuredHotels.value.find(item => item.id === id);
+  const hotel = showcaseHotels.value.find(item => item.id === id);
   if (!hotel || Math.abs(delta) < SWIPE_PX) return;
   stepPhoto(id, delta < 0 ? 1 : -1, photosFor(hotel).length);
 }
