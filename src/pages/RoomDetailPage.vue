@@ -339,45 +339,51 @@
         aria-label="Room photo gallery"
         @keydown="onStageKey"
       >
-        <button
-          type="button"
-          class="lb__close"
-          aria-label="Close gallery"
-          @click="galleryOpen = false"
-        >
-          <q-icon name="close" size="22px" />
-        </button>
-        <button
-          v-if="photos.length > 1"
-          type="button"
-          class="lb__nav lb__nav--prev"
-          aria-label="Previous photo"
-          @click="stepPhoto(-1)"
-        >
-          <q-icon name="chevron_left" size="28px" />
-        </button>
-        <figure class="lb__stage">
-          <img
-            v-if="activeSrc"
-            :key="activeSrc"
-            class="lb__img"
-            :src="activeSrc"
-            :alt="`${room.name} photo ${activePhoto + 1}`"
-          />
-        </figure>
-        <button
-          v-if="photos.length > 1"
-          type="button"
-          class="lb__nav lb__nav--next"
-          aria-label="Next photo"
-          @click="stepPhoto(1)"
-        >
-          <q-icon name="chevron_right" size="28px" />
-        </button>
-        <p class="lb__count" aria-live="polite">
-          {{ activePhoto + 1 }} / {{ photos.length }}
-        </p>
-        <RoomPanoramaButton class="lb__pano" @open="openPanorama" />
+        <div class="lb__bar lb__bar--top">
+          <button
+            type="button"
+            class="lb__close"
+            aria-label="Close gallery"
+            @click="galleryOpen = false"
+          >
+            <q-icon name="close" size="22px" />
+          </button>
+        </div>
+        <div class="lb__main">
+          <button
+            v-if="photos.length > 1"
+            type="button"
+            class="lb__nav lb__nav--prev"
+            aria-label="Previous photo"
+            @click="stepPhoto(-1)"
+          >
+            <q-icon name="chevron_left" size="28px" />
+          </button>
+          <figure class="lb__stage">
+            <img
+              v-if="activeSrc"
+              :key="activeSrc"
+              class="lb__img"
+              :src="activeSrc"
+              :alt="`${room.name} photo ${activePhoto + 1}`"
+            />
+          </figure>
+          <button
+            v-if="photos.length > 1"
+            type="button"
+            class="lb__nav lb__nav--next"
+            aria-label="Next photo"
+            @click="stepPhoto(1)"
+          >
+            <q-icon name="chevron_right" size="28px" />
+          </button>
+        </div>
+        <div class="lb__bar lb__bar--bottom">
+          <p class="lb__count" aria-live="polite">
+            {{ activePhoto + 1 }} / {{ photos.length }}
+          </p>
+          <RoomPanoramaButton class="lb__pano" @open="openPanorama" />
+        </div>
       </div>
     </q-dialog>
 
