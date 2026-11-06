@@ -11,6 +11,7 @@ export function useDragScroll(
   options: DragOptions = {}
 ) {
   let active = false;
+  let pointerId = -1;
   let startX = 0;
   let startScroll = 0;
   let moved = false;
@@ -26,27 +27,45 @@ export function useDragScroll(
     el.value?.classList.remove("is-coasting");
   }
 
+  function releaseTracking() {
+    window.removeEventListener("pointermove", onMove);
+    window.removeEventListener("pointerup", onUp);
+    window.removeEventListener("pointercancel", onUp);
+    pointerId = -1;
+  }
+
   function onDown(event: PointerEvent) {
     const node = el.value;
     if (!node || event.pointerType !== "mouse" || event.button !== 0) return;
     stopMomentum();
+    releaseTracking();
     active = true;
     moved = false;
+    pointerId = event.pointerId;
     startX = event.clientX;
     lastX = event.clientX;
     startScroll = node.scrollLeft;
     lastT = performance.now();
     velocity = 0;
     node.classList.add("is-dragging");
-    node.setPointerCapture(event.pointerId);
+    // Capturing on pointerdown retargets the click to this scroller, so a
+    // child button never receives it. Capture only after a real drag.
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onUp);
   }
 
   function onMove(event: PointerEvent) {
     const node = el.value;
-    if (!active || !node) return;
+    if (!active || !node || event.pointerId !== pointerId) return;
     const now = performance.now();
     const dx = event.clientX - startX;
-    if (Math.abs(dx) > 8) moved = true;
+    if (Math.abs(dx) > 8) {
+      moved = true;
+      if (!node.hasPointerCapture(event.pointerId)) {
+        node.setPointerCapture(event.pointerId);
+      }
+    }
     const dt = Math.max(now - lastT, 1);
     velocity = (event.clientX - lastX) / dt;
     lastX = event.clientX;
@@ -73,9 +92,11 @@ export function useDragScroll(
     raf = requestAnimationFrame(tick);
   }
 
-  function onUp() {
+  function onUp(event: PointerEvent) {
+    if (!active || event.pointerId !== pointerId) return;
     const node = el.value;
     active = false;
+    releaseTracking();
     node?.classList.remove("is-dragging");
     coast();
   }
@@ -93,19 +114,16 @@ export function useDragScroll(
 
   function unbind(node: HTMLElement) {
     node.removeEventListener("pointerdown", onDown);
-    node.removeEventListener("pointermove", onMove);
-    node.removeEventListener("pointerup", onUp);
-    node.removeEventListener("pointercancel", onUp);
     node.removeEventListener("click", onClick, true);
     node.removeEventListener("wheel", onWheel);
+    active = false;
+    releaseTracking();
+    node.classList.remove("is-dragging");
   }
 
   function bind(node: HTMLElement) {
     reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     node.addEventListener("pointerdown", onDown);
-    node.addEventListener("pointermove", onMove);
-    node.addEventListener("pointerup", onUp);
-    node.addEventListener("pointercancel", onUp);
     node.addEventListener("click", onClick, true);
     node.addEventListener("wheel", onWheel, { passive: true });
   }
@@ -121,6 +139,7 @@ export function useDragScroll(
 
   onUnmounted(() => {
     stopMomentum();
+    releaseTracking();
     if (el.value) unbind(el.value);
   });
 }

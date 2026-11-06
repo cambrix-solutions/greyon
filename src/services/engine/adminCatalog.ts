@@ -134,8 +134,11 @@ export type RoomTypeInput = {
   baseInventory?: number;
   status?: ContentStatus;
   /**
-   * JPG or WebP, max 15 MB. Multipart field `panorama` on
-   * POST /admin/room-types and PATCH /admin/room-types/{id}.
+   * JPG or WebP, max 15 MB. Multipart field `panorama`.
+   * Create sends it on POST /admin/room-types. Update sends it on
+   * POST /admin/room-types/{id} with `_method=PATCH` — PHP does not
+   * fill `$_FILES` for a real PATCH, so that request returns 200
+   * and `hasFile('panorama')` stays false.
    */
   panoramaFile?: File;
   /**
@@ -261,15 +264,27 @@ function appendRoomFields(form: FormData, input: Partial<RoomTypeInput>) {
   }
 }
 
-/** Multipart field `panorama` on PATCH /admin/room-types/{id}. */
+/**
+ * Multipart field `panorama` for PATCH /admin/room-types/{id}.
+ * A real PATCH leaves PHP's `$_FILES` empty, and the engine then
+ * returns 200 without storing the photo. POST + `_method=PATCH` is
+ * parsed as multipart and still routed to the update action.
+ */
 async function uploadRoomPanorama(id: string, file: File): Promise<RoomType> {
   const form = new FormData();
+  form.append("_method", "PATCH");
   form.append("panorama", file, file.name);
   const { roomType } = await engineAPI.request<{ roomType: EngineRoomType }>(
     `/admin/room-types/${numId(id)}`,
-    { method: "PATCH", body: form }
+    { method: "POST", body: form }
   );
-  return mapEngineRoomType(roomType);
+  const mapped = mapEngineRoomType(roomType);
+  if (!mapped.panoramaUrl) {
+    throw new Error(
+      "The server accepted the save but did not store the 360° photo."
+    );
+  }
+  return mapped;
 }
 
 function panoramaUploadFailed(
