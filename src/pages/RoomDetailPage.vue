@@ -781,8 +781,18 @@ function scrollActiveThumb() {
   const active = film?.querySelector<HTMLElement>(".is-active");
   if (!film || !active) return;
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const left = active.offsetLeft - (film.clientWidth - active.offsetWidth) / 2;
-  film.scrollTo({ left, behavior: reduce ? "auto" : "smooth" });
+  const filmRect = film.getBoundingClientRect();
+  const activeRect = active.getBoundingClientRect();
+  // offsetLeft is relative to the lightbox, not the strip, so it scrolls
+  // the active thumb out from under the counter. Center it in the strip.
+  const delta =
+    activeRect.left +
+    activeRect.width / 2 -
+    (filmRect.left + filmRect.width / 2);
+  film.scrollTo({
+    left: film.scrollLeft + delta,
+    behavior: reduce ? "auto" : "smooth"
+  });
 }
 
 watch([activePhoto, galleryOpen], async () => {
