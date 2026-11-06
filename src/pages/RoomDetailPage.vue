@@ -337,9 +337,14 @@
         class="lb room-lb"
         role="dialog"
         aria-label="Room photo gallery"
+        tabindex="-1"
         @keydown="onStageKey"
       >
         <div class="lb__bar lb__bar--top">
+          <div class="lb__heading">
+            <p class="lb__kicker">Gallery</p>
+            <p class="lb__name">{{ room.name }}</p>
+          </div>
           <button
             type="button"
             class="lb__close"
@@ -359,13 +364,26 @@
           >
             <q-icon name="chevron_left" size="28px" />
           </button>
-          <figure class="lb__stage">
+          <figure
+            class="lb__stage"
+            @pointerdown="onPhotoPointerDown"
+            @pointerup="onPhotoPointerUp"
+            @pointercancel="onPhotoPointerCancel"
+          >
+            <img
+              v-if="leavingSrc && leavingSrc !== activeSrc"
+              class="lb__img lb__img--ghost"
+              :src="leavingSrc"
+              alt=""
+              draggable="false"
+            />
             <img
               v-if="activeSrc"
               :key="activeSrc"
               class="lb__img"
               :src="activeSrc"
               :alt="`${room.name} photo ${activePhoto + 1}`"
+              draggable="false"
             />
           </figure>
           <button
@@ -379,10 +397,42 @@
           </button>
         </div>
         <div class="lb__bar lb__bar--bottom">
-          <p class="lb__count" aria-live="polite">
-            {{ activePhoto + 1 }} / {{ photos.length }}
-          </p>
-          <RoomPanoramaButton class="lb__pano" @open="openPanorama" />
+          <div class="lb__meter">
+            <p class="lb__count" aria-live="polite">
+              {{ pad(activePhoto + 1) }}
+              <span class="lb__slash">/</span>
+              {{ pad(photos.length) }}
+            </p>
+            <span class="lb__progress" aria-hidden="true">
+              <span :style="{ width: photoProgress }" />
+            </span>
+          </div>
+          <ul ref="lbFilm" class="lb__film" aria-label="Room photographs">
+            <li v-for="(src, index) in photos" :key="`${src}-${index}`">
+              <button
+                type="button"
+                :class="{ 'is-active': activePhoto === index }"
+                :aria-label="`Show photo ${index + 1}`"
+                :aria-current="activePhoto === index ? 'true' : undefined"
+                @click="activePhoto = index"
+              >
+                <img :src="src" alt="" draggable="false" />
+              </button>
+            </li>
+          </ul>
+          <button
+            type="button"
+            class="lb__view"
+            aria-label="Open 360° view"
+            @click="openPanorama"
+          >
+            <svg class="lb__view-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="8.25" />
+              <ellipse cx="12" cy="12" rx="3.4" ry="8.25" />
+              <path d="M4.2 12h15.6" />
+            </svg>
+            <span>View 360°</span>
+          </button>
         </div>
       </div>
     </q-dialog>
@@ -432,7 +482,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, nextTick, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import RevealWords from "@/components/home/RevealWords.vue";
 import { useDragScroll } from "@/components/home/useDragScroll";
@@ -457,6 +507,8 @@ const cms = useCmsStore();
 const catalogReady = ref(false);
 const activePhoto = ref(0);
 const galleryOpen = ref(false);
+const lbFilm = ref<HTMLElement | null>(null);
+useDragScroll(lbFilm, { momentum: true });
 const panoOpen = ref(false);
 const panoSoonOpen = ref(false);
 
@@ -529,6 +581,12 @@ const photos = computed(() => {
 });
 
 const activeSrc = computed(() => photos.value[activePhoto.value] ?? "");
+const leavingSrc = ref("");
+const photoProgress = computed(() => {
+  const total = photos.value.length;
+  if (!total) return "0%";
+  return `${((activePhoto.value + 1) / total) * 100}%`;
+});
 const panoramaUrl = computed(() => room.value?.panoramaUrl?.trim() || "");
 
 function openPanorama() {
@@ -693,6 +751,62 @@ function onStageKey(event: KeyboardEvent) {
   else if (event.key === "ArrowLeft") stepPhoto(-1);
   else if (event.key === "Escape") galleryOpen.value = false;
 }
+
+let swipePointer = -1;
+let swipeX = 0;
+let swipeY = 0;
+
+function onPhotoPointerDown(event: PointerEvent) {
+  if (event.pointerType === "mouse" && event.button !== 0) return;
+  swipePointer = event.pointerId;
+  swipeX = event.clientX;
+  swipeY = event.clientY;
+}
+
+function onPhotoPointerUp(event: PointerEvent) {
+  if (event.pointerId !== swipePointer) return;
+  swipePointer = -1;
+  const dx = event.clientX - swipeX;
+  const dy = event.clientY - swipeY;
+  if (Math.abs(dx) < 48 || Math.abs(dx) <= Math.abs(dy)) return;
+  stepPhoto(dx < 0 ? 1 : -1);
+}
+
+function onPhotoPointerCancel() {
+  swipePointer = -1;
+}
+
+function scrollActiveThumb() {
+  const film = lbFilm.value;
+  const active = film?.querySelector<HTMLElement>(".is-active");
+  if (!film || !active) return;
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const left = active.offsetLeft - (film.clientWidth - active.offsetWidth) / 2;
+  film.scrollTo({ left, behavior: reduce ? "auto" : "smooth" });
+}
+
+watch([activePhoto, galleryOpen], async () => {
+  if (!galleryOpen.value) return;
+  await nextTick();
+  scrollActiveThumb();
+});
+
+let leaveTimer = 0;
+watch(activeSrc, (next, prev) => {
+  window.clearTimeout(leaveTimer);
+  if (!galleryOpen.value || !prev || prev === next) {
+    leavingSrc.value = "";
+    return;
+  }
+  leavingSrc.value = prev;
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  leaveTimer = window.setTimeout(
+    () => {
+      leavingSrc.value = "";
+    },
+    reduce ? 40 : 560
+  );
+});
 
 function formatStayDate(ymd: string) {
   if (!ymd) return "—";
