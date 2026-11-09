@@ -3,8 +3,7 @@
     class="room-media"
     :class="{
       'room-media--empty': !hasImages || allBroken,
-      'room-media--fill': fill,
-      'room-media--reserve-controls': reserveControls || Boolean(panoramaUrl)
+      'room-media--fill': fill
     }"
   >
     <!-- Always under the carousel so broken CMS urls still feel intentional. -->
@@ -64,15 +63,6 @@
 
     <div v-if="badge" class="room-media__badge">{{ badge }}</div>
 
-    <RoomViewControls
-      v-if="panoramaUrl"
-      class="room-media__controls"
-      :show-arrows="images.length > 1 && !allBroken"
-      @panorama="openPanorama"
-      @prev="step(-1)"
-      @next="step(1)"
-    />
-
     <q-dialog
       v-if="lightbox && hasImages && !allBroken"
       v-model="galleryOpen"
@@ -117,28 +107,13 @@
         <p class="room-gallery__count">
           {{ Number(gallerySlide) + 1 }} / {{ images.length }}
         </p>
-        <RoomPanoramaButton
-          v-if="panoramaUrl"
-          class="room-gallery__pano"
-          @open="openPanorama"
-        />
       </div>
     </q-dialog>
-
-    <RoomPanoramaDialog
-      v-if="panoramaUrl"
-      v-model="panoOpen"
-      :src="panoramaUrl"
-      :title="alt"
-    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
-import RoomPanoramaButton from "@/components/RoomPanoramaButton.vue";
-import RoomPanoramaDialog from "@/components/RoomPanoramaDialog.vue";
-import RoomViewControls from "@/components/RoomViewControls.vue";
 
 const props = withDefaults(
   defineProps<{
@@ -149,33 +124,25 @@ const props = withDefaults(
     fill?: boolean;
     /** When false, photos are display-only (no fullscreen lightbox). */
     lightbox?: boolean;
-    /** Equirectangular photo. The 360° control is hidden when this is empty. */
-    panoramaUrl?: string | null;
-    /** Shift carousel dots so an external control cluster can sit on the photo. */
-    reserveControls?: boolean;
   }>(),
   {
     images: () => [],
     alt: "Room",
     badge: "",
     fill: false,
-    lightbox: true,
-    panoramaUrl: null,
-    reserveControls: false
+    lightbox: true
   }
 );
 
 const slide = ref(0);
 const galleryOpen = ref(false);
 const gallerySlide = ref(0);
-const panoOpen = ref(false);
 const broken = ref<Set<string>>(new Set());
 const loaded = ref<Set<string>>(new Set());
 
 const images = computed(
   () => (props.images ?? []).map(src => src?.trim()).filter(Boolean) as string[]
 );
-const panoramaUrl = computed(() => props.panoramaUrl?.trim() || "");
 const hasImages = computed(() => images.value.length > 0);
 const allBroken = computed(
   () =>
@@ -218,19 +185,6 @@ function openGallery(idx: number) {
   gallerySlide.value = idx;
   galleryOpen.value = true;
 }
-
-function step(delta: number) {
-  const total = images.value.length;
-  if (total < 2) return;
-  slide.value = (Number(slide.value) + delta + total) % total;
-}
-
-function openPanorama() {
-  if (!panoramaUrl.value) return;
-  panoOpen.value = true;
-}
-
-defineExpose({ step });
 </script>
 
 <style scoped>
@@ -376,19 +330,6 @@ defineExpose({ step });
   color: var(--gy-gold);
 }
 
-.room-media__controls {
-  position: absolute;
-  right: 0.55rem;
-  bottom: 0.55rem;
-  z-index: 4;
-  max-width: calc(100% - 1.1rem);
-}
-
-.room-media--reserve-controls :deep(.q-carousel__navigation) {
-  box-sizing: border-box;
-  padding-right: 9.75rem;
-}
-
 .room-media__badge {
   position: absolute;
   top: 0.75rem;
@@ -464,12 +405,5 @@ defineExpose({ step });
   letter-spacing: 0.06em;
   color: rgba(255, 255, 255, 0.78);
   pointer-events: none;
-}
-
-.room-gallery__pano {
-  position: absolute;
-  right: 0.75rem;
-  bottom: max(3.25rem, calc(env(safe-area-inset-bottom) + 2.75rem));
-  z-index: 4;
 }
 </style>

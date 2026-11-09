@@ -270,7 +270,6 @@
                   :title="roomCardTitle(room)"
                   :subtitle="roomSubtitle(room)"
                   :images="room.images"
-                  :panorama-url="room.panoramaUrl"
                   :bed-type="room.bedType"
                   :room-size="room.roomSize"
                   :max-guests="room.maxGuests"
