@@ -104,7 +104,6 @@
               size="18px"
               class="gy-header__search-trigger-icon"
             />
-            <span class="gy-header__search-trigger-label">Search</span>
             <span
               v-if="headerSearchSummary"
               class="gy-header__search-trigger-summary"
@@ -784,19 +783,10 @@ onUnmounted(() => {
   color: inherit;
 }
 
-.gy-header__search-trigger-label {
-  flex-shrink: 0;
-  line-height: 1;
-  white-space: nowrap;
-}
-
 .gy-header__search-trigger-summary {
   display: none;
   min-width: 0;
   max-width: 11rem;
-  margin-left: 0.15rem;
-  padding-left: 0.55rem;
-  border-left: 1px solid rgba(255, 255, 255, 0.35);
   font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.01em;
@@ -806,10 +796,6 @@ onUnmounted(() => {
   overflow: hidden;
   text-overflow: ellipsis;
   opacity: 0.92;
-}
-
-.gy-header:not(.gy-header--solid) .gy-header__search-trigger-summary {
-  border-left-color: rgba(18, 17, 16, 0.22);
 }
 
 @media (min-width: 1440px) {
