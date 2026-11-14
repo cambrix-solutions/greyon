@@ -74,10 +74,6 @@
             <strong>{{ totalRooms }}</strong>
             <span>Room types</span>
           </div>
-          <div class="stat">
-            <strong>{{ hotelCap - hotels.length }}</strong>
-            <span>Slots left</span>
-          </div>
         </div>
       </div>
     </section>
@@ -88,7 +84,7 @@
           <p class="prop-board__eyebrow">Properties</p>
           <h2 class="prop-board__title">
             Hotels
-            <em>{{ hotels.length }}/{{ hotelCap }}</em>
+            <em>{{ hotels.length }}</em>
           </h2>
         </div>
         <span v-if="auth.canAction('hotels', 'create')" class="prop-board__add">
@@ -98,16 +94,8 @@
             color="primary"
             icon="add"
             label="Add hotel"
-            :disable="hotels.length >= hotelCap"
             @click="openCreateHotel"
           />
-          <q-tooltip
-            v-if="hotels.length >= hotelCap"
-            anchor="top middle"
-            self="bottom middle"
-          >
-            Hotel limit reached for this destination ({{ hotelCap }} max)
-          </q-tooltip>
         </span>
       </header>
 
@@ -264,16 +252,8 @@
             color="primary"
             icon="add"
             label="Add hotel"
-            :disable="hotels.length >= hotelCap"
             @click="openCreateHotel"
           />
-          <q-tooltip
-            v-if="hotels.length >= hotelCap"
-            anchor="top middle"
-            self="bottom middle"
-          >
-            Hotel limit reached for this destination ({{ hotelCap }} max)
-          </q-tooltip>
         </span>
       </div>
     </section>
@@ -682,7 +662,6 @@ const $q = useQuasar();
 const route = useRoute();
 const router = useRouter();
 
-const hotelCap = 3;
 const expandedHotelId = ref<string | null>(null);
 
 const locationId = computed(() => String(route.params.id || ""));
@@ -929,13 +908,6 @@ function blankHotel() {
 }
 
 function openCreateHotel() {
-  if (hotels.value.length >= hotelCap) {
-    $q.notify({
-      type: "warning",
-      message: `Hotel limit reached for this destination (${hotelCap} max).`
-    });
-    return;
-  }
   hotelEditing.value = null;
   blankHotel();
   void loadCatalogOptions();
@@ -1212,7 +1184,7 @@ function removeRoom(id: string) {
   margin-bottom: 1.15rem;
   background: #fff;
   border: 1px solid rgba(28, 36, 33, 0.08);
-  border-radius: 16px;
+  border-radius: 0;
   overflow: hidden;
   box-shadow: 0 10px 28px rgba(28, 36, 33, 0.04);
 }
@@ -1278,7 +1250,7 @@ function removeRoom(id: string) {
 
 .dest-overview__tags li {
   padding: 0.2rem 0.6rem;
-  border-radius: 999px;
+  border-radius: 0;
   background: rgba(84, 88, 89, 0.12);
   color: var(--gy-gold-deep);
   font-size: 0.74rem;
@@ -1294,7 +1266,7 @@ function removeRoom(id: string) {
 
 .stat {
   padding: 0.65rem 0.7rem;
-  border-radius: 12px;
+  border-radius: 0;
   background: #f7f5f1;
   border: 1px solid rgba(28, 36, 33, 0.05);
 }
@@ -1318,7 +1290,7 @@ function removeRoom(id: string) {
   display: inline-flex;
   align-items: center;
   padding: 0.15rem 0.5rem;
-  border-radius: 999px;
+  border-radius: 0;
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.05em;
@@ -1345,7 +1317,7 @@ function removeRoom(id: string) {
 .feat-pill {
   display: inline-flex;
   padding: 0.15rem 0.5rem;
-  border-radius: 999px;
+  border-radius: 0;
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -1357,7 +1329,7 @@ function removeRoom(id: string) {
 .prop-board {
   background: #fff;
   border: 1px solid rgba(28, 36, 33, 0.08);
-  border-radius: 16px;
+  border-radius: 0;
   overflow: hidden;
   box-shadow: 0 10px 28px rgba(28, 36, 33, 0.04);
 }
@@ -1437,7 +1409,7 @@ function removeRoom(id: string) {
 .prop-hotel__thumb {
   width: 56px;
   height: 56px;
-  border-radius: 12px;
+  border-radius: 0;
   overflow: hidden;
   background: #ebe6dc;
   display: grid;
@@ -1488,7 +1460,7 @@ function removeRoom(id: string) {
 .prop-rooms {
   margin: 0 1.15rem 1rem;
   border: 1px solid rgba(28, 36, 33, 0.08);
-  border-radius: 12px;
+  border-radius: 0;
   background: #fff;
   overflow: hidden;
 }
@@ -1519,7 +1491,7 @@ function removeRoom(id: string) {
 .prop-room__thumb {
   width: 40px;
   height: 40px;
-  border-radius: 9px;
+  border-radius: 0;
   overflow: hidden;
   background: #ebe6dc;
   display: grid;
@@ -1576,7 +1548,7 @@ function removeRoom(id: string) {
 .prop-empty__icon {
   width: 3.25rem;
   height: 3.25rem;
-  border-radius: 14px;
+  border-radius: 0;
   display: grid;
   place-items: center;
   background: rgba(84, 88, 89, 0.12);
@@ -1603,7 +1575,7 @@ function removeRoom(id: string) {
   min-height: 40px;
   padding: 0.35rem 0.65rem;
   background: #faf9f7;
-  border-radius: 12px;
+  border-radius: 0;
   border: 1px solid rgba(28, 36, 33, 0.06);
 }
 

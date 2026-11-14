@@ -84,7 +84,7 @@ const emit = defineEmits<{
 <style>
 /* Unscoped: q-menu / q-dialog content is teleported to <body>. */
 .gy-pop {
-  border-radius: 18px !important;
+  border-radius: 0 !important;
   background: var(--gy-white);
   box-shadow:
     0 24px 60px rgba(28, 36, 33, 0.18),
@@ -113,7 +113,7 @@ const emit = defineEmits<{
   max-width: 100vw !important;
   max-height: 92dvh;
   background: var(--gy-white);
-  border-radius: 20px 20px 0 0;
+  border-radius: 0;
   color: var(--gy-forest);
   overflow: hidden;
 }
@@ -134,7 +134,7 @@ const emit = defineEmits<{
   width: 2.5rem;
   height: 4px;
   margin-left: -1.25rem;
-  border-radius: 999px;
+  border-radius: 0;
   background: rgba(69, 76, 75, 0.18);
 }
 
@@ -156,7 +156,7 @@ const emit = defineEmits<{
   width: 2.5rem;
   height: 2.5rem;
   border: 0;
-  border-radius: 999px;
+  border-radius: 0;
   background: transparent;
   color: var(--gy-forest);
   cursor: pointer;

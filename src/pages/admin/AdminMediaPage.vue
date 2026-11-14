@@ -133,7 +133,7 @@
         </q-card>
       </div>
     </div>
-    <q-banner v-else class="bg-white" rounded>
+    <q-banner v-else class="bg-white">
       No media match. Attach assets to a destination (and optionally a hotel).
       <template #action>
         <q-btn

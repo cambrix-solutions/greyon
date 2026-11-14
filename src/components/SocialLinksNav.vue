@@ -70,7 +70,7 @@ const links = SOCIAL_LINKS;
   min-width: 44px;
   min-height: 44px;
   border: 1px solid color-mix(in srgb, var(--gy-forest) 28%, transparent);
-  border-radius: 999px;
+  border-radius: 0;
   color: var(--gy-forest);
   transition:
     color 0.2s ease,

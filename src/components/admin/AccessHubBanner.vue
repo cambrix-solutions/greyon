@@ -96,7 +96,7 @@ const steps = computed(() => {
     ),
     #fff;
   border: 1px solid rgba(84, 88, 89, 0.22);
-  border-radius: 14px;
+  border-radius: 0;
 }
 
 .access-hub__eyebrow {
@@ -128,7 +128,7 @@ const steps = computed(() => {
   gap: 0.55rem;
   align-items: center;
   padding: 0.7rem 0.75rem;
-  border-radius: 12px;
+  border-radius: 0;
   border: 1px solid rgba(28, 36, 33, 0.08);
   background: rgba(255, 255, 255, 0.85);
   text-decoration: none;
@@ -154,7 +154,7 @@ const steps = computed(() => {
   place-items: center;
   width: 1.55rem;
   height: 1.55rem;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--gy-gold-deep);
   color: #fff;
   font-size: 0.75rem;

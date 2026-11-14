@@ -41,7 +41,7 @@ function close() {
   margin: 0;
   padding: 1.35rem 1.4rem 1.2rem;
   border: 1px solid var(--gy-gold);
-  border-radius: 12px;
+  border-radius: 0;
   background: var(--gy-forest);
   color: var(--gy-gold);
   animation: pano-soon-in 0.22s ease;
@@ -73,7 +73,7 @@ function close() {
   min-height: 44px;
   padding: 0 1.15rem;
   border: 1px solid var(--gy-gold);
-  border-radius: 8px;
+  border-radius: 0;
   background: var(--gy-gold);
   color: var(--gy-forest);
   font-family: var(--font-display);

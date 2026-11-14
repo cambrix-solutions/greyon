@@ -403,7 +403,7 @@ function remove(item: CatalogProduct) {
   grid-template-rows: auto 1fr auto;
   background: #fff;
   border: 1px solid rgba(18, 17, 16, 0.08);
-  border-radius: 14px;
+  border-radius: 0;
   overflow: hidden;
 }
 
@@ -447,7 +447,7 @@ function remove(item: CatalogProduct) {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   padding: 0.15rem 0.45rem;
-  border-radius: 999px;
+  border-radius: 0;
   background: rgba(18, 17, 16, 0.06);
 }
 
@@ -492,7 +492,7 @@ function remove(item: CatalogProduct) {
   text-align: center;
   color: var(--gy-muted);
   background: #fff;
-  border-radius: 14px;
+  border-radius: 0;
   border: 1px dashed rgba(18, 17, 16, 0.12);
 }
 </style>

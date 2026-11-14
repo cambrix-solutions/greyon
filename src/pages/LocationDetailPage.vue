@@ -27,7 +27,7 @@
             type="button"
             @click="bookHere"
           >
-            Book in {{ location.name }}
+            Reserve in {{ location.name }}
           </button>
           <button
             v-if="hotelsHere.length"
@@ -76,7 +76,7 @@
           </div>
         </figure>
       </div>
-      <SectionDivider v-if="highlights.length" fill="#1a211e" />
+      <SectionDivider v-if="highlights.length" fill="var(--gy-cream)" />
       <SectionDivider
         v-else-if="!gallery.length"
         kind="angle"
@@ -91,32 +91,10 @@
       data-sheet="Highlights"
       aria-labelledby="highlights-title"
     >
-      <ul v-if="!reduceMotion" class="sr-only">
-        <li v-for="item in highlights" :key="item">{{ item }}</li>
-      </ul>
-      <div
-        class="marquee"
-        :class="{ 'is-static': reduceMotion, 'is-paused': paused }"
-        :aria-hidden="reduceMotion ? undefined : 'true'"
-        @pointerdown="paused = true"
-        @pointerup="paused = false"
-        @pointercancel="paused = false"
-        @pointerleave="paused = false"
-      >
-        <div class="marquee__track" :style="marqueeStyle">
-          <span
-            v-for="(item, index) in marqueeItems"
-            :key="`${index}-${item}`"
-            class="marquee__item"
-          >
-            <em>{{ item }}</em>
-            <span class="marquee__mark" />
-          </span>
-        </div>
-      </div>
-      <div class="dest-wrap highlights__copy">
-        <p v-reveal class="eyebrow eyebrow--light">Notes</p>
+      <div class="dest-wrap">
+        <p v-reveal class="eyebrow">Notes</p>
         <h2 id="highlights-title" v-reveal="{ delay: '70ms' }">Highlights</h2>
+        <NearbyLandmarksList :items="highlightItems" />
       </div>
       <SectionDivider
         kind="angle"
@@ -315,6 +293,7 @@ import { useRoute, useRouter } from "vue-router";
 import RevealWords from "@/components/home/RevealWords.vue";
 import { useDragScroll } from "@/components/home/useDragScroll";
 import { useParallax } from "@/components/home/useParallax";
+import NearbyLandmarksList from "@/components/hotel/NearbyLandmarksList.vue";
 import SectionDivider from "@/components/hotel/SectionDivider.vue";
 import HotelCard from "@/components/HotelCard.vue";
 import MapEmbed from "@/components/MapEmbed.vue";
@@ -330,11 +309,6 @@ const cms = useCmsStore();
 const heroFrame = ref<HTMLElement | null>(null);
 const portraitFrame = ref<HTMLElement | null>(null);
 const elseRail = ref<HTMLElement | null>(null);
-const paused = ref(false);
-const reduceMotion = ref(
-  typeof window !== "undefined" &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches
-);
 
 const heroOffset = useParallax(heroFrame, 140);
 const portraitOffset = useParallax(portraitFrame, 110);
@@ -358,6 +332,9 @@ const gallery = computed(() =>
 );
 const highlights = computed(() =>
   (location.value?.highlights ?? []).map(item => item.trim()).filter(Boolean)
+);
+const highlightItems = computed(() =>
+  highlights.value.map(place => ({ place }))
 );
 const portraitImage = computed(
   () => gallery.value.find(src => src !== heroImage.value) || ""
@@ -392,26 +369,9 @@ const others = computed(() =>
 
 const heroEdge = computed(() => {
   if (description.value || portraitImage.value) return "var(--gy-cream)";
-  if (highlights.value.length) return "#1a211e";
+  if (highlights.value.length) return "var(--gy-cream)";
   if (gallery.value.length) return "var(--gy-cream)";
   return "var(--gy-white)";
-});
-
-const marqueeHalf = computed(() => {
-  const items = highlights.value;
-  if (!items.length || reduceMotion.value) return items;
-  const repeats = Math.max(1, Math.ceil(8 / items.length));
-  return Array.from({ length: repeats }, () => items).flat();
-});
-const marqueeItems = computed(() =>
-  reduceMotion.value
-    ? marqueeHalf.value
-    : [...marqueeHalf.value, ...marqueeHalf.value]
-);
-const marqueeStyle = computed(() => {
-  if (reduceMotion.value) return undefined;
-  const seconds = Math.max(24, marqueeHalf.value.length * 3.6);
-  return { animationDuration: `${seconds}s` };
 });
 
 function pad(value: number) {
@@ -571,104 +531,15 @@ function bookHere() {
 
 .highlights {
   position: relative;
-  color: #fff;
-  background:
-    radial-gradient(
-      ellipse at 8% 0%,
-      rgba(196, 163, 90, 0.34),
-      transparent 46%
-    ),
-    radial-gradient(
-      ellipse at 100% 100%,
-      rgba(98, 112, 99, 0.7),
-      transparent 48%
-    ),
-    linear-gradient(155deg, #1a211e 0%, #2c312e 50%, #3a3228 100%);
-  overflow: hidden;
-}
-
-.marquee {
-  overflow: hidden;
-  margin-bottom: clamp(1.6rem, 4vw, 2.6rem);
-  padding-top: clamp(2.2rem, 5vw, 3.4rem);
-  -webkit-mask-image: linear-gradient(
-    90deg,
-    transparent,
-    #000 8%,
-    #000 92%,
-    transparent
-  );
-  mask-image: linear-gradient(
-    90deg,
-    transparent,
-    #000 8%,
-    #000 92%,
-    transparent
-  );
-}
-
-.marquee__track {
-  display: flex;
-  width: max-content;
-  animation: dest-highlight-marquee 32s linear infinite;
-}
-
-.marquee:hover .marquee__track,
-.marquee.is-paused .marquee__track {
-  animation-play-state: paused;
-}
-
-.marquee__item {
-  display: inline-flex;
-  align-items: center;
-  gap: 1.1rem;
-  padding-right: 1.1rem;
-}
-
-.marquee__item em {
-  font-style: normal;
-  font-family: var(--font-display);
-  font-size: var(--gy-text-4xl);
-  font-weight: 500;
-  letter-spacing: normal;
-  line-height: 1;
-  white-space: nowrap;
-}
-
-.marquee__item:hover em {
-  color: var(--gy-gold);
-}
-
-.marquee__mark {
-  width: 0.48rem;
-  height: 0.48rem;
-  background: linear-gradient(135deg, var(--gy-gold), #d5dece);
-  transform: rotate(45deg);
-}
-
-.marquee.is-static {
-  -webkit-mask-image: none;
-  mask-image: none;
-}
-
-.marquee.is-static .marquee__track {
-  width: auto;
-  flex-wrap: wrap;
-  gap: 0.35rem 0.2rem;
-  padding-inline: clamp(1.25rem, 6vw, 5rem);
-  animation: none;
+  padding: clamp(2.5rem, 5vw, 4rem) 0;
+  color: var(--gy-forest);
+  background: var(--gy-cream);
 }
 
 .highlights h2 {
   margin: 0;
   font-size: var(--gy-text-4xl);
   line-height: 1;
-}
-
-.highlights__copy {
-  position: relative;
-  z-index: 1;
-  padding-bottom: clamp(2.4rem, 6vw, 4rem);
 }
 
 .gallery {
@@ -698,7 +569,7 @@ function bookHere() {
   height: min(70vh, 640px);
   margin-bottom: min(12vh, 6.5rem);
   padding: 0.55rem;
-  border-radius: 28px;
+  border-radius: 0;
   background: linear-gradient(
     145deg,
     rgba(196, 163, 90, 0.95),
@@ -712,7 +583,7 @@ function bookHere() {
   position: relative;
   height: 100%;
   overflow: hidden;
-  border-radius: 22px;
+  border-radius: 0;
   background:
     radial-gradient(
       circle at 30% 20%,
@@ -738,7 +609,7 @@ function bookHere() {
   align-items: baseline;
   margin: 0;
   padding: 0.5rem 0.85rem;
-  border-radius: 999px;
+  border-radius: 0;
   background: rgba(22, 21, 19, 0.55);
   color: #fff;
   backdrop-filter: blur(12px);
@@ -795,7 +666,7 @@ function bookHere() {
   align-content: end;
   min-height: 11rem;
   padding: 1.25rem 1.3rem;
-  border-radius: 22px;
+  border-radius: 0;
   background: rgba(255, 255, 255, 0.78);
   box-shadow: 0 18px 44px rgba(22, 21, 19, 0.08);
   backdrop-filter: blur(14px);
@@ -825,7 +696,7 @@ function bookHere() {
 .visit__map {
   margin-top: 1.3rem;
   padding: 1rem 1rem 1.15rem;
-  border-radius: 24px;
+  border-radius: 0;
   background: rgba(255, 255, 255, 0.88);
   box-shadow: 0 22px 50px rgba(22, 21, 19, 0.08);
 }
@@ -844,7 +715,7 @@ function bookHere() {
 
 .visit__map :deep(.map-embed__frame) {
   min-height: 320px;
-  border-radius: 16px;
+  border-radius: 0;
 }
 
 .elsewhere {
@@ -907,7 +778,7 @@ function bookHere() {
 .else-card a {
   display: grid;
   overflow: hidden;
-  border-radius: 24px;
+  border-radius: 0;
   background: #1c2420;
   color: #fff;
   text-decoration: none;
@@ -980,15 +851,6 @@ function bookHere() {
   color: var(--gy-forest);
 }
 
-@keyframes dest-highlight-marquee {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
-
 @media (max-width: 900px) {
   .story__grid,
   .stays__grid,
@@ -1025,10 +887,6 @@ function bookHere() {
     margin-bottom: 2.5rem;
   }
 
-  .marquee__item em {
-    font-size: var(--gy-text-2xl);
-  }
-
   .visit__map :deep(.map-embed__frame) {
     min-height: 240px;
   }
@@ -1036,9 +894,7 @@ function bookHere() {
 
 @media (prefers-reduced-motion: reduce) {
   .hero__img,
-  .portrait__frame img,
-  .marquee__item em,
-  .marquee__track {
+  .portrait__frame img {
     transition: none;
     animation: none;
   }
@@ -1047,17 +903,6 @@ function bookHere() {
   .portrait__frame img {
     height: 100%;
     transform: none !important;
-  }
-
-  .marquee {
-    -webkit-mask-image: none;
-    mask-image: none;
-  }
-
-  .marquee__track {
-    width: auto;
-    flex-wrap: wrap;
-    padding-inline: clamp(1.25rem, 6vw, 5rem);
   }
 }
 </style>

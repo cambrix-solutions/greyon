@@ -101,7 +101,7 @@ const photo = computed(() => {
   aspect-ratio: 4 / 5;
   max-height: 620px;
   overflow: hidden;
-  border-radius: 24px;
+  border-radius: 0;
   box-shadow: 0 24px 60px rgba(28, 31, 30, 0.14);
 }
 
@@ -145,7 +145,7 @@ const photo = computed(() => {
   margin-top: 1.6rem;
   padding: 1.2rem 1.3rem 0.9rem;
   border: 1px solid rgba(28, 31, 30, 0.08);
-  border-radius: 20px;
+  border-radius: 0;
   background: rgba(255, 255, 255, 0.5);
 }
 

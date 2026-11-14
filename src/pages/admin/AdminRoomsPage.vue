@@ -599,7 +599,7 @@ watch([hotelFilter, statusFilter, query], () => {
   padding: 0.75rem 1rem;
   background: #fff;
   border: 1px solid rgba(84, 88, 89, 0.18);
-  border-radius: 12px;
+  border-radius: 0;
   font-size: 0.84rem;
   color: var(--gy-muted);
 }
@@ -621,7 +621,7 @@ watch([hotelFilter, statusFilter, query], () => {
 .room-group {
   background: #fff;
   border: 1px solid rgba(28, 36, 33, 0.08);
-  border-radius: 16px;
+  border-radius: 0;
   overflow: hidden;
   box-shadow: 0 1px 0 rgba(28, 36, 33, 0.03);
 }
@@ -679,7 +679,7 @@ watch([hotelFilter, statusFilter, query], () => {
   align-items: center;
   padding: 0.85rem 0.9rem;
   border: 1px solid rgba(28, 36, 33, 0.07);
-  border-radius: 14px;
+  border-radius: 0;
   background: #fff;
   transition: border-color 0.15s ease;
 }
@@ -692,7 +692,7 @@ watch([hotelFilter, statusFilter, query], () => {
 .room-card__thumb {
   width: 5rem;
   height: 4rem;
-  border-radius: 10px;
+  border-radius: 0;
   flex-shrink: 0;
 }
 
@@ -739,7 +739,7 @@ watch([hotelFilter, statusFilter, query], () => {
   display: inline-flex;
   align-items: center;
   padding: 0.1rem 0.45rem;
-  border-radius: 999px;
+  border-radius: 0;
   font-size: 0.68rem;
   font-weight: 600;
   text-transform: lowercase;
@@ -792,7 +792,7 @@ watch([hotelFilter, statusFilter, query], () => {
 
 .room-card__chips li {
   padding: 0.18rem 0.55rem;
-  border-radius: 999px;
+  border-radius: 0;
   background: rgba(28, 36, 33, 0.05);
   color: var(--gy-ink);
   font-size: 0.74rem;
@@ -858,7 +858,7 @@ watch([hotelFilter, statusFilter, query], () => {
   padding: 2rem 1rem;
   color: var(--gy-muted);
   background: #fff;
-  border-radius: 14px;
+  border-radius: 0;
   border: 1px dashed rgba(28, 36, 33, 0.15);
 }
 

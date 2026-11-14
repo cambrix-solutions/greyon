@@ -102,7 +102,7 @@ function onType(value: string | number | null) {
   place-items: center;
   width: 2.75rem;
   height: 2.75rem;
-  border-radius: 10px;
+  border-radius: 0;
   background: var(--gy-sand, #f3efe6);
   color: var(--gy-forest, #3f4a3f);
   border: 1px solid rgba(18, 17, 16, 0.08);
@@ -120,7 +120,7 @@ function onType(value: string | number | null) {
   overflow: auto;
   padding: 0.35rem;
   border: 1px solid rgba(18, 17, 16, 0.08);
-  border-radius: 12px;
+  border-radius: 0;
   background: #fff;
 }
 
@@ -132,7 +132,7 @@ function onType(value: string | number | null) {
   margin: 0;
   padding: 0;
   border: 1px solid transparent;
-  border-radius: 8px;
+  border-radius: 0;
   background: transparent;
   color: var(--gy-ink, #121110);
   cursor: pointer;

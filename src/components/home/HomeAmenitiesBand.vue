@@ -212,7 +212,7 @@ function iconFor(label: string) {
   margin-right: 1.15rem;
   padding: 0.7rem 1.15rem;
   border: 1px solid rgba(246, 241, 231, 0.28);
-  border-radius: 999px;
+  border-radius: 0;
   background: rgba(16, 18, 16, 0.4);
   backdrop-filter: blur(10px);
   font-family: var(--font-display);

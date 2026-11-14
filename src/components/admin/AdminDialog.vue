@@ -94,7 +94,7 @@ function onUpdate(value: boolean) {
   width: min(640px, 96vw);
   max-height: min(92vh, 920px);
   overflow: hidden;
-  border-radius: 20px !important;
+  border-radius: 0 !important;
   border: 1px solid rgba(28, 36, 33, 0.08);
   box-shadow: 0 32px 72px rgba(18, 17, 16, 0.2) !important;
   background: #fff;
@@ -160,7 +160,7 @@ function onUpdate(value: boolean) {
   width: 2.65rem;
   height: 2.65rem;
   flex-shrink: 0;
-  border-radius: 12px;
+  border-radius: 0;
   background: rgba(84, 88, 89, 0.12);
   color: var(--gy-gold-deep);
   margin-top: 0.1rem;
@@ -211,7 +211,7 @@ function onUpdate(value: boolean) {
 .admin-dialog__notice {
   margin: 0 1.4rem;
   padding: 0.75rem 0.9rem;
-  border-radius: 12px;
+  border-radius: 0;
   background: rgba(84, 88, 89, 0.08);
   border: 1px solid rgba(84, 88, 89, 0.16);
   font-size: 0.84rem;
@@ -244,7 +244,7 @@ function onUpdate(value: boolean) {
 
 .admin-dialog__body :deep(.q-field--outlined .q-field__control) {
   background: #fff;
-  border-radius: 12px;
+  border-radius: 0;
 }
 
 .admin-dialog__body :deep(.q-field--outlined .q-field__control:before) {
@@ -277,7 +277,7 @@ function onUpdate(value: boolean) {
 }
 
 .admin-dialog__foot :deep(.q-btn) {
-  border-radius: 10px;
+  border-radius: 0;
   min-height: 2.55rem;
   padding: 0.5rem 1.25rem;
   font-weight: 600;

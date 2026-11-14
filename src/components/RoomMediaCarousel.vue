@@ -198,7 +198,7 @@ function openGallery(idx: number) {
   box-sizing: border-box;
   background: var(--gy-sand);
   aspect-ratio: 16 / 10;
-  border-radius: 12px;
+  border-radius: 0;
 }
 
 /* Parent card owns sizing; fill only stretches inside a bounded media cell. */
@@ -337,7 +337,7 @@ function openGallery(idx: number) {
   z-index: 2;
   max-width: calc(100% - 1.5rem);
   padding: 0.35rem 0.7rem;
-  border-radius: 999px;
+  border-radius: 0;
   font-family: var(--font-display);
   font-size: 0.7rem;
   font-weight: 600;
@@ -368,7 +368,7 @@ function openGallery(idx: number) {
   width: 2.75rem;
   height: 2.75rem;
   border: 0;
-  border-radius: 999px;
+  border-radius: 0;
   background: rgba(255, 255, 255, 0.12);
   color: var(--gy-white);
   cursor: pointer;

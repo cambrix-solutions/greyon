@@ -134,7 +134,10 @@
               />
             </span>
             <span class="room__shade">
-              <span class="room__name">{{ cardLabel(room) }}</span>
+              <span v-if="hotelForRoom(room)?.name" class="room__hotel">{{
+                hotelForRoom(room)?.name
+              }}</span>
+              <span class="room__name">{{ room.name }}</span>
               <span v-if="showBed(room)" class="room__beds">{{
                 bedroomLabel(room)
               }}</span>
@@ -164,7 +167,7 @@ import { useCmsStore } from "@/stores/cms-store";
 import type { Hotel, RoomType } from "@/types/greyon";
 import { formatTime } from "@/utils/datetime";
 import { hostedImage } from "@/utils/hostedImage";
-import { bedLabelAddsDetail, roomWithPropertyLabel } from "@/utils/roomLabel";
+import { bedLabelAddsDetail } from "@/utils/roomLabel";
 import { roomDetailPath } from "@/utils/roomPath";
 
 const SWIPE_PX = 48;
@@ -321,11 +324,6 @@ function roomImage(room: RoomType) {
   return "";
 }
 
-/** "{Apartel name} — {room name}" from the room's hotel relation. */
-function cardLabel(room: RoomType) {
-  return roomWithPropertyLabel(hotelForRoom(room)?.name, room.name);
-}
-
 /** Bedroom count / bed label from room.bedType (e.g. "1 bedroom"). */
 function bedroomLabel(room: RoomType) {
   return room.bedType?.trim() ?? "";
@@ -386,7 +384,7 @@ function showBed(room: RoomType) {
   width: 44px;
   height: 44px;
   border: 1px solid rgba(255, 255, 255, 0.45);
-  border-radius: 999px;
+  border-radius: 0;
   background: rgba(12, 12, 11, 0.28);
   color: #fff;
   cursor: pointer;
@@ -547,7 +545,7 @@ function showBed(room: RoomType) {
   width: 48px;
   height: 48px;
   border: 1.5px solid var(--q-secondary, var(--gy-gold));
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--q-primary, var(--gy-forest));
   color: var(--q-secondary, var(--gy-gold));
   box-shadow: 0 10px 24px rgba(69, 76, 75, 0.18);
@@ -583,7 +581,7 @@ function showBed(room: RoomType) {
   height: min(48vh, 400px);
   min-height: 260px;
   overflow: hidden;
-  border-radius: 22px;
+  border-radius: 0;
   color: #fff;
   background: #2a2e2c;
   scroll-snap-align: start;
@@ -610,6 +608,17 @@ function showBed(room: RoomType) {
   gap: 0.35rem;
   padding: 1.2rem;
   background: linear-gradient(to top, rgba(8, 8, 7, 0.82), transparent 62%);
+}
+
+.room__hotel {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.3;
+  color: var(--gy-gold);
+  overflow-wrap: break-word;
 }
 
 .room__name {

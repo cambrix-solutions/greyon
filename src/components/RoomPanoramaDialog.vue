@@ -320,7 +320,7 @@ onBeforeUnmount(() => {
   width: 44px;
   height: 44px;
   padding: 0;
-  border-radius: 999px;
+  border-radius: 0;
 }
 
 .pano__close:focus-visible,
@@ -344,7 +344,7 @@ onBeforeUnmount(() => {
   width: 44px;
   height: 44px;
   padding: 0;
-  border-radius: 2px;
+  border-radius: 0;
   font-family: var(--font-display);
   font-size: 1.35rem;
   font-weight: 700;
@@ -359,7 +359,7 @@ onBeforeUnmount(() => {
   max-width: calc(100% - 7.5rem);
   margin: 0;
   padding: 0.35rem 0.75rem;
-  border-radius: 999px;
+  border-radius: 0;
   background: rgba(26, 33, 30, 0.78);
   transform: translateX(-50%);
   font-family: var(--font-body);
@@ -416,7 +416,7 @@ onBeforeUnmount(() => {
   min-width: 8.5rem;
   min-height: 44px;
   padding: 0 1.1rem;
-  border-radius: 999px;
+  border-radius: 0;
   font-family: var(--font-display);
   font-size: 0.85rem;
   font-weight: 700;

@@ -669,7 +669,7 @@ function resetData() {
 }
 
 .dash__head-actions :deep(.q-btn) {
-  border-radius: 8px;
+  border-radius: 0;
 }
 
 .dash-btn-primary {
@@ -692,7 +692,7 @@ function resetData() {
 }
 
 .dash-search :deep(.q-field__control) {
-  border-radius: 10px;
+  border-radius: 0;
 }
 
 .dash-chips {
@@ -703,7 +703,7 @@ function resetData() {
 
 .dash-chip {
   border: 1px solid rgba(28, 36, 33, 0.1);
-  border-radius: 999px;
+  border-radius: 0;
   background: #fff;
   color: var(--gy-muted);
   padding: 0.38rem 0.85rem;
@@ -739,7 +739,7 @@ function resetData() {
   margin-bottom: 0.9rem;
   background: #fff8ef;
   border: 1px solid rgba(176, 141, 87, 0.3);
-  border-radius: 12px;
+  border-radius: 0;
 }
 
 .dash-alert p {
@@ -768,7 +768,7 @@ function resetData() {
   padding: 0.9rem 0.95rem;
   background: #fff;
   border: 1px solid rgba(28, 36, 33, 0.07);
-  border-radius: 14px;
+  border-radius: 0;
   transition:
     border-color 0.3s ease,
     transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
@@ -788,7 +788,7 @@ function resetData() {
   place-items: center;
   background: rgba(84, 88, 89, 0.1);
   color: var(--gy-forest);
-  border-radius: 10px;
+  border-radius: 0;
   flex-shrink: 0;
 }
 
@@ -838,7 +838,7 @@ function resetData() {
   padding: 0.75rem 0.85rem;
   background: #fff;
   border: 1px solid rgba(28, 36, 33, 0.07);
-  border-radius: 12px;
+  border-radius: 0;
   font-size: 0.86rem;
   color: var(--gy-ink);
   transition:
@@ -873,7 +873,7 @@ function resetData() {
 .dash-panel {
   background: #fff;
   border: 1px solid rgba(28, 36, 33, 0.07);
-  border-radius: 14px;
+  border-radius: 0;
   padding: 0.9rem 1rem 0.55rem;
   transition:
     box-shadow 0.35s ease,
@@ -914,7 +914,7 @@ function resetData() {
   padding: 0.75rem 0.4rem;
   margin: 0 -0.4rem;
   border-top: 1px solid rgba(28, 36, 33, 0.06);
-  border-radius: 8px;
+  border-radius: 0;
   transition: background 0.22s ease;
 }
 
@@ -968,7 +968,7 @@ function resetData() {
   letter-spacing: 0.04em;
   text-transform: capitalize;
   background: rgba(28, 36, 33, 0.06);
-  border-radius: 999px;
+  border-radius: 0;
 }
 
 .dash-status--pending,

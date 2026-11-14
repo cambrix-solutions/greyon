@@ -836,7 +836,7 @@ function remove() {
   padding: 0.7rem 1rem;
   background: #fff;
   border: 1px solid rgba(28, 36, 33, 0.08);
-  border-radius: 10px;
+  border-radius: 0;
   font-size: 0.88rem;
   color: var(--gy-muted);
 }
@@ -886,7 +886,7 @@ function remove() {
   font-weight: 600;
   letter-spacing: 0.02em;
   padding: 0.28rem 0.55rem;
-  border-radius: 999px;
+  border-radius: 0;
   cursor: pointer;
 }
 
@@ -917,7 +917,7 @@ function remove() {
   border: 1px solid rgba(28, 36, 33, 0.1);
   border-left: 3px solid transparent;
   background: #fff;
-  border-radius: 10px;
+  border-radius: 0;
   cursor: pointer;
   font: inherit;
   color: inherit;
@@ -967,7 +967,7 @@ function remove() {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   padding: 0.18rem 0.4rem;
-  border-radius: 4px;
+  border-radius: 0;
   color: #fff;
   background: var(--gy-gold-deep);
 }
@@ -1004,7 +1004,7 @@ function remove() {
 .pkg-editor {
   background: #fff;
   border: 1px solid rgba(28, 36, 33, 0.1);
-  border-radius: 12px;
+  border-radius: 0;
   overflow: hidden;
   min-width: 0;
 }
@@ -1065,7 +1065,7 @@ function remove() {
   gap: 0.45rem 1rem;
   background: #faf9f7;
   border: 1px solid rgba(28, 36, 33, 0.06);
-  border-radius: 10px;
+  border-radius: 0;
 }
 
 .pkg-steps__item {
@@ -1082,7 +1082,7 @@ function remove() {
   place-items: center;
   width: 1.25rem;
   height: 1.25rem;
-  border-radius: 999px;
+  border-radius: 0;
   background: rgba(84, 88, 89, 0.15);
   color: var(--gy-gold-deep);
   font-size: 0.72rem;
@@ -1125,7 +1125,7 @@ function remove() {
   min-width: 1.35rem;
   height: 1.35rem;
   padding: 0 0.4rem;
-  border-radius: 999px;
+  border-radius: 0;
   background: rgba(84, 88, 89, 0.15);
   color: var(--gy-gold-deep);
   font-size: 0.68rem;
@@ -1174,7 +1174,7 @@ function remove() {
   text-align: left;
   padding: 0.75rem 0.8rem;
   border: 1px solid rgba(28, 36, 33, 0.1);
-  border-radius: 10px;
+  border-radius: 0;
   background: #faf9f7;
   cursor: pointer;
   font: inherit;
@@ -1257,7 +1257,7 @@ function remove() {
   gap: 0.25rem;
   padding: 0.2rem;
   background: rgba(28, 36, 33, 0.05);
-  border-radius: 8px;
+  border-radius: 0;
 }
 
 .pkg-tab {
@@ -1267,7 +1267,7 @@ function remove() {
   font-size: 0.8rem;
   font-weight: 600;
   padding: 0.35rem 0.75rem;
-  border-radius: 6px;
+  border-radius: 0;
   color: var(--gy-muted);
   cursor: pointer;
 }
@@ -1285,7 +1285,7 @@ function remove() {
 
 .pkg-mod {
   border: 1px solid rgba(28, 36, 33, 0.1);
-  border-radius: 10px;
+  border-radius: 0;
   background: #faf9f7;
   overflow: hidden;
 }
@@ -1387,7 +1387,7 @@ function remove() {
   align-items: start;
   padding: 0.5rem 0.55rem;
   border: 1px solid rgba(28, 36, 33, 0.08);
-  border-radius: 8px;
+  border-radius: 0;
   background: #fff;
   cursor: pointer;
 }

@@ -180,7 +180,7 @@ function hotelsFor(locationId: string) {
   position: relative;
   display: block;
   height: 100%;
-  border-radius: 30px;
+  border-radius: 0;
   color: inherit;
   transform-style: preserve-3d;
   transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
@@ -191,7 +191,7 @@ function hotelsFor(locationId: string) {
   display: block;
   height: 100%;
   overflow: hidden;
-  border-radius: 30px;
+  border-radius: 0;
   background: #2a2e2c;
 }
 

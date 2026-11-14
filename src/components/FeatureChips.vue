@@ -210,7 +210,7 @@ function iconFor(label: string) {
   gap: 0.35rem;
   max-width: 100%;
   padding: 0.38rem 0.78rem;
-  border-radius: 999px;
+  border-radius: 0;
   font-size: 0.78rem;
   line-height: 1.25;
   letter-spacing: 0.01em;
@@ -236,7 +236,7 @@ function iconFor(label: string) {
 .feature-chips--wrap li {
   max-width: 100%;
   align-items: flex-start;
-  border-radius: 14px;
+  border-radius: 0;
   white-space: normal;
 }
 
@@ -321,7 +321,7 @@ function iconFor(label: string) {
   max-width: 100vw !important;
   max-height: 88dvh;
   background: var(--gy-white);
-  border-radius: 20px 20px 0 0;
+  border-radius: 0;
   color: var(--gy-forest);
   overflow: hidden;
 }
@@ -342,7 +342,7 @@ function iconFor(label: string) {
   width: 2.5rem;
   height: 4px;
   margin-left: -1.25rem;
-  border-radius: 999px;
+  border-radius: 0;
   background: rgba(69, 76, 75, 0.18);
 }
 
@@ -364,7 +364,7 @@ function iconFor(label: string) {
   width: 2.5rem;
   height: 2.5rem;
   border: 0;
-  border-radius: 999px;
+  border-radius: 0;
   background: transparent;
   color: var(--gy-forest);
   cursor: pointer;

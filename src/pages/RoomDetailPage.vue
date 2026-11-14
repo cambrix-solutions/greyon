@@ -221,7 +221,7 @@
                     >
                       {{
                         hasSearchedDates && pricedRoom(other.id)
-                          ? "Book"
+                          ? "Reserve"
                           : "Check availability"
                       }}
                     </button>
@@ -298,7 +298,7 @@
       </div>
     </section>
 
-    <div class="book-bar" role="region" aria-label="Book this room">
+    <div class="book-bar" role="region" aria-label="Reserve this room">
       <div class="book-bar__price">
         <template v-if="priced">
           <strong>${{ priced.total.toFixed(0) }}</strong>
@@ -721,7 +721,7 @@ const guestsLabel = computed(() => {
 
 const bookCtaLabel = computed(() => {
   if (booking.searching) return "Checking…";
-  if (priced.value) return "Book";
+  if (priced.value) return "Reserve";
   return "Check availability";
 });
 

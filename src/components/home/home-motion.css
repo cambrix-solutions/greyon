@@ -54,7 +54,7 @@
 }
 
 .home-motion .glass-frame {
-  border-radius: 28px;
+  border-radius: 0;
   padding: 2px;
   background: conic-gradient(
     from var(--wow-spin),
@@ -69,7 +69,7 @@
 }
 
 .home-motion .glass-frame__in {
-  border-radius: 26px;
+  border-radius: 0;
   background: rgba(16, 18, 16, 0.62);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);

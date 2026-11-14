@@ -117,9 +117,14 @@
             class="gy-account-btn gt-xs"
             :title="customer.displayName"
           >
-            <span class="gy-account-btn__avatar" aria-hidden="true">{{
-              accountInitials
-            }}</span>
+            <span class="gy-account-btn__avatar" aria-hidden="true">
+              <img
+                src="/images/default-avatar.svg"
+                alt=""
+                width="28"
+                height="28"
+              />
+            </span>
             <span class="gy-account-btn__label">Account</span>
           </router-link>
           <router-link
@@ -418,13 +423,6 @@ function openDrawer() {
   drawerOpen.value = true;
 }
 
-const accountInitials = computed(() => {
-  const parts = customer.displayName.trim().split(/\s+/).filter(Boolean);
-  if (!parts.length) return "G";
-  if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
-  return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
-});
-
 const drawerPrimaryLinks = computed(() => {
   const items = [
     { label: t("nav.home"), to: "/", icon: "home" as const },
@@ -675,7 +673,7 @@ onUnmounted(() => {
   min-height: 2.75rem;
   padding: 0.35rem 0.85rem 0.35rem 0.65rem;
   border: 1px solid rgba(69, 76, 75, 0.14);
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--gy-white);
   color: var(--gy-ink);
   box-shadow: 0 8px 22px rgba(28, 36, 33, 0.1);
@@ -735,7 +733,7 @@ onUnmounted(() => {
   min-height: 2.5rem;
   padding: 0.35rem 0.85rem 0.35rem 0.65rem;
   border: 1.5px solid var(--gy-forest);
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--gy-forest);
   color: var(--gy-white);
   font: inherit;
@@ -826,7 +824,7 @@ onUnmounted(() => {
   max-width: 560px;
   margin: 0.75rem auto;
   padding: 1rem 1rem 1.15rem;
-  border-radius: 18px;
+  border-radius: 0;
   background: var(--gy-cream, #f7f4ef);
   color: var(--gy-ink);
   box-shadow: 0 18px 48px rgba(28, 36, 33, 0.18);
@@ -837,7 +835,7 @@ onUnmounted(() => {
     width: calc(100vw - 1rem);
     max-width: none;
     margin: 0.5rem;
-    border-radius: 16px;
+    border-radius: 0;
   }
 }
 
@@ -864,7 +862,7 @@ onUnmounted(() => {
   width: 2.5rem;
   height: 2.5rem;
   border: 0;
-  border-radius: 999px;
+  border-radius: 0;
   background: rgba(69, 76, 75, 0.08);
   color: var(--gy-ink);
   cursor: pointer;
@@ -1098,10 +1096,16 @@ onUnmounted(() => {
   height: 1.7rem;
   display: grid;
   place-items: center;
-  background: linear-gradient(145deg, var(--gy-gold), var(--gy-gold-deep));
-  color: var(--gy-ink);
-  font-size: 0.68rem;
-  letter-spacing: 0.02em;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--gy-sand);
+}
+
+.gy-account-btn__avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .gy-signin-btn {
@@ -1181,7 +1185,7 @@ onUnmounted(() => {
   width: 2.75rem;
   height: 2.75rem;
   border: 0;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--gy-sand);
   color: var(--gy-ink);
   cursor: pointer;
@@ -1200,7 +1204,7 @@ onUnmounted(() => {
   gap: 0.85rem;
   min-height: 3.1rem;
   padding: 0.55rem 0.7rem;
-  border-radius: 12px;
+  border-radius: 0;
   color: var(--gy-ink);
   font-family: var(--font-display);
   font-size: 1rem;
@@ -1219,7 +1223,7 @@ onUnmounted(() => {
   place-items: center;
   width: 2.4rem;
   height: 2.4rem;
-  border-radius: 10px;
+  border-radius: 0;
   background: var(--gy-sand);
   color: var(--gy-forest);
   flex-shrink: 0;
@@ -1244,7 +1248,7 @@ onUnmounted(() => {
   min-height: 3.1rem;
   padding: 0.55rem 0.7rem;
   border: 0;
-  border-radius: 12px;
+  border-radius: 0;
   background: transparent;
   color: var(--gy-ink);
   font: inherit;
@@ -1275,7 +1279,7 @@ onUnmounted(() => {
 
 .gy-drawer__panel {
   border: 1px solid rgba(69, 76, 75, 0.1);
-  border-radius: 14px;
+  border-radius: 0;
   background: var(--gy-white);
   overflow: hidden;
 }
@@ -1300,7 +1304,7 @@ onUnmounted(() => {
   place-items: center;
   width: 2.6rem;
   height: 2.6rem;
-  border-radius: 10px;
+  border-radius: 0;
   background: rgba(98, 112, 99, 0.12);
   color: var(--gy-forest);
   flex-shrink: 0;
@@ -1339,7 +1343,7 @@ onUnmounted(() => {
   gap: 0.75rem;
   min-height: 2.85rem;
   padding: 0.55rem 0.65rem;
-  border-radius: 10px;
+  border-radius: 0;
   color: var(--gy-forest);
   text-decoration: none;
   transition: background 0.18s ease;

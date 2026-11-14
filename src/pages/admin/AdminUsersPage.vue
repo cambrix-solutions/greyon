@@ -266,7 +266,7 @@
           label="Managed hotels"
           outlined
           dense
-          hint="Package limits: up to 3 hotels per location."
+          hint="Choose which hotels this person can manage."
         />
       </AdminFormSection>
       <template #actions>
@@ -551,7 +551,7 @@ function remove(id: string) {
   padding: 0.15rem 0.5rem;
   font-size: 0.72rem;
   font-weight: 600;
-  border-radius: 999px;
+  border-radius: 0;
 }
 .role-pill {
   color: var(--gy-gold-deep);
@@ -574,7 +574,7 @@ function remove(id: string) {
 .my-access {
   background: #fff;
   border: 1px solid rgba(28, 36, 33, 0.08);
-  border-radius: 16px;
+  border-radius: 0;
   overflow: hidden;
 }
 .my-access__head {
