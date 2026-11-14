@@ -110,7 +110,7 @@ const trackStyle = computed(() => {
       transparent 48%
     ),
     linear-gradient(155deg, #1a211e 0%, #2c312e 46%, #3a3228 100%);
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 4rem), 0 100%);
+  clip-path: none;
   padding: clamp(3.5rem, 7vw, 5.5rem) 0 clamp(5.5rem, 9vw, 7.5rem);
   overflow: hidden;
 }
@@ -262,7 +262,7 @@ const trackStyle = computed(() => {
 
 @media (max-width: 700px) {
   .band {
-    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 1.75rem), 0 100%);
+    clip-path: none;
     padding-bottom: 4.25rem;
   }
 

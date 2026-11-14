@@ -21,7 +21,7 @@ const type = computed(() => String(route.meta.legalType || "privacy"));
 
 const title = computed(() => {
   if (type.value === "terms") return "Terms & Conditions";
-  if (type.value === "booking") return "Booking Terms";
+  if (type.value === "booking") return "Reservation Terms";
   return "Privacy Policy";
 });
 

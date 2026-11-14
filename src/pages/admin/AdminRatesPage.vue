@@ -68,7 +68,7 @@
       </template>
     </AdminPageHeader>
 
-    <q-banner v-reveal class="bg-grey-2 q-mb-md" rounded>
+    <q-banner v-reveal class="bg-grey-2 q-mb-md">
       Set the default price for each room below. Hotel check-in / check-out
       <strong>times</strong> come from each hotel (edit under Hotels).
       <template v-if="auth.isDeveloper">
@@ -283,7 +283,7 @@
         </div>
       </div>
 
-      <q-banner v-if="roomHotelTimes" dense rounded class="bg-blue-1 q-mb-md">
+      <q-banner v-if="roomHotelTimes" dense class="bg-blue-1 q-mb-md">
         Selected room hotel times: check-in
         <strong>{{ roomHotelTimes.checkIn }}</strong>
         · check-out
@@ -1179,7 +1179,7 @@ function remove(id: string) {
 
 .cal {
   border: 1px solid rgba(0, 0, 0, 0.12);
-  border-radius: 8px;
+  border-radius: 0;
   overflow: hidden;
   background: #fff;
 }
@@ -1263,7 +1263,7 @@ function remove(id: string) {
   justify-content: center;
   width: 1.5rem;
   height: 1.5rem;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--q-primary);
   color: #fff;
 }
@@ -1326,7 +1326,7 @@ function remove(id: string) {
   min-height: 40px;
   padding: 0.35rem 0.65rem;
   background: #faf9f7;
-  border-radius: 12px;
+  border-radius: 0;
   border: 1px solid rgba(28, 36, 33, 0.06);
 }
 
@@ -1347,7 +1347,7 @@ function remove(id: string) {
   padding: 0.65rem 0.85rem;
   background: #fff;
   border: 1px solid rgba(28, 36, 33, 0.08);
-  border-radius: 12px;
+  border-radius: 0;
 }
 
 .rates-pager__meta {

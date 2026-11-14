@@ -675,7 +675,7 @@ async function onDragEnd() {
 }
 
 .hero-add {
-  border-radius: 10px;
+  border-radius: 0;
   min-height: 2.6rem;
   padding-inline: 0.9rem;
 }
@@ -683,7 +683,7 @@ async function onDragEnd() {
 .hero-alert {
   margin: 0 0 1rem;
   padding: 0.75rem 0.9rem;
-  border-radius: 12px;
+  border-radius: 0;
   background: rgba(139, 46, 46, 0.08);
   color: var(--q-negative);
 }
@@ -697,7 +697,7 @@ async function onDragEnd() {
 .slide-skel,
 .slide-card {
   aspect-ratio: 16 / 9;
-  border-radius: 18px;
+  border-radius: 0;
   overflow: hidden;
 }
 
@@ -765,7 +765,7 @@ async function onDragEnd() {
   width: 2rem;
   height: 2rem;
   border: 0;
-  border-radius: 999px;
+  border-radius: 0;
   background: rgba(255, 255, 255, 0.18);
   color: #fff;
   cursor: pointer;
@@ -793,7 +793,7 @@ async function onDragEnd() {
 .slide-switch span {
   width: 0.85rem;
   height: 0.85rem;
-  border-radius: 999px;
+  border-radius: 0;
   background: rgba(255, 255, 255, 0.75);
   transform: translateX(-5px);
   transition: transform 0.18s ease;
@@ -810,7 +810,7 @@ async function onDragEnd() {
 
 .slide-chip {
   padding: 0.2rem 0.55rem;
-  border-radius: 999px;
+  border-radius: 0;
   background: rgba(255, 255, 255, 0.2);
   font-family: var(--font-display);
   font-size: 0.68rem;
@@ -852,7 +852,7 @@ async function onDragEnd() {
   display: inline-flex;
   margin-top: 0.45rem;
   padding: 0.28rem 0.65rem;
-  border-radius: 999px;
+  border-radius: 0;
   background: #fff;
   color: var(--gy-ink);
   font-family: var(--font-display);
@@ -867,7 +867,7 @@ async function onDragEnd() {
   gap: 0.55rem;
   max-width: 28rem;
   padding: 1.5rem;
-  border-radius: 20px;
+  border-radius: 0;
   background: #fff;
   border: 1px solid rgba(69, 76, 75, 0.08);
   box-shadow: 0 16px 40px rgba(69, 76, 75, 0.06);
@@ -896,7 +896,7 @@ async function onDragEnd() {
   max-width: 980px;
   max-height: calc(100dvh - 2rem);
   overflow: auto;
-  border-radius: 18px;
+  border-radius: 0;
   padding: 1rem 1rem 0.85rem;
 }
 
@@ -956,7 +956,7 @@ async function onDragEnd() {
   position: relative;
   aspect-ratio: 16 / 9;
   overflow: hidden;
-  border-radius: 16px;
+  border-radius: 0;
   background: #2c2926;
 }
 
@@ -1006,7 +1006,7 @@ async function onDragEnd() {
   align-self: flex-start;
   margin-top: 0.55rem;
   padding: 0.35rem 0.7rem;
-  border-radius: 999px;
+  border-radius: 0;
   background: #fff;
   color: var(--gy-ink);
   font-family: var(--font-display);
@@ -1024,7 +1024,7 @@ async function onDragEnd() {
 .confirm-card {
   width: min(420px, calc(100vw - 1.5rem));
   padding: 1.15rem 1.1rem 1rem;
-  border-radius: 18px;
+  border-radius: 0;
 }
 
 .confirm-card p {

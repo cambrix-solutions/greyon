@@ -174,17 +174,7 @@
         <p v-reveal="{ delay: '100ms' }" class="panel__lead">
           Distances from the property to places guests ask about most.
         </p>
-        <ul class="landmark-list">
-          <li
-            v-for="(item, index) in landmarks"
-            :key="`${item.place}-${item.distance}`"
-            v-reveal="{ delay: `${140 + index * 35}ms` }"
-            class="landmark"
-          >
-            <span class="landmark__place">{{ item.place }}</span>
-            <span class="landmark__meta">{{ item.distance }}</span>
-          </li>
-        </ul>
+        <NearbyLandmarksList :items="landmarks" />
       </div>
     </section>
 
@@ -246,7 +236,7 @@
                   : focusSearch()
               "
             >
-              {{ stickyPriced ? "Book" : "Check availability" }}
+              {{ stickyPriced ? "Reserve" : "Check availability" }}
             </button>
           </aside>
 
@@ -286,9 +276,11 @@
                   "
                   :detail-to="roomDetailPath(hotel, room)"
                   :show-view-details="true"
+                  :show-panorama="true"
+                  :panorama-url="room.panoramaUrl"
                   :cta-label="
                     hasSearchedDates && pricedRoom(room.id)
-                      ? 'Book'
+                      ? 'Reserve'
                       : 'Check availability'
                   "
                   :cta-outline="!(hasSearchedDates && pricedRoom(room.id))"
@@ -370,7 +362,7 @@
           stickyPriced ? openRoom(stickyPriced.roomType.id) : focusSearch()
         "
       >
-        {{ stickyPriced ? "Book" : "Check availability" }}
+        {{ stickyPriced ? "Reserve" : "Check availability" }}
       </button>
     </div>
   </q-page>
@@ -390,6 +382,7 @@ import HotelCard from "@/components/HotelCard.vue";
 import { useParallax } from "@/components/home/useParallax";
 import HotelAmenityBand from "@/components/hotel/HotelAmenityBand.vue";
 import HotelGallery from "@/components/hotel/HotelGallery.vue";
+import NearbyLandmarksList from "@/components/hotel/NearbyLandmarksList.vue";
 import SectionDivider from "@/components/hotel/SectionDivider.vue";
 import MapEmbed from "@/components/MapEmbed.vue";
 import RoomCardSkeleton from "@/components/RoomCardSkeleton.vue";
@@ -785,7 +778,7 @@ async function openRoom(roomTypeId: string) {
   min-height: 2rem;
   padding: 0.3rem 0.75rem;
   border: 1px solid rgba(255, 255, 255, 0.38);
-  border-radius: 999px;
+  border-radius: 0;
   background: rgba(255, 255, 255, 0.14);
   backdrop-filter: blur(12px);
   font-family: var(--font-display);
@@ -811,7 +804,7 @@ async function openRoom(roomTypeId: string) {
 .fact {
   min-width: 0;
   padding: 1rem 1.05rem 0.95rem;
-  border-radius: 18px;
+  border-radius: 0;
   background: rgba(255, 255, 255, 0.86);
   color: var(--gy-forest);
   box-shadow: 0 18px 40px rgba(12, 11, 10, 0.16);
@@ -978,7 +971,7 @@ async function openRoom(roomTypeId: string) {
 
 .info-card,
 .product-card {
-  border-radius: 20px;
+  border-radius: 0;
   background: rgba(255, 255, 255, 0.78);
   box-shadow: 0 16px 40px rgba(36, 48, 42, 0.08);
   backdrop-filter: blur(12px);
@@ -1057,54 +1050,6 @@ async function openRoom(roomTypeId: string) {
   padding: clamp(2.5rem, 5vw, 4rem) 0;
 }
 
-.landmark-list {
-  display: grid;
-  grid-template-columns: 1fr;
-  column-gap: clamp(1.5rem, 3vw, 2.75rem);
-  row-gap: 0;
-  margin: 0.5rem 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.landmark {
-  display: grid;
-  gap: 0.2rem;
-  padding: 0.85rem 0;
-  border-bottom: 1px solid color-mix(in srgb, var(--gy-forest) 18%, transparent);
-}
-
-.landmark__place {
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.02rem;
-  letter-spacing: -0.01em;
-  line-height: 1.3;
-  color: var(--gy-forest);
-}
-
-.landmark__meta {
-  margin: 0;
-  font-family: var(--font-body);
-  font-size: 0.92rem;
-  font-weight: 400;
-  line-height: 1.45;
-  color: var(--gy-gold);
-}
-
-@media (min-width: 700px) {
-  .landmark-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1100px) {
-  .landmark-list {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
 .rooms {
   scroll-margin-top: 6.5rem;
   padding: clamp(3.5rem, 7vw, 5.5rem) 0 clamp(3rem, 6vw, 5rem);
@@ -1143,7 +1088,7 @@ async function openRoom(roomTypeId: string) {
   display: grid;
   gap: 0.45rem;
   padding: 1.2rem 1.15rem 1.15rem;
-  border-radius: 22px;
+  border-radius: 0;
   background: rgba(255, 255, 255, 0.8);
   box-shadow: 0 22px 50px rgba(36, 48, 42, 0.1);
   backdrop-filter: blur(16px) saturate(1.1);
@@ -1232,10 +1177,9 @@ async function openRoom(roomTypeId: string) {
   position: absolute;
   top: 0;
   right: 0;
-  width: min(18%, 7rem);
+  width: 1px;
   height: 100%;
-  background: var(--gy-cream);
-  clip-path: polygon(0 0, 100% 0, 0 100%);
+  background: color-mix(in srgb, var(--gy-forest) 18%, transparent);
   transform: translateX(99%);
 }
 
@@ -1271,13 +1215,13 @@ async function openRoom(roomTypeId: string) {
 
 .place__map :deep(.map-embed) {
   padding: 0.7rem;
-  border-radius: 18px;
+  border-radius: 0;
   background: rgba(255, 255, 255, 0.94);
 }
 
 .place__map :deep(.map-embed__frame) {
   min-height: 320px;
-  border-radius: 12px;
+  border-radius: 0;
 }
 
 .related {

@@ -284,7 +284,7 @@
                 <q-item-label>{{ item.label }}</q-item-label>
               </q-item-section>
               <q-item-section v-if="item.badge" side>
-                <q-badge color="orange" rounded>{{ item.badge }}</q-badge>
+                <q-badge color="orange">{{ item.badge }}</q-badge>
               </q-item-section>
             </q-item>
           </q-list>
@@ -713,7 +713,7 @@ async function onOpenNotification(item: StaffNotification) {
   width: 2.15rem;
   height: 2.15rem;
   border: 1px solid rgba(18, 17, 16, 0.08);
-  border-radius: 999px;
+  border-radius: 0;
   background: #fff;
   color: var(--gy-ink);
   cursor: pointer;
@@ -736,7 +736,7 @@ async function onOpenNotification(item: StaffNotification) {
   padding: 0 0.25rem;
   display: inline-grid;
   place-items: center;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--gy-forest);
   color: #fff;
   font-size: 0.62rem;
@@ -802,7 +802,7 @@ async function onOpenNotification(item: StaffNotification) {
   color: var(--gy-ink);
   background: var(--gy-cream);
   border: 1px solid rgba(176, 141, 87, 0.3);
-  border-radius: 999px;
+  border-radius: 0;
   font-size: 0.74rem;
   line-height: 1;
   white-space: nowrap;
@@ -822,7 +822,7 @@ async function onOpenNotification(item: StaffNotification) {
   color: #fff;
   font-size: 0.68rem;
   font-weight: 600;
-  border-radius: 999px;
+  border-radius: 0;
 }
 
 .admin-link {
@@ -834,7 +834,7 @@ async function onOpenNotification(item: StaffNotification) {
   color: var(--gy-muted);
   font-size: 0.82rem;
   line-height: 1;
-  border-radius: 8px;
+  border-radius: 0;
   white-space: nowrap;
 }
 
@@ -850,7 +850,7 @@ async function onOpenNotification(item: StaffNotification) {
   margin: 0;
   padding: 0.25rem 0.45rem 0.25rem 0.25rem;
   border: 1px solid rgba(28, 36, 33, 0.08);
-  border-radius: 999px;
+  border-radius: 0;
   background: #fff;
   color: inherit;
   cursor: pointer;
@@ -881,7 +881,7 @@ async function onOpenNotification(item: StaffNotification) {
   font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.04em;
-  border-radius: 999px;
+  border-radius: 0;
 }
 
 .admin-account__meta {
@@ -918,7 +918,7 @@ async function onOpenNotification(item: StaffNotification) {
 .admin-account-menu {
   min-width: 240px;
   border: 1px solid rgba(28, 36, 33, 0.08);
-  border-radius: 14px;
+  border-radius: 0;
   box-shadow: 0 16px 40px rgba(28, 36, 33, 0.12);
   overflow: hidden;
 }
@@ -953,7 +953,7 @@ async function onOpenNotification(item: StaffNotification) {
   text-transform: uppercase;
   color: var(--gy-gold-deep);
   background: rgba(176, 141, 87, 0.12);
-  border-radius: 999px;
+  border-radius: 0;
 }
 
 .admin-account-menu__pkg {
@@ -987,7 +987,7 @@ async function onOpenNotification(item: StaffNotification) {
 }
 
 .admin-nav :deep(.q-item) {
-  border-radius: 10px;
+  border-radius: 0;
   margin: 0.12rem 0.45rem;
   min-height: 40px;
   color: var(--gy-ink);
@@ -1001,7 +1001,7 @@ async function onOpenNotification(item: StaffNotification) {
   margin-left: 0.85rem;
   min-height: 38px;
   border-left: 2px solid rgba(84, 88, 89, 0.28);
-  border-radius: 0 10px 10px 0;
+  border-radius: 0;
 }
 
 .admin-nav :deep(.q-item:hover) {
@@ -1038,7 +1038,7 @@ async function onOpenNotification(item: StaffNotification) {
 .admin-page-container :deep(.admin-scroll),
 .admin-page-container :deep(.q-card),
 .admin-page-container :deep(.q-banner) {
-  border-radius: 14px;
+  border-radius: 0;
   transition:
     box-shadow 0.35s ease,
     transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
@@ -1051,11 +1051,11 @@ async function onOpenNotification(item: StaffNotification) {
 }
 
 .admin-page-container :deep(.q-btn) {
-  border-radius: 8px;
+  border-radius: 0;
 }
 
 .admin-page-container :deep(.q-field--outlined .q-field__control) {
-  border-radius: 10px;
+  border-radius: 0;
 }
 
 .admin-alert {

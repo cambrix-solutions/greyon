@@ -150,7 +150,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
       transparent 42%
     ),
     #141210;
-  clip-path: polygon(0 3rem, 100% 0, 100% calc(100% - 3.5rem), 0 100%);
+  clip-path: none;
   padding: clamp(4.5rem, 8vw, 6.5rem) 0 clamp(5rem, 8vw, 6.75rem);
 }
 
@@ -321,7 +321,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
   width: 44px;
   height: 44px;
   border: 1px solid rgba(255, 255, 255, 0.45);
-  border-radius: 999px;
+  border-radius: 0;
   background: rgba(255, 255, 255, 0.12);
   color: #fff;
   cursor: pointer;
@@ -392,7 +392,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 
 @media (max-width: 700px) {
   .gallery {
-    clip-path: polygon(0 1.25rem, 100% 0, 100% calc(100% - 1.25rem), 0 100%);
+    clip-path: none;
     padding-top: 3.25rem;
     padding-bottom: 3.5rem;
   }

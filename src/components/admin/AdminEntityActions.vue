@@ -182,7 +182,7 @@ function onPrimaryClick() {
 
 .entity-actions__status {
   min-width: 7.25rem;
-  border-radius: 10px;
+  border-radius: 0;
   background: #fff;
   border: 1px solid rgba(28, 25, 23, 0.1);
   box-shadow: 0 1px 0 rgba(28, 25, 23, 0.03);
@@ -216,7 +216,7 @@ function onPrimaryClick() {
 .entity-actions__cluster {
   display: inline-flex;
   align-items: stretch;
-  border-radius: 11px;
+  border-radius: 0;
   border: 1px solid rgba(28, 25, 23, 0.1);
   background: #fff;
   box-shadow: 0 1px 0 rgba(28, 25, 23, 0.03);
@@ -268,7 +268,7 @@ function onPrimaryClick() {
 .entity-actions__icon {
   width: 34px;
   min-height: 34px;
-  border-radius: 8px !important;
+  border-radius: 0 !important;
   color: var(--gy-muted, #78716c) !important;
 }
 

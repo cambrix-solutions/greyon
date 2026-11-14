@@ -110,7 +110,7 @@ const emit = defineEmits<{
   background: var(--gy-cream);
   color: var(--gy-ink);
   border: 1px solid rgba(69, 76, 75, 0.1);
-  border-radius: 16px;
+  border-radius: 0;
   box-shadow:
     0 24px 60px rgba(69, 76, 75, 0.14),
     0 2px 8px rgba(69, 76, 75, 0.06);
@@ -121,7 +121,7 @@ const emit = defineEmits<{
   flex-direction: column;
   gap: 0.75rem;
   padding: 0.65rem 0.85rem 0.75rem;
-  border-radius: 12px;
+  border-radius: 0;
 }
 
 .svc-mega__col + .svc-mega__col {
@@ -139,7 +139,7 @@ const emit = defineEmits<{
   place-items: center;
   width: 2.4rem;
   height: 2.4rem;
-  border-radius: 10px;
+  border-radius: 0;
   background: var(--gy-sand);
   color: var(--gy-forest);
 }
@@ -172,7 +172,7 @@ const emit = defineEmits<{
   gap: 0.75rem;
   min-height: 3.4rem;
   padding: 0.4rem 0.45rem;
-  border-radius: 10px;
+  border-radius: 0;
   color: inherit;
   text-decoration: none;
   transition: background 0.18s ease;
@@ -186,7 +186,7 @@ const emit = defineEmits<{
   width: 3rem;
   height: 3rem;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: 0;
   background: var(--gy-sand);
   flex-shrink: 0;
 }
@@ -214,7 +214,7 @@ const emit = defineEmits<{
 .svc-mega__soon {
   margin: 0.35rem 0;
   padding: 0.85rem 0.75rem;
-  border-radius: 10px;
+  border-radius: 0;
   background: var(--gy-sand);
   color: var(--gy-muted);
   font-size: 0.9rem;
@@ -249,7 +249,7 @@ const emit = defineEmits<{
 .svc-mega__skel-thumb {
   width: 3rem;
   height: 3rem;
-  border-radius: 8px;
+  border-radius: 0;
   background: linear-gradient(90deg, #ebe7e2, #f5f2ee, #ebe7e2);
   background-size: 200% 100%;
   animation: svc-shimmer 1.2s ease infinite;
@@ -264,7 +264,7 @@ const emit = defineEmits<{
 .svc-mega__skel-lines span {
   display: block;
   height: 0.65rem;
-  border-radius: 4px;
+  border-radius: 0;
   background: linear-gradient(90deg, #ebe7e2, #f5f2ee, #ebe7e2);
   background-size: 200% 100%;
   animation: svc-shimmer 1.2s ease infinite;

@@ -393,7 +393,7 @@ function remove(item: CatalogService) {
   padding: 1rem;
   background: #fff;
   border: 1px solid rgba(18, 17, 16, 0.08);
-  border-radius: 14px;
+  border-radius: 0;
 }
 
 .svc-card__icon {
@@ -401,7 +401,7 @@ function remove(item: CatalogService) {
   place-items: center;
   width: 2.75rem;
   height: 2.75rem;
-  border-radius: 12px;
+  border-radius: 0;
   background: var(--gy-sand);
   color: var(--gy-forest);
 }
@@ -424,7 +424,7 @@ function remove(item: CatalogService) {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   padding: 0.15rem 0.45rem;
-  border-radius: 999px;
+  border-radius: 0;
   background: rgba(18, 17, 16, 0.06);
 }
 
@@ -467,7 +467,7 @@ function remove(item: CatalogService) {
   text-align: center;
   color: var(--gy-muted);
   background: #fff;
-  border-radius: 14px;
+  border-radius: 0;
   border: 1px dashed rgba(18, 17, 16, 0.12);
 }
 </style>

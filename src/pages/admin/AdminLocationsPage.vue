@@ -146,7 +146,6 @@
             <h3>
               Hotels
               <span>{{ hotelsFor(loc.id).length }}</span>
-              <small> / {{ hotelCap }} max</small>
             </h3>
             <span
               v-if="
@@ -162,20 +161,8 @@
                 color="primary"
                 icon="add"
                 label="Add hotel"
-                :disable="hotelsFor(loc.id).length >= hotelCap"
-                :to="
-                  hotelsFor(loc.id).length >= hotelCap
-                    ? undefined
-                    : `/admin/locations/${loc.id}`
-                "
+                :to="`/admin/locations/${loc.id}`"
               />
-              <q-tooltip
-                v-if="hotelsFor(loc.id).length >= hotelCap"
-                anchor="top middle"
-                self="bottom middle"
-              >
-                Hotel limit reached for this destination ({{ hotelCap }} max)
-              </q-tooltip>
             </span>
           </div>
 
@@ -387,9 +374,6 @@ const statusOptions = [
   ...cms.statusOptions.map(s => ({ label: s, value: s }))
 ];
 
-/** Soft cap matching package limit hotels_per_location (seeded at 3). */
-const hotelCap = 3;
-
 const form = reactive({
   name: "",
   slug: "",
@@ -539,7 +523,7 @@ function remove(id: string) {
   padding: 0.75rem 1rem;
   background: #fff;
   border: 1px solid rgba(84, 88, 89, 0.18);
-  border-radius: 12px;
+  border-radius: 0;
   font-size: 0.84rem;
   color: var(--gy-muted);
 }
@@ -561,7 +545,7 @@ function remove(id: string) {
 .loc-card {
   background: #fff;
   border: 1px solid rgba(28, 36, 33, 0.08);
-  border-radius: 16px;
+  border-radius: 0;
   overflow: hidden;
   box-shadow: 0 1px 0 rgba(28, 36, 33, 0.03);
 }
@@ -581,7 +565,7 @@ function remove(id: string) {
 
 .loc-card__media {
   aspect-ratio: 4 / 3;
-  border-radius: 10px;
+  border-radius: 0;
   overflow: hidden;
   background: var(--gy-stone, #e8e4dc);
 }
@@ -618,7 +602,7 @@ function remove(id: string) {
   display: inline-flex;
   align-items: center;
   padding: 0.12rem 0.45rem;
-  border-radius: 999px;
+  border-radius: 0;
   font-size: 0.68rem;
   font-weight: 600;
   text-transform: lowercase;
@@ -675,7 +659,7 @@ function remove(id: string) {
 
 .loc-card__chips li {
   padding: 0.2rem 0.55rem;
-  border-radius: 999px;
+  border-radius: 0;
   background: rgba(84, 88, 89, 0.1);
   color: var(--gy-ink);
   font-size: 0.74rem;
@@ -724,7 +708,7 @@ function remove(id: string) {
   min-width: 1.4rem;
   height: 1.4rem;
   padding: 0 0.35rem;
-  border-radius: 999px;
+  border-radius: 0;
   background: rgba(84, 88, 89, 0.16);
   color: var(--gy-gold-deep);
   font-size: 0.74rem;
@@ -755,7 +739,7 @@ function remove(id: string) {
   padding: 0.75rem 0.85rem;
   background: #fff;
   border: 1px solid rgba(28, 36, 33, 0.07);
-  border-radius: 12px;
+  border-radius: 0;
   transition: border-color 0.15s ease;
 }
 
@@ -766,7 +750,7 @@ function remove(id: string) {
 .hotel-row__thumb {
   width: 3rem;
   height: 3rem;
-  border-radius: 9px;
+  border-radius: 0;
   overflow: hidden;
   flex-shrink: 0;
   display: grid;
@@ -835,14 +819,14 @@ function remove(id: string) {
   color: var(--gy-muted);
   font-size: 0.88rem;
   border: 1px dashed rgba(28, 36, 33, 0.14);
-  border-radius: 10px;
+  border-radius: 0;
   background: rgba(255, 255, 255, 0.55);
 }
 
 .loc-hub__empty {
   text-align: center;
   background: #fff;
-  border-radius: 14px;
+  border-radius: 0;
   border-style: dashed;
 }
 

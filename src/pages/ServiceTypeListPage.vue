@@ -325,7 +325,7 @@ onMounted(() => {
 .empty {
   margin: 1.5rem 0 0;
   padding: 1.25rem 1.35rem;
-  border-radius: 14px;
+  border-radius: 0;
   background: var(--gy-sand);
   font-family: var(--font-body);
   color: var(--gy-forest);

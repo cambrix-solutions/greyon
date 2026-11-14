@@ -225,7 +225,7 @@ function onLng(val: string | number | null) {
   gap: 0.85rem;
   align-items: start;
   padding: 0.9rem 1rem;
-  border-radius: 12px;
+  border-radius: 0;
   background: linear-gradient(180deg, #faf8f4 0%, #f6f3ed 100%);
   border: 1px solid rgba(84, 88, 89, 0.18);
 }
@@ -235,7 +235,7 @@ function onLng(val: string | number | null) {
   place-items: center;
   width: 2.5rem;
   height: 2.5rem;
-  border-radius: 10px;
+  border-radius: 0;
   background: rgba(84, 88, 89, 0.14);
   color: var(--gy-gold-deep);
 }
@@ -276,7 +276,7 @@ function onLng(val: string | number | null) {
 
 .map-pin-picker__stage {
   position: relative;
-  border-radius: 14px;
+  border-radius: 0;
   overflow: hidden;
   border: 1px solid rgba(28, 36, 33, 0.1);
   background: #ebe8e2;
@@ -327,7 +327,7 @@ function onLng(val: string | number | null) {
   align-items: center;
   gap: 0.4rem;
   padding: 0.45rem 0.65rem;
-  border-radius: 999px;
+  border-radius: 0;
   background: rgba(255, 255, 255, 0.94);
   border: 1px solid rgba(28, 36, 33, 0.08);
   box-shadow: 0 6px 18px rgba(28, 36, 33, 0.1);
@@ -358,7 +358,7 @@ function onLng(val: string | number | null) {
   font-weight: 600;
   cursor: pointer;
   padding: 0.15rem 0.35rem;
-  border-radius: 6px;
+  border-radius: 0;
 }
 
 .map-pin-picker__clear:hover {
@@ -367,7 +367,7 @@ function onLng(val: string | number | null) {
 }
 
 .map-pin-picker__manual {
-  border-radius: 10px;
+  border-radius: 0;
   border: 1px solid rgba(28, 36, 33, 0.08);
   background: #fff;
   padding: 0.15rem 0.85rem 0.15rem;

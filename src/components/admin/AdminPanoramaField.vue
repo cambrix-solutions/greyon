@@ -161,7 +161,7 @@ onBeforeUnmount(clearPicked);
   max-width: 100%;
   padding: 0.85rem;
   border: 1px dashed rgba(98, 112, 99, 0.45);
-  border-radius: 10px;
+  border-radius: 0;
   background: var(--gy-sand);
   transition:
     border-color 0.15s ease,
@@ -228,7 +228,7 @@ onBeforeUnmount(clearPicked);
   position: relative;
   overflow: hidden;
   border: 1px solid var(--gy-gold);
-  border-radius: 8px;
+  border-radius: 0;
   background: var(--gy-white);
 }
 
@@ -244,7 +244,7 @@ onBeforeUnmount(clearPicked);
   top: 0.45rem;
   left: 0.45rem;
   padding: 0.2rem 0.4rem;
-  border-radius: 2px;
+  border-radius: 0;
   background: var(--gy-forest);
   color: var(--gy-gold);
   font-family: var(--font-display);
@@ -269,7 +269,7 @@ onBeforeUnmount(clearPicked);
   min-height: 44px;
   padding: 0 0.75rem;
   border: 1px solid var(--gy-gold);
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--gy-forest);
   color: var(--gy-gold);
   font-family: var(--font-display);
@@ -286,7 +286,7 @@ onBeforeUnmount(clearPicked);
 
 .pano-field__error {
   padding: 0.65rem 0.75rem;
-  border-radius: 8px;
+  border-radius: 0;
   background: rgba(196, 163, 90, 0.16);
   color: var(--gy-forest);
 }

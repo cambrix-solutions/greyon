@@ -422,7 +422,7 @@ function remove(id: string) {
   padding: 0.75rem 1rem;
   background: #fff;
   border: 1px solid rgba(84, 88, 89, 0.16);
-  border-radius: 12px;
+  border-radius: 0;
   font-size: 0.86rem;
   color: var(--gy-muted);
   line-height: 1.45;
@@ -439,7 +439,7 @@ function remove(id: string) {
   flex-direction: column;
   background: #fff;
   border: 1px solid rgba(28, 36, 33, 0.08);
-  border-radius: 16px;
+  border-radius: 0;
   overflow: hidden;
 }
 
@@ -485,7 +485,7 @@ function remove(id: string) {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   padding: 0.2rem 0.45rem;
-  border-radius: 999px;
+  border-radius: 0;
   background: rgba(28, 36, 33, 0.06);
   color: var(--gy-muted);
 }
@@ -537,7 +537,7 @@ function remove(id: string) {
   padding: 2rem 1rem;
   color: var(--gy-muted);
   background: #fff;
-  border-radius: 14px;
+  border-radius: 0;
   border: 1px dashed rgba(28, 36, 33, 0.15);
 }
 </style>

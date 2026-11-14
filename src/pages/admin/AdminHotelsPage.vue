@@ -109,22 +109,9 @@
                 color="primary"
                 icon="add"
                 label="Hotel here"
-                :disable="
-                  group.locationId === 'orphan' ||
-                  group.hotels.length >= hotelCap
-                "
+                :disable="group.locationId === 'orphan'"
                 @click="openCreateIn(group.locationId)"
               />
-              <q-tooltip
-                v-if="
-                  group.locationId !== 'orphan' &&
-                  group.hotels.length >= hotelCap
-                "
-                anchor="top middle"
-                self="bottom middle"
-              >
-                Hotel limit reached for this destination ({{ hotelCap }} max)
-              </q-tooltip>
             </span>
           </div>
         </header>
@@ -451,8 +438,6 @@ import { uploadFolder } from "@/utils/uploadFolder";
 
 const cms = useCmsStore();
 const auth = useAuthStore();
-/** Soft cap matching package limit hotels_per_location (seeded at 3). */
-const hotelCap = 3;
 const $q = useQuasar();
 const route = useRoute();
 const router = useRouter();
@@ -659,14 +644,6 @@ function openCreate() {
 
 function openCreateIn(locationId: string) {
   if (locationId === "orphan") return;
-  const used = cms.hotels.filter(h => h.locationId === locationId).length;
-  if (used >= hotelCap) {
-    $q.notify({
-      type: "warning",
-      message: `Hotel limit reached for this destination (${hotelCap} max).`
-    });
-    return;
-  }
   editing.value = null;
   blank(locationId);
   void loadCatalogOptions();
@@ -853,7 +830,7 @@ watch([statusFilter, locationFilter, featuredOnly, query], syncQuery);
   padding: 0.75rem 1rem;
   background: #fff;
   border: 1px solid rgba(84, 88, 89, 0.18);
-  border-radius: 12px;
+  border-radius: 0;
   font-size: 0.84rem;
   color: var(--gy-muted);
 }
@@ -875,7 +852,7 @@ watch([statusFilter, locationFilter, featuredOnly, query], syncQuery);
 .hotel-group {
   background: #fff;
   border: 1px solid rgba(28, 36, 33, 0.08);
-  border-radius: 16px;
+  border-radius: 0;
   overflow: hidden;
   box-shadow: 0 1px 0 rgba(28, 36, 33, 0.03);
 }
@@ -937,7 +914,7 @@ watch([statusFilter, locationFilter, featuredOnly, query], syncQuery);
   align-items: start;
   padding: 0.85rem 0.9rem;
   border: 1px solid rgba(28, 36, 33, 0.07);
-  border-radius: 14px;
+  border-radius: 0;
   background: #fff;
   transition: border-color 0.15s ease;
 }
@@ -950,7 +927,7 @@ watch([statusFilter, locationFilter, featuredOnly, query], syncQuery);
 .hotel-card__thumb {
   width: 5.25rem;
   height: 4rem;
-  border-radius: 10px;
+  border-radius: 0;
   flex-shrink: 0;
 }
 
@@ -997,7 +974,7 @@ watch([statusFilter, locationFilter, featuredOnly, query], syncQuery);
   display: inline-flex;
   align-items: center;
   padding: 0.1rem 0.45rem;
-  border-radius: 999px;
+  border-radius: 0;
   font-size: 0.68rem;
   font-weight: 600;
   text-transform: lowercase;
@@ -1018,7 +995,7 @@ watch([statusFilter, locationFilter, featuredOnly, query], syncQuery);
 .hotel-card__feat-pill {
   display: inline-flex;
   padding: 0.1rem 0.45rem;
-  border-radius: 999px;
+  border-radius: 0;
   font-size: 0.68rem;
   font-weight: 650;
   background: rgba(84, 88, 89, 0.14);
@@ -1067,7 +1044,7 @@ watch([statusFilter, locationFilter, featuredOnly, query], syncQuery);
 
 .hotel-card__chips li {
   padding: 0.18rem 0.55rem;
-  border-radius: 999px;
+  border-radius: 0;
   background: rgba(28, 36, 33, 0.05);
   color: var(--gy-ink);
   font-size: 0.74rem;
@@ -1082,7 +1059,7 @@ watch([statusFilter, locationFilter, featuredOnly, query], syncQuery);
 
 .hotel-card__feat-toggle {
   padding: 0.15rem 0.55rem;
-  border-radius: 10px;
+  border-radius: 0;
   border: 1px solid rgba(28, 25, 23, 0.1);
   background: #fff;
   box-shadow: 0 1px 0 rgba(28, 25, 23, 0.03);
@@ -1094,7 +1071,7 @@ watch([statusFilter, locationFilter, featuredOnly, query], syncQuery);
   padding: 2rem 1rem;
   color: var(--gy-muted);
   background: #fff;
-  border-radius: 14px;
+  border-radius: 0;
   border: 1px dashed rgba(28, 36, 33, 0.15);
 }
 
@@ -1104,7 +1081,7 @@ watch([statusFilter, locationFilter, featuredOnly, query], syncQuery);
   min-height: 40px;
   padding: 0.35rem 0.65rem;
   background: #faf9f7;
-  border-radius: 12px;
+  border-radius: 0;
   border: 1px solid rgba(28, 36, 33, 0.06);
 }
 

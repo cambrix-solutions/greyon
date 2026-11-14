@@ -14,20 +14,18 @@
     @pointercancel="pressed = false"
   >
     <div class="room-offer__media">
-      <component
-        :is="detailTo ? 'router-link' : 'div'"
-        class="room-offer__hit"
-        :to="detailTo || undefined"
-        :aria-label="detailTo ? `View details for ${title}` : undefined"
-      >
-        <RoomMediaCarousel
-          :images="images"
-          :alt="title"
-          :badge="badge"
-          fill
-          :lightbox="!detailTo"
-        />
-      </component>
+      <RoomMediaCarousel
+        :images="images"
+        :alt="title"
+        :badge="badge"
+        fill
+        :lightbox="!detailTo"
+      />
+      <RoomPanoramaButton
+        v-if="showPanorama"
+        class="room-offer__pano"
+        @open="openPanorama"
+      />
     </div>
 
     <div class="room-offer__body">
@@ -56,6 +54,13 @@
           size="sm"
           sheet-title="Room amenities"
         />
+        <router-link
+          v-if="detailTo && showViewDetails"
+          :to="detailTo"
+          class="room-offer__details"
+        >
+          View details
+        </router-link>
         <p v-if="meta" class="room-offer__meta">{{ meta }}</p>
       </div>
 
@@ -76,17 +81,17 @@
           >
             {{ ctaLabel }}
           </button>
-          <router-link
-            v-if="detailTo && showViewDetails"
-            :to="detailTo"
-            class="gy-btn gy-btn--outline room-offer__secondary"
-          >
-            View details
-          </router-link>
         </div>
       </div>
     </div>
   </article>
+  <RoomPanoramaDialog
+    v-if="showPanorama && panoramaSrc"
+    v-model="panoOpen"
+    :src="panoramaSrc"
+    :title="title"
+  />
+  <RoomPanoramaSoonDialog v-else-if="showPanorama" v-model="panoSoonOpen" />
 </template>
 
 <script setup lang="ts">
@@ -95,6 +100,9 @@ import type { RouteLocationRaw } from "vue-router";
 import FeatureChips from "@/components/FeatureChips.vue";
 import RoomFacts from "@/components/RoomFacts.vue";
 import RoomMediaCarousel from "@/components/RoomMediaCarousel.vue";
+import RoomPanoramaButton from "@/components/RoomPanoramaButton.vue";
+import RoomPanoramaDialog from "@/components/RoomPanoramaDialog.vue";
+import RoomPanoramaSoonDialog from "@/components/RoomPanoramaSoonDialog.vue";
 
 const props = withDefaults(
   defineProps<{
@@ -114,10 +122,14 @@ const props = withDefaults(
     priceHint?: string;
     ctaLabel?: string;
     ctaOutline?: boolean;
-    /** When set, title + photo link to the room detail page. */
+    /** When set, the title (and View details) link to the room detail page. */
     detailTo?: RouteLocationRaw | "";
-    /** Show the secondary View details action (hotel page). */
+    /** Show the secondary View details action under amenities. */
     showViewDetails?: boolean;
+    /** Opt-in 360° control (hotel detail room cards only). */
+    showPanorama?: boolean;
+    /** Equirectangular photo. Empty still shows the button (coming soon). */
+    panoramaUrl?: string | null;
   }>(),
   {
     variant: "detail",
@@ -135,16 +147,29 @@ const props = withDefaults(
     ctaLabel: "Check availability",
     ctaOutline: false,
     detailTo: "",
-    showViewDetails: false
+    showViewDetails: false,
+    showPanorama: false,
+    panoramaUrl: null
   }
 );
 
 const emit = defineEmits<{ (e: "cta"): void }>();
 
 const pressed = ref(false);
+const panoOpen = ref(false);
+const panoSoonOpen = ref(false);
 
 const images = computed(() => props.images ?? []);
 const amenities = computed(() => props.amenities ?? []);
+const panoramaSrc = computed(() => props.panoramaUrl?.trim() || "");
+
+function openPanorama() {
+  if (panoramaSrc.value) {
+    panoOpen.value = true;
+    return;
+  }
+  panoSoonOpen.value = true;
+}
 </script>
 
 <style scoped>
@@ -163,7 +188,7 @@ const amenities = computed(() => props.amenities ?? []);
   min-width: 0;
   overflow: hidden;
   background: var(--gy-white);
-  border-radius: 16px;
+  border-radius: 0;
   box-shadow:
     0 1px 2px rgba(69, 76, 75, 0.05),
     0 12px 32px rgba(69, 76, 75, 0.08);
@@ -198,13 +223,11 @@ const amenities = computed(() => props.amenities ?? []);
   text-decoration: none;
 }
 
-.room-offer__hit {
-  display: block;
-  height: 100%;
-  min-width: 0;
-  max-width: 100%;
-  color: inherit;
-  text-decoration: none;
+.room-offer__pano {
+  position: absolute;
+  right: 0.55rem;
+  bottom: 0.55rem;
+  z-index: 5;
 }
 
 /* Stacked: fixed 16:10 plane — never stretch/fill the whole card. */
@@ -217,7 +240,7 @@ const amenities = computed(() => props.amenities ?? []);
   height: auto;
   min-height: 0;
   max-height: none;
-  border-radius: 16px 16px 0 0;
+  border-radius: 0;
 }
 
 .room-offer__body {
@@ -267,7 +290,7 @@ const amenities = computed(() => props.amenities ?? []);
 .room-offer__title-link:focus-visible {
   outline: 2px solid var(--gy-gold);
   outline-offset: 3px;
-  border-radius: 4px;
+  border-radius: 0;
 }
 
 .room-offer__subtitle {
@@ -279,6 +302,32 @@ const amenities = computed(() => props.amenities ?? []);
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.room-offer__details {
+  justify-self: start;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--gy-forest);
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.room-offer__details:hover,
+.room-offer__details:focus-visible {
+  color: var(--gy-gold-deep);
+}
+
+.room-offer__details:focus-visible {
+  outline: 2px solid var(--gy-gold);
+  outline-offset: 3px;
 }
 
 .room-offer__meta {
@@ -326,19 +375,13 @@ const amenities = computed(() => props.amenities ?? []);
   width: 100%;
 }
 
-.room-offer__cta,
-.room-offer__secondary {
+.room-offer__cta {
   width: 100%;
   min-height: 44px;
   text-decoration: none;
   box-sizing: border-box;
 }
 
-.room-offer__secondary {
-  font-size: 0.72rem;
-}
-
-/* Wide: media ~40–42% | body. No aspect-ratio on fill height (overflow risk). */
 @media (min-width: 900px) {
   .room-offer--detail,
   .room-offer--result {
@@ -370,11 +413,10 @@ const amenities = computed(() => props.amenities ?? []);
     height: 100%;
     min-height: 280px;
     max-height: 420px;
-    border-radius: 16px 0 0 16px;
+    border-radius: 0;
   }
 
   .room-offer__body {
-    /* Tablet-wide: keep price under copy so media+content don't squeeze. */
     grid-template-columns: minmax(0, 1fr);
     gap: 1rem;
     padding: 1.15rem 1.25rem;
@@ -401,7 +443,6 @@ const amenities = computed(() => props.amenities ?? []);
   }
 }
 
-/* Comfortable desktop: price column beside copy. */
 @media (min-width: 1100px) {
   .room-offer--detail .room-offer__body,
   .room-offer--result .room-offer__body {

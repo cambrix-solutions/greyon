@@ -27,7 +27,12 @@
       <div class="account-layout">
         <aside v-reveal class="account-profile">
           <div class="account-profile__avatar" aria-hidden="true">
-            {{ initials }}
+            <img
+              src="/images/default-avatar.svg"
+              alt=""
+              width="68"
+              height="68"
+            />
           </div>
           <div class="account-profile__meta">
             <p class="account-profile__name">{{ customer.displayName }}</p>
@@ -66,7 +71,7 @@
               <router-link
                 to="/booking"
                 class="gy-btn gy-btn--outline account-block__cta"
-                >Book a stay</router-link
+                >Reserve a stay</router-link
               >
             </header>
             <div v-if="loadingBookings" class="account-empty">
@@ -227,13 +232,6 @@ const firstName = computed(() => {
   return name.split(/\s+/)[0] ?? name;
 });
 
-const initials = computed(() => {
-  const parts = customer.displayName.trim().split(/\s+/).filter(Boolean);
-  if (!parts.length) return "G";
-  if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
-  return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
-});
-
 const greeting = computed(() => {
   const h = new Date().getHours();
   if (h < 12) return "Good morning";
@@ -242,7 +240,7 @@ const greeting = computed(() => {
 });
 
 const exploreLinks = [
-  { to: "/booking", label: "Book a stay", hint: "Search dates & rooms" },
+  { to: "/booking", label: "Reserve a stay", hint: "Search dates & rooms" },
   { to: "/locations", label: "Destinations", hint: "Cities & coastlines" },
   { to: "/contact", label: "Concierge", hint: "Ask the Greyon team" }
 ];
@@ -358,12 +356,16 @@ async function onLogout() {
   height: 4.25rem;
   display: grid;
   place-items: center;
-  background: linear-gradient(145deg, var(--gy-gold), var(--gy-gold-deep));
-  color: var(--gy-forest);
-  font-family: var(--font-display, inherit);
-  font-size: 1.35rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--gy-sand);
+}
+
+.account-profile__avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .account-profile__name {

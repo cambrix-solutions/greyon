@@ -196,7 +196,7 @@ function dateLabel(value: string) {
   aspect-ratio: 4 / 5;
   max-height: 760px;
   overflow: hidden;
-  border-radius: 36px 36px 140px 36px;
+  border-radius: 0;
   background: #2a2e2c;
   transform-style: preserve-3d;
   transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
@@ -287,7 +287,7 @@ function dateLabel(value: string) {
   display: block;
   aspect-ratio: 16 / 10;
   overflow: hidden;
-  border-radius: 18px;
+  border-radius: 0;
   background: #2a2e2c;
 }
 

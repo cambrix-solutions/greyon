@@ -30,7 +30,7 @@ const emit = defineEmits<{ open: [] }>();
   margin: 0;
   padding: 0;
   border: 1px solid var(--gy-gold);
-  border-radius: 2px;
+  border-radius: 0;
   background: var(--gy-white);
   color: var(--gy-forest);
   cursor: pointer;

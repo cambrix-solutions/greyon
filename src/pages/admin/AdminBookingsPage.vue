@@ -1016,7 +1016,7 @@ function remove(id: string) {
   padding: 1rem 1.05rem 1.1rem;
   background: #fff;
   border: 1px solid rgba(28, 36, 33, 0.07);
-  border-radius: 14px;
+  border-radius: 0;
 }
 
 .booking-section__bar {
@@ -1152,7 +1152,7 @@ function remove(id: string) {
 }
 
 .bookings-scroll {
-  border-radius: 10px;
+  border-radius: 0;
   border: 1px solid rgba(28, 36, 33, 0.1);
 }
 
@@ -1215,7 +1215,7 @@ function remove(id: string) {
   display: inline-flex;
   align-items: center;
   padding: 0.22rem 0.65rem;
-  border-radius: 999px;
+  border-radius: 0;
   font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.04em;

@@ -1,7 +1,7 @@
 <template>
   <q-page class="gy-section booking-page">
     <SeoHead
-      title="Booking | Greyon"
+      title="Reservation | Greyon"
       description="Search Greyon apartel availability and complete your reservation request."
     />
     <div class="gy-container booking-shell">
@@ -65,7 +65,7 @@
                 :price-text="`$${result.total.toFixed(2)}`"
                 :price-per-night="resultPerNight(result)"
                 price-hint="incl. taxes & fees for your dates"
-                cta-label="Book now"
+                cta-label="Reserve now"
                 :detail-to="roomDetailPath(result.hotel, result.roomType)"
                 :show-view-details="true"
                 @cta="booking.selectResult(result)"
@@ -111,7 +111,7 @@
                 :disabled="!staySidebar.priced"
                 @click="bookFromSidebar"
               >
-                Book
+                Reserve
               </button>
             </div>
 
@@ -226,14 +226,14 @@
                 type="button"
                 @click="booking.goToGuestDetails()"
               >
-                Book now
+                Reserve now
               </button>
             </div>
           </div>
 
           <aside
             class="room-detail-step__aside stay-card"
-            aria-label="Booking summary"
+            aria-label="Reservation summary"
           >
             <p class="stay-card__eyebrow">Your stay</p>
             <div class="stay-card__price">
@@ -264,7 +264,7 @@
               type="button"
               @click="booking.goToGuestDetails()"
             >
-              Book now
+              Reserve now
             </button>
           </aside>
         </div>
@@ -282,7 +282,9 @@
             v-if="customer.isAuthenticated"
             class="guest-account guest-account--in"
           >
-            <p class="guest-account__title">Booking with your Greyon account</p>
+            <p class="guest-account__title"
+              >Reservation with your Greyon account</p
+            >
             <p class="guest-account__copy">
               {{ customer.displayName }} · {{ customer.user?.email }}
             </p>
@@ -550,7 +552,7 @@
         </p>
 
         <div class="success-ref">
-          <span>Booking reference</span>
+          <span>Reservation reference</span>
           <strong>{{ booking.confirmedBooking.reference }}</strong>
         </div>
 
@@ -782,7 +784,7 @@ const stepTitle = computed(() => {
     case 6:
       return "Confirmed";
     default:
-      return "Booking";
+      return "Reservation";
   }
 });
 
@@ -1052,7 +1054,7 @@ function showGuestError(
   display: grid;
   gap: 0.4rem;
   padding: 1.2rem 1.15rem 1.15rem;
-  border-radius: 16px;
+  border-radius: 0;
   background: var(--gy-cream);
   border: 1px solid rgba(28, 36, 33, 0.08);
 }
@@ -1178,7 +1180,7 @@ function showGuestError(
 
 .room-detail-step__gallery {
   overflow: hidden;
-  border-radius: 16px;
+  border-radius: 0;
   margin-bottom: 1.15rem;
   min-width: 0;
   max-width: 100%;
@@ -1195,7 +1197,7 @@ function showGuestError(
   min-height: 260px;
   max-height: 440px;
   height: auto;
-  border-radius: 16px;
+  border-radius: 0;
 }
 
 .room-detail-step__hotel {
