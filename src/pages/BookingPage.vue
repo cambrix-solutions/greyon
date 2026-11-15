@@ -68,6 +68,8 @@
                 cta-label="Reserve now"
                 :detail-to="roomDetailPath(result.hotel, result.roomType)"
                 :show-view-details="true"
+                :show-panorama="true"
+                :panorama-url="result.roomType.panoramaUrl"
                 @cta="booking.selectResult(result)"
               />
             </div>
