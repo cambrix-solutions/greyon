@@ -277,7 +277,7 @@
                   :detail-to="roomDetailPath(hotel, room)"
                   :show-view-details="true"
                   :show-panorama="true"
-                  :panorama-url="room.panoramaUrl"
+                  :panorama-urls="roomPanoramaUrls(room)"
                   :cta-label="
                     hasSearchedDates && pricedRoom(room.id)
                       ? 'Reserve'
@@ -393,6 +393,7 @@ import { useCmsStore } from "@/stores/cms-store";
 import type { HotelProductRef, RoomType } from "@/types/greyon";
 import { roomWithPropertyLabel } from "@/utils/roomLabel";
 import { roomDetailPath } from "@/utils/roomPath";
+import { roomPanoramaUrls } from "@/utils/roomPanoramas";
 
 const route = useRoute();
 const router = useRouter();

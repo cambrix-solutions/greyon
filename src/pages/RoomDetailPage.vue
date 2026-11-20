@@ -438,9 +438,9 @@
     </q-dialog>
 
     <RoomPanoramaDialog
-      v-if="panoramaUrl"
+      v-if="panoramaUrls.length"
       v-model="panoOpen"
-      :src="panoramaUrl"
+      :sources="panoramaUrls"
       :title="room.name"
     />
     <RoomPanoramaSoonDialog v-else v-model="panoSoonOpen" />
@@ -491,6 +491,7 @@ import BookingSearchWidget from "@/components/BookingSearchWidget.vue";
 import HotelAmenityBand from "@/components/hotel/HotelAmenityBand.vue";
 import SectionDivider from "@/components/hotel/SectionDivider.vue";
 import RoomFacts from "@/components/RoomFacts.vue";
+import { roomPanoramaUrls } from "@/utils/roomPanoramas";
 import RoomPanoramaButton from "@/components/RoomPanoramaButton.vue";
 import RoomPanoramaDialog from "@/components/RoomPanoramaDialog.vue";
 import RoomPanoramaSoonDialog from "@/components/RoomPanoramaSoonDialog.vue";
@@ -587,10 +588,10 @@ const photoProgress = computed(() => {
   if (!total) return "0%";
   return `${((activePhoto.value + 1) / total) * 100}%`;
 });
-const panoramaUrl = computed(() => room.value?.panoramaUrl?.trim() || "");
+const panoramaUrls = computed(() => roomPanoramaUrls(room.value));
 
 function openPanorama() {
-  if (panoramaUrl.value) {
+  if (panoramaUrls.value.length) {
     panoOpen.value = true;
     return;
   }

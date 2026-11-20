@@ -5,14 +5,19 @@
     transition-show="fade"
     transition-hide="fade"
     @update:model-value="emit('update:modelValue', $event)"
-    @show="boot"
+    @show="onShow"
     @hide="shutdown"
   >
     <div class="pano">
       <div ref="stageEl" class="pano__stage" />
 
       <div class="pano__bar">
-        <h2 id="pano-title" class="pano__title">{{ title || "360° view" }}</h2>
+        <h2 id="pano-title" class="pano__title">
+          {{ title || "360° view" }}
+          <span v-if="many" class="pano__count"
+            >· {{ index + 1 }} of {{ photos.length }}</span
+          >
+        </h2>
       </div>
 
       <button
@@ -34,9 +39,46 @@
         <button type="button" aria-label="Zoom out" @click="zoom(1)">−</button>
       </div>
 
-      <p v-if="phase === 'ready'" class="pano__hint">
+      <p
+        v-if="phase === 'ready'"
+        class="pano__hint"
+        :class="{ 'pano__hint--raised': many }"
+      >
         Drag to look around · pinch or zoom
       </p>
+
+      <div v-if="many" class="pano__nav" role="group" aria-label="360° photos">
+        <button
+          type="button"
+          class="pano__step"
+          aria-label="Previous 360° photo"
+          @click="go(index - 1)"
+        >
+          <q-icon name="chevron_left" size="22px" />
+        </button>
+        <div class="pano__dots">
+          <button
+            v-for="(_, i) in photos"
+            :key="i"
+            type="button"
+            class="pano__dot"
+            :class="{ 'pano__dot--active': i === index }"
+            :aria-label="`360° photo ${i + 1} of ${photos.length}`"
+            :aria-current="i === index ? 'true' : undefined"
+            @click="go(i)"
+          >
+            {{ i + 1 }}
+          </button>
+        </div>
+        <button
+          type="button"
+          class="pano__step"
+          aria-label="Next 360° photo"
+          @click="go(index + 1)"
+        >
+          <q-icon name="chevron_right" size="22px" />
+        </button>
+      </div>
 
       <div v-if="phase === 'loading'" class="pano__veil" role="status">
         <span class="pano__spinner" aria-hidden="true" />
@@ -55,7 +97,7 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, ref, shallowRef, watch } from "vue";
+import { computed, onBeforeUnmount, ref, shallowRef, watch } from "vue";
 
 type PannellumViewer = {
   on: (event: string, callback: (arg?: unknown) => void) => unknown;
@@ -75,10 +117,13 @@ type PannellumApi = {
 const props = withDefaults(
   defineProps<{
     modelValue: boolean;
-    src: string;
+    /** A single photo. Used when `sources` is empty. */
+    src?: string;
+    /** Several photos, already in the order guests should see them. */
+    sources?: string[];
     title?: string;
   }>(),
-  { title: "" }
+  { src: "", sources: () => [], title: "" }
 );
 
 const emit = defineEmits<{
@@ -89,6 +134,15 @@ const stageEl = ref<HTMLElement | null>(null);
 const phase = ref<"loading" | "ready" | "error">("loading");
 const errorMessage = ref("");
 const viewer = shallowRef<PannellumViewer | null>(null);
+const index = ref(0);
+
+const photos = computed(() => {
+  const list = props.sources.map(item => item.trim()).filter(Boolean);
+  if (list.length) return list;
+  const single = props.src.trim();
+  return single ? [single] : [];
+});
+const many = computed(() => photos.value.length > 1);
 
 let token = 0;
 let loadTimer = 0;
@@ -98,10 +152,33 @@ function close() {
 }
 
 function onEscape(event: KeyboardEvent) {
-  if (event.key !== "Escape" || !props.modelValue) return;
+  if (!props.modelValue) return;
+  if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+    if (!many.value) return;
+    event.preventDefault();
+    event.stopPropagation();
+    go(index.value + (event.key === "ArrowRight" ? 1 : -1));
+    return;
+  }
+  if (event.key !== "Escape") return;
   event.preventDefault();
   event.stopPropagation();
   close();
+}
+
+/** Show photo `next` (wraps around). The viewer is rebuilt for the new photo. */
+function go(next: number) {
+  const total = photos.value.length;
+  if (total < 2) return;
+  const wrapped = ((next % total) + total) % total;
+  if (wrapped === index.value && phase.value !== "error") return;
+  index.value = wrapped;
+  void boot();
+}
+
+function onShow() {
+  index.value = 0;
+  void boot();
 }
 
 function destroyViewer() {
@@ -145,7 +222,7 @@ async function boot() {
   errorMessage.value = "";
   destroyViewer();
 
-  const src = props.src.trim();
+  const src = photos.value[index.value] ?? "";
   if (!src) {
     fail(id, "No 360° photo is available for this room.");
     return;
@@ -351,6 +428,68 @@ onBeforeUnmount(() => {
   line-height: 1;
 }
 
+.pano__count {
+  font-weight: 400;
+  color: var(--gy-gold);
+}
+
+.pano__nav {
+  position: absolute;
+  bottom: max(0.75rem, env(safe-area-inset-bottom));
+  left: 50%;
+  z-index: 5;
+  display: flex;
+  align-items: stretch;
+  gap: 0.35rem;
+  max-width: calc(100% - 7.5rem);
+  transform: translateX(-50%);
+}
+
+.pano__step,
+.pano__dot {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--gy-gold);
+  border-radius: 0;
+  background: var(--gy-forest);
+  color: var(--gy-gold);
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.pano__step {
+  display: inline-grid;
+  place-items: center;
+}
+
+.pano__dots {
+  display: flex;
+  gap: 0.35rem;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.pano__dots::-webkit-scrollbar {
+  display: none;
+}
+
+.pano__dot--active {
+  background: var(--gy-gold);
+  color: var(--gy-forest);
+}
+
+.pano__step:focus-visible,
+.pano__dot:focus-visible {
+  outline: 2px solid var(--gy-gold);
+  outline-offset: 2px;
+}
+
 .pano__hint {
   position: absolute;
   bottom: max(0.9rem, env(safe-area-inset-bottom));
@@ -420,6 +559,10 @@ onBeforeUnmount(() => {
   font-family: var(--font-display);
   font-size: 0.85rem;
   font-weight: 700;
+}
+
+.pano__hint--raised {
+  bottom: calc(max(0.75rem, env(safe-area-inset-bottom)) + 44px + 0.5rem);
 }
 
 @keyframes pano-pulse {

@@ -86,9 +86,9 @@
     </div>
   </article>
   <RoomPanoramaDialog
-    v-if="showPanorama && panoramaSrc"
+    v-if="showPanorama && panoramaList.length"
     v-model="panoOpen"
-    :src="panoramaSrc"
+    :sources="panoramaList"
     :title="title"
   />
   <RoomPanoramaSoonDialog v-else-if="showPanorama" v-model="panoSoonOpen" />
@@ -130,6 +130,8 @@ const props = withDefaults(
     showPanorama?: boolean;
     /** Equirectangular photo. Empty still shows the button (coming soon). */
     panoramaUrl?: string | null;
+    /** Several 360° photos in guest order. Wins over `panoramaUrl`. */
+    panoramaUrls?: string[];
   }>(),
   {
     variant: "detail",
@@ -149,7 +151,8 @@ const props = withDefaults(
     detailTo: "",
     showViewDetails: false,
     showPanorama: false,
-    panoramaUrl: null
+    panoramaUrl: null,
+    panoramaUrls: () => []
   }
 );
 
@@ -161,10 +164,15 @@ const panoSoonOpen = ref(false);
 
 const images = computed(() => props.images ?? []);
 const amenities = computed(() => props.amenities ?? []);
-const panoramaSrc = computed(() => props.panoramaUrl?.trim() || "");
+const panoramaList = computed(() => {
+  const many = props.panoramaUrls.map(url => url.trim()).filter(Boolean);
+  if (many.length) return many;
+  const single = props.panoramaUrl?.trim();
+  return single ? [single] : [];
+});
 
 function openPanorama() {
-  if (panoramaSrc.value) {
+  if (panoramaList.value.length) {
     panoOpen.value = true;
     return;
   }

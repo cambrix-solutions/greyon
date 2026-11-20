@@ -69,7 +69,7 @@
                 :detail-to="roomDetailPath(result.hotel, result.roomType)"
                 :show-view-details="true"
                 :show-panorama="true"
-                :panorama-url="result.roomType.panoramaUrl"
+                :panorama-urls="roomPanoramaUrls(result.roomType)"
                 @cta="booking.selectResult(result)"
               />
             </div>
@@ -639,6 +639,7 @@ import RoomCardSkeleton from "@/components/RoomCardSkeleton.vue";
 import RoomFacts from "@/components/RoomFacts.vue";
 import RoomMediaCarousel from "@/components/RoomMediaCarousel.vue";
 import RoomOfferCard from "@/components/RoomOfferCard.vue";
+import { roomPanoramaUrls } from "@/utils/roomPanoramas";
 import SeoHead from "@/components/SeoHead.vue";
 import { useBookingStore } from "@/stores/booking-store";
 import { useCmsStore } from "@/stores/cms-store";
