@@ -185,6 +185,20 @@ export interface RoomType {
    * or sends null/blank. The write field is multipart `panorama`, not this URL.
    */
   panoramaUrl: string | null;
+  /**
+   * Ordered 360° photos. The public catalog and availability results carry
+   * only the published ones; admin lists carry all of them. Absent on older
+   * payloads — use `roomPanoramaUrls()` to read what guests should see.
+   */
+  panoramas?: RoomPanorama[];
+}
+
+/** One 360° photo of a room type. Write endpoints: /admin/room-types/{id}/panoramas. */
+export interface RoomPanorama {
+  id: string;
+  url: string;
+  isPublished: boolean;
+  sortOrder: number;
 }
 
 export interface RatePlan {

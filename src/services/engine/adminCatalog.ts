@@ -3,10 +3,12 @@ import {
   mapEngineHotel,
   mapEngineLocation,
   mapEngineRatePlan,
+  mapEngineRoomPanorama,
   mapEngineRoomType,
   type EngineHotel,
   type EngineLocation,
   type EngineRatePlan,
+  type EngineRoomPanorama,
   type EngineRoomType
 } from "@/services/engine/mappers";
 import type {
@@ -14,6 +16,7 @@ import type {
   Hotel,
   Location,
   RatePlan,
+  RoomPanorama,
   RoomType
 } from "@/types/greyon";
 
@@ -340,6 +343,79 @@ export async function updateRoomType(
   } catch (error) {
     throw panoramaUploadFailed(error, mapped);
   }
+}
+
+type PanoramaListResponse = { panoramas: EngineRoomPanorama[] };
+
+function mapPanoramaList(res: PanoramaListResponse): RoomPanorama[] {
+  return (res.panoramas ?? []).map(mapEngineRoomPanorama);
+}
+
+/** All 360° photos of a room, in the order guests see them (published or not). */
+export async function fetchRoomPanoramas(
+  roomId: string
+): Promise<RoomPanorama[]> {
+  return mapPanoramaList(
+    await engineAPI.get<PanoramaListResponse>(
+      `/admin/room-types/${numId(roomId)}/panoramas`
+    )
+  );
+}
+
+/**
+ * Upload one 360° photo (JPG or WebP, max 15 MB, multipart field
+ * `panoramas[]`). It goes to the end of the list. Returns the full list.
+ */
+export async function addRoomPanorama(
+  roomId: string,
+  file: File,
+  isPublished = true
+): Promise<RoomPanorama[]> {
+  const form = new FormData();
+  form.append("panoramas[]", file, file.name);
+  form.append("isPublished", isPublished ? "1" : "0");
+  return mapPanoramaList(
+    await engineAPI.request<PanoramaListResponse>(
+      `/admin/room-types/${numId(roomId)}/panoramas`,
+      { method: "POST", body: form }
+    )
+  );
+}
+
+export async function setRoomPanoramaPublished(
+  roomId: string,
+  panoramaId: string,
+  isPublished: boolean
+): Promise<RoomPanorama[]> {
+  return mapPanoramaList(
+    await engineAPI.patch<PanoramaListResponse>(
+      `/admin/room-types/${numId(roomId)}/panoramas/${numId(panoramaId)}`,
+      { isPublished }
+    )
+  );
+}
+
+export async function reorderRoomPanoramas(
+  roomId: string,
+  ids: string[]
+): Promise<RoomPanorama[]> {
+  return mapPanoramaList(
+    await engineAPI.patch<PanoramaListResponse>(
+      `/admin/room-types/${numId(roomId)}/panoramas/reorder`,
+      { ids: ids.map(numId) }
+    )
+  );
+}
+
+export async function deleteRoomPanorama(
+  roomId: string,
+  panoramaId: string
+): Promise<RoomPanorama[]> {
+  return mapPanoramaList(
+    await engineAPI.delete<PanoramaListResponse>(
+      `/admin/room-types/${numId(roomId)}/panoramas/${numId(panoramaId)}`
+    )
+  );
 }
 
 export async function destroyRoomType(id: string) {
