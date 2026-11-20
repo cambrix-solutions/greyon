@@ -19,14 +19,47 @@
           width="240"
           height="84"
         />
-        <button
-          type="button"
-          class="pano__close"
-          aria-label="Close 360° view"
-          @click="close"
-        >
-          <q-icon name="close" size="22px" />
-        </button>
+        <div class="pano__top-actions">
+          <div v-if="switchableRooms.length > 1" class="pano__rooms">
+            <button
+              type="button"
+              class="pano__rooms-btn"
+              :aria-expanded="roomsOpen"
+              aria-haspopup="listbox"
+              aria-label="Rooms with 360° views"
+              @click="roomsOpen = !roomsOpen"
+            >
+              Rooms
+              <q-icon name="expand_more" size="18px" />
+            </button>
+            <ul
+              v-if="roomsOpen"
+              class="pano__rooms-menu"
+              role="listbox"
+              aria-label="Rooms with 360° views"
+            >
+              <li v-for="room in switchableRooms" :key="room.id">
+                <button
+                  type="button"
+                  role="option"
+                  :aria-selected="room.id === activeRoomId"
+                  :class="{ 'is-on': room.id === activeRoomId }"
+                  @click="selectRoom(room.id)"
+                >
+                  {{ room.name }}
+                </button>
+              </li>
+            </ul>
+          </div>
+          <button
+            type="button"
+            class="pano__close"
+            aria-label="Close 360° view"
+            @click="close"
+          >
+            <q-icon name="close" size="22px" />
+          </button>
+        </div>
       </div>
 
       <div v-if="phase === 'ready'" class="pano__dock">
@@ -190,6 +223,8 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, shallowRef, watch } from "vue";
+import type { PanoramaTourRoom, RoomPanorama } from "@/types/greyon";
+import { hotspotLabel, roomPanoramaLabel } from "@/utils/roomPanoramas";
 
 type PannellumViewer = {
   on: (event: string, callback: (arg?: unknown) => void) => unknown;
@@ -237,9 +272,22 @@ const props = withDefaults(
     src?: string;
     /** Several photos, already in the order guests should see them. */
     sources?: string[];
+    /** Preferred: published photos with captions and hotspots. */
+    photos?: RoomPanorama[];
+    /** Room type name for the label pill and hotspot defaults. */
     title?: string;
+    roomId?: string;
+    /** Other rooms in this hotel that have published 360° photos. */
+    tourRooms?: PanoramaTourRoom[];
   }>(),
-  { src: "", sources: () => [], title: "" }
+  {
+    src: "",
+    sources: () => [],
+    photos: () => [],
+    title: "",
+    roomId: "",
+    tourRooms: () => []
+  }
 );
 
 const emit = defineEmits<{
@@ -257,19 +305,50 @@ const autoRotateOn = ref(true);
 const isFullscreen = ref(false);
 const hintVisible = ref(true);
 const fullscreenAvailable = ref(false);
+const roomsOpen = ref(false);
+const activeRoomId = ref("");
 
-const photos = computed(() => {
+const switchableRooms = computed(() =>
+  props.tourRooms.filter(room => room.photos.some(photo => photo.url))
+);
+
+const activeRoom = computed(
+  () =>
+    switchableRooms.value.find(room => room.id === activeRoomId.value) ?? null
+);
+
+const roomName = computed(
+  () => activeRoom.value?.name.trim() || props.title.trim() || "360° view"
+);
+
+const photos = computed((): RoomPanorama[] => {
+  if (activeRoom.value) {
+    return activeRoom.value.photos.filter(photo => photo.url);
+  }
+  if (props.photos.length) {
+    return props.photos.filter(photo => photo.url);
+  }
   const list = props.sources.map(item => item.trim()).filter(Boolean);
-  if (list.length) return list;
-  const single = props.src.trim();
-  return single ? [single] : [];
+  const urls = list.length ? list : [props.src.trim()].filter(Boolean);
+  return urls.map((url, i) => ({
+    id: `src-${i}`,
+    url,
+    caption: null,
+    isPublished: true,
+    sortOrder: i,
+    hotspots: []
+  }));
 });
 const many = computed(() => photos.value.length > 1);
-const labelText = computed(() => {
-  const name = props.title.trim() || "360° view";
-  if (!many.value) return name;
-  return `${name} · ${index.value + 1}`;
-});
+const currentPhoto = computed(() => photos.value[index.value]);
+const labelText = computed(() =>
+  roomPanoramaLabel(
+    roomName.value,
+    currentPhoto.value,
+    index.value,
+    photos.value.length
+  )
+);
 
 let token = 0;
 let loadTimer = 0;
@@ -306,6 +385,10 @@ function onKeyDown(event: KeyboardEvent) {
   if (event.key === "Escape") {
     event.preventDefault();
     event.stopPropagation();
+    if (roomsOpen.value) {
+      roomsOpen.value = false;
+      return;
+    }
     if (isFullscreen.value) {
       void exitFullscreen();
       return;
@@ -501,8 +584,31 @@ function go(next: number) {
   void boot();
 }
 
+function goToId(targetId: string) {
+  const next = photos.value.findIndex(photo => photo.id === targetId);
+  if (next < 0) return;
+  go(next);
+}
+
+function selectRoom(id: string) {
+  if (id === activeRoomId.value) {
+    roomsOpen.value = false;
+    return;
+  }
+  activeRoomId.value = id;
+  index.value = 0;
+  roomsOpen.value = false;
+  void boot();
+}
+
 function onShow() {
   index.value = 0;
+  roomsOpen.value = false;
+  activeRoomId.value =
+    props.roomId ||
+    switchableRooms.value.find(room => room.name === props.title)?.id ||
+    switchableRooms.value[0]?.id ||
+    "";
   autoRotateOn.value = !prefersReducedMotion();
   hintVisible.value = true;
   const doc = fsDoc();
@@ -573,13 +679,44 @@ function resolveApi(mod: unknown): PannellumApi | null {
   return null;
 }
 
+function guestHotspots() {
+  const photo = currentPhoto.value;
+  if (!photo) return [];
+  const ids = new Set(photos.value.map(item => item.id));
+  return photo.hotspots
+    .filter(spot => ids.has(spot.targetPanoramaId))
+    .map(spot => {
+      const text = hotspotLabel(roomName.value, spot, photos.value);
+      return {
+        id: `hs-${spot.id}`,
+        yaw: spot.yaw,
+        pitch: spot.pitch,
+        cssClass: "pano-hs",
+        createTooltipFunc: (div: HTMLDivElement) => {
+          div.classList.add("pano-hs");
+          const mark = document.createElement("span");
+          mark.className = "pano-hs__mark";
+          mark.setAttribute("aria-label", text);
+          mark.textContent = "›";
+          const tip = document.createElement("span");
+          tip.className = "pano-hs__tip";
+          tip.textContent = text;
+          div.append(mark, tip);
+        },
+        clickHandlerFunc: () => {
+          goToId(spot.targetPanoramaId);
+        }
+      };
+    });
+}
+
 async function boot() {
   const id = ++token;
   phase.value = "loading";
   errorMessage.value = "";
   destroyViewer();
 
-  const src = photos.value[index.value] ?? "";
+  const src = currentPhoto.value?.url ?? "";
   if (!src) {
     fail(id, "No 360° photo is available for this room.");
     return;
@@ -621,7 +758,8 @@ async function boot() {
       minHfov: 50,
       maxHfov: 120,
       crossOrigin: "anonymous",
-      friction: 0.15
+      friction: 0.15,
+      hotSpots: guestHotspots()
     });
     if (id !== token) {
       next.destroy();
@@ -762,8 +900,77 @@ onBeforeUnmount(() => {
 }
 
 .pano__logo,
-.pano__close {
+.pano__top-actions,
+.pano__close,
+.pano__rooms-btn,
+.pano__rooms-menu button {
   pointer-events: auto;
+}
+
+.pano__top-actions {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.pano__rooms {
+  position: relative;
+}
+
+.pano__rooms-btn,
+.pano__rooms-menu button {
+  border: 0;
+  background: rgba(0, 0, 0, 0.45);
+  color: var(--gy-white);
+  font-family: var(--font-display);
+  cursor: pointer;
+}
+
+.pano__rooms-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  min-height: 2.5rem;
+  padding: 0 0.7rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.pano__rooms-menu {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  z-index: 6;
+  min-width: 12rem;
+  max-width: min(18rem, 70vw);
+  max-height: min(18rem, 50vh);
+  margin: 0;
+  padding: 0.3rem;
+  overflow: auto;
+  list-style: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.5rem;
+  background: rgba(0, 0, 0, 0.88);
+}
+
+.pano__rooms-menu button {
+  display: block;
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  border-radius: 0.35rem;
+  background: transparent;
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-align: left;
+}
+
+.pano__rooms-menu button.is-on,
+.pano__rooms-menu button:hover {
+  background: rgba(196, 163, 90, 0.2);
+  color: var(--gy-gold);
 }
 
 .pano__logo {
@@ -964,6 +1171,8 @@ onBeforeUnmount(() => {
   color: var(--gy-white);
 }
 
+.pano__rooms-btn:focus-visible,
+.pano__rooms-menu button:focus-visible,
 .pano__close:focus-visible,
 .pano__pan:focus-visible,
 .pano__tools button:focus-visible,
@@ -1176,6 +1385,59 @@ onBeforeUnmount(() => {
   .pano__hint {
     max-width: calc(100% - 2rem);
     font-size: 0.78rem;
+  }
+}
+
+.pano__stage :deep(.pnlm-hotspot.pano-hs),
+.pano__stage :deep(.pano-hs) {
+  background: transparent !important;
+  border: 0 !important;
+  width: auto !important;
+  height: auto !important;
+}
+
+.pano__stage :deep(.pano-hs__mark) {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: var(--gy-gold);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  color: #111;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.pano__stage :deep(.pano-hs__tip) {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 0.4rem);
+  padding: 0.28rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.82);
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.pano__stage :deep(.pano-hs:hover .pano-hs__tip),
+.pano__stage :deep(.pano-hs:focus-within .pano-hs__tip) {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .pano__stage :deep(.pano-hs__tip) {
+    opacity: 1;
   }
 }
 </style>

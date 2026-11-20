@@ -278,6 +278,10 @@
                   :show-view-details="true"
                   :show-panorama="true"
                   :panorama-urls="roomPanoramaUrls(room)"
+                  :panoramas="publishedRoomPanoramas(room)"
+                  :panorama-title="room.name"
+                  :room-id="room.id"
+                  :tour-rooms="tourRooms"
                   :cta-label="
                     hasSearchedDates && pricedRoom(room.id)
                       ? 'Reserve'
@@ -393,7 +397,11 @@ import { useCmsStore } from "@/stores/cms-store";
 import type { HotelProductRef, RoomType } from "@/types/greyon";
 import { roomWithPropertyLabel } from "@/utils/roomLabel";
 import { roomDetailPath } from "@/utils/roomPath";
-import { roomPanoramaUrls } from "@/utils/roomPanoramas";
+import {
+  publishedRoomPanoramas,
+  roomPanoramaUrls,
+  tourRoomsFromList
+} from "@/utils/roomPanoramas";
 
 const route = useRoute();
 const router = useRouter();
@@ -478,6 +486,7 @@ const locationName = computed(
 const rooms = computed(() =>
   hotel.value ? cms.getRoomTypesByHotelId(hotel.value.id) : []
 );
+const tourRooms = computed(() => tourRoomsFromList(rooms.value));
 const coverImage = computed(
   () =>
     hotel.value?.heroImage?.trim() ||
