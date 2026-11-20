@@ -14,27 +14,16 @@
       <h2 id="home-amenities-title" class="band__title">
         {{ $t("home.amenities") }}
       </h2>
-      <div
+      <ul
         v-if="amenities.length"
-        class="marquee"
+        class="amenity-list"
         :aria-label="$t('home.amenities')"
       >
-        <div class="marquee__track">
-          <span v-for="item in amenities" :key="item" class="chip">
-            <q-icon :name="iconFor(item)" size="22px" />
-            {{ item }}
-          </span>
-          <span
-            v-for="item in amenities"
-            :key="`loop-${item}`"
-            class="chip marquee__clone"
-            aria-hidden="true"
-          >
-            <q-icon :name="iconFor(item)" size="22px" />
-            {{ item }}
-          </span>
-        </div>
-      </div>
+        <li v-for="item in amenities" :key="item" class="chip">
+          <q-icon :name="iconFor(item)" size="22px" />
+          {{ item }}
+        </li>
+      </ul>
       <div v-if="words.length" class="places">
         <router-link
           v-for="word in words"
@@ -200,8 +189,29 @@ function iconFor(label: string) {
   color: var(--gy-white);
 }
 
-.band .marquee__track {
-  gap: 0;
+.amenity-list {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(5, auto);
+  grid-auto-columns: max-content;
+  gap: 0.75rem 1.15rem;
+  margin: 0;
+  padding: 0 clamp(1.25rem, 6vw, 5rem);
+  list-style: none;
+}
+
+@media (max-width: 600px) {
+  .amenity-list {
+    grid-auto-flow: row;
+    grid-template-rows: none;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem;
+  }
+
+  .amenity-list .chip {
+    white-space: normal;
+    letter-spacing: 0.12em;
+  }
 }
 
 .chip {
@@ -209,7 +219,6 @@ function iconFor(label: string) {
   align-items: center;
   gap: 0.55rem;
   flex: 0 0 auto;
-  margin-right: 1.15rem;
   padding: 0.7rem 1.15rem;
   border: 1px solid rgba(246, 241, 231, 0.28);
   border-radius: 0;
@@ -257,23 +266,6 @@ function iconFor(label: string) {
 @media (prefers-reduced-motion: reduce) {
   .band__img {
     transform: none !important;
-  }
-
-  .band .marquee {
-    overflow: visible;
-    mask-image: none;
-    padding-inline: clamp(1.25rem, 6vw, 5rem);
-  }
-
-  .band .marquee__track {
-    flex-wrap: wrap;
-    width: auto;
-    max-width: 100%;
-    animation: none;
-  }
-
-  .marquee__clone {
-    display: none;
   }
 }
 
