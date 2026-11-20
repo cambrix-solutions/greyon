@@ -20,7 +20,7 @@
           no-caps
           class="dash-btn-primary"
           icon="add"
-          label="Create booking"
+          label="Create reservation"
           to="/admin/bookings?create=1"
         />
       </div>
@@ -33,7 +33,7 @@
         outlined
         clearable
         debounce="150"
-        placeholder="Search bookings, guests, enquiries…"
+        placeholder="Search reservations, guests, enquiries…"
         class="dash-search"
       >
         <template #prepend>
@@ -382,7 +382,7 @@ const attentionCopy = computed(() => {
   const parts: string[] = [];
   if (pendingCount.value) {
     parts.push(
-      `${pendingCount.value} pending booking${pendingCount.value === 1 ? "" : "s"}`
+      `${pendingCount.value} pending reservation${pendingCount.value === 1 ? "" : "s"}`
     );
   }
   if (newEnquiryCount.value) {
@@ -404,7 +404,7 @@ const cards = computed(() => [
     to: "/admin/hotels"
   },
   {
-    label: "Bookings",
+    label: "Reservations",
     value: myBookings.value.length,
     hint: pendingCount.value ? `${pendingCount.value} pending` : "All clear",
     icon: "book_online",
@@ -447,7 +447,7 @@ const quickActions = computed(() =>
       perm: "rates"
     },
     {
-      label: "Create booking",
+      label: "Create reservation",
       to: "/admin/bookings?create=1",
       icon: "event_available",
       perm: "bookings"
@@ -471,7 +471,7 @@ const quickActions = computed(() =>
       perm: "settings"
     }
   ].filter(a =>
-    a.label === "Create booking"
+    a.label === "Create reservation"
       ? auth.canAction("bookings", "create")
       : auth.can(a.perm)
   )
@@ -534,10 +534,10 @@ const visibleEnquiries = computed(() => {
 });
 
 const bookingsPanelTitle = computed(() => {
-  if (focus.value === "pending") return "Pending bookings";
+  if (focus.value === "pending") return "Pending reservations";
   if (focus.value === "today") return "Arrivals & departures today";
-  if (focus.value === "inbox") return "Bookings";
-  return "Recent bookings";
+  if (focus.value === "inbox") return "Reservations";
+  return "Recent reservations";
 });
 
 const bookingsPanelLink = computed(() => {
@@ -569,7 +569,7 @@ async function setBookingStatus(reference: string, status: BookingStatus) {
   await cms.updateBookingStatus(reference, status);
   $q.notify({
     type: "positive",
-    message: `Booking ${reference} → ${status}`
+    message: `Reservation ${reference} → ${status}`
   });
 }
 
@@ -577,7 +577,7 @@ function confirmAllPending() {
   const pending = myBookings.value.filter(b => b.status === "pending");
   if (!pending.length) return;
   $q.dialog({
-    title: "Confirm all pending bookings?",
+    title: "Confirm all pending reservations?",
     message: `This will confirm ${pending.length} reservation${pending.length === 1 ? "" : "s"}.`,
     cancel: true,
     persistent: true
@@ -587,7 +587,7 @@ function confirmAllPending() {
     );
     $q.notify({
       type: "positive",
-      message: `Confirmed ${pending.length} booking${pending.length === 1 ? "" : "s"}.`
+      message: `Confirmed ${pending.length} reservation${pending.length === 1 ? "" : "s"}.`
     });
   });
 }

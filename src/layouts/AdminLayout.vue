@@ -46,7 +46,7 @@
           <button
             type="button"
             class="admin-bell"
-            aria-label="Booking notifications"
+            aria-label="Reservation notifications"
             aria-haspopup="menu"
           >
             <q-icon name="notifications" size="20px" />
@@ -64,7 +64,7 @@
               class="admin-notify-menu"
             >
               <div class="admin-notify-menu__head">
-                <p class="admin-notify-menu__title">Bookings</p>
+                <p class="admin-notify-menu__title">Reservations</p>
                 <button
                   v-if="notifications.unreadCount"
                   type="button"
@@ -85,7 +85,7 @@
                 v-else-if="!notifications.items.length"
                 class="admin-notify-menu__empty"
               >
-                No booking alerts yet
+                No reservation alerts yet
               </div>
               <q-list v-else dense class="admin-notify-menu__list">
                 <q-item
@@ -109,7 +109,7 @@
               <q-separator />
               <q-item clickable v-close-popup to="/admin/bookings">
                 <q-item-section class="text-primary"
-                  >View all bookings</q-item-section
+                  >View all reservations</q-item-section
                 >
               </q-item>
             </q-menu>
@@ -290,6 +290,25 @@
           </q-list>
         </template>
 
+        <template v-if="insightsNav.length">
+          <p class="admin-drawer__label">Insights</p>
+          <q-list padding class="admin-nav">
+            <q-item
+              v-for="item in insightsNav"
+              :key="item.to"
+              clickable
+              v-ripple
+              :to="item.to"
+              active-class="admin-nav__active"
+            >
+              <q-item-section avatar>
+                <q-icon :name="item.icon" />
+              </q-item-section>
+              <q-item-section>{{ item.label }}</q-item-section>
+            </q-item>
+          </q-list>
+        </template>
+
         <template v-if="systemNav.length">
           <p class="admin-drawer__label">System</p>
           <q-list padding class="admin-nav">
@@ -458,7 +477,14 @@ type NavItem = {
   to: string;
   icon: string;
   perm: string;
-  group: "primary" | "properties" | "publishing" | "ops" | "system" | "access";
+  group:
+    | "primary"
+    | "properties"
+    | "publishing"
+    | "ops"
+    | "insights"
+    | "system"
+    | "access";
   badge?: number;
   depth?: number;
   caption?: string;
@@ -536,6 +562,13 @@ const nav = computed<NavItem[]>(() => [
     group: "publishing"
   },
   {
+    label: "Pages",
+    to: "/admin/pages",
+    icon: "article",
+    perm: "pages",
+    group: "publishing"
+  },
+  {
     label: "Prices & rooms",
     to: "/admin/rates",
     icon: "event_available",
@@ -543,7 +576,7 @@ const nav = computed<NavItem[]>(() => [
     group: "ops"
   },
   {
-    label: "Bookings",
+    label: "Reservations",
     to: "/admin/bookings",
     icon: "book_online",
     perm: "bookings",
@@ -566,10 +599,33 @@ const nav = computed<NavItem[]>(() => [
     group: "system"
   },
   {
+    label: "Reports",
+    to: "/admin/reports",
+    icon: "insights",
+    perm: "reports",
+    group: "insights"
+  },
+  {
+    label: "Guests",
+    to: "/admin/guests",
+    icon: "people_alt",
+    perm: "guests",
+    group: "insights"
+  },
+  {
+    // Developers manage org-admin accounts on the older People screen;
+    // org admins get the invite-by-Google People page.
     label: "People",
-    to: "/admin/users",
+    to: auth.isDeveloper ? "/admin/users" : "/admin/people",
     icon: auth.isDeveloper ? "group" : "badge",
     perm: "users",
+    group: "access"
+  },
+  {
+    label: "Roles",
+    to: "/admin/roles",
+    icon: "admin_panel_settings",
+    perm: "roles",
     group: "access"
   },
   {
@@ -607,6 +663,9 @@ const publishingNav = computed(() =>
   visibleNav.value.filter(i => i.group === "publishing")
 );
 const opsNav = computed(() => visibleNav.value.filter(i => i.group === "ops"));
+const insightsNav = computed(() =>
+  visibleNav.value.filter(i => i.group === "insights")
+);
 const systemNav = computed(() =>
   visibleNav.value.filter(i => i.group === "system")
 );

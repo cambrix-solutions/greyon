@@ -64,6 +64,8 @@ export interface EngineAdminPackage {
     scope?: "none" | "location" | "hotel" | string;
   }>;
   featureKeys: string[];
+  /** Feature key → actions (view / create / edit / delete) this seat grants. */
+  featureActions?: Record<string, string[]>;
   /** Location sub-keys etc. — SPA treats these like featureKeys for can() */
   permissionKeys?: string[];
   locationIds: Array<number | string>;
@@ -201,6 +203,11 @@ export function mapEngineAdminToUser(admin: EngineAdmin): {
     }
     for (const key of pkg.featureKeys ?? []) featureSet.add(key);
     for (const key of pkg.permissionKeys ?? []) featureSet.add(key);
+    // Per-feature actions from custom roles, as `bookings.view`-style keys
+    // (see auth-store `canDo`).
+    for (const [key, actions] of Object.entries(pkg.featureActions ?? {})) {
+      for (const action of actions) featureSet.add(`${key}.${action}`);
+    }
     for (const id of pkg.locationIds ?? []) locationIds.add(String(id));
     for (const id of pkg.hotelIds ?? []) hotelIds.add(String(id));
   }

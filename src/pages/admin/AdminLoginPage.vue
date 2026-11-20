@@ -38,10 +38,13 @@
               placeholder="••••••••"
             />
           </label>
-          <p v-if="error" class="error">{{ error }}</p>
+          <p v-if="error || googleError" class="error">
+            {{ error || googleError }}
+          </p>
           <button class="gy-btn" type="submit" :disabled="submitting">
             {{ submitting ? "Signing in…" : "Sign in" }}
           </button>
+          <a class="google-btn" :href="googleUrl">Sign in with Google</a>
           <router-link to="/" class="back">← Back to site</router-link>
         </form>
       </q-page>
@@ -50,8 +53,9 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { adminGoogleRedirectUrl } from "@/services/engine/adminAccess";
 import { useAuthStore } from "@/stores/auth-store";
 
 const auth = useAuthStore();
@@ -61,6 +65,25 @@ const email = ref("");
 const password = ref("");
 const error = ref("");
 const submitting = ref(false);
+const googleUrl = adminGoogleRedirectUrl();
+
+/** Error codes the engine sends back after Google sign-in / invite acceptance. */
+const googleErrors: Record<string, string> = {
+  invite_invalid: "This invite is invalid or has expired. Ask for a new one.",
+  google_code: "Google sign-in was cancelled.",
+  google_failed: "Google sign-in failed. Please try again.",
+  google_unverified: "Your Google email address is not verified.",
+  inactive: "This account is not active. Please contact the hotel.",
+  invite_email_mismatch:
+    "Use the Google account for the email address that was invited.",
+  no_invite:
+    "This Google account has no Greyon admin access. Ask your admin for an invite."
+};
+const googleError = computed(() => {
+  const code = typeof route.query.error === "string" ? route.query.error : "";
+  if (!code) return "";
+  return googleErrors[code] ?? "Google sign-in did not work for this account.";
+});
 
 function leaveIfAuthed() {
   auth.hydrate();
@@ -245,6 +268,19 @@ async function onSubmit() {
   color: #b42318;
   font-size: 0.85rem;
   margin: 0 0 0.5rem;
+}
+
+.google-btn {
+  display: block;
+  margin-top: 0.6rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid rgba(18, 17, 16, 0.2);
+  background: #fff;
+  color: #121110;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
 }
 
 .back {
