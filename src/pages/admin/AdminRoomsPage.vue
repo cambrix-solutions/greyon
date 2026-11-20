@@ -304,6 +304,7 @@
           v-if="dialog"
           :key="`${editing ?? 'new'}-${dialog}`"
           :room-id="editing"
+          :progress="panoramaProgress"
           @staged="onPanoramaStaged"
         />
       </AdminFormSection>
@@ -340,6 +341,7 @@ import AmenitiesEditor from "@/components/admin/AmenitiesEditor.vue";
 import GalleryEditor from "@/components/admin/GalleryEditor.vue";
 import { useAuthStore } from "@/stores/auth-store";
 import { RoomPanoramaUploadError } from "@/services/engine/adminCatalog";
+import type { PanoramaProgress } from "@/utils/roomPanoramas";
 import { useCmsStore } from "@/stores/cms-store";
 import type { ContentStatus, RoomType } from "@/types/greyon";
 import { uploadFolder } from "@/utils/uploadFolder";
@@ -354,6 +356,7 @@ const editing = ref<string | null>(null);
 const images = ref<string[]>([]);
 const amenities = ref<string[]>([]);
 const stagedPanoramas = ref<{ file: File; published: boolean }[]>([]);
+const panoramaProgress = ref<PanoramaProgress | null>(null);
 const query = ref("");
 const hotelFilter = ref("all");
 const statusFilter = ref("all");
@@ -501,7 +504,13 @@ function save() {
         ...form,
         images: images.value.filter(Boolean),
         amenities: amenities.value,
-        ...(editing.value ? {} : { stagedPanoramas: stagedPanoramas.value })
+        ...(editing.value
+          ? {}
+          : {
+              stagedPanoramas: stagedPanoramas.value,
+              onPanoramaProgress: (p: PanoramaProgress | null) =>
+                (panoramaProgress.value = p)
+            })
       });
       dialog.value = false;
       $q.notify({ type: "positive", message: "Room saved." });

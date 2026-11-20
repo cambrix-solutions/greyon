@@ -552,6 +552,7 @@
           v-if="roomDialog"
           :key="`${roomEditing ?? 'new'}-${roomDialog}`"
           :room-id="roomEditing"
+          :progress="roomPanoramaProgress"
           @staged="onRoomPanoramaStaged"
         />
       </AdminFormSection>
@@ -646,6 +647,7 @@ import {
 } from "@/services/engine/adminCatalogEntities";
 import { useAuthStore } from "@/stores/auth-store";
 import { RoomPanoramaUploadError } from "@/services/engine/adminCatalog";
+import type { PanoramaProgress } from "@/utils/roomPanoramas";
 import { useCmsStore } from "@/stores/cms-store";
 import type {
   ContentStatus,
@@ -1044,6 +1046,7 @@ const roomEditing = ref<string | null>(null);
 const roomImages = ref<string[]>([]);
 const roomAmenities = ref<string[]>([]);
 const roomStagedPanoramas = ref<{ file: File; published: boolean }[]>([]);
+const roomPanoramaProgress = ref<PanoramaProgress | null>(null);
 const roomForm = reactive({
   hotelId: "",
   name: "",
@@ -1116,7 +1119,11 @@ function saveRoom() {
         amenities: roomAmenities.value,
         ...(roomEditing.value
           ? {}
-          : { stagedPanoramas: roomStagedPanoramas.value })
+          : {
+              stagedPanoramas: roomStagedPanoramas.value,
+              onPanoramaProgress: (p: PanoramaProgress | null) =>
+                (roomPanoramaProgress.value = p)
+            })
       });
       roomDialog.value = false;
       $q.notify({ type: "positive", message: "Room saved." });
