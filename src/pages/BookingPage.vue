@@ -70,6 +70,10 @@
                 :show-view-details="true"
                 :show-panorama="true"
                 :panorama-urls="roomPanoramaUrls(result.roomType)"
+                :panoramas="publishedRoomPanoramas(result.roomType)"
+                :panorama-title="result.roomType.name"
+                :room-id="result.roomType.id"
+                :tour-rooms="tourRoomsForResult(result)"
                 @cta="booking.selectResult(result)"
               />
             </div>
@@ -639,7 +643,11 @@ import RoomCardSkeleton from "@/components/RoomCardSkeleton.vue";
 import RoomFacts from "@/components/RoomFacts.vue";
 import RoomMediaCarousel from "@/components/RoomMediaCarousel.vue";
 import RoomOfferCard from "@/components/RoomOfferCard.vue";
-import { roomPanoramaUrls } from "@/utils/roomPanoramas";
+import {
+  publishedRoomPanoramas,
+  roomPanoramaUrls,
+  tourRoomsFromList
+} from "@/utils/roomPanoramas";
 import SeoHead from "@/components/SeoHead.vue";
 import { useBookingStore } from "@/stores/booking-store";
 import { useCmsStore } from "@/stores/cms-store";
@@ -712,6 +720,20 @@ function roomFactsLine(room: RoomType) {
   ]
     .filter(Boolean)
     .join(" · ");
+}
+
+function tourRoomsForResult(result: AvailabilityResult) {
+  const fromCms = cms.getRoomTypesByHotelId(result.hotel.id);
+  if (fromCms.length) return tourRoomsFromList(fromCms);
+  const seen = new Set<string>();
+  const sameHotel: RoomType[] = [];
+  for (const row of booking.results) {
+    if (row.hotel.id !== result.hotel.id) continue;
+    if (seen.has(row.roomType.id)) continue;
+    seen.add(row.roomType.id);
+    sameHotel.push(row.roomType);
+  }
+  return tourRoomsFromList(sameHotel);
 }
 
 function resultRoomTitle(result: AvailabilityResult) {

@@ -193,12 +193,29 @@ export interface RoomType {
   panoramas?: RoomPanorama[];
 }
 
+export interface RoomPanoramaHotspot {
+  id: string;
+  yaw: number;
+  pitch: number;
+  label: string | null;
+  targetPanoramaId: string;
+}
+
 /** One 360° photo of a room type. Write endpoints: /admin/room-types/{id}/panoramas. */
 export interface RoomPanorama {
   id: string;
   url: string;
+  caption: string | null;
   isPublished: boolean;
   sortOrder: number;
+  hotspots: RoomPanoramaHotspot[];
+}
+
+/** A hotel room type the 360° viewer can switch to. */
+export interface PanoramaTourRoom {
+  id: string;
+  name: string;
+  photos: RoomPanorama[];
 }
 
 export interface RatePlan {
