@@ -9,8 +9,8 @@
   >
     <div class="pano-list__top">
       <p class="pano-list__hint">
-        Add as many equirectangular photos as you like — JPG or WebP, up to 15
-        MB each.
+        Add as many equirectangular photos as you like — JPG or WebP, up to 25
+        MB each. Big photos are compressed for you.
         <template v-if="live"> Changes are saved as you make them. </template>
         <template v-else> They upload when you create the room. </template>
         Guests see only <strong>published</strong> photos, in this order.
@@ -236,7 +236,7 @@ async function addFiles(files: File[]) {
     let n = 0;
     for (const file of files) {
       n += 1;
-      status.value = `Preparing ${n} of ${files.length}…`;
+      status.value = `Checking ${n} of ${files.length}…`;
       let prepared: File;
       try {
         prepared = await preparePanoramaFile(file);
