@@ -85,6 +85,20 @@
           <p class="pano-item__state">
             {{ item.published ? "Shown to guests" : "Hidden from guests" }}
           </p>
+          <input
+            v-if="live && item.id"
+            class="pano-item__caption"
+            type="text"
+            maxlength="80"
+            :value="item.caption"
+            placeholder="Caption (e.g. Bedroom)"
+            :aria-label="`Caption for 360° photo ${i + 1}`"
+            :disabled="busy"
+            @mousedown.stop
+            @dragstart.prevent
+            @keydown.enter.prevent="blurCaption"
+            @blur="onCaptionBlur(item, $event)"
+          />
         </div>
         <q-toggle
           :model-value="item.published"
@@ -94,6 +108,17 @@
           @update:model-value="togglePublished(item)"
         />
         <div class="pano-item__actions">
+          <button
+            v-if="live && item.id"
+            type="button"
+            class="pano-item__btn pano-item__btn--wide"
+            :disabled="busy || items.length < 2"
+            :aria-label="`Place arrows on 360° photo ${i + 1}`"
+            @mousedown.stop
+            @click="openEditor(item)"
+          >
+            Place arrows
+          </button>
           <button
             type="button"
             class="pano-item__btn"
@@ -124,17 +149,28 @@
         </div>
       </li>
     </ol>
+
+    <AdminPanoramaHotspotEditor
+      v-if="editorPhoto && roomId"
+      v-model="editorOpen"
+      :room-id="roomId"
+      :photo="editorPhoto"
+      :photos="saved"
+      @saved="apply"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from "vue";
 import { useQuasar } from "quasar";
+import AdminPanoramaHotspotEditor from "@/components/admin/AdminPanoramaHotspotEditor.vue";
 import {
   addRoomPanorama,
   deleteRoomPanorama,
   fetchRoomPanoramas,
   reorderRoomPanoramas,
+  setRoomPanoramaCaption,
   setRoomPanoramaPublished
 } from "@/services/engine/adminCatalog";
 import { useCmsStore } from "@/stores/cms-store";
@@ -160,6 +196,7 @@ type Item = {
   key: string;
   id: string | null;
   url: string;
+  caption: string;
   published: boolean;
   file: File | null;
 };
@@ -178,6 +215,9 @@ const $q = useQuasar();
 const cms = useCmsStore();
 
 const items = ref<Item[]>([]);
+const saved = ref<RoomPanorama[]>([]);
+const editorOpen = ref(false);
+const editorPhotoId = ref<string | null>(null);
 const loading = ref(false);
 const busy = ref(false);
 const ownProgress = ref<PanoramaProgress | null>(null);
@@ -188,6 +228,9 @@ const dragOver = ref<number | null>(null);
 
 const live = computed(() => Boolean(props.roomId));
 const shownProgress = computed(() => props.progress ?? ownProgress.value);
+const editorPhoto = computed(
+  () => saved.value.find(photo => photo.id === editorPhotoId.value) ?? null
+);
 let seq = 0;
 
 function message(e: unknown, fallback: string) {
@@ -199,12 +242,14 @@ function fromList(list: RoomPanorama[]): Item[] {
     key: `saved-${photo.id}`,
     id: photo.id,
     url: photo.url,
+    caption: photo.caption ?? "",
     published: photo.isPublished,
     file: null
   }));
 }
 
 function apply(list: RoomPanorama[]) {
+  saved.value = list;
   items.value = fromList(list);
   if (props.roomId) cms.setRoomPanoramas(props.roomId, list);
 }
@@ -216,7 +261,7 @@ async function load() {
   if (!props.roomId) return;
   loading.value = true;
   try {
-    items.value = fromList(await fetchRoomPanoramas(props.roomId));
+    apply(await fetchRoomPanoramas(props.roomId));
   } catch (e) {
     error.value = message(e, "Could not load the 360° photos.");
   } finally {
@@ -292,6 +337,7 @@ async function addFiles(files: File[]) {
           key: `new-${seq}`,
           id: null,
           url: URL.createObjectURL(prepared),
+          caption: "",
           published: true,
           file: prepared
         });
@@ -348,6 +394,28 @@ function move(from: number, to: number) {
   const roomId = props.roomId;
   const ids = next.map(item => item.id as string);
   void run(() => reorderRoomPanoramas(roomId, ids));
+}
+
+function blurCaption(event: Event) {
+  (event.target as HTMLInputElement).blur();
+}
+
+function onCaptionBlur(item: Item, event: Event) {
+  const next = (event.target as HTMLInputElement).value.trim();
+  if (!live.value || !item.id || !props.roomId) {
+    item.caption = next;
+    return;
+  }
+  if (next === (item.caption ?? "").trim()) return;
+  const roomId = props.roomId;
+  const id = item.id;
+  void run(() => setRoomPanoramaCaption(roomId, id, next || null));
+}
+
+function openEditor(item: Item) {
+  if (!item.id) return;
+  editorPhotoId.value = item.id;
+  editorOpen.value = true;
 }
 
 function onFileInput(event: Event) {
@@ -656,5 +724,28 @@ onBeforeUnmount(releaseStaged);
   .pano-list {
     transition-duration: 0.01s;
   }
+}
+
+.pano-item__caption {
+  width: 100%;
+  max-width: 16rem;
+  min-height: 2.15rem;
+  margin-top: 0.25rem;
+  padding: 0.25rem 0.45rem;
+  border: 1px solid rgba(98, 112, 99, 0.45);
+  border-radius: 0;
+  background: #fff;
+  color: var(--gy-forest);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+}
+
+.pano-item__btn--wide {
+  width: auto;
+  padding: 0 0.55rem;
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
 }
 </style>

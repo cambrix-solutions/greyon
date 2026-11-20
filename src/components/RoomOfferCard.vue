@@ -89,7 +89,10 @@
     v-if="showPanorama && panoramaList.length"
     v-model="panoOpen"
     :sources="panoramaList"
-    :title="title"
+    :photos="panoramas"
+    :title="panoramaTitle || title"
+    :room-id="roomId"
+    :tour-rooms="tourRooms"
   />
   <RoomPanoramaSoonDialog v-else-if="showPanorama" v-model="panoSoonOpen" />
 </template>
@@ -103,6 +106,7 @@ import RoomMediaCarousel from "@/components/RoomMediaCarousel.vue";
 import RoomPanoramaButton from "@/components/RoomPanoramaButton.vue";
 import RoomPanoramaDialog from "@/components/RoomPanoramaDialog.vue";
 import RoomPanoramaSoonDialog from "@/components/RoomPanoramaSoonDialog.vue";
+import type { PanoramaTourRoom, RoomPanorama } from "@/types/greyon";
 
 const props = withDefaults(
   defineProps<{
@@ -132,6 +136,12 @@ const props = withDefaults(
     panoramaUrl?: string | null;
     /** Several 360° photos in guest order. Wins over `panoramaUrl`. */
     panoramaUrls?: string[];
+    /** Published photos with captions and hotspots (preferred over urls). */
+    panoramas?: RoomPanorama[];
+    /** Room type name for the 360° label (not the hotel + room card title). */
+    panoramaTitle?: string;
+    roomId?: string;
+    tourRooms?: PanoramaTourRoom[];
   }>(),
   {
     variant: "detail",
@@ -152,7 +162,11 @@ const props = withDefaults(
     showViewDetails: false,
     showPanorama: false,
     panoramaUrl: null,
-    panoramaUrls: () => []
+    panoramaUrls: () => [],
+    panoramas: () => [],
+    panoramaTitle: "",
+    roomId: "",
+    tourRooms: () => []
   }
 );
 
@@ -165,6 +179,10 @@ const panoSoonOpen = ref(false);
 const images = computed(() => props.images ?? []);
 const amenities = computed(() => props.amenities ?? []);
 const panoramaList = computed(() => {
+  const fromPhotos = props.panoramas
+    .map(photo => photo.url.trim())
+    .filter(Boolean);
+  if (fromPhotos.length) return fromPhotos;
   const many = props.panoramaUrls.map(url => url.trim()).filter(Boolean);
   if (many.length) return many;
   const single = props.panoramaUrl?.trim();

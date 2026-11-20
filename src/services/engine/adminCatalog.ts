@@ -418,6 +418,84 @@ export async function deleteRoomPanorama(
   );
 }
 
+export async function setRoomPanoramaCaption(
+  roomId: string,
+  panoramaId: string,
+  caption: string | null
+): Promise<RoomPanorama[]> {
+  return mapPanoramaList(
+    await engineAPI.patch<PanoramaListResponse>(
+      `/admin/room-types/${numId(roomId)}/panoramas/${numId(panoramaId)}`,
+      { caption }
+    )
+  );
+}
+
+export type PanoramaHotspotInput = {
+  targetPanoramaId: string;
+  yaw: number;
+  pitch: number;
+  label?: string | null;
+};
+
+type HotspotListResponse = { hotspots: unknown[] };
+
+function hotspotUrl(roomId: string, panoramaId: string, hotspotId?: string) {
+  const base = `/admin/room-types/${numId(roomId)}/panoramas/${numId(panoramaId)}/hotspots`;
+  return hotspotId ? `${base}/${numId(hotspotId)}` : base;
+}
+
+async function afterHotspotWrite(roomId: string): Promise<RoomPanorama[]> {
+  // The hotspot endpoints return only that photo's hotspots; refresh the
+  // full list so captions, order and other photos stay in sync.
+  return fetchRoomPanoramas(roomId);
+}
+
+export async function addRoomPanoramaHotspot(
+  roomId: string,
+  panoramaId: string,
+  input: PanoramaHotspotInput
+): Promise<RoomPanorama[]> {
+  await engineAPI.post<HotspotListResponse>(hotspotUrl(roomId, panoramaId), {
+    targetPanoramaId: numId(input.targetPanoramaId),
+    yaw: input.yaw,
+    pitch: input.pitch,
+    label: input.label ?? null
+  });
+  return afterHotspotWrite(roomId);
+}
+
+export async function updateRoomPanoramaHotspot(
+  roomId: string,
+  panoramaId: string,
+  hotspotId: string,
+  input: Partial<PanoramaHotspotInput>
+): Promise<RoomPanorama[]> {
+  const body: Record<string, unknown> = {};
+  if (input.targetPanoramaId !== undefined) {
+    body.targetPanoramaId = numId(input.targetPanoramaId);
+  }
+  if (input.yaw !== undefined) body.yaw = input.yaw;
+  if (input.pitch !== undefined) body.pitch = input.pitch;
+  if (input.label !== undefined) body.label = input.label;
+  await engineAPI.patch<HotspotListResponse>(
+    hotspotUrl(roomId, panoramaId, hotspotId),
+    body
+  );
+  return afterHotspotWrite(roomId);
+}
+
+export async function deleteRoomPanoramaHotspot(
+  roomId: string,
+  panoramaId: string,
+  hotspotId: string
+): Promise<RoomPanorama[]> {
+  await engineAPI.delete<HotspotListResponse>(
+    hotspotUrl(roomId, panoramaId, hotspotId)
+  );
+  return afterHotspotWrite(roomId);
+}
+
 export async function destroyRoomType(id: string) {
   await engineAPI.delete(`/admin/room-types/${numId(id)}`);
 }
