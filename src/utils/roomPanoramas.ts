@@ -1,4 +1,6 @@
+import { ApiError } from "@/helpers/api/createApiClient";
 import type { RoomType } from "@/types/greyon";
+import { friendlyApiError } from "@/utils/apiErrors";
 
 /**
  * The 360° photos guests should see for a room, in the admin's order.
@@ -18,4 +20,15 @@ export function roomPanoramaUrls(
   }
   const single = room.panoramaUrl?.trim();
   return single ? [single] : [];
+}
+
+/** Where a one-by-one 360° upload is: photo `current` of `total`, 1-based. */
+export type PanoramaProgress = { current: number; total: number; name: string };
+
+/** One short, readable reason a single 360° upload failed. */
+export function panoramaUploadMessage(e: unknown): string {
+  if (e instanceof ApiError && e.status === 413) {
+    return "too large (the server refused the file).";
+  }
+  return friendlyApiError(e, "Upload failed.");
 }

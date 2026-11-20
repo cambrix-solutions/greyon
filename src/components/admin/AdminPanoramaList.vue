@@ -29,7 +29,25 @@
       </label>
     </div>
 
-    <p v-if="status" class="pano-list__status" role="status">{{ status }}</p>
+    <div
+      v-if="shownProgress"
+      class="pano-list__progress"
+      role="status"
+      aria-live="polite"
+    >
+      <p class="pano-list__status">
+        Uploading {{ shownProgress.current }} of {{ shownProgress.total }}
+        <span class="pano-list__file">— {{ shownProgress.name }}</span>
+      </p>
+      <q-linear-progress
+        :value="(shownProgress.current - 1) / shownProgress.total"
+        :buffer="shownProgress.current / shownProgress.total"
+        color="primary"
+        track-color="grey-3"
+        rounded
+        size="8px"
+      />
+    </div>
     <p v-if="error" class="pano-list__error" role="alert">{{ error }}</p>
 
     <p v-if="loading" class="pano-list__empty">Loading 360° photos…</p>
@@ -125,6 +143,10 @@ import {
   PANORAMA_ACCEPT_ATTR,
   preparePanoramaFile
 } from "@/utils/imageCompress";
+import {
+  panoramaUploadMessage,
+  type PanoramaProgress
+} from "@/utils/roomPanoramas";
 
 /**
  * Many 360° photos for one room: upload, publish / hide, delete and
@@ -142,7 +164,11 @@ type Item = {
   file: File | null;
 };
 
-const props = defineProps<{ roomId: string | null }>();
+const props = defineProps<{
+  roomId: string | null;
+  /** Set by the parent while it uploads the photos of a new room. */
+  progress?: PanoramaProgress | null;
+}>();
 
 const emit = defineEmits<{
   staged: [items: { file: File; published: boolean }[]];
@@ -154,13 +180,14 @@ const cms = useCmsStore();
 const items = ref<Item[]>([]);
 const loading = ref(false);
 const busy = ref(false);
-const status = ref("");
+const ownProgress = ref<PanoramaProgress | null>(null);
 const error = ref("");
 const dragging = ref(false);
 const dragFrom = ref<number | null>(null);
 const dragOver = ref<number | null>(null);
 
 const live = computed(() => Boolean(props.roomId));
+const shownProgress = computed(() => props.progress ?? ownProgress.value);
 let seq = 0;
 
 function message(e: unknown, fallback: string) {
@@ -227,16 +254,25 @@ async function run(action: () => Promise<RoomPanorama[]>) {
   }
 }
 
+/**
+ * Upload the chosen photos one at a time: one POST per file, in order.
+ * A photo that fails (too large, bad type, network) is reported by name and
+ * the rest still go up. A saved room's list is re-read at the end.
+ */
 async function addFiles(files: File[]) {
   if (!files.length || busy.value) return;
   busy.value = true;
   error.value = "";
   const problems: string[] = [];
   try {
-    let n = 0;
-    for (const file of files) {
-      n += 1;
-      status.value = `Checking ${n} of ${files.length}…`;
+    for (const [index, file] of files.entries()) {
+      if (props.roomId) {
+        ownProgress.value = {
+          current: index + 1,
+          total: files.length,
+          name: file.name
+        };
+      }
       let prepared: File;
       try {
         prepared = await preparePanoramaFile(file);
@@ -245,11 +281,10 @@ async function addFiles(files: File[]) {
         continue;
       }
       if (props.roomId) {
-        status.value = `Uploading ${n} of ${files.length}…`;
         try {
           apply(await addRoomPanorama(props.roomId, prepared, true));
         } catch (e) {
-          problems.push(`${file.name}: ${message(e, "Upload failed.")}`);
+          problems.push(`${file.name}: ${panoramaUploadMessage(e)}`);
         }
       } else {
         seq += 1;
@@ -262,13 +297,19 @@ async function addFiles(files: File[]) {
         });
       }
     }
+    if (props.roomId) {
+      try {
+        apply(await fetchRoomPanoramas(props.roomId));
+      } catch (e) {
+        problems.push(message(e, "Could not refresh the 360° photos."));
+      }
+    }
   } finally {
     busy.value = false;
-    status.value = "";
+    ownProgress.value = null;
   }
   if (problems.length) error.value = problems.join(" ");
 }
-
 function togglePublished(item: Item) {
   if (props.roomId && item.id) {
     const roomId = props.roomId;
@@ -408,6 +449,16 @@ onBeforeUnmount(releaseStaged);
   font-size: 0.85rem;
   line-height: 1.45;
   color: var(--gy-forest);
+}
+
+.pano-list__progress {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.pano-list__file {
+  opacity: 0.7;
+  overflow-wrap: anywhere;
 }
 
 .pano-list__hint {

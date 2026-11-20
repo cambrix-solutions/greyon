@@ -13,6 +13,7 @@ import {
   destroyRatePlan,
   destroyRoomType,
   fetchAdminHotels,
+  fetchRoomPanoramas,
   fetchAdminLocations,
   fetchAdminRatePlans,
   fetchAdminRoomTypes,
@@ -97,6 +98,10 @@ import type {
   RoomType,
   UserPackage
 } from "@/types/greyon";
+import {
+  panoramaUploadMessage,
+  type PanoramaProgress
+} from "@/utils/roomPanoramas";
 
 export type { MediaItem, SiteSettings };
 
@@ -733,6 +738,8 @@ export const useCmsStore = defineStore("cms", () => {
      * live instead (AdminPanoramaList), so this is ignored when `id` is set.
      */
     stagedPanoramas?: { file: File; published: boolean }[];
+    /** Called before each staged photo is sent, and with null when done. */
+    onPanoramaProgress?: (progress: PanoramaProgress | null) => void;
   }) {
     const payload = omitUndefined({
       name: input.name,
@@ -761,7 +768,11 @@ export const useCmsStore = defineStore("cms", () => {
         payload as Parameters<typeof createRoomType>[0]
       );
       patchList(roomTypes, created);
-      return await uploadStagedPanoramas(created, input.stagedPanoramas ?? []);
+      return await uploadStagedPanoramas(
+        created,
+        input.stagedPanoramas ?? [],
+        input.onPanoramaProgress
+      );
     } catch (error) {
       if (error instanceof RoomPanoramaUploadError) {
         patchList(roomTypes, error.room);
@@ -770,34 +781,54 @@ export const useCmsStore = defineStore("cms", () => {
     }
   }
 
-  /** Upload the photos picked before the room existed, one by one, in order. */
+  /**
+   * Upload the photos picked before the room existed: one request per
+   * photo, in order. A failed photo is noted and the rest still go up;
+   * the list is re-read at the end and a single error names every failure.
+   */
   async function uploadStagedPanoramas(
     room: RoomType,
-    staged: { file: File; published: boolean }[]
+    staged: { file: File; published: boolean }[],
+    onProgress?: (progress: PanoramaProgress | null) => void
   ) {
     let current = room;
-    for (const item of staged) {
-      try {
-        const list = await addRoomPanorama(
-          current.id,
-          item.file,
-          item.published
-        );
-        current = withPanoramas(current, list);
-      } catch (error) {
-        const detail =
-          error instanceof Error && error.message
-            ? error.message
-            : "Upload failed.";
-        throw new RoomPanoramaUploadError(
-          `The room was saved, but a 360° photo was not. ${detail}`,
-          current
-        );
+    const failed: string[] = [];
+    try {
+      for (const [index, item] of staged.entries()) {
+        onProgress?.({
+          current: index + 1,
+          total: staged.length,
+          name: item.file.name
+        });
+        try {
+          const list = await addRoomPanorama(
+            current.id,
+            item.file,
+            item.published
+          );
+          current = withPanoramas(current, list);
+        } catch (error) {
+          failed.push(`${item.file.name}: ${panoramaUploadMessage(error)}`);
+        }
       }
+    } finally {
+      onProgress?.(null);
+    }
+    if (staged.length) {
+      try {
+        current = withPanoramas(current, await fetchRoomPanoramas(current.id));
+      } catch {
+        // Keep what the uploads already returned.
+      }
+    }
+    if (failed.length) {
+      throw new RoomPanoramaUploadError(
+        `The room was saved, but ${failed.length} of ${staged.length} 360° photos did not upload. ${failed.join(" ")}`,
+        current
+      );
     }
     return patchList(roomTypes, current);
   }
-
   function withPanoramas(room: RoomType, list: RoomPanorama[]): RoomType {
     const first = list.find(photo => photo.isPublished);
     return { ...room, panoramas: list, panoramaUrl: first?.url ?? null };
