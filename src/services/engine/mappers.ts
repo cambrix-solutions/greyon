@@ -17,6 +17,7 @@ import type {
   ProductPackage,
   RateCalendar,
   RatePlan,
+  RoomPanorama,
   RoomType
 } from "@/types/greyon";
 import { slugify } from "@/utils/slugify";
@@ -391,6 +392,15 @@ export interface EngineRoomType {
    * GET /admin/room-types(/{id}).
    */
   panoramaUrl?: string | null;
+  /** Ordered 360° photos. Public: published only. Admin: all. */
+  panoramas?: EngineRoomPanorama[];
+}
+
+export interface EngineRoomPanorama {
+  id: number | string;
+  url?: string | null;
+  isPublished?: boolean;
+  sortOrder?: number | null;
 }
 
 export interface EngineRatePlan {
@@ -413,6 +423,15 @@ function mapOptionalUrl(value: unknown): string | null {
   return trimmed || null;
 }
 
+export function mapEngineRoomPanorama(row: EngineRoomPanorama): RoomPanorama {
+  return {
+    id: String(row.id),
+    url: mapOptionalUrl(row.url) ?? "",
+    isPublished: row.isPublished !== false,
+    sortOrder: Number(row.sortOrder ?? 0)
+  };
+}
+
 export function mapEngineRoomType(row: EngineRoomType): RoomType {
   const rawSlug = typeof row.slug === "string" ? row.slug.trim() : "";
   // Client-only fallback when the engine omits slug — do not invent server fields.
@@ -433,7 +452,14 @@ export function mapEngineRoomType(row: EngineRoomType): RoomType {
     amenities: row.amenities ?? [],
     baseInventory: row.baseInventory ?? 0,
     status: asStatus(row.status),
-    panoramaUrl: mapOptionalUrl(row.panoramaUrl)
+    panoramaUrl: mapOptionalUrl(row.panoramaUrl),
+    ...(Array.isArray(row.panoramas)
+      ? {
+          panoramas: row.panoramas
+            .map(mapEngineRoomPanorama)
+            .filter(photo => photo.url)
+        }
+      : {})
   };
 }
 
