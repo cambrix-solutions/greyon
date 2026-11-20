@@ -11,6 +11,7 @@ import {
   mapEngineDeveloperToUser
 } from "@/services/engine";
 import { useCmsStore } from "@/stores/cms-store";
+import type { EngineAdmin } from "@/services/engine/mappers";
 import type { AdminRole, AdminUser } from "@/types/greyon";
 
 export const roleLabels: Record<AdminRole, string> = {
@@ -381,6 +382,17 @@ export const useAuthStore = defineStore("auth", () => {
     const crudKey = `${module}_${action}`;
     const keys = featureKeys.value;
 
+    // A custom role can narrow a feature to some actions (Access → Roles);
+    // never show a button the API would refuse.
+    const roleAction =
+      action === "list" ? "view" : action === "update" ? "edit" : action;
+    if (
+      keys.some(k => k.startsWith(`${module}.`)) &&
+      !keys.includes(`${module}.${roleAction}`)
+    ) {
+      return false;
+    }
+
     // Explicit CRUD permission always wins (engine PermissionSeeder).
     if (keys.includes(crudKey)) return true;
 
@@ -396,6 +408,43 @@ export const useAuthStore = defineStore("auth", () => {
     // denying `{module}_create` (seeded Admin + Manager seats). Never treat
     // the parent feature as permission to mutate.
     return false;
+  }
+
+  /**
+   * Per-feature action from Access → Roles (view / create / edit / delete).
+   * Seats saved before actions existed carry every action. When the session
+   * has no `feature.action` keys at all (older engine), fall back to the
+   * feature itself.
+   */
+  function canDo(
+    feature: string,
+    action: "view" | "create" | "edit" | "delete"
+  ) {
+    if (!user.value) return false;
+    if (isDeveloper.value) return true;
+    const keys = featureKeys.value;
+    if (keys.includes(`${feature}.${action}`)) return true;
+    if (keys.some(k => k.startsWith(`${feature}.`))) return false;
+    return keys.includes(feature);
+  }
+
+  /** Signs in an admin returned by the Google invite / sign-in exchange. */
+  function adoptAdminSession(admin: EngineAdmin) {
+    const mapped = mapEngineAdminToUser(admin);
+    if (!mapped.roles.length) return false;
+    markLoginGrace();
+    persistLocalSession(
+      mapped.user,
+      `engine.admin.${mapped.user.id}`,
+      "admin",
+      mapped.roles,
+      mapped.featureKeys
+    );
+    if (typeof sessionStorage !== "undefined") {
+      sessionStorage.setItem("greyon_login_guard", "admin");
+    }
+    void useCmsStore().syncCatalogFromEngine("admin");
+    return true;
   }
 
   /**
@@ -511,6 +560,8 @@ export const useAuthStore = defineStore("auth", () => {
     refreshEngineSession,
     can,
     canAction,
+    canDo,
+    adoptAdminSession,
     canDestinationDetail,
     featureEnabled,
     canAccessLocation,
