@@ -158,22 +158,20 @@
           </div>
           <div class="gy-adm-field">
             <label class="gy-adm-label" :for="`inv-hotel-${idx}`">
-              Hotel{{
-                seatScope(row.packageId) === "hotel" ? "" : " (optional)"
-              }}
+              Hotel{{ seatKinds(row.packageId).hotelOnly ? "" : " (optional)" }}
             </label>
             <select
               :id="`inv-hotel-${idx}`"
               v-model="row.hotelId"
               class="gy-adm-input"
-              :required="seatScope(row.packageId) === 'hotel'"
-              :disabled="seatScope(row.packageId) === 'location'"
+              :required="seatKinds(row.packageId).hotelOnly"
+              :disabled="seatKinds(row.packageId).locationOnly"
             >
-              <option value="">
+              <option value="" :disabled="seatKinds(row.packageId).hotelOnly">
                 {{
-                  seatScope(row.packageId) === "location"
-                    ? "Whole destination"
-                    : "Choose a hotel"
+                  seatKinds(row.packageId).hotelOnly
+                    ? "Choose a hotel"
+                    : "Whole destination"
                 }}
               </option>
               <option
@@ -386,12 +384,19 @@ function inviteSeatLine(pkg: SeatAssignment & { name: string | null }) {
   return where ? `${name} · ${where}` : name;
 }
 
-function seatScope(packageId: number): "location" | "hotel" | null {
-  const seat = seats.value.find(s => s.id === packageId);
-  const scope = seat?.roles.find(
-    r => r.scope === "location" || r.scope === "hotel"
-  )?.scope;
-  return scope === "location" || scope === "hotel" ? scope : null;
+/**
+ * What a seat can be placed on. Custom roles carry both base roles (no scope
+ * of their own), so they work at a destination or at one hotel. The built-in
+ * manager seat is destination-only and the hotel desk seat is hotel-only.
+ */
+function seatKinds(packageId: number) {
+  const roles = seats.value.find(s => s.id === packageId)?.roles ?? [];
+  const location = roles.some(r => r.scope === "location");
+  const hotel = roles.some(r => r.scope === "hotel");
+  return {
+    locationOnly: location && !hotel,
+    hotelOnly: hotel && !location
+  };
 }
 
 function canToggle(person: TeamMember) {
@@ -432,10 +437,16 @@ function addSeatRow() {
   invite.seats.push({ packageId: 0, locationId: "", hotelId: "" });
 }
 
+/**
+ * The engine reads `locationIds` as "the whole destination" and `hotelIds` as
+ * "only these hotels", and a location pick wins over a hotel pick. So a row
+ * with a hotel sends just that hotel, and a row without one sends the
+ * destination.
+ */
 function assignments(): SeatAssignment[] {
   return invite.seats.map(row => {
-    const scope = seatScope(row.packageId);
-    if (scope === "hotel") {
+    const { locationOnly } = seatKinds(row.packageId);
+    if (row.hotelId && !locationOnly) {
       return {
         packageId: row.packageId,
         locationIds: [],
@@ -444,7 +455,7 @@ function assignments(): SeatAssignment[] {
     }
     return {
       packageId: row.packageId,
-      locationIds: row.locationId ? [Number(row.locationId)] : [],
+      locationIds: [Number(row.locationId)],
       hotelIds: []
     };
   });
@@ -462,6 +473,14 @@ async function sendInvite() {
   inviteError.value = "";
   if (invite.seats.some(s => !s.packageId)) {
     inviteError.value = "Choose a role for every seat.";
+    return;
+  }
+  if (invite.seats.some(s => !s.locationId)) {
+    inviteError.value = "Choose a destination for every role.";
+    return;
+  }
+  if (invite.seats.some(s => seatKinds(s.packageId).hotelOnly && !s.hotelId)) {
+    inviteError.value = "Choose a hotel for every hotel desk role.";
     return;
   }
   sending.value = true;

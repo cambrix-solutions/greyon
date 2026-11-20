@@ -122,24 +122,6 @@
         </div>
 
         <div class="gy-adm-field">
-          <span class="gy-adm-label">Works in</span>
-          <div class="gy-adm-chips">
-            <button
-              v-for="scope in options?.scopes ?? []"
-              :key="scope.key"
-              type="button"
-              class="gy-adm-chip"
-              :class="{ 'is-on': form.scope === scope.key }"
-              :disabled="!!editing && (editing.adminCount ?? 0) > 0"
-              :title="scope.description"
-              @click="form.scope = scope.key"
-            >
-              {{ scope.label }}
-            </button>
-          </div>
-        </div>
-
-        <div class="gy-adm-field">
           <span class="gy-adm-label"
             >Features (only ones you hold are offered)</span
           >
@@ -224,14 +206,12 @@ import {
   deleteRole,
   fetchRoleOptions,
   fetchRoles,
-  roleScope,
   ROLE_ACTIONS,
   updateRole,
   type AccessRole,
   type RoleAction,
   type RoleFeatureOption,
-  type RoleOptions,
-  type RoleScope
+  type RoleOptions
 } from "@/services/engine/adminAccess";
 import { useAuthStore } from "@/stores/auth-store";
 
@@ -247,7 +227,6 @@ const editing = ref<AccessRole | null>(null);
 const form = ref<{
   name: string;
   description: string;
-  scope: RoleScope;
   features: Record<string, RoleAction[]>;
 } | null>(null);
 
@@ -289,7 +268,7 @@ onMounted(load);
 function startNew() {
   editing.value = null;
   formError.value = "";
-  form.value = { name: "", description: "", scope: "hotel", features: {} };
+  form.value = { name: "", description: "", features: {} };
 }
 
 function startEdit(role: AccessRole) {
@@ -309,7 +288,6 @@ function startEdit(role: AccessRole) {
   form.value = {
     name: role.name,
     description: role.description ?? "",
-    scope: roleScope(role) ?? "hotel",
     features
   };
 }
@@ -366,13 +344,9 @@ async function save() {
       features
     };
     if (editing.value) {
-      const scopeChanged = roleScope(editing.value) !== form.value.scope;
-      await updateRole(editing.value.id, {
-        ...payload,
-        ...(scopeChanged ? { scope: form.value.scope } : {})
-      });
+      await updateRole(editing.value.id, payload);
     } else {
-      await createRole({ ...payload, scope: form.value.scope });
+      await createRole(payload);
     }
     $q.notify({ type: "positive", message: "Role saved." });
     cancel();

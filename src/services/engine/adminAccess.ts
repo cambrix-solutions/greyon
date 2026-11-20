@@ -10,8 +10,6 @@ import type { EngineAdmin } from "@/services/engine/mappers";
 export type RoleAction = "view" | "create" | "edit" | "delete";
 export const ROLE_ACTIONS: RoleAction[] = ["view", "create", "edit", "delete"];
 
-export type RoleScope = "location" | "hotel";
-
 export interface AccessRole {
   id: number;
   name: string;
@@ -31,22 +29,13 @@ export interface RoleFeatureOption {
 }
 
 export interface RoleOptions {
-  scopes: { key: RoleScope; label: string; description: string }[];
   features: RoleFeatureOption[];
 }
 
 export interface RoleInput {
   name: string;
   description?: string | null;
-  scope?: RoleScope;
   features: { key: string; actions: RoleAction[] }[];
-}
-
-export function roleScope(role: AccessRole): RoleScope | null {
-  const scope = role.roles.find(
-    r => r.scope === "location" || r.scope === "hotel"
-  )?.scope;
-  return scope === "location" || scope === "hotel" ? scope : null;
 }
 
 export async function fetchRoles(): Promise<AccessRole[]> {
