@@ -564,6 +564,8 @@ export interface EngineBooking {
   total?: number | null;
   status: string;
   source?: string;
+  paymentMethod?: string | null;
+  paidAt?: string | null;
   notes?: string | null;
   createdAt?: string | null;
 }
@@ -768,6 +770,11 @@ export function mapEngineBooking(row: EngineBooking): Booking {
     source: row.source === "admin" ? "admin" : "website",
     createdAt: row.createdAt ?? new Date().toISOString()
   };
+  const method = row.paymentMethod;
+  if (method === "cash" || method === "aba_qr" || method === "card") {
+    booking.paymentMethod = method;
+  }
+  if (row.paidAt) booking.paidAt = row.paidAt;
   if (row.notes) booking.notes = row.notes;
   if (row.hotel?.name) booking.hotelName = row.hotel.name;
   if (row.hotel?.slug) booking.hotelSlug = row.hotel.slug;
