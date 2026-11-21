@@ -314,6 +314,8 @@ export interface Booking {
   total: number;
   status: BookingStatus;
   source: "website" | "admin";
+  paymentMethod?: "cash" | "aba_qr" | "card" | null;
+  paidAt?: string | null;
   createdAt: string;
   notes?: string;
   /** Present on my-bookings / detail payloads from engine */
@@ -322,6 +324,41 @@ export interface Booking {
   hotelHeroImage?: string;
   roomTypeName?: string;
   ratePlanName?: string;
+}
+
+export type PaymentMethod = "cash" | "aba_qr" | "card";
+
+/** One room type in the admin Quick book inventory for a stay. */
+export interface QuickBookRoom {
+  roomTypeId: string;
+  name: string;
+  bedType: string | null;
+  roomSize: string | null;
+  maxGuests: number | null;
+  image: string | null;
+  ratePlanId: string;
+  nights: number;
+  nightly: number;
+  subtotal: number;
+  taxesFees: number;
+  total: number;
+  availableUnits: number;
+  soldOut: boolean;
+}
+
+export interface QuickBookInventory {
+  hotel: {
+    id: string;
+    name: string;
+    slug: string;
+    locationName?: string | null;
+  };
+  checkIn: string;
+  checkOut: string;
+  guests: number;
+  rooms: number;
+  nights: number;
+  roomTypes: QuickBookRoom[];
 }
 
 export interface AvailabilityResult {

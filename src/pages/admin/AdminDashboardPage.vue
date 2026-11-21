@@ -135,6 +135,10 @@
       </router-link>
     </div>
 
+    <div v-if="auth.canDo('bookings', 'create')" v-reveal>
+      <QuickBookPanel @created="onQuickBooked" />
+    </div>
+
     <section v-reveal class="dash-section">
       <h2 class="dash-section__title">Quick actions</h2>
       <div class="dash-actions">
@@ -293,6 +297,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import { useQuasar } from "quasar";
+import QuickBookPanel from "@/components/admin/QuickBookPanel.vue";
 import { useAuthStore } from "@/stores/auth-store";
 import { useCmsStore } from "@/stores/cms-store";
 import type { Booking, BookingStatus, EnquiryStatus } from "@/types/greyon";
@@ -563,6 +568,10 @@ function stayLabel(b: Booking) {
 
 function isArrivalToday(b: Booking) {
   return b.checkIn === today;
+}
+
+async function onQuickBooked(_booking: Booking) {
+  await cms.ensureDashboardData();
 }
 
 async function setBookingStatus(reference: string, status: BookingStatus) {
