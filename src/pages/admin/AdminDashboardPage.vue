@@ -91,7 +91,7 @@
           unelevated
           dense
           no-caps
-          color="primary"
+          class="dash-alert__btn"
           label="Confirm all pending"
           @click="confirmAllPending"
         />
@@ -100,7 +100,7 @@
           flat
           dense
           no-caps
-          color="primary"
+          class="dash-alert__link"
           label="Open pending"
           to="/admin/bookings?status=pending"
         />
@@ -109,7 +109,7 @@
           flat
           dense
           no-caps
-          color="primary"
+          class="dash-alert__link"
           label="Open inbox"
           to="/admin/enquiries?status=new"
         />
@@ -749,11 +749,16 @@ function resetData() {
   background: #fff8ef;
   border: 1px solid rgba(176, 141, 87, 0.3);
   border-radius: 0;
+  color: var(--gy-ink);
+}
+
+.dash-alert strong {
+  color: var(--gy-ink);
 }
 
 .dash-alert p {
   margin: 0.2rem 0 0;
-  color: var(--gy-muted);
+  color: var(--gy-ink);
   font-size: 0.88rem;
 }
 
@@ -761,6 +766,15 @@ function resetData() {
   display: flex;
   flex-wrap: wrap;
   gap: 0.25rem;
+}
+
+.dash-alert__btn {
+  background: var(--gy-ink) !important;
+  color: #fff !important;
+}
+
+.dash-alert__link {
+  color: var(--gy-ink) !important;
 }
 
 .dash-stats {

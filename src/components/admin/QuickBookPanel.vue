@@ -10,28 +10,53 @@
 
     <ol class="qb__steps" aria-label="Booking steps">
       <li
-        v-for="(step, i) in steps"
+        v-for="step in steps"
         :key="step.id"
         class="qb__step"
         :class="{
-          'is-done': stepIndex > i,
-          'is-on': stepIndex === i && phase !== 'done',
-          'is-skip': step.skipped
+          'is-done': step.completed,
+          'is-on': step.current,
+          'is-skip': step.skipped,
+          'is-disabled': step.disabled
         }"
       >
-        <span class="qb__step-mark" aria-hidden="true">
-          <q-icon
-            v-if="stepIndex > i || phase === 'done'"
-            name="check"
-            size="14px"
-          />
-          <template v-else>{{ i + 1 }}</template>
-        </span>
-        <span class="qb__step-copy">
-          <span class="qb__step-name">{{ step.label }}</span>
-          <span v-if="step.detail" class="qb__step-detail">{{
-            step.detail
-          }}</span>
+        <button
+          v-if="step.clickable"
+          type="button"
+          class="qb__step-btn"
+          :aria-label="`Go back to ${step.label}`"
+          @click="backTo(step.id)"
+        >
+          <span class="qb__step-mark" aria-hidden="true">
+            <q-icon name="check" size="14px" />
+          </span>
+          <span class="qb__step-copy">
+            <span class="qb__step-name">{{ step.label }}</span>
+            <span v-if="step.detail" class="qb__step-detail">{{
+              step.detail
+            }}</span>
+          </span>
+        </button>
+        <span
+          v-else
+          class="qb__step-btn"
+          :aria-current="step.current ? 'step' : undefined"
+          :aria-disabled="step.disabled ? 'true' : undefined"
+        >
+          <span class="qb__step-mark" aria-hidden="true">
+            <q-icon
+              v-if="step.completed || phase === 'done'"
+              name="check"
+              size="14px"
+            />
+            <template v-else>{{ step.number }}</template>
+          </span>
+          <span class="qb__step-copy">
+            <span class="qb__step-name">{{ step.label }}</span>
+            <span v-if="step.detail" class="qb__step-detail">{{
+              step.detail
+            }}</span>
+          </span>
         </span>
       </li>
     </ol>
@@ -70,7 +95,14 @@
 
     <div v-else-if="stepId === 'destination'" class="qb__grid">
       <p v-if="!destinationCards.length" class="qb__empty">
-        No destinations in your scope yet.
+        No hotels are available for booking yet.
+        <router-link
+          v-if="auth.can('hotels')"
+          class="qb__text-link qb__empty-link"
+          to="/admin/hotels"
+        >
+          Open hotels
+        </router-link>
       </p>
       <button
         v-for="card in destinationCards"
@@ -92,7 +124,7 @@
           <span class="qb-card__meta">
             {{
               card.bookable
-                ? `${card.count} room type${card.count === 1 ? "" : "s"}`
+                ? `${card.count} ${card.unit}${card.count === 1 ? "" : "s"}`
                 : "Coming soon"
             }}
           </span>
@@ -396,50 +428,64 @@ const roomOffers = ref<QuickBookRoom[]>([]);
 
 const todayIso = isoDate(new Date());
 
-const scopedLocations = computed(() =>
-  cms.locations.filter(loc => auth.canAccessLocation(loc.id))
-);
+const accessibleHotels = computed(() => auth.scopedHotels);
+
+const destinationCards = computed(() => {
+  const groups = new Map<string, (typeof accessibleHotels.value)[number][]>();
+  for (const hotel of accessibleHotels.value) {
+    const list = groups.get(hotel.locationId) ?? [];
+    list.push(hotel);
+    groups.set(hotel.locationId, list);
+  }
+  return [...groups.entries()].map(([id, hotels]) => {
+    const published = hotels.filter(item => item.status === "published");
+    const roomsKnown = published.some(item =>
+      cms.roomTypes.some(room => room.hotelId === item.id)
+    );
+    const roomCount = published.reduce(
+      (sum, item) => sum + bookableCountForHotel(item.id),
+      0
+    );
+    const count = roomsKnown ? roomCount : published.length;
+    return {
+      id,
+      name: locationLabel(id, hotels),
+      photo: locationPhoto(id, hotels),
+      count,
+      unit: roomsKnown ? "room type" : "hotel",
+      bookable: published.length > 0 && (!roomsKnown || roomCount > 0)
+    };
+  });
+});
 
 const destinationLocked = computed(
-  () => !auth.isGlobalScope && scopedLocations.value.length === 1
-);
-
-const destinationCards = computed(() =>
-  scopedLocations.value.map(loc => {
-    const count = bookableCount(loc.id);
-    return {
-      id: loc.id,
-      name: loc.name,
-      photo: loc.heroImage || "",
-      count,
-      bookable: count > 0
-    };
-  })
+  () => !auth.isGlobalScope && destinationCards.value.length === 1
 );
 
 const hotelCards = computed(() =>
-  cms.hotels
+  accessibleHotels.value
     .filter(
       hotel =>
-        hotel.locationId === locationId.value &&
-        hotel.status === "published" &&
-        auth.canAccessHotel(hotel.id)
+        hotel.locationId === locationId.value && hotel.status === "published"
     )
     .map(hotel => ({
       id: hotel.id,
       name: hotel.name,
       photo: hotel.heroImage || "",
-      meta: `${bookableCountForHotel(hotel.id)} room type${bookableCountForHotel(hotel.id) === 1 ? "" : "s"}`
+      meta: hotelCardMeta(hotel.id, hotel)
     }))
 );
 
-const location = computed(
-  () => cms.locations.find(item => item.id === locationId.value) ?? null
-);
 const hotel = computed(
   () => cms.hotels.find(item => item.id === hotelId.value) ?? null
 );
-const locationName = computed(() => location.value?.name ?? "");
+const locationName = computed(() => {
+  if (!locationId.value) return "";
+  return (
+    destinationCards.value.find(card => card.id === locationId.value)?.name ??
+    ""
+  );
+});
 const selected = computed(
   () =>
     roomOffers.value.find(room => room.roomTypeId === selectedId.value) ?? null
@@ -470,29 +516,56 @@ const stepIndex = computed(() => {
 });
 
 const steps = computed(() => {
-  const destDetail = location.value
+  const destDetail = locationName.value
     ? destinationLocked.value
-      ? `${location.value.name} (your location)`
-      : location.value.name
+      ? `${locationName.value} (your location)`
+      : locationName.value
     : "";
-  return [
+  const order: StepId[] = ["destination", "hotel", "room", "pay"];
+  const currentIndex = phase.value === "done" ? order.length : stepIndex.value;
+  const items: {
+    id: StepId;
+    label: string;
+    detail: string;
+    skipped: boolean;
+    number: number;
+    current: boolean;
+    completed: boolean;
+    clickable: boolean;
+    disabled: boolean;
+  }[] = [
     {
       id: "destination",
       label: "Destination",
       detail: destDetail,
-      skipped: destinationLocked.value
+      skipped: destinationLocked.value,
+      number: 1,
+      current: false,
+      completed: false,
+      clickable: false,
+      disabled: false
     },
     {
       id: "hotel",
       label: "Hotel",
       detail: hotel.value?.name ?? "",
-      skipped: false
+      skipped: false,
+      number: 2,
+      current: false,
+      completed: false,
+      clickable: false,
+      disabled: false
     },
     {
       id: "room",
       label: "Room",
       detail: selected.value?.name ?? "",
-      skipped: false
+      skipped: false,
+      number: 3,
+      current: false,
+      completed: false,
+      clickable: false,
+      disabled: false
     },
     {
       id: "pay",
@@ -501,15 +574,28 @@ const steps = computed(() => {
         phase.value === "done"
           ? paymentLabel(confirmed.value?.paymentMethod)
           : "",
-      skipped: false
+      skipped: false,
+      number: 4,
+      current: false,
+      completed: false,
+      clickable: false,
+      disabled: false
     }
   ];
+  return items.map((step, i) => {
+    const completed = !step.skipped && currentIndex > i;
+    const current =
+      !step.skipped && phase.value !== "done" && stepIndex.value === i;
+    const clickable = completed;
+    const disabled = !step.skipped && !completed && !current;
+    return { ...step, completed, current, clickable, disabled };
+  });
 });
 
 onMounted(() => {
   resetDates();
-  if (destinationLocked.value && scopedLocations.value[0]) {
-    locationId.value = scopedLocations.value[0].id;
+  if (destinationLocked.value && destinationCards.value[0]) {
+    locationId.value = destinationCards.value[0].id;
     stepId.value = "hotel";
   }
 });
@@ -524,15 +610,38 @@ watch([checkIn, checkOut, guests, hotelId], () => {
   }
 });
 
-function bookableCount(locId: string) {
-  return cms.hotels
-    .filter(
-      hotel =>
-        hotel.locationId === locId &&
-        hotel.status === "published" &&
-        auth.canAccessHotel(hotel.id)
-    )
-    .reduce((sum, hotel) => sum + bookableCountForHotel(hotel.id), 0);
+function locationLabel(
+  locId: string,
+  hotels: (typeof accessibleHotels.value)[number][]
+) {
+  const catalog = cms.locations.find(item => item.id === locId);
+  if (catalog?.name) return catalog.name;
+  const named = hotels.find(item => item.locationName);
+  return named?.locationName || "Unnamed destination";
+}
+
+function locationPhoto(
+  locId: string,
+  hotels: (typeof accessibleHotels.value)[number][]
+) {
+  const catalog = cms.locations.find(item => item.id === locId);
+  if (catalog?.heroImage) return catalog.heroImage;
+  const published = hotels.find(
+    item => item.status === "published" && item.heroImage
+  );
+  return (
+    published?.heroImage || hotels.find(item => item.heroImage)?.heroImage || ""
+  );
+}
+
+function hotelCardMeta(
+  id: string,
+  hotel: (typeof accessibleHotels.value)[number]
+) {
+  const known = cms.roomTypes.some(room => room.hotelId === id);
+  if (!known) return hotel.propertyType || hotel.area || "Published";
+  const count = bookableCountForHotel(id);
+  return `${count} room type${count === 1 ? "" : "s"}`;
 }
 
 function bookableCountForHotel(id: string) {
@@ -817,11 +926,42 @@ function addDays(date: Date, days: number) {
   color: var(--gy-muted);
 }
 
+.qb__step-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
 .qb__step.is-on,
 .qb__step.is-done {
   border-color: var(--gy-forest);
   background: var(--gy-forest);
   color: #fff;
+}
+
+.qb__step.is-done .qb__step-btn {
+  cursor: pointer;
+}
+
+.qb__step.is-disabled {
+  color: #9a9389;
+  background: #eeebe4;
+  border-color: rgba(28, 36, 33, 0.08);
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+.qb__step.is-disabled .qb__step-btn,
+.qb__step.is-disabled .qb__step-btn[aria-disabled="true"] {
+  cursor: not-allowed;
 }
 
 .qb__step-mark {
@@ -1227,6 +1367,11 @@ function addDays(date: Date, days: number) {
   text-decoration: underline;
   text-underline-offset: 2px;
   cursor: pointer;
+}
+
+.qb__empty-link {
+  display: inline-block;
+  margin-left: 0.35rem;
 }
 
 .qb__done {

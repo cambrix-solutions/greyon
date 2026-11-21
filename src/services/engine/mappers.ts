@@ -136,6 +136,11 @@ export interface EngineHotelProduct {
 export interface EngineHotel {
   id: number | string;
   locationId: number | string;
+  location?: {
+    id: number | string;
+    name?: string | null;
+    slug?: string | null;
+  } | null;
   name: string;
   slug: string;
   shortDescription?: string | null;
@@ -342,6 +347,7 @@ export function mapEngineHotel(row: EngineHotel): Hotel {
     name: row.name,
     slug: row.slug,
     locationId: String(row.locationId),
+    ...(row.location?.name ? { locationName: row.location.name } : {}),
     shortDescription: row.shortDescription ?? "",
     description: row.description ?? "",
     address: row.address ?? "",

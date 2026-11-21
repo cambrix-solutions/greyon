@@ -134,6 +134,8 @@ export interface Hotel {
   name: string;
   slug: string;
   locationId: string;
+  /** Present when the hotel API includes the location relation. */
+  locationName?: string;
   shortDescription: string;
   description: string;
   address: string;
