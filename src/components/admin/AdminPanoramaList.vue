@@ -316,14 +316,16 @@ function hotspotsEqual(
 const draftPhotos = computed(() => items.value.map(asPhoto));
 const editorPhoto = computed(
   () =>
-    draftPhotos.value.find(photo => photo.id === editorPhotoId.value) ?? null
+    draftPhotos.value.find(
+      (photo: RoomPanorama) => photo.id === editorPhotoId.value
+    ) ?? null
 );
 
 const dirty = computed(() => {
-  if (items.value.some(item => item.file || item.phase === "error"))
+  if (items.value.some((item: Item) => item.file || item.phase === "error"))
     return true;
   if (items.value.length !== baseline.value.length) return true;
-  return items.value.some((item, i) => {
+  return items.value.some((item: Item, i: number) => {
     const base = baseline.value[i];
     if (!base || base.id !== item.id) return true;
     if ((item.caption ?? "").trim() !== (base.caption ?? "").trim())
@@ -334,16 +336,18 @@ const dirty = computed(() => {
 });
 
 const savingLabel = computed(() => {
-  const uploading = items.value.find(item => item.phase === "uploading");
+  const uploading = items.value.find(
+    (item: Item) => item.phase === "uploading"
+  );
   if (uploading) return `Uploading ${uploading.percent}%`;
-  if (items.value.some(item => item.phase === "preparing")) {
+  if (items.value.some((item: Item) => item.phase === "preparing")) {
     return "Preparing 360° photos…";
   }
   return "Saving 360° photos…";
 });
 
-watch(dirty, value => emit("dirty", value), { immediate: true });
-watch(busy, value => emit("busy", value), { immediate: true });
+watch(dirty, (value: boolean) => emit("dirty", value), { immediate: true });
+watch(busy, (value: boolean) => emit("busy", value), { immediate: true });
 
 function apply(list: RoomPanorama[]) {
   baseline.value = list;
@@ -371,7 +375,7 @@ async function load() {
 
 watch(
   () => props.roomId,
-  (id, prev) => {
+  (id: string | null, prev: string | null | undefined) => {
     // Creating a room sets the id mid-session; keep pending photos.
     // On first run `prev` is undefined, so edit still loads.
     if (id && prev === null) return;
@@ -419,7 +423,7 @@ function remove(item: Item) {
     persistent: true
   }).onOk(() => {
     if (item.file) URL.revokeObjectURL(item.url);
-    items.value = items.value.filter(other => other.key !== item.key);
+    items.value = items.value.filter((other: Item) => other.key !== item.key);
     if (editorPhotoId.value === photoId(item)) {
       editorOpen.value = false;
       editorPhotoId.value = null;
@@ -470,9 +474,9 @@ function remapPhotoId(from: string, to: string) {
 function knownIds() {
   return new Set(
     [
-      ...baseline.value.map(photo => photo.id),
-      ...items.value.map(item => item.id)
-    ].filter((id): id is string => Boolean(id))
+      ...baseline.value.map((photo: RoomPanorama) => photo.id),
+      ...items.value.map((item: Item) => item.id)
+    ].filter((id: string | null): id is string => Boolean(id))
   );
 }
 
@@ -510,7 +514,8 @@ async function uploadItem(roomId: string, item: Item) {
 async function syncHotspots(roomId: string, item: Item) {
   if (!item.id) return;
   const before =
-    baseline.value.find(photo => photo.id === item.id)?.hotspots ?? [];
+    baseline.value.find((photo: RoomPanorama) => photo.id === item.id)
+      ?.hotspots ?? [];
   const after = item.hotspots;
   const afterIds = new Set(after.map(spot => spot.id));
   for (const spot of before) {
@@ -520,7 +525,7 @@ async function syncHotspots(roomId: string, item: Item) {
   }
   for (const spot of after) {
     const target = items.value.find(
-      other =>
+      (other: Item) =>
         photoId(other) === spot.targetPanoramaId ||
         other.id === spot.targetPanoramaId
     );
@@ -538,7 +543,9 @@ async function syncHotspots(roomId: string, item: Item) {
       pitch: spot.pitch,
       label: spot.label
     };
-    const prev = before.find(other => other.id === spot.id);
+    const prev = before.find(
+      (other: RoomPanoramaHotspot) => other.id === spot.id
+    );
     const isPending = !spot.id || spot.id.startsWith("pending-hs-");
     if (isPending || !prev) {
       await addRoomPanoramaHotspot(roomId, item.id, input);
@@ -558,7 +565,7 @@ async function commit(roomId: string) {
   busy.value = true;
   error.value = "";
   try {
-    const pending = items.value.filter(item => item.file);
+    const pending = items.value.filter((item: Item) => item.file);
     const failed: Item[] = [];
     for (const item of pending) {
       try {
@@ -579,7 +586,9 @@ async function commit(roomId: string) {
 
     for (const item of items.value) {
       if (!item.id) continue;
-      const base = baseline.value.find(photo => photo.id === item.id);
+      const base = baseline.value.find(
+        (photo: RoomPanorama) => photo.id === item.id
+      );
       const caption = item.caption.trim() || null;
       if ((base?.caption ?? null) !== caption) {
         await setRoomPanoramaCaption(roomId, item.id, caption);
@@ -591,8 +600,8 @@ async function commit(roomId: string) {
     }
 
     const ids = items.value
-      .map(item => item.id)
-      .filter((id): id is string => Boolean(id));
+      .map((item: Item) => item.id)
+      .filter((id: string | null): id is string => Boolean(id));
     if (ids.length) await reorderRoomPanoramas(roomId, ids);
 
     const keep = new Set(ids);

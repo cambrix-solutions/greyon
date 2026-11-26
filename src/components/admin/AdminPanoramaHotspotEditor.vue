@@ -147,7 +147,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, ref, shallowRef } from "vue";
+import { computed, onBeforeUnmount, ref, shallowRef } from "vue";
 import {
   addRoomPanoramaHotspot,
   deleteRoomPanoramaHotspot,
@@ -209,23 +209,33 @@ const error = ref("");
 const busy = ref(false);
 const moving = ref(false);
 const draft = ref<Draft | null>(null);
+const localHotspots = ref<{
+  photoId: string;
+  spots: RoomPanoramaHotspot[];
+} | null>(null);
 const stageStatus = ref<"idle" | "loading" | "ready">("idle");
 let token = 0;
 let resizeObs: ResizeObserver | null = null;
 
 const photoTitle = computed(() => {
-  const i = props.photos.findIndex(item => item.id === props.photo.id);
+  const i = props.photos.findIndex(
+    (item: RoomPanorama) => item.id === props.photo.id
+  );
   const caption = props.photo.caption?.trim();
   const n = i >= 0 ? `360° photo ${i + 1}` : "360° photo";
   return caption ? `${n} (${caption})` : n;
 });
 
-const hotspots = computed(() => props.photo.hotspots ?? []);
+const hotspots = computed(() =>
+  localHotspots.value?.photoId === props.photo.id
+    ? localHotspots.value.spots
+    : (props.photo.hotspots ?? [])
+);
 
 const targets = computed(() =>
   props.photos
-    .filter(item => item.id !== props.photo.id)
-    .map(item => {
+    .filter((item: RoomPanorama) => item.id !== props.photo.id)
+    .map((item: RoomPanorama) => {
       const i = props.photos.indexOf(item);
       const caption = item.caption?.trim();
       return {
@@ -343,7 +353,9 @@ function onStageClick(event: MouseEvent) {
       .closest("[data-hotspot-id]")
       ?.getAttribute("data-hotspot-id");
     if (id) {
-      const spot = hotspots.value.find(item => item.id === id);
+      const spot = hotspots.value.find(
+        (item: RoomPanoramaHotspot) => item.id === id
+      );
       if (spot) editSpot(spot);
     }
     return;
@@ -386,11 +398,14 @@ function cancelDraft() {
   void boot();
 }
 
-function applyLocal(hotspots: RoomPanorama["hotspots"]) {
-  const nextPhoto: RoomPanorama = { ...props.photo, hotspots };
+function applyLocal(spots: RoomPanoramaHotspot[]) {
+  localHotspots.value = { photoId: props.photo.id, spots };
+  const nextPhoto: RoomPanorama = { ...props.photo, hotspots: spots };
   emit(
     "saved",
-    props.photos.map(photo => (photo.id === nextPhoto.id ? nextPhoto : photo))
+    props.photos.map((photo: RoomPanorama) =>
+      photo.id === nextPhoto.id ? nextPhoto : photo
+    )
   );
 }
 
@@ -411,7 +426,9 @@ async function saveDraft() {
     if (props.deferSave) {
       const spots = [...(props.photo.hotspots ?? [])];
       if (current.id) {
-        const index = spots.findIndex(spot => spot.id === current.id);
+        const index = spots.findIndex(
+          (spot: RoomPanoramaHotspot) => spot.id === current.id
+        );
         const updated = { id: current.id, ...input };
         if (index >= 0) spots[index] = updated;
         else spots.push(updated);
@@ -433,7 +450,6 @@ async function saveDraft() {
     }
     draft.value = null;
     moving.value = false;
-    await nextTick();
     await boot();
   } catch (e) {
     error.value = message(e, "The arrow did not save. Try again.");
@@ -450,7 +466,9 @@ async function removeDraft() {
   try {
     if (props.deferSave) {
       applyLocal(
-        (props.photo.hotspots ?? []).filter(spot => spot.id !== current.id)
+        (props.photo.hotspots ?? []).filter(
+          (spot: RoomPanoramaHotspot) => spot.id !== current.id
+        )
       );
     } else {
       const list = await deleteRoomPanoramaHotspot(
@@ -462,7 +480,6 @@ async function removeDraft() {
     }
     draft.value = null;
     moving.value = false;
-    await nextTick();
     await boot();
   } catch (e) {
     error.value = message(e, "The arrow could not be deleted.");
