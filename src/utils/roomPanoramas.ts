@@ -52,21 +52,21 @@ export function tourRoomsFromList(rooms: RoomType[]): PanoramaTourRoom[] {
     .filter(room => room.photos.length > 0);
 }
 
-/** Guest-facing label for the current 360° photo. */
+/** Guest-facing label for the current 360° photo (caption is the room name). */
 export function roomPanoramaLabel(
   roomName: string,
   photo: RoomPanorama | undefined,
   index: number,
   total: number
 ): string {
-  const name = roomName.trim() || "360° view";
   const caption = photo?.caption?.trim();
-  if (caption) return `${name} · ${caption}`;
-  if (total > 1) return `${name} · ${index + 1}`;
-  return name;
+  if (caption) return caption;
+  const name = roomName.trim();
+  if (total > 1) return name ? `${name} · ${index + 1}` : `View ${index + 1}`;
+  return name || "360° view";
 }
 
-/** Hover label on a hotspot. Uses the arrow's own label when set. */
+/** Hover label on a hotspot. Uses the arrow's own label, else the target caption. */
 export function hotspotLabel(
   roomName: string,
   hotspot: { label: string | null; targetPanoramaId: string },
@@ -76,13 +76,40 @@ export function hotspotLabel(
   if (own) return own;
   const target = photos.find(photo => photo.id === hotspot.targetPanoramaId);
   const caption = target?.caption?.trim();
-  const name = roomName.trim() || "360° view";
-  if (caption) return `${name} · ${caption}`;
+  if (caption) return caption;
   if (target) {
     const n = photos.findIndex(photo => photo.id === target.id);
-    return n >= 0 ? `${name} · ${n + 1}` : name;
+    return n >= 0 ? `View ${n + 1}` : "360° view";
   }
-  return name;
+  return roomName.trim() || "360° view";
+}
+
+/**
+ * Peninsula-style floor arrow: white circle, thin grey border, black
+ * direction arrow, dark tooltip with the destination name.
+ */
+export function mountFloorHotspot(
+  div: HTMLDivElement,
+  text: string,
+  hotspotId?: string
+) {
+  if (hotspotId) div.dataset.hotspotId = hotspotId;
+  div.classList.add("pano-hs");
+  const mark = document.createElement("span");
+  mark.className = "pano-hs__mark";
+  mark.setAttribute("aria-label", text);
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("class", "pano-hs__arrow");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("aria-hidden", "true");
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  path.setAttribute("d", "M12 4.5 20 18.5H4Z");
+  svg.append(path);
+  mark.append(svg);
+  const tip = document.createElement("span");
+  tip.className = "pano-hs__tip";
+  tip.textContent = text;
+  div.append(mark, tip);
 }
 
 /** Where a one-by-one 360° upload is: photo `current` of `total`, 1-based. */

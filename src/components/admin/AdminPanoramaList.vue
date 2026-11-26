@@ -15,18 +15,28 @@
         <template v-else> They upload when you create the room. </template>
         Guests see only <strong>published</strong> photos, in this order.
       </p>
-      <label class="pano-list__add" :class="{ 'is-disabled': busy }">
-        <q-icon name="add_a_photo" size="18px" />
-        Add 360° photos
+      <div class="pano-list__add" :class="{ 'is-disabled': busy }">
+        <button
+          type="button"
+          class="pano-list__add-btn"
+          :disabled="busy"
+          @click="openFilePicker"
+        >
+          <q-icon name="add_a_photo" size="18px" />
+          Add 360° photos
+        </button>
         <input
+          ref="fileInput"
           type="file"
           multiple
           class="pano-list__input"
           :accept="PANORAMA_ACCEPT_ATTR"
           :disabled="busy"
+          tabindex="-1"
+          @click.stop
           @change="onFileInput"
         />
-      </label>
+      </div>
     </div>
 
     <div
@@ -214,6 +224,7 @@ const emit = defineEmits<{
 const $q = useQuasar();
 const cms = useCmsStore();
 
+const fileInput = ref<HTMLInputElement | null>(null);
 const items = ref<Item[]>([]);
 const saved = ref<RoomPanorama[]>([]);
 const editorOpen = ref(false);
@@ -350,6 +361,8 @@ async function addFiles(files: File[]) {
         problems.push(message(e, "Could not refresh the 360° photos."));
       }
     }
+  } catch (e) {
+    problems.push(message(e, "Those 360° photos could not be added."));
   } finally {
     busy.value = false;
     ownProgress.value = null;
@@ -416,6 +429,15 @@ function openEditor(item: Item) {
   if (!item.id) return;
   editorPhotoId.value = item.id;
   editorOpen.value = true;
+}
+
+function openFilePicker() {
+  if (busy.value) return;
+  const input = fileInput.value;
+  if (!input) return;
+  input.value = "";
+  // Defer so the parent dialog's focus trap does not fight the native picker.
+  window.setTimeout(() => input.click(), 0);
 }
 
 function onFileInput(event: Event) {
@@ -540,8 +562,12 @@ onBeforeUnmount(releaseStaged);
 }
 
 .pano-list__add {
-  display: inline-flex;
+  position: relative;
   flex: 0 0 auto;
+}
+
+.pano-list__add-btn {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.4rem;
@@ -557,12 +583,13 @@ onBeforeUnmount(releaseStaged);
   cursor: pointer;
 }
 
-.pano-list__add.is-disabled {
+.pano-list__add.is-disabled,
+.pano-list__add-btn:disabled {
   opacity: 0.55;
   cursor: progress;
 }
 
-.pano-list__add:focus-within {
+.pano-list__add-btn:focus-visible {
   outline: 2px solid var(--gy-gold);
   outline-offset: 2px;
 }
@@ -571,8 +598,10 @@ onBeforeUnmount(releaseStaged);
   position: absolute;
   width: 1px;
   height: 1px;
-  opacity: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
   pointer-events: none;
+  opacity: 0;
 }
 
 .pano-list__error {

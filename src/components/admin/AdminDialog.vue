@@ -5,6 +5,8 @@
     :position="position"
     :full-height="fullHeight"
     :maximized="maximized"
+    :no-refocus="noRefocus"
+    :allow-focus-outside="allowFocusOutside"
     transition-show="scale"
     transition-hide="fade"
     class="admin-dialog-host"
@@ -67,13 +69,18 @@ withDefaults(
     position?: "standard" | "right" | "left" | "top" | "bottom";
     fullHeight?: boolean;
     maximized?: boolean;
+    /** Keep focus from snapping back when a native file picker opens. */
+    noRefocus?: boolean;
+    allowFocusOutside?: boolean;
   }>(),
   {
     size: "md",
     persistent: true,
     position: "standard",
     fullHeight: false,
-    maximized: false
+    maximized: false,
+    noRefocus: false,
+    allowFocusOutside: false
   }
 );
 
