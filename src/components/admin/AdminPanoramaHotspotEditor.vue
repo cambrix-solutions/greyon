@@ -2,8 +2,13 @@
   <q-dialog
     :model-value="modelValue"
     maximized
+    full-width
+    full-height
+    no-refocus
+    allow-focus-outside
     transition-show="fade"
     transition-hide="fade"
+    content-class="hs-ed-dialog"
     @update:model-value="emit('update:modelValue', $event)"
     @show="onShow"
     @hide="shutdown"
@@ -33,7 +38,16 @@
           class="hs-ed__stage"
           @pointerdown="onStagePointerDown"
           @click="onStageClick"
-        />
+        >
+          <div
+            v-if="stageStatus === 'loading'"
+            class="hs-ed__veil"
+            role="status"
+          >
+            <span class="hs-ed__spinner" aria-hidden="true" />
+            <p>Loading 360° photo…</p>
+          </div>
+        </div>
 
         <aside class="hs-ed__side">
           <p v-if="error" class="hs-ed__error" role="alert">{{ error }}</p>
@@ -113,8 +127,8 @@
             Click the photo to place an arrow to another view.
           </p>
 
-          <ul v-if="photo.hotspots.length" class="hs-ed__list">
-            <li v-for="spot in photo.hotspots" :key="spot.id">
+          <ul v-if="hotspots.length" class="hs-ed__list">
+            <li v-for="spot in hotspots" :key="spot.id">
               <button
                 type="button"
                 class="hs-ed__item"
@@ -140,7 +154,7 @@ import {
   updateRoomPanoramaHotspot
 } from "@/services/engine/adminCatalog";
 import type { RoomPanorama, RoomPanoramaHotspot } from "@/types/greyon";
-import { hotspotLabel } from "@/utils/roomPanoramas";
+import { hotspotLabel, mountFloorHotspot } from "@/utils/roomPanoramas";
 
 type PannellumViewer = {
   destroy: () => void;
@@ -190,7 +204,9 @@ const error = ref("");
 const busy = ref(false);
 const moving = ref(false);
 const draft = ref<Draft | null>(null);
+const stageStatus = ref<"idle" | "loading" | "ready">("idle");
 let token = 0;
+let resizeObs: ResizeObserver | null = null;
 
 const photoTitle = computed(() => {
   const i = props.photos.findIndex(item => item.id === props.photo.id);
@@ -199,10 +215,12 @@ const photoTitle = computed(() => {
   return caption ? `${n} (${caption})` : n;
 });
 
+const hotspots = computed(() => props.photo.hotspots ?? []);
+
 const targets = computed(() =>
   props.photos
     .filter(item => item.id !== props.photo.id)
-    .map((item, _, list) => {
+    .map(item => {
       const i = props.photos.indexOf(item);
       const caption = item.caption?.trim();
       return {
@@ -233,7 +251,46 @@ function resolveApi(mod: unknown): PannellumApi | null {
   if (record.default && typeof record.default.viewer === "function") {
     return record.default;
   }
+  const fromWindow = (window as Window & { pannellum?: PannellumApi })
+    .pannellum;
+  if (fromWindow && typeof fromWindow.viewer === "function") return fromWindow;
   return null;
+}
+
+function waitForStage(id: number): Promise<HTMLElement | null> {
+  const started = performance.now();
+  return new Promise(resolve => {
+    const tick = () => {
+      if (id !== token) {
+        resolve(null);
+        return;
+      }
+      const stage = stageEl.value;
+      if (stage && stage.clientWidth > 8 && stage.clientHeight > 8) {
+        resolve(stage);
+        return;
+      }
+      if (performance.now() - started > 2000) {
+        resolve(stage ?? null);
+        return;
+      }
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
+}
+
+function bindResize(stage: HTMLElement) {
+  resizeObs?.disconnect();
+  if (typeof ResizeObserver === "undefined") return;
+  resizeObs = new ResizeObserver(() => {
+    try {
+      viewer.value?.resize();
+    } catch {
+      /* viewer may be mid-destroy */
+    }
+  });
+  resizeObs.observe(stage);
 }
 
 function coordsFromClick(
@@ -281,7 +338,7 @@ function onStageClick(event: MouseEvent) {
       .closest("[data-hotspot-id]")
       ?.getAttribute("data-hotspot-id");
     if (id) {
-      const spot = props.photo.hotspots.find(item => item.id === id);
+      const spot = hotspots.value.find(item => item.id === id);
       if (spot) editSpot(spot);
     }
     return;
@@ -378,7 +435,7 @@ async function removeDraft() {
 }
 
 function hotspotConfig() {
-  const spots = [...props.photo.hotspots];
+  const spots = [...hotspots.value];
   if (draft.value) {
     const draftSpot = {
       id: draft.value.id ?? "draft",
@@ -395,25 +452,17 @@ function hotspotConfig() {
     id: `hs-${spot.id}`,
     yaw: spot.yaw,
     pitch: spot.pitch,
-    cssClass: "hs-ed-spot",
+    cssClass: "pano-hs",
     createTooltipFunc: (div: HTMLDivElement) => {
-      div.dataset.hotspotId = spot.id;
-      div.classList.add("hs-ed__mark-wrap");
-      const mark = document.createElement("span");
-      mark.className = "hs-ed__mark";
-      mark.textContent = "›";
-      const tip = document.createElement("span");
-      tip.className = "hs-ed__tip";
-      tip.textContent = listLabel(spot);
-      div.append(mark, tip);
+      mountFloorHotspot(div, listLabel(spot), spot.id);
     }
   }));
 }
 
 async function boot() {
   const id = ++token;
-  const stage = stageEl.value;
-  if (!stage || !props.photo.url) return;
+  error.value = "";
+  stageStatus.value = "loading";
   const current = viewer.value;
   viewer.value = null;
   try {
@@ -421,6 +470,13 @@ async function boot() {
   } catch {
     /* already torn down */
   }
+  if (!props.photo.url) {
+    error.value = "This 360° photo has no image to open.";
+    stageStatus.value = "idle";
+    return;
+  }
+  const stage = await waitForStage(id);
+  if (!stage || id !== token) return;
   try {
     const [mod] = await Promise.all([
       import("pannellum"),
@@ -428,7 +484,11 @@ async function boot() {
     ]);
     if (id !== token) return;
     const api = resolveApi(mod);
-    if (!api) return;
+    if (!api) {
+      error.value = "The 360° viewer couldn’t be loaded. Try again.";
+      stageStatus.value = "idle";
+      return;
+    }
     const next = api.viewer(stage, {
       type: "equirectangular",
       panorama: props.photo.url,
@@ -451,9 +511,22 @@ async function boot() {
       return;
     }
     viewer.value = next;
+    bindResize(stage);
     next.resize();
+    next.on("load", () => {
+      if (id !== token) return;
+      stageStatus.value = "ready";
+      next.resize();
+    });
+    next.on("error", () => {
+      if (id !== token) return;
+      error.value = "The 360° photo could not be opened.";
+      stageStatus.value = "idle";
+    });
   } catch {
+    if (id !== token) return;
     error.value = "The 360° photo could not be opened.";
+    stageStatus.value = "idle";
   }
 }
 
@@ -466,6 +539,9 @@ function onShow() {
 
 function shutdown() {
   token += 1;
+  stageStatus.value = "idle";
+  resizeObs?.disconnect();
+  resizeObs = null;
   const current = viewer.value;
   viewer.value = null;
   try {
@@ -484,6 +560,9 @@ onBeforeUnmount(shutdown);
   flex-direction: column;
   width: 100%;
   height: 100%;
+  min-width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
   overflow: hidden;
   background: #111;
   color: #fff;
@@ -544,9 +623,40 @@ onBeforeUnmount(shutdown);
 }
 
 .hs-ed__stage {
+  position: relative;
   min-width: 0;
-  min-height: 0;
+  min-height: 16rem;
   background: #000;
+}
+
+.hs-ed__veil {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 0.75rem;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  pointer-events: none;
+}
+
+.hs-ed__spinner {
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: hs-ed-spin 0.7s linear infinite;
+}
+
+@keyframes hs-ed-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .hs-ed__stage :deep(.pnlm-container) {
@@ -671,40 +781,51 @@ onBeforeUnmount(shutdown);
   color: var(--gy-gold);
 }
 
-.hs-ed__stage :deep(.hs-ed__mark-wrap) {
+.hs-ed__stage :deep(.pnlm-hotspot.pano-hs),
+.hs-ed__stage :deep(.pano-hs) {
   background: transparent !important;
   border: 0 !important;
   width: auto !important;
   height: auto !important;
 }
 
-.hs-ed__stage :deep(.hs-ed__mark) {
+.hs-ed__stage :deep(.pano-hs__mark) {
   display: grid;
   place-items: center;
-  width: 1.85rem;
-  height: 1.85rem;
-  border: 2px solid #fff;
+  width: 2.15rem;
+  height: 2.15rem;
+  border: 1.5px solid #8d8d8d;
   border-radius: 50%;
-  background: var(--gy-gold);
-  color: #111;
-  font-size: 1.2rem;
-  font-weight: 700;
-  line-height: 1;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
   cursor: pointer;
 }
 
-.hs-ed__stage :deep(.hs-ed__tip) {
+.hs-ed__stage :deep(.pano-hs__arrow) {
+  display: block;
+  width: 0.85rem;
+  height: 0.85rem;
+  fill: #111;
+}
+
+.hs-ed__stage :deep(.pano-hs__tip) {
   position: absolute;
   left: 50%;
-  bottom: calc(100% + 0.35rem);
-  padding: 0.2rem 0.45rem;
+  bottom: calc(100% + 0.4rem);
+  padding: 0.28rem 0.55rem;
   border-radius: 4px;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.82);
   color: #fff;
   font-size: 0.72rem;
+  font-weight: 600;
   white-space: nowrap;
   transform: translateX(-50%);
   pointer-events: none;
+}
+
+.hs-ed__stage :deep(.pano-hs:hover .pano-hs__tip),
+.hs-ed__stage :deep(.pano-hs:focus-within .pano-hs__tip) {
+  opacity: 1;
 }
 
 @media (max-width: 800px) {
@@ -718,5 +839,16 @@ onBeforeUnmount(shutdown);
     border-top: 1px solid rgba(255, 255, 255, 0.12);
     max-height: 45%;
   }
+}
+</style>
+
+<style>
+.hs-ed-dialog {
+  padding: 0 !important;
+  background: #111 !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
 }
 </style>

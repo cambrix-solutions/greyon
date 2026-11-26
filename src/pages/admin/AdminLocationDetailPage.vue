@@ -516,6 +516,8 @@
       eyebrow="Room"
       :title="roomEditing ? 'Edit room' : 'Add room'"
       subtitle="Room type under the selected hotel."
+      no-refocus
+      allow-focus-outside
     >
       <AdminFormSection title="Essentials" :columns="2">
         <q-input v-model="roomForm.name" label="Room name" outlined dense />

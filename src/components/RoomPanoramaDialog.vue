@@ -205,7 +205,12 @@
         </button>
       </div>
 
-      <div v-if="phase === 'loading'" class="pano__veil" role="status">
+      <div
+        v-if="phase === 'loading' || flying"
+        class="pano__veil"
+        :class="{ 'pano__veil--fade': transition === 'fade' }"
+        role="status"
+      >
         <span class="pano__spinner" aria-hidden="true" />
         <p>Loading 360° view…</p>
       </div>
@@ -223,8 +228,16 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, shallowRef, watch } from "vue";
-import type { PanoramaTourRoom, RoomPanorama } from "@/types/greyon";
-import { hotspotLabel, roomPanoramaLabel } from "@/utils/roomPanoramas";
+import type {
+  PanoramaTourRoom,
+  RoomPanorama,
+  RoomPanoramaHotspot
+} from "@/types/greyon";
+import {
+  hotspotLabel,
+  mountFloorHotspot,
+  roomPanoramaLabel
+} from "@/utils/roomPanoramas";
 
 type PannellumViewer = {
   on: (event: string, callback: (arg?: unknown) => void) => unknown;
@@ -238,6 +251,12 @@ type PannellumViewer = {
   startAutoRotate: (speed?: number) => unknown;
   stopAutoRotate: () => unknown;
   resize: () => void;
+  lookAt?: (
+    pitch: number,
+    yaw: number,
+    hfov?: number,
+    duration?: number
+  ) => unknown;
 };
 
 type PannellumApi = {
@@ -299,6 +318,8 @@ const stageEl = ref<HTMLElement | null>(null);
 const phase = ref<"loading" | "ready" | "error">("loading");
 const errorMessage = ref("");
 const viewer = shallowRef<PannellumViewer | null>(null);
+const flying = ref(false);
+const transition = ref<"fly" | "fade">("fade");
 const index = ref(0);
 const yaw = ref(0);
 const autoRotateOn = ref(true);
@@ -351,6 +372,8 @@ const labelText = computed(() =>
 );
 
 let token = 0;
+let pendingTransition: "fly" | "fade" = "fade";
+const trail: string[] = [];
 let loadTimer = 0;
 let idleTimer = 0;
 let hintTimer = 0;
@@ -574,12 +597,19 @@ function onResize() {
   viewer.value?.resize();
 }
 
+function delay(ms: number) {
+  return new Promise<void>(resolve => {
+    window.setTimeout(resolve, ms);
+  });
+}
+
 /** Show photo `next` (wraps around). The viewer is rebuilt for the new photo. */
 function go(next: number) {
   const total = photos.value.length;
   if (total < 2) return;
   const wrapped = ((next % total) + total) % total;
   if (wrapped === index.value && phase.value !== "error") return;
+  pendingTransition = "fade";
   index.value = wrapped;
   void boot();
 }
@@ -587,7 +617,39 @@ function go(next: number) {
 function goToId(targetId: string) {
   const next = photos.value.findIndex(photo => photo.id === targetId);
   if (next < 0) return;
-  go(next);
+  if (next === index.value && phase.value !== "error") return;
+  index.value = next;
+  void boot();
+}
+
+async function enterHotspot(spot: RoomPanoramaHotspot) {
+  const target = photos.value.find(photo => photo.id === spot.targetPanoramaId);
+  if (!target || flying.value) return;
+  const fromId = currentPhoto.value?.id;
+  const goingBack = trail[trail.length - 1] === target.id;
+  if (goingBack) trail.pop();
+  else if (fromId) trail.push(fromId);
+
+  const reduced = prefersReducedMotion();
+  pendingTransition = goingBack || reduced ? "fade" : "fly";
+  transition.value = pendingTransition;
+
+  if (pendingTransition === "fly") {
+    flying.value = true;
+    const current = viewer.value;
+    try {
+      current?.stopAutoRotate?.();
+      current?.lookAt?.(spot.pitch, spot.yaw, 52, 750);
+    } catch {
+      /* viewer may not support lookAt */
+    }
+    await delay(750);
+  }
+  try {
+    goToId(target.id);
+  } finally {
+    flying.value = false;
+  }
 }
 
 function selectRoom(id: string) {
@@ -603,6 +665,9 @@ function selectRoom(id: string) {
 
 function onShow() {
   index.value = 0;
+  trail.length = 0;
+  flying.value = false;
+  pendingTransition = "fade";
   roomsOpen.value = false;
   activeRoomId.value =
     props.roomId ||
@@ -683,7 +748,7 @@ function guestHotspots() {
   const photo = currentPhoto.value;
   if (!photo) return [];
   const ids = new Set(photos.value.map(item => item.id));
-  return photo.hotspots
+  return (photo.hotspots ?? [])
     .filter(spot => ids.has(spot.targetPanoramaId))
     .map(spot => {
       const text = hotspotLabel(roomName.value, spot, photos.value);
@@ -693,18 +758,10 @@ function guestHotspots() {
         pitch: spot.pitch,
         cssClass: "pano-hs",
         createTooltipFunc: (div: HTMLDivElement) => {
-          div.classList.add("pano-hs");
-          const mark = document.createElement("span");
-          mark.className = "pano-hs__mark";
-          mark.setAttribute("aria-label", text);
-          mark.textContent = "›";
-          const tip = document.createElement("span");
-          tip.className = "pano-hs__tip";
-          tip.textContent = text;
-          div.append(mark, tip);
+          mountFloorHotspot(div, text, spot.id);
         },
         clickHandlerFunc: () => {
-          goToId(spot.targetPanoramaId);
+          void enterHotspot(spot);
         }
       };
     });
@@ -713,6 +770,8 @@ function guestHotspots() {
 async function boot() {
   const id = ++token;
   phase.value = "loading";
+  transition.value = pendingTransition;
+  pendingTransition = "fade";
   errorMessage.value = "";
   destroyViewer();
 
@@ -1154,9 +1213,12 @@ onBeforeUnmount(() => {
 }
 
 .pano__label {
+  order: -1;
+  margin-right: auto;
   min-width: 0;
   max-width: min(22rem, calc(100% - 9.5rem));
-  margin: 0 0 2.55rem;
+  margin-bottom: 2.55rem;
+  margin-left: 0;
   padding: 0.4rem 0.85rem;
   overflow: hidden;
   border-radius: 999px;
@@ -1269,6 +1331,20 @@ onBeforeUnmount(() => {
   padding: 5rem 1.25rem;
   background: rgba(0, 0, 0, 0.88);
   text-align: center;
+}
+
+.pano__veil--fade {
+  background: rgba(0, 0, 0, 0.55);
+  animation: pano-fade 0.35s ease;
+}
+
+@keyframes pano-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .pano__veil p,
@@ -1399,17 +1475,20 @@ onBeforeUnmount(() => {
 .pano__stage :deep(.pano-hs__mark) {
   display: grid;
   place-items: center;
-  width: 2rem;
-  height: 2rem;
-  border: 2px solid #fff;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1.5px solid #8d8d8d;
   border-radius: 50%;
-  background: var(--gy-gold);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
-  color: #111;
-  font-size: 1.25rem;
-  font-weight: 700;
-  line-height: 1;
+  background: #fff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
   cursor: pointer;
+}
+
+.pano__stage :deep(.pano-hs__arrow) {
+  display: block;
+  width: 0.9rem;
+  height: 0.9rem;
+  fill: #111;
 }
 
 .pano__stage :deep(.pano-hs__tip) {

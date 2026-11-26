@@ -215,6 +215,8 @@
       eyebrow="Properties"
       :title="editing ? 'Edit room' : 'Add room'"
       subtitle="Room types sit under a hotel and drive how many rooms you can sell, prices, and booking."
+      no-refocus
+      allow-focus-outside
     >
       <template #notice>
         Pick the <strong>parent hotel</strong> — rooms never link straight to a
