@@ -147,7 +147,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, shallowRef } from "vue";
+import { computed, nextTick, onBeforeUnmount, ref, shallowRef } from "vue";
 import {
   addRoomPanoramaHotspot,
   deleteRoomPanoramaHotspot,
@@ -186,12 +186,17 @@ type Draft = {
   label: string;
 };
 
-const props = defineProps<{
-  modelValue: boolean;
-  roomId: string;
-  photo: RoomPanorama;
-  photos: RoomPanorama[];
-}>();
+const props = withDefaults(
+  defineProps<{
+    modelValue: boolean;
+    roomId: string;
+    photo: RoomPanorama;
+    photos: RoomPanorama[];
+    /** Keep arrow edits local; the parent commits them on Save changes. */
+    deferSave?: boolean;
+  }>(),
+  { deferSave: false }
+);
 
 const emit = defineEmits<{
   "update:modelValue": [open: boolean];
@@ -381,6 +386,16 @@ function cancelDraft() {
   void boot();
 }
 
+function applyLocal(hotspots: RoomPanorama["hotspots"]) {
+  const nextPhoto: RoomPanorama = { ...props.photo, hotspots };
+  emit(
+    "saved",
+    props.photos.map(photo => (photo.id === nextPhoto.id ? nextPhoto : photo))
+  );
+}
+
+let pendingHotspotSeq = 0;
+
 async function saveDraft() {
   const current = draft.value;
   if (!current || !current.targetPanoramaId || busy.value) return;
@@ -393,17 +408,32 @@ async function saveDraft() {
       pitch: current.pitch,
       label: current.label.trim() || null
     };
-    const list = current.id
-      ? await updateRoomPanoramaHotspot(
-          props.roomId,
-          props.photo.id,
-          current.id,
-          input
-        )
-      : await addRoomPanoramaHotspot(props.roomId, props.photo.id, input);
-    emit("saved", list);
+    if (props.deferSave) {
+      const spots = [...(props.photo.hotspots ?? [])];
+      if (current.id) {
+        const index = spots.findIndex(spot => spot.id === current.id);
+        const updated = { id: current.id, ...input };
+        if (index >= 0) spots[index] = updated;
+        else spots.push(updated);
+      } else {
+        pendingHotspotSeq += 1;
+        spots.push({ id: `pending-hs-${pendingHotspotSeq}`, ...input });
+      }
+      applyLocal(spots);
+    } else {
+      const list = current.id
+        ? await updateRoomPanoramaHotspot(
+            props.roomId,
+            props.photo.id,
+            current.id,
+            input
+          )
+        : await addRoomPanoramaHotspot(props.roomId, props.photo.id, input);
+      emit("saved", list);
+    }
     draft.value = null;
     moving.value = false;
+    await nextTick();
     await boot();
   } catch (e) {
     error.value = message(e, "The arrow did not save. Try again.");
@@ -418,14 +448,21 @@ async function removeDraft() {
   busy.value = true;
   error.value = "";
   try {
-    const list = await deleteRoomPanoramaHotspot(
-      props.roomId,
-      props.photo.id,
-      current.id
-    );
-    emit("saved", list);
+    if (props.deferSave) {
+      applyLocal(
+        (props.photo.hotspots ?? []).filter(spot => spot.id !== current.id)
+      );
+    } else {
+      const list = await deleteRoomPanoramaHotspot(
+        props.roomId,
+        props.photo.id,
+        current.id
+      );
+      emit("saved", list);
+    }
     draft.value = null;
     moving.value = false;
+    await nextTick();
     await boot();
   } catch (e) {
     error.value = message(e, "The arrow could not be deleted.");

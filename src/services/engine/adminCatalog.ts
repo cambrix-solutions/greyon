@@ -369,15 +369,26 @@ export async function fetchRoomPanoramas(
 export async function addRoomPanorama(
   roomId: string,
   file: File,
-  isPublished = true
+  isPublished = true,
+  options?: {
+    onUploadProgress?: (percent: number) => void;
+    signal?: AbortSignal;
+  }
 ): Promise<RoomPanorama[]> {
   const form = new FormData();
   form.append("panoramas[]", file, file.name);
   form.append("isPublished", isPublished ? "1" : "0");
   return mapPanoramaList(
-    await engineAPI.request<PanoramaListResponse>(
+    await engineAPI.requestUpload<PanoramaListResponse>(
       `/admin/room-types/${numId(roomId)}/panoramas`,
-      { method: "POST", body: form }
+      {
+        method: "POST",
+        body: form,
+        ...(options?.onUploadProgress
+          ? { onUploadProgress: options.onUploadProgress }
+          : {}),
+        ...(options?.signal ? { signal: options.signal } : {})
+      }
     )
   );
 }
