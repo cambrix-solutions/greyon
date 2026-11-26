@@ -137,7 +137,7 @@ export type RoomTypeInput = {
   baseInventory?: number;
   status?: ContentStatus;
   /**
-   * JPG or WebP, max 25 MB. Multipart field `panorama`.
+   * JPG or WebP, max 35 MB. Multipart field `panorama`.
    * Create sends it on POST /admin/room-types. Update sends it on
    * POST /admin/room-types/{id} with `_method=PATCH` — PHP does not
    * fill `$_FILES` for a real PATCH, so that request returns 200
@@ -363,7 +363,7 @@ export async function fetchRoomPanoramas(
 }
 
 /**
- * Upload one 360° photo (JPG or WebP, max 25 MB, multipart field
+ * Upload one 360° photo (JPG or WebP, max 35 MB, multipart field
  * `panoramas[]`). It goes to the end of the list. Returns the full list.
  */
 export async function addRoomPanorama(

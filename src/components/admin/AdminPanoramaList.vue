@@ -9,7 +9,7 @@
   >
     <div class="pano-list__top">
       <p class="pano-list__hint">
-        Add as many equirectangular photos as you like — JPG or WebP, up to 25
+        Add as many equirectangular photos as you like — JPG or WebP, up to 35
         MB each. The server shrinks very large files. Changes are saved when you
         click
         <strong>Save changes</strong>. Guests see only
