@@ -119,7 +119,7 @@ export async function prepareImageForUpload(
 }
 
 /** Engine limit per 360° photo (multipart field `panorama` / `panoramas[]`). */
-export const PANORAMA_MAX_BYTES = 25 * 1024 * 1024;
+export const PANORAMA_MAX_BYTES = 35 * 1024 * 1024;
 export const PANORAMA_ACCEPT_ATTR = "image/jpeg,image/webp,.jpg,.jpeg,.webp";
 
 function isPanoramaFile(file: File): boolean {
@@ -129,17 +129,17 @@ function isPanoramaFile(file: File): boolean {
   return /\.(jpe?g|webp)$/i.test(file.name);
 }
 
-/** JPG or WebP, at most 25 MB — the engine rejects anything else. */
+/** JPG or WebP, at most 35 MB — the engine rejects anything else. */
 export function validatePanoramaFile(file: File): string | null {
   if (!isPanoramaFile(file)) return "Use a JPG or WebP 360° photo.";
   if (file.size > PANORAMA_MAX_BYTES) {
-    return "That 360° photo is too large (max 25 MB).";
+    return "That 360° photo is too large (max 35 MB).";
   }
   return null;
 }
 
 /**
- * JPG/WebP only, 25 MB cap. The original is uploaded untouched: the engine
+ * JPG/WebP only, 35 MB cap. The original is uploaded untouched: the engine
  * shrinks it (max 8192px wide, WebP quality 90), which keeps 360° photos
  * sharper than a browser canvas would.
  */
