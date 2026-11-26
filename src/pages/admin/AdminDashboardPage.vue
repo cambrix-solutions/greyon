@@ -20,7 +20,7 @@
           no-caps
           class="dash-btn-primary"
           icon="add"
-          label="Create booking"
+          label="Create reservation"
           to="/admin/bookings?create=1"
         />
       </div>
@@ -33,7 +33,7 @@
         outlined
         clearable
         debounce="150"
-        placeholder="Search bookings, guests, enquiries…"
+        placeholder="Search reservations, guests, enquiries…"
         class="dash-search"
       >
         <template #prepend>
@@ -91,7 +91,7 @@
           unelevated
           dense
           no-caps
-          color="primary"
+          class="dash-alert__btn"
           label="Confirm all pending"
           @click="confirmAllPending"
         />
@@ -100,7 +100,7 @@
           flat
           dense
           no-caps
-          color="primary"
+          class="dash-alert__link"
           label="Open pending"
           to="/admin/bookings?status=pending"
         />
@@ -109,7 +109,7 @@
           flat
           dense
           no-caps
-          color="primary"
+          class="dash-alert__link"
           label="Open inbox"
           to="/admin/enquiries?status=new"
         />
@@ -133,6 +133,10 @@
           <div v-if="card.hint" class="dash-stat__hint">{{ card.hint }}</div>
         </div>
       </router-link>
+    </div>
+
+    <div v-if="auth.canDo('bookings', 'create')" v-reveal>
+      <QuickBookPanel @created="onQuickBooked" />
     </div>
 
     <section v-reveal class="dash-section">
@@ -293,6 +297,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import { useQuasar } from "quasar";
+import QuickBookPanel from "@/components/admin/QuickBookPanel.vue";
 import { useAuthStore } from "@/stores/auth-store";
 import { useCmsStore } from "@/stores/cms-store";
 import type { Booking, BookingStatus, EnquiryStatus } from "@/types/greyon";
@@ -382,7 +387,7 @@ const attentionCopy = computed(() => {
   const parts: string[] = [];
   if (pendingCount.value) {
     parts.push(
-      `${pendingCount.value} pending booking${pendingCount.value === 1 ? "" : "s"}`
+      `${pendingCount.value} pending reservation${pendingCount.value === 1 ? "" : "s"}`
     );
   }
   if (newEnquiryCount.value) {
@@ -404,7 +409,7 @@ const cards = computed(() => [
     to: "/admin/hotels"
   },
   {
-    label: "Bookings",
+    label: "Reservations",
     value: myBookings.value.length,
     hint: pendingCount.value ? `${pendingCount.value} pending` : "All clear",
     icon: "book_online",
@@ -447,7 +452,7 @@ const quickActions = computed(() =>
       perm: "rates"
     },
     {
-      label: "Create booking",
+      label: "Create reservation",
       to: "/admin/bookings?create=1",
       icon: "event_available",
       perm: "bookings"
@@ -471,7 +476,7 @@ const quickActions = computed(() =>
       perm: "settings"
     }
   ].filter(a =>
-    a.label === "Create booking"
+    a.label === "Create reservation"
       ? auth.canAction("bookings", "create")
       : auth.can(a.perm)
   )
@@ -534,10 +539,10 @@ const visibleEnquiries = computed(() => {
 });
 
 const bookingsPanelTitle = computed(() => {
-  if (focus.value === "pending") return "Pending bookings";
+  if (focus.value === "pending") return "Pending reservations";
   if (focus.value === "today") return "Arrivals & departures today";
-  if (focus.value === "inbox") return "Bookings";
-  return "Recent bookings";
+  if (focus.value === "inbox") return "Reservations";
+  return "Recent reservations";
 });
 
 const bookingsPanelLink = computed(() => {
@@ -565,11 +570,15 @@ function isArrivalToday(b: Booking) {
   return b.checkIn === today;
 }
 
+async function onQuickBooked(_booking: Booking) {
+  await cms.ensureDashboardData();
+}
+
 async function setBookingStatus(reference: string, status: BookingStatus) {
   await cms.updateBookingStatus(reference, status);
   $q.notify({
     type: "positive",
-    message: `Booking ${reference} → ${status}`
+    message: `Reservation ${reference} → ${status}`
   });
 }
 
@@ -577,7 +586,7 @@ function confirmAllPending() {
   const pending = myBookings.value.filter(b => b.status === "pending");
   if (!pending.length) return;
   $q.dialog({
-    title: "Confirm all pending bookings?",
+    title: "Confirm all pending reservations?",
     message: `This will confirm ${pending.length} reservation${pending.length === 1 ? "" : "s"}.`,
     cancel: true,
     persistent: true
@@ -587,7 +596,7 @@ function confirmAllPending() {
     );
     $q.notify({
       type: "positive",
-      message: `Confirmed ${pending.length} booking${pending.length === 1 ? "" : "s"}.`
+      message: `Confirmed ${pending.length} reservation${pending.length === 1 ? "" : "s"}.`
     });
   });
 }
@@ -669,7 +678,7 @@ function resetData() {
 }
 
 .dash__head-actions :deep(.q-btn) {
-  border-radius: 8px;
+  border-radius: 0;
 }
 
 .dash-btn-primary {
@@ -692,7 +701,7 @@ function resetData() {
 }
 
 .dash-search :deep(.q-field__control) {
-  border-radius: 10px;
+  border-radius: 0;
 }
 
 .dash-chips {
@@ -703,7 +712,7 @@ function resetData() {
 
 .dash-chip {
   border: 1px solid rgba(28, 36, 33, 0.1);
-  border-radius: 999px;
+  border-radius: 0;
   background: #fff;
   color: var(--gy-muted);
   padding: 0.38rem 0.85rem;
@@ -739,12 +748,17 @@ function resetData() {
   margin-bottom: 0.9rem;
   background: #fff8ef;
   border: 1px solid rgba(176, 141, 87, 0.3);
-  border-radius: 12px;
+  border-radius: 0;
+  color: var(--gy-ink);
+}
+
+.dash-alert strong {
+  color: var(--gy-ink);
 }
 
 .dash-alert p {
   margin: 0.2rem 0 0;
-  color: var(--gy-muted);
+  color: var(--gy-ink);
   font-size: 0.88rem;
 }
 
@@ -752,6 +766,15 @@ function resetData() {
   display: flex;
   flex-wrap: wrap;
   gap: 0.25rem;
+}
+
+.dash-alert__btn {
+  background: var(--gy-ink) !important;
+  color: #fff !important;
+}
+
+.dash-alert__link {
+  color: var(--gy-ink) !important;
 }
 
 .dash-stats {
@@ -768,7 +791,7 @@ function resetData() {
   padding: 0.9rem 0.95rem;
   background: #fff;
   border: 1px solid rgba(28, 36, 33, 0.07);
-  border-radius: 14px;
+  border-radius: 0;
   transition:
     border-color 0.3s ease,
     transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
@@ -788,7 +811,7 @@ function resetData() {
   place-items: center;
   background: rgba(84, 88, 89, 0.1);
   color: var(--gy-forest);
-  border-radius: 10px;
+  border-radius: 0;
   flex-shrink: 0;
 }
 
@@ -838,7 +861,7 @@ function resetData() {
   padding: 0.75rem 0.85rem;
   background: #fff;
   border: 1px solid rgba(28, 36, 33, 0.07);
-  border-radius: 12px;
+  border-radius: 0;
   font-size: 0.86rem;
   color: var(--gy-ink);
   transition:
@@ -873,7 +896,7 @@ function resetData() {
 .dash-panel {
   background: #fff;
   border: 1px solid rgba(28, 36, 33, 0.07);
-  border-radius: 14px;
+  border-radius: 0;
   padding: 0.9rem 1rem 0.55rem;
   transition:
     box-shadow 0.35s ease,
@@ -914,7 +937,7 @@ function resetData() {
   padding: 0.75rem 0.4rem;
   margin: 0 -0.4rem;
   border-top: 1px solid rgba(28, 36, 33, 0.06);
-  border-radius: 8px;
+  border-radius: 0;
   transition: background 0.22s ease;
 }
 
@@ -968,7 +991,7 @@ function resetData() {
   letter-spacing: 0.04em;
   text-transform: capitalize;
   background: rgba(28, 36, 33, 0.06);
-  border-radius: 999px;
+  border-radius: 0;
 }
 
 .dash-status--pending,

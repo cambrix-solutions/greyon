@@ -1,7 +1,9 @@
 <template>
   <q-page class="stay-detail">
     <SeoHead
-      :title="stay ? `${stay.reference} | Greyon` : 'Booking details | Greyon'"
+      :title="
+        stay ? `${stay.reference} | Greyon` : 'Reservation details | Greyon'
+      "
       description="Your Greyon reservation details."
     />
 

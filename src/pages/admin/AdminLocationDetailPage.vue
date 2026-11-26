@@ -74,10 +74,6 @@
             <strong>{{ totalRooms }}</strong>
             <span>Room types</span>
           </div>
-          <div class="stat">
-            <strong>{{ hotelCap - hotels.length }}</strong>
-            <span>Slots left</span>
-          </div>
         </div>
       </div>
     </section>
@@ -88,7 +84,7 @@
           <p class="prop-board__eyebrow">Properties</p>
           <h2 class="prop-board__title">
             Hotels
-            <em>{{ hotels.length }}/{{ hotelCap }}</em>
+            <em>{{ hotels.length }}</em>
           </h2>
         </div>
         <span v-if="auth.canAction('hotels', 'create')" class="prop-board__add">
@@ -98,16 +94,8 @@
             color="primary"
             icon="add"
             label="Add hotel"
-            :disable="hotels.length >= hotelCap"
             @click="openCreateHotel"
           />
-          <q-tooltip
-            v-if="hotels.length >= hotelCap"
-            anchor="top middle"
-            self="bottom middle"
-          >
-            Hotel limit reached for this destination ({{ hotelCap }} max)
-          </q-tooltip>
         </span>
       </header>
 
@@ -264,16 +252,8 @@
             color="primary"
             icon="add"
             label="Add hotel"
-            :disable="hotels.length >= hotelCap"
             @click="openCreateHotel"
           />
-          <q-tooltip
-            v-if="hotels.length >= hotelCap"
-            anchor="top middle"
-            self="bottom middle"
-          >
-            Hotel limit reached for this destination ({{ hotelCap }} max)
-          </q-tooltip>
         </span>
       </div>
     </section>
@@ -530,12 +510,15 @@
 
     <!-- Room dialog -->
     <AdminDialog
-      v-model="roomDialog"
+      :model-value="roomDialog"
       size="xl"
       icon="bed"
       eyebrow="Room"
       :title="roomEditing ? 'Edit room' : 'Add room'"
       subtitle="Room type under the selected hotel."
+      no-refocus
+      allow-focus-outside
+      @update:model-value="onRoomDialogUpdate"
     >
       <AdminFormSection title="Essentials" :columns="2">
         <q-input v-model="roomForm.name" label="Room name" outlined dense />
@@ -565,14 +548,14 @@
         />
       </AdminFormSection>
       <AdminFormSection
-        title="360° photo"
-        hint="Optional equirectangular photo. Guests can look around the room when this is set."
+        title="360° photos"
+        hint="Optional. Add several, choose which are published, and set the order guests see them in."
       >
-        <AdminPanoramaField
+        <AdminPanoramaList
           v-if="roomDialog"
-          :key="`${roomEditing ?? 'new'}-${roomDialog}`"
-          :existing-url="roomPanoramaExisting"
-          @change="onRoomPanoramaChange"
+          :key="roomPanoSession"
+          ref="roomPanoList"
+          :room-id="roomEditing"
         />
       </AdminFormSection>
       <AdminFormSection title="Details">
@@ -619,7 +602,7 @@
         />
       </AdminFormSection>
       <template #actions>
-        <q-btn flat no-caps label="Cancel" v-close-popup />
+        <q-btn flat no-caps label="Cancel" @click="requestCloseRoom" />
         <q-btn
           v-if="
             roomEditing
@@ -629,7 +612,9 @@
           color="primary"
           unelevated
           no-caps
-          :label="roomEditing ? 'Save room' : 'Create room'"
+          :loading="roomSaving"
+          :disable="roomSaving"
+          :label="roomEditing ? 'Save changes' : 'Create room'"
           @click="saveRoom"
         />
       </template>
@@ -653,7 +638,7 @@ import AdminFormSection from "@/components/admin/AdminFormSection.vue";
 import AdminPageHeader from "@/components/admin/AdminPageHeader.vue";
 import AmenitiesEditor from "@/components/admin/AmenitiesEditor.vue";
 import CatalogChipSelect from "@/components/admin/CatalogChipSelect.vue";
-import AdminPanoramaField from "@/components/admin/AdminPanoramaField.vue";
+import AdminPanoramaList from "@/components/admin/AdminPanoramaList.vue";
 import GalleryEditor from "@/components/admin/GalleryEditor.vue";
 import ImageDropField from "@/components/admin/ImageDropField.vue";
 import LandmarksEditor from "@/components/admin/LandmarksEditor.vue";
@@ -665,7 +650,6 @@ import {
   type CatalogService
 } from "@/services/engine/adminCatalogEntities";
 import { useAuthStore } from "@/stores/auth-store";
-import { RoomPanoramaUploadError } from "@/services/engine/adminCatalog";
 import { useCmsStore } from "@/stores/cms-store";
 import type {
   ContentStatus,
@@ -682,7 +666,6 @@ const $q = useQuasar();
 const route = useRoute();
 const router = useRouter();
 
-const hotelCap = 3;
 const expandedHotelId = ref<string | null>(null);
 
 const locationId = computed(() => String(route.params.id || ""));
@@ -929,13 +912,6 @@ function blankHotel() {
 }
 
 function openCreateHotel() {
-  if (hotels.value.length >= hotelCap) {
-    $q.notify({
-      type: "warning",
-      message: `Hotel limit reached for this destination (${hotelCap} max).`
-    });
-    return;
-  }
   hotelEditing.value = null;
   blankHotel();
   void loadCatalogOptions();
@@ -1071,9 +1047,14 @@ const roomDialog = ref(false);
 const roomEditing = ref<string | null>(null);
 const roomImages = ref<string[]>([]);
 const roomAmenities = ref<string[]>([]);
-const roomPanoramaFile = ref<File | null>(null);
-const roomRemovePanorama = ref(false);
-const roomPanoramaExisting = ref<string | null>(null);
+const roomSaving = ref(false);
+const roomPanoSession = ref(0);
+const roomPanoList = ref<{
+  commit: (roomId: string) => Promise<void>;
+  discard: () => Promise<void>;
+  isDirty: () => boolean;
+  isBusy: () => boolean;
+} | null>(null);
 const roomForm = reactive({
   hotelId: "",
   name: "",
@@ -1106,9 +1087,7 @@ function openCreateRoom(hotelId: string) {
   roomForm.status = "draft";
   roomImages.value = [];
   roomAmenities.value = [];
-  roomPanoramaFile.value = null;
-  roomRemovePanorama.value = false;
-  roomPanoramaExisting.value = null;
+  roomPanoSession.value += 1;
   roomDialog.value = true;
 }
 
@@ -1126,15 +1105,55 @@ function openEditRoom(room: RoomType) {
   roomForm.status = room.status;
   roomImages.value = [...room.images];
   roomAmenities.value = [...room.amenities];
-  roomPanoramaFile.value = null;
-  roomRemovePanorama.value = false;
-  roomPanoramaExisting.value = room.panoramaUrl;
+  roomPanoSession.value += 1;
   roomDialog.value = true;
 }
 
-function onRoomPanoramaChange(payload: { file: File | null; clear: boolean }) {
-  roomPanoramaFile.value = payload.file;
-  roomRemovePanorama.value = payload.clear && !payload.file;
+function onRoomDialogUpdate(open: boolean) {
+  if (open) {
+    roomDialog.value = true;
+    return;
+  }
+  requestCloseRoom();
+}
+
+function requestCloseRoom() {
+  const list = roomPanoList.value;
+  if (list?.isBusy()) {
+    $q.dialog({
+      title: "Upload in progress",
+      message:
+        "A 360° photo is still uploading. Wait for it to finish, or leave and discard unsaved photos.",
+      cancel: { label: "Stay", flat: true },
+      ok: { label: "Leave anyway", color: "negative", unelevated: true },
+      persistent: true
+    }).onOk(() => {
+      void closeRoomDialog();
+    });
+    return;
+  }
+  if (list?.isDirty()) {
+    $q.dialog({
+      title: "Unsaved changes",
+      message:
+        "You have unsaved 360° photo changes. Leave without saving? Uploaded photos that were not saved will be removed.",
+      cancel: { label: "Stay", flat: true },
+      ok: { label: "Discard changes", color: "negative", unelevated: true },
+      persistent: true
+    }).onOk(() => {
+      void closeRoomDialog();
+    });
+    return;
+  }
+  void closeRoomDialog();
+}
+
+async function closeRoomDialog() {
+  try {
+    await roomPanoList.value?.discard();
+  } finally {
+    roomDialog.value = false;
+  }
 }
 
 function saveRoom() {
@@ -1142,30 +1161,27 @@ function saveRoom() {
     $q.notify({ type: "negative", message: "Name and hotel are required." });
     return;
   }
+  if (roomSaving.value) return;
   void (async () => {
+    roomSaving.value = true;
     try {
-      await cms.upsertRoom({
+      const saved = await cms.upsertRoom({
         ...(roomEditing.value ? { id: roomEditing.value } : {}),
         ...roomForm,
         images: roomImages.value.filter(Boolean),
-        amenities: roomAmenities.value,
-        ...(roomPanoramaFile.value
-          ? { panoramaFile: roomPanoramaFile.value }
-          : {}),
-        ...(roomRemovePanorama.value && !roomPanoramaFile.value
-          ? { removePanorama: true }
-          : {})
+        amenities: roomAmenities.value
       });
+      if (!roomEditing.value) roomEditing.value = saved.id;
+      await roomPanoList.value?.commit(saved.id);
       roomDialog.value = false;
       $q.notify({ type: "positive", message: "Room saved." });
     } catch (e) {
-      if (e instanceof RoomPanoramaUploadError && !roomEditing.value) {
-        roomEditing.value = e.room.id;
-      }
       $q.notify({
         type: "negative",
         message: e instanceof Error ? e.message : "Save failed."
       });
+    } finally {
+      roomSaving.value = false;
     }
   })();
 }
@@ -1212,7 +1228,7 @@ function removeRoom(id: string) {
   margin-bottom: 1.15rem;
   background: #fff;
   border: 1px solid rgba(28, 36, 33, 0.08);
-  border-radius: 16px;
+  border-radius: 0;
   overflow: hidden;
   box-shadow: 0 10px 28px rgba(28, 36, 33, 0.04);
 }
@@ -1278,7 +1294,7 @@ function removeRoom(id: string) {
 
 .dest-overview__tags li {
   padding: 0.2rem 0.6rem;
-  border-radius: 999px;
+  border-radius: 0;
   background: rgba(84, 88, 89, 0.12);
   color: var(--gy-gold-deep);
   font-size: 0.74rem;
@@ -1294,7 +1310,7 @@ function removeRoom(id: string) {
 
 .stat {
   padding: 0.65rem 0.7rem;
-  border-radius: 12px;
+  border-radius: 0;
   background: #f7f5f1;
   border: 1px solid rgba(28, 36, 33, 0.05);
 }
@@ -1318,7 +1334,7 @@ function removeRoom(id: string) {
   display: inline-flex;
   align-items: center;
   padding: 0.15rem 0.5rem;
-  border-radius: 999px;
+  border-radius: 0;
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.05em;
@@ -1345,7 +1361,7 @@ function removeRoom(id: string) {
 .feat-pill {
   display: inline-flex;
   padding: 0.15rem 0.5rem;
-  border-radius: 999px;
+  border-radius: 0;
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -1357,7 +1373,7 @@ function removeRoom(id: string) {
 .prop-board {
   background: #fff;
   border: 1px solid rgba(28, 36, 33, 0.08);
-  border-radius: 16px;
+  border-radius: 0;
   overflow: hidden;
   box-shadow: 0 10px 28px rgba(28, 36, 33, 0.04);
 }
@@ -1437,7 +1453,7 @@ function removeRoom(id: string) {
 .prop-hotel__thumb {
   width: 56px;
   height: 56px;
-  border-radius: 12px;
+  border-radius: 0;
   overflow: hidden;
   background: #ebe6dc;
   display: grid;
@@ -1488,7 +1504,7 @@ function removeRoom(id: string) {
 .prop-rooms {
   margin: 0 1.15rem 1rem;
   border: 1px solid rgba(28, 36, 33, 0.08);
-  border-radius: 12px;
+  border-radius: 0;
   background: #fff;
   overflow: hidden;
 }
@@ -1519,7 +1535,7 @@ function removeRoom(id: string) {
 .prop-room__thumb {
   width: 40px;
   height: 40px;
-  border-radius: 9px;
+  border-radius: 0;
   overflow: hidden;
   background: #ebe6dc;
   display: grid;
@@ -1576,7 +1592,7 @@ function removeRoom(id: string) {
 .prop-empty__icon {
   width: 3.25rem;
   height: 3.25rem;
-  border-radius: 14px;
+  border-radius: 0;
   display: grid;
   place-items: center;
   background: rgba(84, 88, 89, 0.12);
@@ -1603,7 +1619,7 @@ function removeRoom(id: string) {
   min-height: 40px;
   padding: 0.35rem 0.65rem;
   background: #faf9f7;
-  border-radius: 12px;
+  border-radius: 0;
   border: 1px solid rgba(28, 36, 33, 0.06);
 }
 

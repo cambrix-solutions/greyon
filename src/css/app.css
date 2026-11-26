@@ -13,8 +13,8 @@
   --gy-taupe: #a89278;
   --gy-beige: #e4d5c0;
   --gy-shadow: 0 20px 50px rgba(69, 76, 75, 0.09);
-  --gy-radius-card: 16px;
-  --gy-radius-media: 12px;
+  --gy-radius-card: 0;
+  --gy-radius-media: 0;
   --font-display: "Montserrat", sans-serif;
   --font-body: "Lora", serif;
   /* Page titles, section titles, then card titles. */
@@ -30,6 +30,19 @@
   --gy-text-4xl: clamp(1.75rem, 1.4rem + 1vw, 2.25rem);
   --gy-text-display: clamp(2.25rem, 1.6rem + 2vw, 3.25rem);
   --gy-text-stat: 1.2rem;
+}
+
+/* Square corners (client feedback 12 Nov 2026). Circles stay on avatars, map pins, and dots. */
+.q-card,
+.q-banner,
+.q-menu,
+.q-field--outlined .q-field__control,
+.q-img,
+.q-carousel,
+.q-chip,
+.q-badge,
+.q-btn:not(.q-btn--round):not(.q-btn--fab) {
+  border-radius: 0;
 }
 
 html,
@@ -98,7 +111,7 @@ a {
   min-height: 3.05rem;
   padding: 0.85rem 1.65rem;
   border: 1px solid transparent;
-  border-radius: 8px;
+  border-radius: 0;
   background: var(--gy-forest);
   color: var(--gy-white);
   font-family: var(--font-display);
@@ -177,7 +190,7 @@ a {
 }
 
 .gy-card {
-  border-radius: var(--gy-radius-card);
+  border-radius: 0;
   padding: 0.75rem;
   background: var(--gy-white);
   box-shadow:
@@ -186,7 +199,7 @@ a {
 }
 
 .gy-card .gy-card-media {
-  border-radius: var(--gy-radius-media);
+  border-radius: 0;
 }
 
 .gy-card-media {
@@ -250,7 +263,7 @@ img.gy-img--broken {
   -webkit-overflow-scrolling: touch;
   margin-bottom: 1rem;
   border: 1px solid rgba(143, 115, 64, 0.16);
-  border-radius: 14px;
+  border-radius: 0;
   background: #fff;
   /* Avoid nested scrollbars: this is the only overflow-x owner */
   overscroll-behavior-x: contain;
@@ -284,7 +297,7 @@ img.gy-img--broken {
 
 .admin-data__table {
   border: 1px solid rgba(143, 115, 64, 0.16);
-  border-radius: 14px;
+  border-radius: 0;
   background: #fff;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
@@ -309,7 +322,7 @@ img.gy-img--broken {
   padding: 0.95rem 1rem;
   background: #fff;
   border: 1px solid rgba(28, 36, 33, 0.1);
-  border-radius: 14px;
+  border-radius: 0;
   min-width: 0;
 }
 
@@ -386,7 +399,7 @@ img.gy-img--broken {
   color: var(--gy-muted);
   background: #fff;
   border: 1px dashed rgba(28, 36, 33, 0.15);
-  border-radius: 14px;
+  border-radius: 0;
 }
 
 @media (max-width: 899px) {
@@ -411,21 +424,21 @@ img.gy-img--broken {
 
 /* Soften Quasar chrome inside admin */
 .admin-layout .q-btn {
-  border-radius: 8px;
+  border-radius: 0;
 }
 
 .admin-layout .q-field--outlined .q-field__control {
-  border-radius: 10px;
+  border-radius: 0;
 }
 
 .admin-layout .q-card {
-  border-radius: 14px;
+  border-radius: 0;
   box-shadow: none;
   border: 1px solid rgba(28, 36, 33, 0.07);
 }
 
 .admin-layout .q-dialog .q-card {
-  border-radius: 18px;
+  border-radius: 0;
 }
 
 .admin-layout .q-dialog__backdrop {
@@ -439,7 +452,7 @@ img.gy-img--broken {
 }
 
 .admin-layout .q-banner {
-  border-radius: 12px;
+  border-radius: 0;
 }
 
 .admin-layout .q-markup-table thead tr {
@@ -622,7 +635,7 @@ img.gy-img--broken {
 /* City selector (Kampot / Phnom Penh / Sihanoukville) shared by every select. */
 .gy-select.q-field .q-field__control {
   min-height: 3rem;
-  border-radius: 12px !important;
+  border-radius: 0 !important;
   background: var(--gy-white);
 }
 
@@ -653,7 +666,7 @@ img.gy-img--broken {
 .gy-select.q-field.q-field--outlined .q-field__control:after {
   border-color: var(--gy-forest) !important;
   border-width: 1px !important;
-  border-radius: 12px;
+  border-radius: 0;
 }
 
 .gy-select.q-field.q-field--borderless .q-field__control {
@@ -670,7 +683,7 @@ img.gy-img--broken {
   padding: 0.35rem;
   background: var(--gy-white);
   border: 1px solid var(--gy-stone);
-  border-radius: 14px;
+  border-radius: 0;
   box-shadow: var(--gy-shadow);
   color: var(--gy-forest);
 }
@@ -679,7 +692,7 @@ img.gy-img--broken {
   min-height: 2.75rem;
   margin: 0.12rem 0;
   padding-inline: 0.9rem;
-  border-radius: 999px;
+  border-radius: 0;
   font-family: var(--font-body);
   color: var(--gy-forest);
   letter-spacing: 0;

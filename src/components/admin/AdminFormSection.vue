@@ -48,7 +48,7 @@ withDefaults(
   padding: 1rem 1.05rem 1.1rem;
   background: #fff;
   border: 1px solid rgba(28, 36, 33, 0.07);
-  border-radius: 14px;
+  border-radius: 0;
 }
 
 .admin-form-section__head {

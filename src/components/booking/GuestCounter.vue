@@ -91,7 +91,7 @@ function set(value: number) {
   width: 2.15rem;
   height: 2.15rem;
   border: 1px solid rgba(69, 76, 75, 0.28);
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--gy-white);
   color: var(--gy-forest);
   cursor: pointer;

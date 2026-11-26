@@ -209,12 +209,15 @@
     </div>
 
     <AdminDialog
-      v-model="dialog"
+      :model-value="dialog"
       size="xl"
       icon="bed"
       eyebrow="Properties"
       :title="editing ? 'Edit room' : 'Add room'"
       subtitle="Room types sit under a hotel and drive how many rooms you can sell, prices, and booking."
+      no-refocus
+      allow-focus-outside
+      @update:model-value="onDialogUpdate"
     >
       <template #notice>
         Pick the <strong>parent hotel</strong> — rooms never link straight to a
@@ -297,18 +300,18 @@
         />
       </AdminFormSection>
       <AdminFormSection
-        title="360° photo"
-        hint="Optional equirectangular photo. Guests can look around the room when this is set."
+        title="360° photos"
+        hint="Optional. Add several, choose which are published, and set the order guests see them in."
       >
-        <AdminPanoramaField
+        <AdminPanoramaList
           v-if="dialog"
-          :key="`${editing ?? 'new'}-${dialog}`"
-          :existing-url="panoramaExisting"
-          @change="onPanoramaChange"
+          :key="panoSession"
+          ref="panoList"
+          :room-id="editing"
         />
       </AdminFormSection>
       <template #actions>
-        <q-btn flat no-caps label="Cancel" v-close-popup />
+        <q-btn flat no-caps label="Cancel" @click="requestClose" />
         <q-btn
           v-if="
             editing
@@ -318,6 +321,8 @@
           color="primary"
           unelevated
           no-caps
+          :loading="saving"
+          :disable="saving"
           :label="editing ? 'Save changes' : 'Create room'"
           @click="save"
         />
@@ -335,11 +340,10 @@ import AdminDialog from "@/components/admin/AdminDialog.vue";
 import AdminEntityActions from "@/components/admin/AdminEntityActions.vue";
 import AdminFormSection from "@/components/admin/AdminFormSection.vue";
 import AdminPageHeader from "@/components/admin/AdminPageHeader.vue";
-import AdminPanoramaField from "@/components/admin/AdminPanoramaField.vue";
+import AdminPanoramaList from "@/components/admin/AdminPanoramaList.vue";
 import AmenitiesEditor from "@/components/admin/AmenitiesEditor.vue";
 import GalleryEditor from "@/components/admin/GalleryEditor.vue";
 import { useAuthStore } from "@/stores/auth-store";
-import { RoomPanoramaUploadError } from "@/services/engine/adminCatalog";
 import { useCmsStore } from "@/stores/cms-store";
 import type { ContentStatus, RoomType } from "@/types/greyon";
 import { uploadFolder } from "@/utils/uploadFolder";
@@ -353,9 +357,14 @@ const dialog = ref(false);
 const editing = ref<string | null>(null);
 const images = ref<string[]>([]);
 const amenities = ref<string[]>([]);
-const panoramaFile = ref<File | null>(null);
-const removePanorama = ref(false);
-const panoramaExisting = ref<string | null>(null);
+const saving = ref(false);
+const panoSession = ref(0);
+const panoList = ref<{
+  commit: (roomId: string) => Promise<void>;
+  discard: () => Promise<void>;
+  isDirty: () => boolean;
+  isBusy: () => boolean;
+} | null>(null);
 const query = ref("");
 const hotelFilter = ref("all");
 const statusFilter = ref("all");
@@ -440,12 +449,14 @@ const grouped = computed(() => {
 function openCreate() {
   editing.value = null;
   resetForm();
+  panoSession.value += 1;
   dialog.value = true;
 }
 
 function openCreateIn(hotelId: string) {
   editing.value = null;
   resetForm(hotelId);
+  panoSession.value += 1;
   dialog.value = true;
 }
 
@@ -466,14 +477,6 @@ function resetForm(hotelId?: string) {
   form.status = "draft";
   images.value = [];
   amenities.value = [];
-  panoramaFile.value = null;
-  removePanorama.value = false;
-  panoramaExisting.value = null;
-}
-
-function onPanoramaChange(payload: { file: File | null; clear: boolean }) {
-  panoramaFile.value = payload.file;
-  removePanorama.value = payload.clear && !payload.file;
 }
 
 function openEdit(room: RoomType) {
@@ -490,10 +493,55 @@ function openEdit(room: RoomType) {
   form.status = room.status;
   images.value = [...room.images];
   amenities.value = [...room.amenities];
-  panoramaFile.value = null;
-  removePanorama.value = false;
-  panoramaExisting.value = room.panoramaUrl;
+  panoSession.value += 1;
   dialog.value = true;
+}
+
+function onDialogUpdate(open: boolean) {
+  if (open) {
+    dialog.value = true;
+    return;
+  }
+  requestClose();
+}
+
+function requestClose() {
+  const list = panoList.value;
+  if (list?.isBusy()) {
+    $q.dialog({
+      title: "Upload in progress",
+      message:
+        "A 360° photo is still uploading. Wait for it to finish, or leave and discard unsaved photos.",
+      cancel: { label: "Stay", flat: true },
+      ok: { label: "Leave anyway", color: "negative", unelevated: true },
+      persistent: true
+    }).onOk(() => {
+      void closeDialog();
+    });
+    return;
+  }
+  if (list?.isDirty()) {
+    $q.dialog({
+      title: "Unsaved changes",
+      message:
+        "You have unsaved 360° photo changes. Leave without saving? Uploaded photos that were not saved will be removed.",
+      cancel: { label: "Stay", flat: true },
+      ok: { label: "Discard changes", color: "negative", unelevated: true },
+      persistent: true
+    }).onOk(() => {
+      void closeDialog();
+    });
+    return;
+  }
+  void closeDialog();
+}
+
+async function closeDialog() {
+  try {
+    await panoList.value?.discard();
+  } finally {
+    dialog.value = false;
+  }
 }
 
 function save() {
@@ -501,28 +549,27 @@ function save() {
     $q.notify({ type: "negative", message: "Name and hotel are required." });
     return;
   }
+  if (saving.value) return;
   void (async () => {
+    saving.value = true;
     try {
-      await cms.upsertRoom({
+      const saved = await cms.upsertRoom({
         ...(editing.value ? { id: editing.value } : {}),
         ...form,
         images: images.value.filter(Boolean),
-        amenities: amenities.value,
-        ...(panoramaFile.value ? { panoramaFile: panoramaFile.value } : {}),
-        ...(removePanorama.value && !panoramaFile.value
-          ? { removePanorama: true }
-          : {})
+        amenities: amenities.value
       });
+      if (!editing.value) editing.value = saved.id;
+      await panoList.value?.commit(saved.id);
       dialog.value = false;
       $q.notify({ type: "positive", message: "Room saved." });
     } catch (e) {
-      if (e instanceof RoomPanoramaUploadError && !editing.value) {
-        editing.value = e.room.id;
-      }
       $q.notify({
         type: "negative",
         message: e instanceof Error ? e.message : "Save failed."
       });
+    } finally {
+      saving.value = false;
     }
   })();
 }
@@ -599,7 +646,7 @@ watch([hotelFilter, statusFilter, query], () => {
   padding: 0.75rem 1rem;
   background: #fff;
   border: 1px solid rgba(84, 88, 89, 0.18);
-  border-radius: 12px;
+  border-radius: 0;
   font-size: 0.84rem;
   color: var(--gy-muted);
 }
@@ -621,7 +668,7 @@ watch([hotelFilter, statusFilter, query], () => {
 .room-group {
   background: #fff;
   border: 1px solid rgba(28, 36, 33, 0.08);
-  border-radius: 16px;
+  border-radius: 0;
   overflow: hidden;
   box-shadow: 0 1px 0 rgba(28, 36, 33, 0.03);
 }
@@ -679,7 +726,7 @@ watch([hotelFilter, statusFilter, query], () => {
   align-items: center;
   padding: 0.85rem 0.9rem;
   border: 1px solid rgba(28, 36, 33, 0.07);
-  border-radius: 14px;
+  border-radius: 0;
   background: #fff;
   transition: border-color 0.15s ease;
 }
@@ -692,7 +739,7 @@ watch([hotelFilter, statusFilter, query], () => {
 .room-card__thumb {
   width: 5rem;
   height: 4rem;
-  border-radius: 10px;
+  border-radius: 0;
   flex-shrink: 0;
 }
 
@@ -739,7 +786,7 @@ watch([hotelFilter, statusFilter, query], () => {
   display: inline-flex;
   align-items: center;
   padding: 0.1rem 0.45rem;
-  border-radius: 999px;
+  border-radius: 0;
   font-size: 0.68rem;
   font-weight: 600;
   text-transform: lowercase;
@@ -792,7 +839,7 @@ watch([hotelFilter, statusFilter, query], () => {
 
 .room-card__chips li {
   padding: 0.18rem 0.55rem;
-  border-radius: 999px;
+  border-radius: 0;
   background: rgba(28, 36, 33, 0.05);
   color: var(--gy-ink);
   font-size: 0.74rem;
@@ -858,7 +905,7 @@ watch([hotelFilter, statusFilter, query], () => {
   padding: 2rem 1rem;
   color: var(--gy-muted);
   background: #fff;
-  border-radius: 14px;
+  border-radius: 0;
   border: 1px dashed rgba(28, 36, 33, 0.15);
 }
 

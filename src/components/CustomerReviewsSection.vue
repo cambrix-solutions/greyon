@@ -335,7 +335,7 @@ onUnmounted(() => {
   width: 44px;
   height: 44px;
   border: 1px solid rgba(69, 76, 75, 0.2);
-  border-radius: 999px;
+  border-radius: 0;
   background: transparent;
   color: var(--gy-forest);
   cursor: pointer;
@@ -365,7 +365,7 @@ onUnmounted(() => {
   height: 0.55rem;
   padding: 0;
   border: 0;
-  border-radius: 999px;
+  border-radius: 0;
   background: rgba(69, 76, 75, 0.25);
   cursor: pointer;
   transition:

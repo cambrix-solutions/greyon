@@ -195,7 +195,7 @@ const metaLine = computed(() => {
 .hotel-card--live {
   position: relative;
   isolation: isolate;
-  border-radius: 22px;
+  border-radius: 0;
   background: rgba(255, 255, 255, 0.92);
   box-shadow: 0 22px 50px rgba(28, 24, 18, 0.08);
 }

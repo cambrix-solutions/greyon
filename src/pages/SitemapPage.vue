@@ -148,7 +148,7 @@ const groups = computed<SitemapGroup[]>(() => {
 
   const booking: SitemapLink[] = [];
   if (bookingOn) {
-    booking.push({ label: "Booking", path: "/booking" });
+    booking.push({ label: "Reservation", path: "/booking" });
   }
   booking.push(
     { label: "Sign in", path: "/sign-in" },
@@ -166,7 +166,7 @@ const groups = computed<SitemapGroup[]>(() => {
     { label: "Terms", path: "/terms" }
   ];
   if (bookingOn) {
-    legal.push({ label: "Booking terms", path: "/booking-terms" });
+    legal.push({ label: "Reservation terms", path: "/booking-terms" });
   }
 
   return [
@@ -191,7 +191,7 @@ const groups = computed<SitemapGroup[]>(() => {
     },
     {
       id: "booking",
-      title: "Booking & account",
+      title: "Reservation & account",
       icon: "event_available",
       links: booking
     },
@@ -295,7 +295,7 @@ function download() {
 .canonical-row a:focus-visible {
   outline: 2px solid var(--gy-gold);
   outline-offset: 3px;
-  border-radius: 4px;
+  border-radius: 0;
 }
 
 .hero-actions {
@@ -312,7 +312,7 @@ function download() {
 .group-card {
   height: 100%;
   padding: 1.15rem 1rem 0.85rem;
-  border-radius: 22px;
+  border-radius: 0;
   background: #fff;
   border: 1px solid rgba(69, 76, 75, 0.08);
   box-shadow:
@@ -344,7 +344,7 @@ function download() {
   flex: 0 0 auto;
   width: 2.55rem;
   height: 2.55rem;
-  border-radius: 12px;
+  border-radius: 0;
   background: rgba(98, 112, 99, 0.12);
   color: var(--gy-forest);
 }
@@ -367,7 +367,7 @@ function download() {
   display: grid;
   gap: 0.08rem;
   padding: 0.55rem 0.65rem;
-  border-radius: 12px;
+  border-radius: 0;
   transition:
     background 0.2s ease,
     color 0.2s ease;
@@ -415,7 +415,7 @@ function download() {
   }
 
   .group-card {
-    border-radius: 18px;
+    border-radius: 0;
     padding: 1rem 0.85rem 0.75rem;
   }
 }

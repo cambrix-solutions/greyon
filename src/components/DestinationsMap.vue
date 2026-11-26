@@ -246,7 +246,7 @@ watch(
 .dest-map__chip {
   padding: 0.45rem 0.9rem;
   border: 1px solid rgba(69, 76, 75, 0.16);
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--gy-white);
   color: var(--gy-gold);
   font: inherit;
@@ -288,7 +288,7 @@ watch(
 .dest-map--canvas .dest-map__canvas {
   min-height: min(72vh, 680px);
   border: 0;
-  border-radius: 22px;
+  border-radius: 0;
 }
 
 .dest-map__error {

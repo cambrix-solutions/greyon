@@ -5,12 +5,8 @@
     :style="{ color: fill }"
     aria-hidden="true"
   >
-    <svg viewBox="0 0 1440 100" preserveAspectRatio="none">
-      <path
-        v-if="kind === 'curve'"
-        d="M0,52 C220,100 460,4 740,38 C1040,74 1220,8 1440,48 L1440,100 L0,100 Z"
-      />
-      <polygon v-else points="0,100 1440,0 1440,100" />
+    <svg viewBox="0 0 1440 40" preserveAspectRatio="none">
+      <rect x="0" y="0" width="1440" height="40" />
     </svg>
   </div>
 </template>
@@ -39,11 +35,12 @@ withDefaults(
 .section-divider svg {
   display: block;
   width: 100%;
-  height: clamp(2.75rem, 6vw, 5.25rem);
+  height: 1.25rem;
 }
 
 .section-divider path,
-.section-divider polygon {
+.section-divider polygon,
+.section-divider rect {
   fill: currentColor;
 }
 </style>

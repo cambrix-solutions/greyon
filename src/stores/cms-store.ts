@@ -2,6 +2,7 @@ import { defineStore, acceptHMRUpdate } from "pinia";
 import { computed, ref } from "vue";
 import { ApiError } from "@/helpers/api/createApiClient";
 import {
+  addRoomPanorama,
   createHotel,
   createLocation,
   createRatePlan,
@@ -12,6 +13,7 @@ import {
   destroyRatePlan,
   destroyRoomType,
   fetchAdminHotels,
+  fetchRoomPanoramas,
   fetchAdminLocations,
   fetchAdminRatePlans,
   fetchAdminRoomTypes,
@@ -92,9 +94,14 @@ import type {
   ProductPackage,
   RateCalendar,
   RatePlan,
+  RoomPanorama,
   RoomType,
   UserPackage
 } from "@/types/greyon";
+import {
+  panoramaUploadMessage,
+  type PanoramaProgress
+} from "@/utils/roomPanoramas";
 
 export type { MediaItem, SiteSettings };
 
@@ -725,10 +732,14 @@ export const useCmsStore = defineStore("cms", () => {
     amenities?: string[];
     baseInventory?: number;
     status?: ContentStatus;
-    /** New 360° file. Sent as multipart field `panorama`. */
-    panoramaFile?: File | null;
-    /** PATCH `remove_panorama=1`. Ignored when a new file is sent. */
-    removePanorama?: boolean;
+    /**
+     * 360° photos picked while creating a room. Uploaded in this order
+     * right after the room is created. Editing a room manages its photos
+     * live instead (AdminPanoramaList), so this is ignored when `id` is set.
+     */
+    stagedPanoramas?: { file: File; published: boolean }[];
+    /** Called before each staged photo is sent, and with null when done. */
+    onPanoramaProgress?: (progress: PanoramaProgress | null) => void;
   }) {
     const payload = omitUndefined({
       name: input.name,
@@ -745,26 +756,88 @@ export const useCmsStore = defineStore("cms", () => {
       baseInventory: input.baseInventory,
       status: input.status
     });
-    const file = input.panoramaFile instanceof File ? input.panoramaFile : null;
-    const write = {
-      ...payload,
-      ...(file ? { panoramaFile: file } : {}),
-      ...(input.removePanorama && !file ? { removePanorama: true } : {})
-    };
     try {
-      const saved = input.id
-        ? await updateRoomType(
-            input.id,
-            write as Parameters<typeof updateRoomType>[1]
-          )
-        : await createRoomType(write as Parameters<typeof createRoomType>[0]);
-      return patchList(roomTypes, saved);
+      if (input.id) {
+        const saved = await updateRoomType(
+          input.id,
+          payload as Parameters<typeof updateRoomType>[1]
+        );
+        return patchList(roomTypes, saved);
+      }
+      const created = await createRoomType(
+        payload as Parameters<typeof createRoomType>[0]
+      );
+      patchList(roomTypes, created);
+      return await uploadStagedPanoramas(
+        created,
+        input.stagedPanoramas ?? [],
+        input.onPanoramaProgress
+      );
     } catch (error) {
       if (error instanceof RoomPanoramaUploadError) {
         patchList(roomTypes, error.room);
       }
       throw error;
     }
+  }
+
+  /**
+   * Upload the photos picked before the room existed: one request per
+   * photo, in order. A failed photo is noted and the rest still go up;
+   * the list is re-read at the end and a single error names every failure.
+   */
+  async function uploadStagedPanoramas(
+    room: RoomType,
+    staged: { file: File; published: boolean }[],
+    onProgress?: (progress: PanoramaProgress | null) => void
+  ) {
+    let current = room;
+    const failed: string[] = [];
+    try {
+      for (const [index, item] of staged.entries()) {
+        onProgress?.({
+          current: index + 1,
+          total: staged.length,
+          name: item.file.name
+        });
+        try {
+          const list = await addRoomPanorama(
+            current.id,
+            item.file,
+            item.published
+          );
+          current = withPanoramas(current, list);
+        } catch (error) {
+          failed.push(`${item.file.name}: ${panoramaUploadMessage(error)}`);
+        }
+      }
+    } finally {
+      onProgress?.(null);
+    }
+    if (staged.length) {
+      try {
+        current = withPanoramas(current, await fetchRoomPanoramas(current.id));
+      } catch {
+        // Keep what the uploads already returned.
+      }
+    }
+    if (failed.length) {
+      throw new RoomPanoramaUploadError(
+        `The room was saved, but ${failed.length} of ${staged.length} 360° photos did not upload. ${failed.join(" ")}`,
+        current
+      );
+    }
+    return patchList(roomTypes, current);
+  }
+  function withPanoramas(room: RoomType, list: RoomPanorama[]): RoomType {
+    const first = list.find(photo => photo.isPublished);
+    return { ...room, panoramas: list, panoramaUrl: first?.url ?? null };
+  }
+
+  /** Keep a room's 360° list in sync after the admin edits it live. */
+  function setRoomPanoramas(roomId: string, list: RoomPanorama[]) {
+    const room = roomTypes.value.find(r => r.id === roomId);
+    if (room) patchList(roomTypes, withPanoramas(room, list));
   }
 
   async function deleteRoom(id: string) {
@@ -1439,6 +1512,7 @@ export const useCmsStore = defineStore("cms", () => {
     upsertHotel,
     deleteHotel,
     upsertRoom,
+    setRoomPanoramas,
     deleteRoom,
     upsertRate,
     deleteRate,

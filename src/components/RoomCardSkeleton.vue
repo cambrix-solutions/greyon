@@ -37,7 +37,7 @@ withDefaults(
   display: grid;
   overflow: hidden;
   background: var(--gy-white);
-  border-radius: 16px;
+  border-radius: 0;
   box-shadow:
     0 1px 2px rgba(69, 76, 75, 0.05),
     0 12px 32px rgba(69, 76, 75, 0.08);
@@ -46,7 +46,7 @@ withDefaults(
 .room-skel__media {
   aspect-ratio: 16 / 10;
   background: var(--gy-sand);
-  border-radius: 16px 16px 0 0;
+  border-radius: 0;
 }
 
 .room-skel__body {
@@ -57,7 +57,7 @@ withDefaults(
 
 .room-skel__line {
   height: 0.9rem;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--gy-sand);
 }
 
@@ -80,14 +80,14 @@ withDefaults(
 .room-skel__facts span {
   width: 4.5rem;
   height: 0.85rem;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--gy-sand);
 }
 
 .room-skel__chips span {
   width: 5.5rem;
   height: 1.55rem;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--gy-sand);
 }
 
@@ -100,14 +100,14 @@ withDefaults(
 .room-skel__price {
   width: 5rem;
   height: 1.4rem;
-  border-radius: 8px;
+  border-radius: 0;
   background: var(--gy-sand);
 }
 
 .room-skel__btn {
   width: 100%;
   height: 2.6rem;
-  border-radius: 8px;
+  border-radius: 0;
   background: var(--gy-sand);
 }
 
@@ -141,7 +141,7 @@ withDefaults(
     height: 100%;
     min-height: 280px;
     max-height: 420px;
-    border-radius: 16px 0 0 16px;
+    border-radius: 0;
   }
 
   .room-skel--result .room-skel__media {

@@ -98,7 +98,7 @@
       <nav class="gy-footer__legal-row" aria-label="Site utilities">
         <router-link to="/map">Map</router-link>
         <router-link v-if="auth.featureEnabled('booking_public')" to="/booking"
-          >Booking</router-link
+          >Reservation</router-link
         >
         <router-link to="/sitemap">Sitemap</router-link>
       </nav>
@@ -180,7 +180,7 @@ const columns = computed<FooterColumn[]>(() => {
   const stayConnected: FooterLink[] = [
     { label: "Privacy policy", to: "/privacy" },
     { label: "Terms & conditions", to: "/terms" },
-    { label: "Booking terms", to: "/booking-terms" },
+    { label: "Reservation terms", to: "/booking-terms" },
     { label: "hello@greyon.com.kh", href: "mailto:hello@greyon.com.kh" },
     { label: "+855 23 000 000", href: "tel:+85523000000" }
   ];

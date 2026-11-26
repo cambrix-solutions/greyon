@@ -197,7 +197,7 @@ function onGoogle() {
   gap: 0.7rem;
   padding: 0.9rem 1.05rem;
   border: 1px solid rgba(18, 17, 16, 0.12);
-  border-radius: 10px;
+  border-radius: 0;
   background: #fff;
   color: var(--gy-forest);
   font: inherit;
@@ -267,7 +267,7 @@ function onGoogle() {
   width: 100%;
   padding: 0.88rem 1rem;
   border: 1px solid rgba(18, 17, 16, 0.12);
-  border-radius: 10px;
+  border-radius: 0;
   font: inherit;
   font-size: 1.02rem;
   font-weight: 400;
@@ -295,7 +295,7 @@ function onGoogle() {
 .auth-q-input :deep(.q-field__control) {
   min-height: 3.1rem;
   padding: 0 0.35rem 0 0.85rem;
-  border-radius: 10px;
+  border-radius: 0;
   background: var(--gy-sand);
   border-color: rgba(18, 17, 16, 0.12);
   transition:
@@ -340,7 +340,7 @@ function onGoogle() {
   margin: 0;
   padding: 0;
   border: none;
-  border-radius: 8px;
+  border-radius: 0;
   background: transparent;
   color: var(--gy-forest);
   cursor: pointer;
@@ -371,7 +371,7 @@ function onGoogle() {
 .auth-card__submit {
   width: 100%;
   margin-top: 0.45rem;
-  border-radius: 10px;
+  border-radius: 0;
   padding-top: 0.9rem;
   padding-bottom: 0.9rem;
   transition: transform 0.2s ease;

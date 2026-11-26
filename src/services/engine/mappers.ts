@@ -17,6 +17,8 @@ import type {
   ProductPackage,
   RateCalendar,
   RatePlan,
+  RoomPanorama,
+  RoomPanoramaHotspot,
   RoomType
 } from "@/types/greyon";
 import { slugify } from "@/utils/slugify";
@@ -64,6 +66,8 @@ export interface EngineAdminPackage {
     scope?: "none" | "location" | "hotel" | string;
   }>;
   featureKeys: string[];
+  /** Feature key → actions (view / create / edit / delete) this seat grants. */
+  featureActions?: Record<string, string[]>;
   /** Location sub-keys etc. — SPA treats these like featureKeys for can() */
   permissionKeys?: string[];
   locationIds: Array<number | string>;
@@ -132,6 +136,11 @@ export interface EngineHotelProduct {
 export interface EngineHotel {
   id: number | string;
   locationId: number | string;
+  location?: {
+    id: number | string;
+    name?: string | null;
+    slug?: string | null;
+  } | null;
   name: string;
   slug: string;
   shortDescription?: string | null;
@@ -201,6 +210,11 @@ export function mapEngineAdminToUser(admin: EngineAdmin): {
     }
     for (const key of pkg.featureKeys ?? []) featureSet.add(key);
     for (const key of pkg.permissionKeys ?? []) featureSet.add(key);
+    // Per-feature actions from custom roles, as `bookings.view`-style keys
+    // (see auth-store `canDo`).
+    for (const [key, actions] of Object.entries(pkg.featureActions ?? {})) {
+      for (const action of actions) featureSet.add(`${key}.${action}`);
+    }
     for (const id of pkg.locationIds ?? []) locationIds.add(String(id));
     for (const id of pkg.hotelIds ?? []) hotelIds.add(String(id));
   }
@@ -333,6 +347,7 @@ export function mapEngineHotel(row: EngineHotel): Hotel {
     name: row.name,
     slug: row.slug,
     locationId: String(row.locationId),
+    ...(row.location?.name ? { locationName: row.location.name } : {}),
     shortDescription: row.shortDescription ?? "",
     description: row.description ?? "",
     address: row.address ?? "",
@@ -384,6 +399,25 @@ export interface EngineRoomType {
    * GET /admin/room-types(/{id}).
    */
   panoramaUrl?: string | null;
+  /** Ordered 360° photos. Public: published only. Admin: all. */
+  panoramas?: EngineRoomPanorama[];
+}
+
+export interface EngineRoomPanoramaHotspot {
+  id: number | string;
+  yaw?: number | null;
+  pitch?: number | null;
+  label?: string | null;
+  targetPanoramaId?: number | string | null;
+}
+
+export interface EngineRoomPanorama {
+  id: number | string;
+  url?: string | null;
+  caption?: string | null;
+  isPublished?: boolean;
+  sortOrder?: number | null;
+  hotspots?: EngineRoomPanoramaHotspot[];
 }
 
 export interface EngineRatePlan {
@@ -406,6 +440,38 @@ function mapOptionalUrl(value: unknown): string | null {
   return trimmed || null;
 }
 
+export function mapEngineRoomPanoramaHotspot(
+  row: EngineRoomPanoramaHotspot
+): RoomPanoramaHotspot | null {
+  const target = row.targetPanoramaId;
+  if (target === undefined || target === null || target === "") return null;
+  const yaw = Number(row.yaw);
+  const pitch = Number(row.pitch);
+  if (!Number.isFinite(yaw) || !Number.isFinite(pitch)) return null;
+  const label = typeof row.label === "string" ? row.label.trim() : "";
+  return {
+    id: String(row.id),
+    yaw,
+    pitch,
+    label: label || null,
+    targetPanoramaId: String(target)
+  };
+}
+
+export function mapEngineRoomPanorama(row: EngineRoomPanorama): RoomPanorama {
+  const caption = typeof row.caption === "string" ? row.caption.trim() : "";
+  return {
+    id: String(row.id),
+    url: mapOptionalUrl(row.url) ?? "",
+    caption: caption || null,
+    isPublished: row.isPublished !== false,
+    sortOrder: Number(row.sortOrder ?? 0),
+    hotspots: (row.hotspots ?? [])
+      .map(mapEngineRoomPanoramaHotspot)
+      .filter((spot): spot is RoomPanoramaHotspot => Boolean(spot))
+  };
+}
+
 export function mapEngineRoomType(row: EngineRoomType): RoomType {
   const rawSlug = typeof row.slug === "string" ? row.slug.trim() : "";
   // Client-only fallback when the engine omits slug — do not invent server fields.
@@ -426,7 +492,14 @@ export function mapEngineRoomType(row: EngineRoomType): RoomType {
     amenities: row.amenities ?? [],
     baseInventory: row.baseInventory ?? 0,
     status: asStatus(row.status),
-    panoramaUrl: mapOptionalUrl(row.panoramaUrl)
+    panoramaUrl: mapOptionalUrl(row.panoramaUrl),
+    ...(Array.isArray(row.panoramas)
+      ? {
+          panoramas: row.panoramas
+            .map(mapEngineRoomPanorama)
+            .filter(photo => photo.url)
+        }
+      : {})
   };
 }
 
@@ -497,6 +570,8 @@ export interface EngineBooking {
   total?: number | null;
   status: string;
   source?: string;
+  paymentMethod?: string | null;
+  paidAt?: string | null;
   notes?: string | null;
   createdAt?: string | null;
 }
@@ -701,6 +776,11 @@ export function mapEngineBooking(row: EngineBooking): Booking {
     source: row.source === "admin" ? "admin" : "website",
     createdAt: row.createdAt ?? new Date().toISOString()
   };
+  const method = row.paymentMethod;
+  if (method === "cash" || method === "aba_qr" || method === "card") {
+    booking.paymentMethod = method;
+  }
+  if (row.paidAt) booking.paidAt = row.paidAt;
   if (row.notes) booking.notes = row.notes;
   if (row.hotel?.name) booking.hotelName = row.hotel.name;
   if (row.hotel?.slug) booking.hotelSlug = row.hotel.slug;

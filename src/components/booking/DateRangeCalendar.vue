@@ -325,7 +325,7 @@ defineExpose({ focusActive });
   width: 2.25rem;
   height: 2.25rem;
   border: 1px solid rgba(69, 76, 75, 0.14);
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--gy-white);
   color: var(--gy-forest);
   cursor: pointer;
@@ -428,7 +428,7 @@ defineExpose({ focusActive });
   width: 2.6rem;
   height: 2.6rem;
   border: 1px solid transparent;
-  border-radius: 999px;
+  border-radius: 0;
   background: transparent;
   color: inherit;
   font: inherit;
@@ -458,7 +458,7 @@ defineExpose({ focusActive });
   width: 4px;
   height: 4px;
   margin-left: -2px;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--gy-forest);
 }
 

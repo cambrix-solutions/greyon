@@ -46,7 +46,7 @@
           <button
             type="button"
             class="admin-bell"
-            aria-label="Booking notifications"
+            aria-label="Reservation notifications"
             aria-haspopup="menu"
           >
             <q-icon name="notifications" size="20px" />
@@ -64,7 +64,7 @@
               class="admin-notify-menu"
             >
               <div class="admin-notify-menu__head">
-                <p class="admin-notify-menu__title">Bookings</p>
+                <p class="admin-notify-menu__title">Reservations</p>
                 <button
                   v-if="notifications.unreadCount"
                   type="button"
@@ -85,7 +85,7 @@
                 v-else-if="!notifications.items.length"
                 class="admin-notify-menu__empty"
               >
-                No booking alerts yet
+                No reservation alerts yet
               </div>
               <q-list v-else dense class="admin-notify-menu__list">
                 <q-item
@@ -109,7 +109,7 @@
               <q-separator />
               <q-item clickable v-close-popup to="/admin/bookings">
                 <q-item-section class="text-primary"
-                  >View all bookings</q-item-section
+                  >View all reservations</q-item-section
                 >
               </q-item>
             </q-menu>
@@ -284,8 +284,27 @@
                 <q-item-label>{{ item.label }}</q-item-label>
               </q-item-section>
               <q-item-section v-if="item.badge" side>
-                <q-badge color="orange" rounded>{{ item.badge }}</q-badge>
+                <q-badge color="orange">{{ item.badge }}</q-badge>
               </q-item-section>
+            </q-item>
+          </q-list>
+        </template>
+
+        <template v-if="insightsNav.length">
+          <p class="admin-drawer__label">Insights</p>
+          <q-list padding class="admin-nav">
+            <q-item
+              v-for="item in insightsNav"
+              :key="item.to"
+              clickable
+              v-ripple
+              :to="item.to"
+              active-class="admin-nav__active"
+            >
+              <q-item-section avatar>
+                <q-icon :name="item.icon" />
+              </q-item-section>
+              <q-item-section>{{ item.label }}</q-item-section>
             </q-item>
           </q-list>
         </template>
@@ -458,7 +477,14 @@ type NavItem = {
   to: string;
   icon: string;
   perm: string;
-  group: "primary" | "properties" | "publishing" | "ops" | "system" | "access";
+  group:
+    | "primary"
+    | "properties"
+    | "publishing"
+    | "ops"
+    | "insights"
+    | "system"
+    | "access";
   badge?: number;
   depth?: number;
   caption?: string;
@@ -536,6 +562,13 @@ const nav = computed<NavItem[]>(() => [
     group: "publishing"
   },
   {
+    label: "Pages",
+    to: "/admin/pages",
+    icon: "article",
+    perm: "pages",
+    group: "publishing"
+  },
+  {
     label: "Prices & rooms",
     to: "/admin/rates",
     icon: "event_available",
@@ -543,7 +576,7 @@ const nav = computed<NavItem[]>(() => [
     group: "ops"
   },
   {
-    label: "Bookings",
+    label: "Reservations",
     to: "/admin/bookings",
     icon: "book_online",
     perm: "bookings",
@@ -566,10 +599,33 @@ const nav = computed<NavItem[]>(() => [
     group: "system"
   },
   {
+    label: "Reports",
+    to: "/admin/reports",
+    icon: "insights",
+    perm: "reports",
+    group: "insights"
+  },
+  {
+    label: "Guests",
+    to: "/admin/guests",
+    icon: "people_alt",
+    perm: "guests",
+    group: "insights"
+  },
+  {
+    // Developers manage org-admin accounts on the older People screen;
+    // org admins get the invite-by-Google People page.
     label: "People",
-    to: "/admin/users",
+    to: auth.isDeveloper ? "/admin/users" : "/admin/people",
     icon: auth.isDeveloper ? "group" : "badge",
     perm: "users",
+    group: "access"
+  },
+  {
+    label: "Roles",
+    to: "/admin/roles",
+    icon: "admin_panel_settings",
+    perm: "roles",
     group: "access"
   },
   {
@@ -607,6 +663,9 @@ const publishingNav = computed(() =>
   visibleNav.value.filter(i => i.group === "publishing")
 );
 const opsNav = computed(() => visibleNav.value.filter(i => i.group === "ops"));
+const insightsNav = computed(() =>
+  visibleNav.value.filter(i => i.group === "insights")
+);
 const systemNav = computed(() =>
   visibleNav.value.filter(i => i.group === "system")
 );
@@ -713,7 +772,7 @@ async function onOpenNotification(item: StaffNotification) {
   width: 2.15rem;
   height: 2.15rem;
   border: 1px solid rgba(18, 17, 16, 0.08);
-  border-radius: 999px;
+  border-radius: 0;
   background: #fff;
   color: var(--gy-ink);
   cursor: pointer;
@@ -736,7 +795,7 @@ async function onOpenNotification(item: StaffNotification) {
   padding: 0 0.25rem;
   display: inline-grid;
   place-items: center;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--gy-forest);
   color: #fff;
   font-size: 0.62rem;
@@ -802,7 +861,7 @@ async function onOpenNotification(item: StaffNotification) {
   color: var(--gy-ink);
   background: var(--gy-cream);
   border: 1px solid rgba(176, 141, 87, 0.3);
-  border-radius: 999px;
+  border-radius: 0;
   font-size: 0.74rem;
   line-height: 1;
   white-space: nowrap;
@@ -822,7 +881,7 @@ async function onOpenNotification(item: StaffNotification) {
   color: #fff;
   font-size: 0.68rem;
   font-weight: 600;
-  border-radius: 999px;
+  border-radius: 0;
 }
 
 .admin-link {
@@ -834,7 +893,7 @@ async function onOpenNotification(item: StaffNotification) {
   color: var(--gy-muted);
   font-size: 0.82rem;
   line-height: 1;
-  border-radius: 8px;
+  border-radius: 0;
   white-space: nowrap;
 }
 
@@ -850,7 +909,7 @@ async function onOpenNotification(item: StaffNotification) {
   margin: 0;
   padding: 0.25rem 0.45rem 0.25rem 0.25rem;
   border: 1px solid rgba(28, 36, 33, 0.08);
-  border-radius: 999px;
+  border-radius: 0;
   background: #fff;
   color: inherit;
   cursor: pointer;
@@ -881,7 +940,7 @@ async function onOpenNotification(item: StaffNotification) {
   font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.04em;
-  border-radius: 999px;
+  border-radius: 0;
 }
 
 .admin-account__meta {
@@ -918,7 +977,7 @@ async function onOpenNotification(item: StaffNotification) {
 .admin-account-menu {
   min-width: 240px;
   border: 1px solid rgba(28, 36, 33, 0.08);
-  border-radius: 14px;
+  border-radius: 0;
   box-shadow: 0 16px 40px rgba(28, 36, 33, 0.12);
   overflow: hidden;
 }
@@ -953,7 +1012,7 @@ async function onOpenNotification(item: StaffNotification) {
   text-transform: uppercase;
   color: var(--gy-gold-deep);
   background: rgba(176, 141, 87, 0.12);
-  border-radius: 999px;
+  border-radius: 0;
 }
 
 .admin-account-menu__pkg {
@@ -987,7 +1046,7 @@ async function onOpenNotification(item: StaffNotification) {
 }
 
 .admin-nav :deep(.q-item) {
-  border-radius: 10px;
+  border-radius: 0;
   margin: 0.12rem 0.45rem;
   min-height: 40px;
   color: var(--gy-ink);
@@ -1001,7 +1060,7 @@ async function onOpenNotification(item: StaffNotification) {
   margin-left: 0.85rem;
   min-height: 38px;
   border-left: 2px solid rgba(84, 88, 89, 0.28);
-  border-radius: 0 10px 10px 0;
+  border-radius: 0;
 }
 
 .admin-nav :deep(.q-item:hover) {
@@ -1038,7 +1097,7 @@ async function onOpenNotification(item: StaffNotification) {
 .admin-page-container :deep(.admin-scroll),
 .admin-page-container :deep(.q-card),
 .admin-page-container :deep(.q-banner) {
-  border-radius: 14px;
+  border-radius: 0;
   transition:
     box-shadow 0.35s ease,
     transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
@@ -1051,11 +1110,11 @@ async function onOpenNotification(item: StaffNotification) {
 }
 
 .admin-page-container :deep(.q-btn) {
-  border-radius: 8px;
+  border-radius: 0;
 }
 
 .admin-page-container :deep(.q-field--outlined .q-field__control) {
-  border-radius: 10px;
+  border-radius: 0;
 }
 
 .admin-alert {

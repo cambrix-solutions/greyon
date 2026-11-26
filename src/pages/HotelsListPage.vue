@@ -619,7 +619,7 @@ const showError = computed(
   flex: 0 0 min(78vw, 22rem);
   padding: 0;
   border: 0;
-  border-radius: 22px;
+  border-radius: 0;
   overflow: hidden;
   scroll-snap-align: start;
   background: #24302a;
@@ -701,7 +701,7 @@ const showError = computed(
   gap: 0.8rem;
   margin: 0.4rem 0 1.6rem;
   padding: 0.95rem 1rem 0.9rem;
-  border-radius: 24px;
+  border-radius: 0;
   background: rgba(250, 248, 246, 0.78);
   box-shadow: 0 18px 50px rgba(28, 24, 18, 0.1);
   backdrop-filter: blur(18px) saturate(1.2);
@@ -765,7 +765,7 @@ const showError = computed(
   min-height: 44px;
   width: 100%;
   border: 1px solid rgba(69, 76, 75, 0.16);
-  border-radius: 12px;
+  border-radius: 0;
   background: rgba(255, 255, 255, 0.92);
   padding: 0.45rem 0.7rem;
   color: var(--gy-forest);
@@ -790,7 +790,7 @@ const showError = computed(
   flex: 0 0 auto;
   min-height: 44px;
   padding: 0.2rem;
-  border-radius: 999px;
+  border-radius: 0;
   background: rgba(255, 255, 255, 0.72);
   box-shadow: inset 0 0 0 1px rgba(69, 76, 75, 0.12);
 }
@@ -799,7 +799,7 @@ const showError = computed(
   min-height: 40px;
   min-width: 4.5rem;
   border: 0;
-  border-radius: 999px;
+  border-radius: 0;
   background: transparent;
   color: var(--gy-forest);
   font-family: var(--font-display);
@@ -831,7 +831,7 @@ const showError = computed(
   min-height: 44px;
   padding: 0.4rem 0.9rem;
   border: 1px solid rgba(69, 76, 75, 0.16);
-  border-radius: 999px;
+  border-radius: 0;
   background: rgba(255, 255, 255, 0.8);
   color: var(--gy-forest);
   font-family: var(--font-display);
@@ -876,7 +876,7 @@ const showError = computed(
   position: relative;
   z-index: 1;
   overflow: hidden;
-  border-radius: 24px;
+  border-radius: 0;
   background: rgba(255, 255, 255, 0.88);
   box-shadow: 0 22px 50px rgba(28, 24, 18, 0.08);
 }

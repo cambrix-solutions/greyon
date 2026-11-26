@@ -618,7 +618,7 @@ async function onSubmit() {
   padding: 0.4rem;
   background: var(--gy-white);
   border: 1px solid rgba(69, 76, 75, 0.12);
-  border-radius: 999px;
+  border-radius: 0;
   box-shadow: 0 18px 44px rgba(28, 36, 33, 0.14);
   transition: background 0.2s ease;
 }
@@ -666,7 +666,7 @@ async function onSubmit() {
   min-height: 3.6rem;
   padding: 0.55rem 1.25rem;
   border: 0;
-  border-radius: 999px;
+  border-radius: 0;
   background: transparent;
   color: inherit;
   font: inherit;
@@ -716,7 +716,7 @@ async function onSubmit() {
 .gy-seg__nights {
   margin-left: 0.35rem;
   padding: 0.05rem 0.45rem;
-  border-radius: 999px;
+  border-radius: 0;
   background: rgba(98, 112, 99, 0.12);
   color: var(--gy-forest);
   font-size: 0.72em;
@@ -754,7 +754,7 @@ async function onSubmit() {
   min-height: 3.35rem;
   padding: 0 1.6rem;
   border: 0;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--gy-forest);
   color: var(--gy-white);
   font: inherit;
@@ -849,7 +849,7 @@ async function onSubmit() {
 
 .gy-search--compact .gy-search__error {
   padding: 0.4rem 0.9rem;
-  border-radius: 10px;
+  border-radius: 0;
   background: var(--gy-white);
   box-shadow: 0 6px 18px rgba(28, 36, 33, 0.1);
   justify-self: start;
@@ -872,7 +872,7 @@ async function onSubmit() {
   min-height: 2.5rem;
   min-width: 2.5rem;
   padding: 0 0.85rem;
-  border-radius: 999px;
+  border-radius: 0;
 }
 
 /* Tablet / mid-width bars: 2-row layout so values stay readable and the
@@ -887,7 +887,7 @@ async function onSubmit() {
     grid-template-areas:
       "dest dates action"
       "guests rates action";
-    border-radius: 22px;
+    border-radius: 0;
     gap: 0.15rem 0.2rem;
     padding: 0.45rem;
     max-height: none;
@@ -924,7 +924,7 @@ async function onSubmit() {
   .gy-search--compact:not(.gy-search--no-rates) .gy-seg__btn {
     min-height: 3.1rem;
     padding: 0.4rem 0.85rem;
-    border-radius: 14px;
+    border-radius: 0;
     gap: 0.55rem;
   }
 
@@ -951,7 +951,7 @@ async function onSubmit() {
     height: 100%;
     min-height: 100%;
     padding: 0 1rem;
-    border-radius: 16px;
+    border-radius: 0;
     white-space: normal;
     text-align: center;
     line-height: 1.2;
@@ -973,7 +973,7 @@ async function onSubmit() {
       minmax(0, 1.15fr) minmax(0, 1.35fr) minmax(0, 1.1fr)
       auto;
     grid-template-areas: none;
-    border-radius: 999px;
+    border-radius: 0;
     gap: 0;
     padding: 0.15rem;
     max-height: 3.5rem;
@@ -998,7 +998,7 @@ async function onSubmit() {
   .gy-search--compact.gy-search--no-rates .gy-seg__btn {
     min-height: 2.65rem;
     padding: 0.15rem 0.65rem;
-    border-radius: 999px;
+    border-radius: 0;
     gap: 0.4rem;
   }
 
@@ -1022,7 +1022,7 @@ async function onSubmit() {
     height: auto;
     min-height: 2.5rem;
     padding: 0 0.75rem;
-    border-radius: 999px;
+    border-radius: 0;
     white-space: nowrap;
   }
 
@@ -1039,7 +1039,7 @@ async function onSubmit() {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas: none;
     padding: 0.5rem;
-    border-radius: 18px;
+    border-radius: 0;
     gap: 0.15rem;
   }
 
@@ -1065,7 +1065,7 @@ async function onSubmit() {
   .gy-search--compact .gy-seg__btn {
     min-height: 3.5rem;
     padding: 0.55rem 0.9rem;
-    border-radius: 12px;
+    border-radius: 0;
   }
 
   .gy-search--compact .gy-seg__label {
@@ -1089,7 +1089,7 @@ async function onSubmit() {
   .gy-search--compact .gy-search__submit {
     width: 100%;
     min-height: 3.1rem;
-    border-radius: 12px;
+    border-radius: 0;
   }
 
   .gy-search__error,
@@ -1104,7 +1104,7 @@ async function onSubmit() {
   grid-template-columns: minmax(0, 1fr);
   grid-template-areas: none;
   padding: 0.35rem;
-  border-radius: 18px;
+  border-radius: 0;
   gap: 0.2rem;
   max-height: none;
   box-shadow: none;
@@ -1134,7 +1134,7 @@ async function onSubmit() {
 .gy-search--stacked .gy-seg__btn {
   min-height: 3.6rem;
   padding: 0.65rem 0.95rem;
-  border-radius: 12px;
+  border-radius: 0;
   gap: 0.7rem;
 }
 
@@ -1168,7 +1168,7 @@ async function onSubmit() {
   height: auto;
   min-height: 3.15rem;
   padding: 0 1.25rem;
-  border-radius: 12px;
+  border-radius: 0;
   white-space: nowrap;
   font-size: 0.78rem;
 }
@@ -1236,7 +1236,7 @@ async function onSubmit() {
   width: 100%;
   padding: 0.75rem 0.9rem;
   border: 0;
-  border-radius: 12px;
+  border-radius: 0;
   background: transparent;
   color: var(--gy-forest);
   font-family: var(--font-display);
@@ -1267,7 +1267,7 @@ async function onSubmit() {
   gap: 0.35rem;
   margin: 0.35rem 0.5rem 0.75rem;
   padding: 0.75rem 0.85rem;
-  border-radius: 12px;
+  border-radius: 0;
   background: var(--gy-sand);
 }
 
@@ -1283,7 +1283,7 @@ async function onSubmit() {
   min-height: 2.5rem;
   padding: 0.45rem 0.7rem;
   border: 1px solid rgba(69, 76, 75, 0.18);
-  border-radius: 8px;
+  border-radius: 0;
   background: var(--gy-white);
   color: var(--gy-forest);
   font: inherit;
@@ -1308,7 +1308,7 @@ async function onSubmit() {
   width: 100%;
   padding: 0.8rem 0.9rem;
   border: 0;
-  border-radius: 12px;
+  border-radius: 0;
   background: transparent;
   color: var(--gy-forest);
   font-family: var(--font-display);
@@ -1334,7 +1334,7 @@ async function onSubmit() {
   place-items: center;
   width: 2.25rem;
   height: 2.25rem;
-  border-radius: 10px;
+  border-radius: 0;
   background: var(--gy-sand);
   color: var(--gy-forest);
 }
@@ -1389,7 +1389,7 @@ async function onSubmit() {
 
 .gy-pop-apply {
   min-width: 6.5rem;
-  border-radius: 999px !important;
+  border-radius: 0 !important;
 }
 
 .gy-pop-apply:disabled {

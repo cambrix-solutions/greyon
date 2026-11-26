@@ -21,7 +21,6 @@
             color="primary"
             track-color="white"
             size="6px"
-            rounded
             class="image-drop__progress"
           />
           <p class="image-drop__progress-label">
@@ -299,7 +298,7 @@ defineExpose({
   padding: 0.85rem;
   border: 1px dashed rgba(84, 88, 89, 0.4);
   background: var(--gy-sand);
-  border-radius: 10px;
+  border-radius: 0;
   transition:
     border-color 0.15s ease,
     background 0.15s ease;
@@ -351,7 +350,7 @@ defineExpose({
   overflow: hidden;
   background: #fff;
   border: 1px solid rgba(28, 36, 33, 0.08);
-  border-radius: 8px;
+  border-radius: 0;
 }
 
 .image-drop__preview img {
@@ -392,7 +391,7 @@ defineExpose({
   width: 1.75rem;
   height: 1.75rem;
   border: 0;
-  border-radius: 999px;
+  border-radius: 0;
   background: rgba(28, 36, 33, 0.75);
   color: #fff;
   font-size: 1.1rem;
@@ -405,7 +404,7 @@ defineExpose({
   gap: 0.45rem;
   padding: 0.65rem 0.75rem;
   background: rgba(176, 64, 64, 0.08);
-  border-radius: 8px;
+  border-radius: 0;
 }
 
 .image-drop__error-msg {

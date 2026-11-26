@@ -137,7 +137,7 @@ withDefaults(
   justify-self: end;
   background: rgba(255, 255, 255, 0.94);
   border: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: 16px;
+  border-radius: 0;
   box-shadow:
     0 30px 70px rgba(0, 0, 0, 0.32),
     0 0 0 1px rgba(84, 88, 89, 0.12);
@@ -178,7 +178,7 @@ withDefaults(
   .auth-shell__panel {
     max-width: none;
     justify-self: stretch;
-    border-radius: 14px;
+    border-radius: 0;
   }
 
   .auth-shell__brand {

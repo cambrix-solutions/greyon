@@ -417,7 +417,7 @@ function scrollToJourney() {
   min-height: 44px;
   padding: 0.35rem 0.85rem;
   border: 0;
-  border-radius: 999px;
+  border-radius: 0;
   background: rgba(255, 255, 255, 0.08);
   color: rgba(255, 255, 255, 0.86);
   font-family: var(--font-display);
@@ -513,7 +513,7 @@ function scrollToJourney() {
   display: grid;
   min-width: 0;
   overflow: hidden;
-  border-radius: 28px;
+  border-radius: 0;
   background: #1c2420;
   color: #fff;
   text-decoration: none;
@@ -655,7 +655,7 @@ function scrollToJourney() {
 .dest-luxe .index-card {
   position: sticky;
   overflow: hidden;
-  border-radius: 26px;
+  border-radius: 0;
   background: rgba(255, 255, 255, 0.94);
   box-shadow: 0 28px 60px rgba(22, 21, 19, 0.14);
 }

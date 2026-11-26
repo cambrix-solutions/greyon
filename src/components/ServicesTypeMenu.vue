@@ -41,7 +41,7 @@ const emit = defineEmits<{
   background: var(--gy-cream);
   color: var(--gy-forest);
   border: 1px solid rgba(98, 112, 99, 0.16);
-  border-radius: 12px;
+  border-radius: 0;
   box-shadow: 0 16px 36px rgba(69, 76, 75, 0.12);
   animation: svc-type-in 0.18s ease;
 }
@@ -61,7 +61,7 @@ const emit = defineEmits<{
   gap: 0.75rem;
   min-height: 2.65rem;
   padding: 0.55rem 0.75rem;
-  border-radius: 8px;
+  border-radius: 0;
   color: var(--gy-forest);
   text-decoration: none;
   font-family: var(--font-display);

@@ -8,9 +8,9 @@ export default {
     hotels: "Apartels",
     portfolios: "Portfolios",
     location: "Destination",
-    booking: "Booking",
+    booking: "Reservation",
     contact: "Contact",
-    bookNow: "Book Now",
+    bookNow: "Reserve Now",
     services: "Our Services"
   },
   portfolios: {

@@ -39,7 +39,7 @@ defineProps<{
 
 .admin-page-head__actions :deep(.q-btn),
 .admin-page-toolbar :deep(.q-btn) {
-  border-radius: 8px;
+  border-radius: 0;
   transition:
     transform 0.22s ease,
     box-shadow 0.22s ease;
@@ -99,7 +99,7 @@ defineProps<{
 }
 
 .admin-page-toolbar :deep(.q-field--outlined .q-field__control) {
-  border-radius: 10px;
+  border-radius: 0;
 }
 
 @media (max-width: 600px) {

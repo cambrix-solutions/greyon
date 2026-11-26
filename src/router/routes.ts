@@ -195,6 +195,16 @@ const routes: RouteRecordRaw[] = [
           solidHeader: true,
           legalType: "booking"
         }
+      },
+      {
+        path: "faq",
+        name: "faq",
+        component: () => import("@/pages/LegalPage.vue"),
+        meta: {
+          title: "FAQ | Greyon",
+          solidHeader: true,
+          legalType: "faq"
+        }
       }
     ]
   },
@@ -209,6 +219,25 @@ const routes: RouteRecordRaw[] = [
     name: "developer-login",
     component: () => import("@/pages/admin/DeveloperLoginPage.vue"),
     meta: { title: "Developer Login | Greyon", publicAdmin: true }
+  },
+  {
+    // Google sign-in errors land here (engine GoogleInviteController).
+    path: "/admin/sign-in",
+    name: "admin-sign-in",
+    component: () => import("@/pages/admin/AdminLoginPage.vue"),
+    meta: { title: "Admin Login | Greyon", publicAdmin: true }
+  },
+  {
+    path: "/admin/accept-invite",
+    name: "admin-accept-invite",
+    component: () => import("@/pages/admin/AdminAcceptInvitePage.vue"),
+    meta: { title: "Accept invite | Greyon Admin", publicAdmin: true }
+  },
+  {
+    path: "/admin/auth/google/complete",
+    name: "admin-google-complete",
+    component: () => import("@/pages/admin/AdminAcceptInvitePage.vue"),
+    meta: { title: "Signing in | Greyon Admin", publicAdmin: true }
   },
   {
     path: "/admin",
@@ -243,7 +272,7 @@ const routes: RouteRecordRaw[] = [
         path: "bookings",
         name: "admin-bookings",
         component: () => import("@/pages/admin/AdminBookingsPage.vue"),
-        meta: { title: "Bookings | Greyon Admin", perm: "bookings" }
+        meta: { title: "Reservations | Greyon Admin", perm: "bookings" }
       },
       {
         path: "locations",
@@ -302,6 +331,36 @@ const routes: RouteRecordRaw[] = [
         name: "admin-settings",
         component: () => import("@/pages/admin/AdminSettingsPage.vue"),
         meta: { title: "Settings | Greyon Admin", perm: "settings" }
+      },
+      {
+        path: "pages",
+        name: "admin-pages",
+        component: () => import("@/pages/admin/AdminPagesPage.vue"),
+        meta: { title: "Pages | Greyon Admin", perm: "pages" }
+      },
+      {
+        path: "reports",
+        name: "admin-reports",
+        component: () => import("@/pages/admin/AdminReportsPage.vue"),
+        meta: { title: "Reports | Greyon Admin", perm: "reports" }
+      },
+      {
+        path: "guests",
+        name: "admin-guests",
+        component: () => import("@/pages/admin/AdminGuestsPage.vue"),
+        meta: { title: "Guests | Greyon Admin", perm: "guests" }
+      },
+      {
+        path: "people",
+        name: "admin-people",
+        component: () => import("@/pages/admin/AdminPeoplePage.vue"),
+        meta: { title: "People | Greyon Admin", perm: "users" }
+      },
+      {
+        path: "roles",
+        name: "admin-roles",
+        component: () => import("@/pages/admin/AdminRolesPage.vue"),
+        meta: { title: "Roles | Greyon Admin", perm: "roles" }
       },
       {
         path: "users",

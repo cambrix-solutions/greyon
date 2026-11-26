@@ -2,8 +2,8 @@
   <q-page padding>
     <AdminPageHeader
       eyebrow="Operations"
-      title="Bookings"
-      :subtitle="`${filtered.length} booking${filtered.length === 1 ? '' : 's'} shown`"
+      title="Reservations"
+      :subtitle="`${filtered.length} reservation${filtered.length === 1 ? '' : 's'} shown`"
     >
       <template #actions>
         <q-btn
@@ -12,7 +12,7 @@
           no-caps
           color="primary"
           icon="add"
-          label="Create booking"
+          label="Create reservation"
           @click="openCreate"
         />
       </template>
@@ -97,13 +97,13 @@
               </td>
             </tr>
             <tr v-if="!filtered.length">
-              <td colspan="6" class="empty-row">No bookings match.</td>
+              <td colspan="6" class="empty-row">No reservations match.</td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <div class="admin-data__cards" aria-label="Bookings">
+      <div class="admin-data__cards" aria-label="Reservations">
         <article
           v-for="b in filtered"
           :key="`card-${b.id}`"
@@ -155,7 +155,7 @@
           </div>
         </article>
         <p v-if="!filtered.length" class="admin-data-card__empty">
-          No bookings match.
+          No reservations match.
         </p>
       </div>
     </div>
@@ -167,8 +167,8 @@
       maximized
       size="md"
       icon="receipt_long"
-      eyebrow="Booking"
-      :title="detailBooking?.reference ?? 'Booking'"
+      eyebrow="Reservation"
+      :title="detailBooking?.reference ?? 'Reservation'"
       :subtitle="
         detailBooking ? `${detailBooking.status} · ${detailBooking.source}` : ''
       "
@@ -199,7 +199,7 @@
         </section>
 
         <section class="booking-detail__section">
-          <h3>Booking meta</h3>
+          <h3>Reservation details</h3>
           <p class="muted"
             >Booked {{ formatDateTime(detailBooking.createdAt) }}</p
           >
@@ -243,7 +243,7 @@
             unelevated
             no-caps
             color="primary"
-            label="Confirm booking"
+            label="Confirm reservation"
             class="full-width"
             @click="confirmBooking(detailBooking)"
           />
@@ -252,7 +252,7 @@
             flat
             no-caps
             color="negative"
-            label="Delete booking"
+            label="Delete reservation"
             class="full-width"
             @click="remove(detailBooking.id)"
           />
@@ -265,7 +265,7 @@
       size="2xl"
       icon="book_online"
       eyebrow="Operations"
-      title="Create booking"
+      title="Create reservation"
       subtitle="Confirm stay details, check rooms available, then save the reservation."
     >
       <section class="booking-section">
@@ -436,7 +436,7 @@
         <GySelect
           v-model="form.status"
           :options="statusCreateOptions"
-          label="Booking status"
+          label="Reservation status"
           outlined
           dense
           emit-value
@@ -492,7 +492,7 @@
           no-caps
           color="primary"
           icon="check"
-          label="Create booking"
+          label="Create reservation"
           :disable="!canCreate"
           @click="create"
         />
@@ -929,15 +929,18 @@ async function setStatus(reference: string, status: string) {
     detailBooking.value =
       cms.getBookingByReference(reference) ?? detailBooking.value;
   }
-  $q.notify({ type: "positive", message: `Booking ${reference} → ${status}` });
+  $q.notify({
+    type: "positive",
+    message: `Reservation ${reference} → ${status}`
+  });
 }
 
 function confirmBooking(b: Booking) {
   if (b.status === "confirmed") return;
 
   $q.dialog({
-    title: "Confirm booking?",
-    message: `Confirm booking ${b.reference} for ${b.guest.fullName}?`,
+    title: "Confirm reservation?",
+    message: `Confirm reservation ${b.reference} for ${b.guest.fullName}?`,
     cancel: { flat: true, label: "Cancel", noCaps: true },
     ok: {
       unelevated: true,
@@ -954,7 +957,7 @@ function confirmBooking(b: Booking) {
     }
     $q.notify({
       type: "positive",
-      message: `Booking ${b.reference} confirmed.`
+      message: `Reservation ${b.reference} confirmed.`
     });
   });
 }
@@ -970,7 +973,7 @@ function remove(id: string) {
   detailBooking.value = null;
 
   $q.dialog({
-    title: "Delete booking?",
+    title: "Delete reservation?",
     message: booking
       ? `Permanently delete ${booking.reference} for ${booking.guest.fullName}?`
       : "Permanently delete this booking?",
@@ -986,7 +989,7 @@ function remove(id: string) {
     .onOk(async () => {
       try {
         await cms.deleteBooking(id);
-        $q.notify({ type: "positive", message: "Booking deleted." });
+        $q.notify({ type: "positive", message: "Reservation deleted." });
       } catch (e) {
         $q.notify({
           type: "negative",
@@ -1016,7 +1019,7 @@ function remove(id: string) {
   padding: 1rem 1.05rem 1.1rem;
   background: #fff;
   border: 1px solid rgba(28, 36, 33, 0.07);
-  border-radius: 14px;
+  border-radius: 0;
 }
 
 .booking-section__bar {
@@ -1152,7 +1155,7 @@ function remove(id: string) {
 }
 
 .bookings-scroll {
-  border-radius: 10px;
+  border-radius: 0;
   border: 1px solid rgba(28, 36, 33, 0.1);
 }
 
@@ -1215,7 +1218,7 @@ function remove(id: string) {
   display: inline-flex;
   align-items: center;
   padding: 0.22rem 0.65rem;
-  border-radius: 999px;
+  border-radius: 0;
   font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.04em;

@@ -172,7 +172,7 @@ async function onSubmit() {
   padding: 1.85rem 1.6rem 1.55rem;
   background: rgba(255, 255, 255, 0.95);
   border: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: 18px;
+  border-radius: 0;
   box-shadow:
     0 30px 70px rgba(0, 0, 0, 0.35),
     0 0 0 1px rgba(111, 128, 103, 0.1);
@@ -225,7 +225,7 @@ async function onSubmit() {
 .login-card input {
   padding: 0.75rem 0.9rem;
   border: 1px solid rgba(28, 36, 33, 0.14);
-  border-radius: 10px;
+  border-radius: 0;
   font: inherit;
   color: var(--gy-ink);
   background: var(--gy-sand);
@@ -245,7 +245,7 @@ async function onSubmit() {
 .login-card .gy-btn {
   width: 100%;
   margin-top: 0.35rem;
-  border-radius: 10px;
+  border-radius: 0;
 }
 
 .error {

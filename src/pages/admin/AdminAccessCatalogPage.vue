@@ -756,7 +756,7 @@ onMounted(() => {
     ),
     #fff;
   border: 1px solid rgba(84, 88, 89, 0.2);
-  border-radius: 14px;
+  border-radius: 0;
 }
 
 .access-ladder__step {
@@ -769,7 +769,7 @@ onMounted(() => {
   padding: 0.55rem 0.65rem;
   background: rgba(255, 255, 255, 0.9);
   border: 1px solid rgba(28, 36, 33, 0.07);
-  border-radius: 10px;
+  border-radius: 0;
 }
 
 .access-ladder__n {
@@ -777,7 +777,7 @@ onMounted(() => {
   place-items: center;
   width: 1.5rem;
   height: 1.5rem;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--gy-gold-deep);
   color: #fff;
   font-size: 0.68rem;
@@ -811,7 +811,7 @@ onMounted(() => {
   padding: 0.75rem 0.9rem;
   background: #faf9f7;
   border: 1px solid rgba(28, 36, 33, 0.06);
-  border-radius: 10px;
+  border-radius: 0;
   color: var(--gy-muted);
   font-size: 0.92rem;
   line-height: 1.45;

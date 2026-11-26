@@ -221,7 +221,7 @@
                     >
                       {{
                         hasSearchedDates && pricedRoom(other.id)
-                          ? "Book"
+                          ? "Reserve"
                           : "Check availability"
                       }}
                     </button>
@@ -298,7 +298,7 @@
       </div>
     </section>
 
-    <div class="book-bar" role="region" aria-label="Book this room">
+    <div class="book-bar" role="region" aria-label="Reserve this room">
       <div class="book-bar__price">
         <template v-if="priced">
           <strong>${{ priced.total.toFixed(0) }}</strong>
@@ -438,10 +438,13 @@
     </q-dialog>
 
     <RoomPanoramaDialog
-      v-if="panoramaUrl"
+      v-if="panoramaUrls.length && room"
       v-model="panoOpen"
-      :src="panoramaUrl"
+      :sources="panoramaUrls"
+      :photos="publishedRoomPanoramas(room)"
       :title="room.name"
+      :room-id="room.id"
+      :tour-rooms="tourRooms"
     />
     <RoomPanoramaSoonDialog v-else v-model="panoSoonOpen" />
   </q-page>
@@ -491,6 +494,11 @@ import BookingSearchWidget from "@/components/BookingSearchWidget.vue";
 import HotelAmenityBand from "@/components/hotel/HotelAmenityBand.vue";
 import SectionDivider from "@/components/hotel/SectionDivider.vue";
 import RoomFacts from "@/components/RoomFacts.vue";
+import {
+  publishedRoomPanoramas,
+  roomPanoramaUrls,
+  tourRoomsFromList
+} from "@/utils/roomPanoramas";
 import RoomPanoramaButton from "@/components/RoomPanoramaButton.vue";
 import RoomPanoramaDialog from "@/components/RoomPanoramaDialog.vue";
 import RoomPanoramaSoonDialog from "@/components/RoomPanoramaSoonDialog.vue";
@@ -587,10 +595,15 @@ const photoProgress = computed(() => {
   if (!total) return "0%";
   return `${((activePhoto.value + 1) / total) * 100}%`;
 });
-const panoramaUrl = computed(() => room.value?.panoramaUrl?.trim() || "");
+const panoramaUrls = computed(() => roomPanoramaUrls(room.value));
+const tourRooms = computed(() =>
+  hotel.value
+    ? tourRoomsFromList(cms.getRoomTypesByHotelId(hotel.value.id))
+    : []
+);
 
 function openPanorama() {
-  if (panoramaUrl.value) {
+  if (panoramaUrls.value.length) {
     panoOpen.value = true;
     return;
   }
@@ -721,7 +734,7 @@ const guestsLabel = computed(() => {
 
 const bookCtaLabel = computed(() => {
   if (booking.searching) return "Checking…";
-  if (priced.value) return "Book";
+  if (priced.value) return "Reserve";
   return "Check availability";
 });
 

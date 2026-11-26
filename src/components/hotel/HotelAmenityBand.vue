@@ -9,6 +9,7 @@
     :aria-hidden="showCopy ? undefined : true"
   >
     <div
+      v-if="!showCopy"
       class="marquee"
       :class="{ 'is-static': reduceMotion, 'is-paused': paused }"
       aria-hidden="true"
@@ -37,7 +38,12 @@
       <p v-if="lead" v-reveal="{ delay: '120ms' }" class="band__lead">
         {{ lead }}
       </p>
-      <FeatureChips :items="items" on-dark />
+      <FeatureChips
+        class="amenity-list"
+        :items="items"
+        :expandable="false"
+        on-dark
+      />
     </div>
   </section>
 </template>
@@ -110,7 +116,7 @@ const trackStyle = computed(() => {
       transparent 48%
     ),
     linear-gradient(155deg, #1a211e 0%, #2c312e 46%, #3a3228 100%);
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 4rem), 0 100%);
+  clip-path: none;
   padding: clamp(3.5rem, 7vw, 5.5rem) 0 clamp(5.5rem, 9vw, 7.5rem);
   overflow: hidden;
 }
@@ -262,7 +268,7 @@ const trackStyle = computed(() => {
 
 @media (max-width: 700px) {
   .band {
-    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 1.75rem), 0 100%);
+    clip-path: none;
     padding-bottom: 4.25rem;
   }
 
@@ -291,6 +297,28 @@ const trackStyle = computed(() => {
 
   .eyebrow::after {
     width: 3.25rem;
+  }
+}
+
+.amenity-list :deep(.feature-chips) {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(5, auto);
+  grid-auto-columns: max-content;
+  gap: 0.75rem 1.15rem;
+}
+
+.amenity-list :deep(.feature-chips li) {
+  padding: 0.55rem 0.95rem;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 600px) {
+  .amenity-list :deep(.feature-chips) {
+    grid-auto-flow: row;
+    grid-template-rows: none;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem;
   }
 }
 </style>
