@@ -510,7 +510,7 @@
 
     <!-- Room dialog -->
     <AdminDialog
-      v-model="roomDialog"
+      :model-value="roomDialog"
       size="xl"
       icon="bed"
       eyebrow="Room"
@@ -518,6 +518,7 @@
       subtitle="Room type under the selected hotel."
       no-refocus
       allow-focus-outside
+      @update:model-value="onRoomDialogUpdate"
     >
       <AdminFormSection title="Essentials" :columns="2">
         <q-input v-model="roomForm.name" label="Room name" outlined dense />
@@ -552,10 +553,9 @@
       >
         <AdminPanoramaList
           v-if="roomDialog"
-          :key="`${roomEditing ?? 'new'}-${roomDialog}`"
+          :key="roomPanoSession"
+          ref="roomPanoList"
           :room-id="roomEditing"
-          :progress="roomPanoramaProgress"
-          @staged="onRoomPanoramaStaged"
         />
       </AdminFormSection>
       <AdminFormSection title="Details">
@@ -602,7 +602,7 @@
         />
       </AdminFormSection>
       <template #actions>
-        <q-btn flat no-caps label="Cancel" v-close-popup />
+        <q-btn flat no-caps label="Cancel" @click="requestCloseRoom" />
         <q-btn
           v-if="
             roomEditing
@@ -612,7 +612,9 @@
           color="primary"
           unelevated
           no-caps
-          :label="roomEditing ? 'Save room' : 'Create room'"
+          :loading="roomSaving"
+          :disable="roomSaving"
+          :label="roomEditing ? 'Save changes' : 'Create room'"
           @click="saveRoom"
         />
       </template>
@@ -648,8 +650,6 @@ import {
   type CatalogService
 } from "@/services/engine/adminCatalogEntities";
 import { useAuthStore } from "@/stores/auth-store";
-import { RoomPanoramaUploadError } from "@/services/engine/adminCatalog";
-import type { PanoramaProgress } from "@/utils/roomPanoramas";
 import { useCmsStore } from "@/stores/cms-store";
 import type {
   ContentStatus,
@@ -1047,8 +1047,14 @@ const roomDialog = ref(false);
 const roomEditing = ref<string | null>(null);
 const roomImages = ref<string[]>([]);
 const roomAmenities = ref<string[]>([]);
-const roomStagedPanoramas = ref<{ file: File; published: boolean }[]>([]);
-const roomPanoramaProgress = ref<PanoramaProgress | null>(null);
+const roomSaving = ref(false);
+const roomPanoSession = ref(0);
+const roomPanoList = ref<{
+  commit: (roomId: string) => Promise<void>;
+  discard: () => Promise<void>;
+  isDirty: () => boolean;
+  isBusy: () => boolean;
+} | null>(null);
 const roomForm = reactive({
   hotelId: "",
   name: "",
@@ -1081,7 +1087,7 @@ function openCreateRoom(hotelId: string) {
   roomForm.status = "draft";
   roomImages.value = [];
   roomAmenities.value = [];
-  roomStagedPanoramas.value = [];
+  roomPanoSession.value += 1;
   roomDialog.value = true;
 }
 
@@ -1099,12 +1105,55 @@ function openEditRoom(room: RoomType) {
   roomForm.status = room.status;
   roomImages.value = [...room.images];
   roomAmenities.value = [...room.amenities];
-  roomStagedPanoramas.value = [];
+  roomPanoSession.value += 1;
   roomDialog.value = true;
 }
 
-function onRoomPanoramaStaged(items: { file: File; published: boolean }[]) {
-  roomStagedPanoramas.value = items;
+function onRoomDialogUpdate(open: boolean) {
+  if (open) {
+    roomDialog.value = true;
+    return;
+  }
+  requestCloseRoom();
+}
+
+function requestCloseRoom() {
+  const list = roomPanoList.value;
+  if (list?.isBusy()) {
+    $q.dialog({
+      title: "Upload in progress",
+      message:
+        "A 360° photo is still uploading. Wait for it to finish, or leave and discard unsaved photos.",
+      cancel: { label: "Stay", flat: true },
+      ok: { label: "Leave anyway", color: "negative", unelevated: true },
+      persistent: true
+    }).onOk(() => {
+      void closeRoomDialog();
+    });
+    return;
+  }
+  if (list?.isDirty()) {
+    $q.dialog({
+      title: "Unsaved changes",
+      message:
+        "You have unsaved 360° photo changes. Leave without saving? Uploaded photos that were not saved will be removed.",
+      cancel: { label: "Stay", flat: true },
+      ok: { label: "Discard changes", color: "negative", unelevated: true },
+      persistent: true
+    }).onOk(() => {
+      void closeRoomDialog();
+    });
+    return;
+  }
+  void closeRoomDialog();
+}
+
+async function closeRoomDialog() {
+  try {
+    await roomPanoList.value?.discard();
+  } finally {
+    roomDialog.value = false;
+  }
 }
 
 function saveRoom() {
@@ -1112,31 +1161,27 @@ function saveRoom() {
     $q.notify({ type: "negative", message: "Name and hotel are required." });
     return;
   }
+  if (roomSaving.value) return;
   void (async () => {
+    roomSaving.value = true;
     try {
-      await cms.upsertRoom({
+      const saved = await cms.upsertRoom({
         ...(roomEditing.value ? { id: roomEditing.value } : {}),
         ...roomForm,
         images: roomImages.value.filter(Boolean),
-        amenities: roomAmenities.value,
-        ...(roomEditing.value
-          ? {}
-          : {
-              stagedPanoramas: roomStagedPanoramas.value,
-              onPanoramaProgress: (p: PanoramaProgress | null) =>
-                (roomPanoramaProgress.value = p)
-            })
+        amenities: roomAmenities.value
       });
+      if (!roomEditing.value) roomEditing.value = saved.id;
+      await roomPanoList.value?.commit(saved.id);
       roomDialog.value = false;
       $q.notify({ type: "positive", message: "Room saved." });
     } catch (e) {
-      if (e instanceof RoomPanoramaUploadError && !roomEditing.value) {
-        roomEditing.value = e.room.id;
-      }
       $q.notify({
         type: "negative",
         message: e instanceof Error ? e.message : "Save failed."
       });
+    } finally {
+      roomSaving.value = false;
     }
   })();
 }

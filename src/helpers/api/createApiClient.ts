@@ -106,9 +106,18 @@ export type CreateApiClientOptions = {
   bearerStorageKey?: string | null;
 };
 
+export type UploadRequestInit = {
+  method?: string;
+  body: FormData;
+  onUploadProgress?: (percent: number) => void;
+  signal?: AbortSignal;
+};
+
 export type ApiClient = {
   baseURL: string;
   request: <T>(path: string, init?: RequestInit) => Promise<T>;
+  /** Multipart upload with percent progress. Uses XHR (fetch has no upload progress). */
+  requestUpload: <T>(path: string, init: UploadRequestInit) => Promise<T>;
   get: <T>(path: string, init?: RequestInit) => Promise<T>;
   post: <T>(path: string, body?: unknown, init?: RequestInit) => Promise<T>;
   put: <T>(path: string, body?: unknown, init?: RequestInit) => Promise<T>;
@@ -197,6 +206,103 @@ export function createApiClient(
     }
   }
 
+  function requestUpload<T>(path: string, init: UploadRequestInit): Promise<T> {
+    const headers: Record<string, string> = {
+      Accept: "application/json",
+      "X-Requested-With": "XMLHttpRequest"
+    };
+    if (bearerStorageKey && typeof localStorage !== "undefined") {
+      const token = localStorage.getItem(bearerStorageKey);
+      if (token) headers.Authorization = `Bearer ${token}`;
+    }
+    const url = path.startsWith("http") ? path : `${root}${path}`;
+
+    return new Promise<T>((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open(init.method ?? "POST", url);
+      xhr.withCredentials = withCredentials;
+      for (const [key, value] of Object.entries(headers)) {
+        xhr.setRequestHeader(key, value);
+      }
+
+      xhr.upload.onprogress = event => {
+        if (!init.onUploadProgress) return;
+        if (event.lengthComputable && event.total > 0) {
+          init.onUploadProgress(
+            Math.max(
+              0,
+              Math.min(100, Math.round((event.loaded / event.total) * 100))
+            )
+          );
+        }
+      };
+
+      const onAbort = () => {
+        xhr.abort();
+      };
+      if (init.signal) {
+        if (init.signal.aborted) {
+          reject(new DOMException("Aborted", "AbortError"));
+          return;
+        }
+        init.signal.addEventListener("abort", onAbort);
+      }
+
+      const cleanup = () => {
+        init.signal?.removeEventListener("abort", onAbort);
+      };
+
+      xhr.onload = () => {
+        cleanup();
+        const text = xhr.responseText ?? "";
+        if (xhr.status >= 200 && xhr.status < 300) {
+          init.onUploadProgress?.(100);
+          if (xhr.status === 204 || !text) {
+            resolve(undefined as T);
+            return;
+          }
+          try {
+            resolve(JSON.parse(text) as T);
+          } catch {
+            reject(
+              new ApiError(
+                xhr.status,
+                messageFromErrorBody(xhr.status, text, text),
+                text
+              )
+            );
+          }
+          return;
+        }
+        let body: EngineErrorBody | string | undefined;
+        try {
+          body = text ? (JSON.parse(text) as EngineErrorBody) : undefined;
+        } catch {
+          body = text;
+        }
+        const error = new ApiError(
+          xhr.status,
+          messageFromErrorBody(xhr.status, text, body),
+          body
+        );
+        if (xhr.status === 401) {
+          const sessionProbe = /\/(?:admin|developer)\/me(?:\?|$)/.test(path);
+          if (sessionProbe) notifyUnauthorized(error);
+        }
+        reject(error);
+      };
+      xhr.onerror = () => {
+        cleanup();
+        reject(new ApiError(0, FRIENDLY_NETWORK_ERROR));
+      };
+      xhr.onabort = () => {
+        cleanup();
+        reject(new DOMException("Aborted", "AbortError"));
+      };
+      xhr.send(init.body);
+    });
+  }
+
   function withJsonBody<T>(
     method: string,
     path: string,
@@ -213,6 +319,7 @@ export function createApiClient(
   return {
     baseURL: root,
     request,
+    requestUpload,
     get: <T>(path: string, init?: RequestInit) =>
       request<T>(path, { ...init, method: "GET" }),
     post: <T>(path: string, body?: unknown, init?: RequestInit) =>

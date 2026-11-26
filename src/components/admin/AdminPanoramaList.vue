@@ -10,11 +10,13 @@
     <div class="pano-list__top">
       <p class="pano-list__hint">
         Add as many equirectangular photos as you like — JPG or WebP, up to 25
-        MB each. Big photos are compressed for you.
-        <template v-if="live"> Changes are saved as you make them. </template>
-        <template v-else> They upload when you create the room. </template>
-        Guests see only <strong>published</strong> photos, in this order.
+        MB each. The server shrinks very large files. Changes are saved when you
+        click
+        <strong>Save changes</strong>. Guests see only
+        <strong>published</strong> photos, in this order.
       </p>
+      <p v-if="dirty && !busy" class="pano-list__flag">Unsaved changes</p>
+      <p v-else-if="busy" class="pano-list__saving">{{ savingLabel }}</p>
       <div class="pano-list__add" :class="{ 'is-disabled': busy }">
         <button
           type="button"
@@ -39,25 +41,6 @@
       </div>
     </div>
 
-    <div
-      v-if="shownProgress"
-      class="pano-list__progress"
-      role="status"
-      aria-live="polite"
-    >
-      <p class="pano-list__status">
-        Uploading {{ shownProgress.current }} of {{ shownProgress.total }}
-        <span class="pano-list__file">— {{ shownProgress.name }}</span>
-      </p>
-      <q-linear-progress
-        :value="(shownProgress.current - 1) / shownProgress.total"
-        :buffer="shownProgress.current / shownProgress.total"
-        color="primary"
-        track-color="grey-3"
-        rounded
-        size="8px"
-      />
-    </div>
     <p v-if="error" class="pano-list__error" role="alert">{{ error }}</p>
 
     <p v-if="loading" class="pano-list__empty">Loading 360° photos…</p>
@@ -74,7 +57,8 @@
         :class="{
           'pano-item--hidden': !item.published,
           'pano-item--over': dragOver === i && dragFrom !== i,
-          'pano-item--moving': dragFrom === i
+          'pano-item--moving': dragFrom === i,
+          'pano-item--error': item.phase === 'error'
         }"
         draggable="true"
         @dragstart="onRowDragStart(i, $event)"
@@ -96,7 +80,6 @@
             {{ item.published ? "Shown to guests" : "Hidden from guests" }}
           </p>
           <input
-            v-if="live && item.id"
             class="pano-item__caption"
             type="text"
             maxlength="80"
@@ -109,6 +92,42 @@
             @keydown.enter.prevent="blurCaption"
             @blur="onCaptionBlur(item, $event)"
           />
+          <div v-if="item.phase !== 'idle'" class="pano-item__upload">
+            <div class="pano-item__upload-row">
+              <q-icon
+                v-if="item.phase === 'uploaded'"
+                name="check_circle"
+                color="positive"
+                size="18px"
+              />
+              <span v-if="item.phase === 'preparing'">Preparing…</span>
+              <span v-else-if="item.phase === 'uploading'"
+                >Uploading {{ item.percent }}%</span
+              >
+              <span v-else-if="item.phase === 'uploaded'" class="pano-item__ok"
+                >Uploaded and saved</span
+              >
+              <span v-else-if="item.phase === 'error'" class="pano-item__err">{{
+                item.error || "Upload failed."
+              }}</span>
+              <button
+                v-if="item.phase === 'error'"
+                type="button"
+                class="pano-item__retry"
+                @click="retryItem(item)"
+              >
+                Retry
+              </button>
+            </div>
+            <q-linear-progress
+              v-if="item.phase === 'preparing' || item.phase === 'uploading'"
+              :value="item.phase === 'preparing' ? 0 : item.percent / 100"
+              :indeterminate="item.phase === 'preparing'"
+              color="primary"
+              track-color="grey-3"
+              size="6px"
+            />
+          </div>
         </div>
         <q-toggle
           :model-value="item.published"
@@ -119,7 +138,6 @@
         />
         <div class="pano-item__actions">
           <button
-            v-if="live && item.id"
             type="button"
             class="pano-item__btn pano-item__btn--wide"
             :disabled="busy || items.length < 2"
@@ -161,12 +179,13 @@
     </ol>
 
     <AdminPanoramaHotspotEditor
-      v-if="editorPhoto && roomId"
+      v-if="editorPhoto"
       v-model="editorOpen"
-      :room-id="roomId"
+      :room-id="roomId || ''"
       :photo="editorPhoto"
-      :photos="saved"
-      @saved="apply"
+      :photos="draftPhotos"
+      defer-save
+      @saved="onHotspotsSaved"
     />
   </div>
 </template>
@@ -177,31 +196,31 @@ import { useQuasar } from "quasar";
 import AdminPanoramaHotspotEditor from "@/components/admin/AdminPanoramaHotspotEditor.vue";
 import {
   addRoomPanorama,
+  addRoomPanoramaHotspot,
   deleteRoomPanorama,
+  deleteRoomPanoramaHotspot,
   fetchRoomPanoramas,
   reorderRoomPanoramas,
   setRoomPanoramaCaption,
-  setRoomPanoramaPublished
+  setRoomPanoramaPublished,
+  updateRoomPanoramaHotspot
 } from "@/services/engine/adminCatalog";
 import { useCmsStore } from "@/stores/cms-store";
-import type { RoomPanorama } from "@/types/greyon";
+import type { RoomPanorama, RoomPanoramaHotspot } from "@/types/greyon";
 import {
   PANORAMA_ACCEPT_ATTR,
-  preparePanoramaFile
+  preparePanoramaFile,
+  validatePanoramaFile
 } from "@/utils/imageCompress";
-import {
-  panoramaUploadMessage,
-  type PanoramaProgress
-} from "@/utils/roomPanoramas";
+import { panoramaUploadMessage } from "@/utils/roomPanoramas";
 
 /**
- * Many 360° photos for one room: upload, publish / hide, delete and
- * reorder (drag a row, or use the arrows).
- *
- * With a `roomId` every change goes straight to the engine. Without one
- * (a room that is not saved yet) photos wait here and are handed to the
- * parent through `staged`, which uploads them right after creating the room.
+ * 360° photos for one room. Edits stay pending in this dialog and are
+ * written when the parent calls `commit` (Save changes). Cancel discards
+ * them, and deletes any photos uploaded during a failed/partial save.
  */
+type Phase = "idle" | "preparing" | "uploading" | "uploaded" | "error";
+
 type Item = {
   key: string;
   id: string | null;
@@ -209,16 +228,19 @@ type Item = {
   caption: string;
   published: boolean;
   file: File | null;
+  hotspots: RoomPanoramaHotspot[];
+  phase: Phase;
+  percent: number;
+  error: string | null;
 };
 
 const props = defineProps<{
   roomId: string | null;
-  /** Set by the parent while it uploads the photos of a new room. */
-  progress?: PanoramaProgress | null;
 }>();
 
 const emit = defineEmits<{
-  staged: [items: { file: File; published: boolean }[]];
+  dirty: [value: boolean];
+  busy: [value: boolean];
 }>();
 
 const $q = useQuasar();
@@ -226,48 +248,119 @@ const cms = useCmsStore();
 
 const fileInput = ref<HTMLInputElement | null>(null);
 const items = ref<Item[]>([]);
-const saved = ref<RoomPanorama[]>([]);
+const baseline = ref<RoomPanorama[]>([]);
 const editorOpen = ref(false);
 const editorPhotoId = ref<string | null>(null);
 const loading = ref(false);
 const busy = ref(false);
-const ownProgress = ref<PanoramaProgress | null>(null);
 const error = ref("");
 const dragging = ref(false);
 const dragFrom = ref<number | null>(null);
 const dragOver = ref<number | null>(null);
-
-const live = computed(() => Boolean(props.roomId));
-const shownProgress = computed(() => props.progress ?? ownProgress.value);
-const editorPhoto = computed(
-  () => saved.value.find(photo => photo.id === editorPhotoId.value) ?? null
-);
+const sessionIds = new Set<string>();
 let seq = 0;
+let uploadAbort: AbortController | null = null;
 
 function message(e: unknown, fallback: string) {
   return e instanceof Error && e.message ? e.message : fallback;
 }
 
-function fromList(list: RoomPanorama[]): Item[] {
-  return list.map(photo => ({
+function photoId(item: Item) {
+  return item.id ?? item.key;
+}
+
+function fromPhoto(photo: RoomPanorama): Item {
+  return {
     key: `saved-${photo.id}`,
     id: photo.id,
     url: photo.url,
     caption: photo.caption ?? "",
     published: photo.isPublished,
-    file: null
-  }));
+    file: null,
+    hotspots: [...(photo.hotspots ?? [])],
+    phase: "idle",
+    percent: 0,
+    error: null
+  };
 }
 
+function asPhoto(item: Item): RoomPanorama {
+  return {
+    id: photoId(item),
+    url: item.url,
+    caption: item.caption.trim() || null,
+    isPublished: item.published,
+    sortOrder: 0,
+    hotspots: item.hotspots
+  };
+}
+
+function hotspotsEqual(
+  a: RoomPanoramaHotspot[],
+  b: RoomPanoramaHotspot[]
+): boolean {
+  if (a.length !== b.length) return false;
+  return a.every((spot, i) => {
+    const other = b[i];
+    return (
+      !!other &&
+      spot.id === other.id &&
+      spot.targetPanoramaId === other.targetPanoramaId &&
+      spot.yaw === other.yaw &&
+      spot.pitch === other.pitch &&
+      (spot.label ?? "") === (other.label ?? "")
+    );
+  });
+}
+
+const draftPhotos = computed(() => items.value.map(asPhoto));
+const editorPhoto = computed(
+  () =>
+    draftPhotos.value.find(
+      (photo: RoomPanorama) => photo.id === editorPhotoId.value
+    ) ?? null
+);
+
+const dirty = computed(() => {
+  if (items.value.some((item: Item) => item.file || item.phase === "error"))
+    return true;
+  if (items.value.length !== baseline.value.length) return true;
+  return items.value.some((item: Item, i: number) => {
+    const base = baseline.value[i];
+    if (!base || base.id !== item.id) return true;
+    if ((item.caption ?? "").trim() !== (base.caption ?? "").trim())
+      return true;
+    if (item.published !== base.isPublished) return true;
+    return !hotspotsEqual(item.hotspots, base.hotspots ?? []);
+  });
+});
+
+const savingLabel = computed(() => {
+  const uploading = items.value.find(
+    (item: Item) => item.phase === "uploading"
+  );
+  if (uploading) return `Uploading ${uploading.percent}%`;
+  if (items.value.some((item: Item) => item.phase === "preparing")) {
+    return "Preparing 360° photos…";
+  }
+  return "Saving 360° photos…";
+});
+
+watch(dirty, (value: boolean) => emit("dirty", value), { immediate: true });
+watch(busy, (value: boolean) => emit("busy", value), { immediate: true });
+
 function apply(list: RoomPanorama[]) {
-  saved.value = list;
-  items.value = fromList(list);
+  baseline.value = list;
+  items.value = list.map(fromPhoto);
+  sessionIds.clear();
   if (props.roomId) cms.setRoomPanoramas(props.roomId, list);
 }
 
 async function load() {
   releaseStaged();
   items.value = [];
+  baseline.value = [];
+  sessionIds.clear();
   error.value = "";
   if (!props.roomId) return;
   loading.value = true;
@@ -280,120 +373,61 @@ async function load() {
   }
 }
 
-watch(() => props.roomId, load, { immediate: true });
-
 watch(
-  items,
-  list => {
-    if (live.value) return;
-    emit(
-      "staged",
-      list
-        .filter(item => item.file)
-        .map(item => ({ file: item.file as File, published: item.published }))
-    );
+  () => props.roomId,
+  (id: string | null, prev: string | null | undefined) => {
+    // Creating a room sets the id mid-session; keep pending photos.
+    // On first run `prev` is undefined, so edit still loads.
+    if (id && prev === null) return;
+    void load();
   },
-  { deep: true }
+  { immediate: true }
 );
 
-/** Run one change against the engine; reload the list if it fails. */
-async function run(action: () => Promise<RoomPanorama[]>) {
-  busy.value = true;
-  error.value = "";
-  try {
-    apply(await action());
-  } catch (e) {
-    error.value = message(e, "That change did not save. Try again.");
-    await load();
-  } finally {
-    busy.value = false;
-  }
-}
-
-/**
- * Upload the chosen photos one at a time: one POST per file, in order.
- * A photo that fails (too large, bad type, network) is reported by name and
- * the rest still go up. A saved room's list is re-read at the end.
- */
-async function addFiles(files: File[]) {
+function addFiles(files: File[]) {
   if (!files.length || busy.value) return;
-  busy.value = true;
   error.value = "";
   const problems: string[] = [];
-  try {
-    for (const [index, file] of files.entries()) {
-      if (props.roomId) {
-        ownProgress.value = {
-          current: index + 1,
-          total: files.length,
-          name: file.name
-        };
-      }
-      let prepared: File;
-      try {
-        prepared = await preparePanoramaFile(file);
-      } catch (e) {
-        problems.push(`${file.name}: ${message(e, "Not a usable photo.")}`);
-        continue;
-      }
-      if (props.roomId) {
-        try {
-          apply(await addRoomPanorama(props.roomId, prepared, true));
-        } catch (e) {
-          problems.push(`${file.name}: ${panoramaUploadMessage(e)}`);
-        }
-      } else {
-        seq += 1;
-        items.value.push({
-          key: `new-${seq}`,
-          id: null,
-          url: URL.createObjectURL(prepared),
-          caption: "",
-          published: true,
-          file: prepared
-        });
-      }
+  for (const file of files) {
+    const invalid = validatePanoramaFile(file);
+    if (invalid) {
+      problems.push(`${file.name}: ${invalid}`);
+      continue;
     }
-    if (props.roomId) {
-      try {
-        apply(await fetchRoomPanoramas(props.roomId));
-      } catch (e) {
-        problems.push(message(e, "Could not refresh the 360° photos."));
-      }
-    }
-  } catch (e) {
-    problems.push(message(e, "Those 360° photos could not be added."));
-  } finally {
-    busy.value = false;
-    ownProgress.value = null;
+    seq += 1;
+    items.value.push({
+      key: `new-${seq}`,
+      id: null,
+      url: URL.createObjectURL(file),
+      caption: "",
+      published: true,
+      file,
+      hotspots: [],
+      phase: "idle",
+      percent: 0,
+      error: null
+    });
   }
   if (problems.length) error.value = problems.join(" ");
 }
+
 function togglePublished(item: Item) {
-  if (props.roomId && item.id) {
-    const roomId = props.roomId;
-    const id = item.id;
-    void run(() => setRoomPanoramaPublished(roomId, id, !item.published));
-    return;
-  }
   item.published = !item.published;
 }
 
 function remove(item: Item) {
   $q.dialog({
-    title: "Delete this 360° photo?",
-    message: "Guests will no longer see it.",
+    title: "Remove this 360° photo?",
+    message: "It will be deleted when you click Save changes.",
     cancel: true,
     persistent: true
   }).onOk(() => {
-    if (props.roomId && item.id) {
-      const roomId = props.roomId;
-      const id = item.id;
-      void run(() => deleteRoomPanorama(roomId, id));
-      return;
-    }
     if (item.file) URL.revokeObjectURL(item.url);
-    items.value = items.value.filter(other => other.key !== item.key);
+    items.value = items.value.filter((other: Item) => other.key !== item.key);
+    if (editorPhotoId.value === photoId(item)) {
+      editorOpen.value = false;
+      editorPhotoId.value = null;
+    }
   });
 }
 
@@ -401,12 +435,9 @@ function move(from: number, to: number) {
   if (from === to || to < 0 || to >= items.value.length) return;
   const next = [...items.value];
   const [moved] = next.splice(from, 1);
+  if (!moved) return;
   next.splice(to, 0, moved);
   items.value = next;
-  if (!props.roomId) return;
-  const roomId = props.roomId;
-  const ids = next.map(item => item.id as string);
-  void run(() => reorderRoomPanoramas(roomId, ids));
 }
 
 function blurCaption(event: Event) {
@@ -414,21 +445,220 @@ function blurCaption(event: Event) {
 }
 
 function onCaptionBlur(item: Item, event: Event) {
-  const next = (event.target as HTMLInputElement).value.trim();
-  if (!live.value || !item.id || !props.roomId) {
-    item.caption = next;
-    return;
-  }
-  if (next === (item.caption ?? "").trim()) return;
-  const roomId = props.roomId;
-  const id = item.id;
-  void run(() => setRoomPanoramaCaption(roomId, id, next || null));
+  item.caption = (event.target as HTMLInputElement).value.trim();
 }
 
 function openEditor(item: Item) {
-  if (!item.id) return;
-  editorPhotoId.value = item.id;
+  if (items.value.length < 2) return;
+  editorPhotoId.value = photoId(item);
   editorOpen.value = true;
+}
+
+function onHotspotsSaved(list: RoomPanorama[]) {
+  const byId = new Map(list.map(photo => [photo.id, photo]));
+  for (const item of items.value) {
+    const next = byId.get(photoId(item));
+    if (next) item.hotspots = [...(next.hotspots ?? [])];
+  }
+}
+
+function remapPhotoId(from: string, to: string) {
+  for (const item of items.value) {
+    for (const spot of item.hotspots) {
+      if (spot.targetPanoramaId === from) spot.targetPanoramaId = to;
+    }
+  }
+  if (editorPhotoId.value === from) editorPhotoId.value = to;
+}
+
+function knownIds() {
+  return new Set(
+    [
+      ...baseline.value.map((photo: RoomPanorama) => photo.id),
+      ...items.value.map((item: Item) => item.id)
+    ].filter((id: string | null): id is string => Boolean(id))
+  );
+}
+
+async function uploadItem(roomId: string, item: Item) {
+  if (!item.file) return;
+  item.phase = "preparing";
+  item.percent = 0;
+  item.error = null;
+  const prepared = await preparePanoramaFile(item.file);
+  item.file = prepared;
+  item.phase = "uploading";
+  const before = knownIds();
+  uploadAbort = new AbortController();
+  const list = await addRoomPanorama(roomId, prepared, item.published, {
+    onUploadProgress: percent => {
+      item.percent = percent;
+    },
+    signal: uploadAbort.signal
+  });
+  const created =
+    list.find(photo => !before.has(photo.id)) ?? list[list.length - 1];
+  if (!created) throw new Error("The photo uploaded, but no id came back.");
+  const previous = photoId(item);
+  if (item.file) URL.revokeObjectURL(item.url);
+  item.id = created.id;
+  item.url = created.url;
+  item.file = null;
+  item.phase = "uploaded";
+  item.percent = 100;
+  sessionIds.add(created.id);
+  remapPhotoId(previous, created.id);
+  $q.notify({ type: "positive", message: "Uploaded and saved" });
+}
+
+async function syncHotspots(roomId: string, item: Item) {
+  if (!item.id) return;
+  const before =
+    baseline.value.find((photo: RoomPanorama) => photo.id === item.id)
+      ?.hotspots ?? [];
+  const after = item.hotspots;
+  const afterIds = new Set(after.map(spot => spot.id));
+  for (const spot of before) {
+    if (!afterIds.has(spot.id)) {
+      await deleteRoomPanoramaHotspot(roomId, item.id, spot.id);
+    }
+  }
+  for (const spot of after) {
+    const target = items.value.find(
+      (other: Item) =>
+        photoId(other) === spot.targetPanoramaId ||
+        other.id === spot.targetPanoramaId
+    );
+    const targetId = target?.id ?? spot.targetPanoramaId;
+    if (
+      !targetId ||
+      targetId.startsWith("new-") ||
+      targetId.startsWith("pending-")
+    ) {
+      continue;
+    }
+    const input = {
+      targetPanoramaId: targetId,
+      yaw: spot.yaw,
+      pitch: spot.pitch,
+      label: spot.label
+    };
+    const prev = before.find(
+      (other: RoomPanoramaHotspot) => other.id === spot.id
+    );
+    const isPending = !spot.id || spot.id.startsWith("pending-hs-");
+    if (isPending || !prev) {
+      await addRoomPanoramaHotspot(roomId, item.id, input);
+    } else if (
+      prev.targetPanoramaId !== input.targetPanoramaId ||
+      prev.yaw !== input.yaw ||
+      prev.pitch !== input.pitch ||
+      (prev.label ?? "") !== (input.label ?? "")
+    ) {
+      await updateRoomPanoramaHotspot(roomId, item.id, spot.id, input);
+    }
+  }
+}
+
+async function commit(roomId: string) {
+  if (busy.value) return;
+  busy.value = true;
+  error.value = "";
+  try {
+    const pending = items.value.filter((item: Item) => item.file);
+    const failed: Item[] = [];
+    for (const item of pending) {
+      try {
+        await uploadItem(roomId, item);
+      } catch (e) {
+        item.phase = "error";
+        item.error = panoramaUploadMessage(e);
+        failed.push(item);
+      }
+    }
+    if (failed.length) {
+      throw new Error(
+        failed
+          .map(item => `${item.file?.name ?? "Photo"}: ${item.error}`)
+          .join(" ")
+      );
+    }
+
+    for (const item of items.value) {
+      if (!item.id) continue;
+      const base = baseline.value.find(
+        (photo: RoomPanorama) => photo.id === item.id
+      );
+      const caption = item.caption.trim() || null;
+      if ((base?.caption ?? null) !== caption) {
+        await setRoomPanoramaCaption(roomId, item.id, caption);
+      }
+      if (!base || base.isPublished !== item.published) {
+        await setRoomPanoramaPublished(roomId, item.id, item.published);
+      }
+      await syncHotspots(roomId, item);
+    }
+
+    const ids = items.value
+      .map((item: Item) => item.id)
+      .filter((id: string | null): id is string => Boolean(id));
+    if (ids.length) await reorderRoomPanoramas(roomId, ids);
+
+    const keep = new Set(ids);
+    for (const photo of baseline.value) {
+      if (!keep.has(photo.id)) await deleteRoomPanorama(roomId, photo.id);
+    }
+
+    apply(await fetchRoomPanoramas(roomId));
+  } catch (e) {
+    error.value = message(e, "The 360° photos could not be saved. Try again.");
+    throw e;
+  } finally {
+    busy.value = false;
+  }
+}
+
+async function retryItem(item: Item) {
+  if (!props.roomId || !item.file) return;
+  error.value = "";
+  busy.value = true;
+  try {
+    await uploadItem(props.roomId, item);
+  } catch (e) {
+    item.phase = "error";
+    item.error = panoramaUploadMessage(e);
+    error.value = item.error;
+  } finally {
+    busy.value = false;
+  }
+}
+
+async function discard() {
+  uploadAbort?.abort();
+  uploadAbort = null;
+  const roomId = props.roomId;
+  const uploaded = [...sessionIds];
+  if (roomId && uploaded.length) {
+    for (const id of uploaded) {
+      try {
+        await deleteRoomPanorama(roomId, id);
+      } catch {
+        /* still discard local state */
+      }
+    }
+  }
+  releaseStaged();
+  sessionIds.clear();
+  if (roomId) {
+    try {
+      apply(await fetchRoomPanoramas(roomId));
+    } catch {
+      items.value = baseline.value.map(fromPhoto);
+    }
+  } else {
+    items.value = [];
+    baseline.value = [];
+  }
 }
 
 function openFilePicker() {
@@ -436,7 +666,6 @@ function openFilePicker() {
   const input = fileInput.value;
   if (!input) return;
   input.value = "";
-  // Defer so the parent dialog's focus trap does not fight the native picker.
   window.setTimeout(() => input.click(), 0);
 }
 
@@ -444,10 +673,9 @@ function onFileInput(event: Event) {
   const input = event.target as HTMLInputElement;
   const files = Array.from(input.files ?? []);
   input.value = "";
-  void addFiles(files);
+  addFiles(files);
 }
 
-/* Dropping photos from the desktop onto the panel. */
 function onFileDrag(event: DragEvent) {
   if (dragFrom.value !== null) return;
   if (event.dataTransfer?.types?.includes("Files")) dragging.value = true;
@@ -462,10 +690,9 @@ function onDragLeave(event: DragEvent) {
 function onFileDrop(event: DragEvent) {
   dragging.value = false;
   if (dragFrom.value !== null) return;
-  void addFiles(Array.from(event.dataTransfer?.files ?? []));
+  addFiles(Array.from(event.dataTransfer?.files ?? []));
 }
 
-/* Dragging a row to a new position. */
 function onRowDragStart(index: number, event: DragEvent) {
   if (busy.value) {
     event.preventDefault();
@@ -500,9 +727,79 @@ function releaseStaged() {
 }
 
 onBeforeUnmount(releaseStaged);
+
+defineExpose({
+  commit,
+  discard,
+  isDirty: () => dirty.value,
+  isBusy: () => busy.value
+});
 </script>
 
 <style scoped>
+.pano-list__flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0.15rem 0.5rem;
+  border: 1px solid var(--gy-gold-deep, #8f7340);
+  background: #fff8ef;
+  color: var(--gy-ink, #454c4b);
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.pano-list__saving {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--gy-forest);
+}
+
+.pano-item__upload {
+  display: grid;
+  gap: 0.2rem;
+  margin-top: 0.35rem;
+}
+
+.pano-item__upload-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  color: var(--gy-forest);
+}
+
+.pano-item__ok {
+  color: #2e7d4f;
+  font-weight: 700;
+}
+
+.pano-item__err {
+  color: #8b2e2e;
+}
+
+.pano-item__retry {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--gy-forest);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.pano-item--error {
+  border-color: #8b2e2e;
+}
+
 .pano-list {
   display: grid;
   gap: 0.75rem;

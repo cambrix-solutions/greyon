@@ -186,12 +186,17 @@ type Draft = {
   label: string;
 };
 
-const props = defineProps<{
-  modelValue: boolean;
-  roomId: string;
-  photo: RoomPanorama;
-  photos: RoomPanorama[];
-}>();
+const props = withDefaults(
+  defineProps<{
+    modelValue: boolean;
+    roomId: string;
+    photo: RoomPanorama;
+    photos: RoomPanorama[];
+    /** Keep arrow edits local; the parent commits them on Save changes. */
+    deferSave?: boolean;
+  }>(),
+  { deferSave: false }
+);
 
 const emit = defineEmits<{
   "update:modelValue": [open: boolean];
@@ -204,23 +209,33 @@ const error = ref("");
 const busy = ref(false);
 const moving = ref(false);
 const draft = ref<Draft | null>(null);
+const localHotspots = ref<{
+  photoId: string;
+  spots: RoomPanoramaHotspot[];
+} | null>(null);
 const stageStatus = ref<"idle" | "loading" | "ready">("idle");
 let token = 0;
 let resizeObs: ResizeObserver | null = null;
 
 const photoTitle = computed(() => {
-  const i = props.photos.findIndex(item => item.id === props.photo.id);
+  const i = props.photos.findIndex(
+    (item: RoomPanorama) => item.id === props.photo.id
+  );
   const caption = props.photo.caption?.trim();
   const n = i >= 0 ? `360° photo ${i + 1}` : "360° photo";
   return caption ? `${n} (${caption})` : n;
 });
 
-const hotspots = computed(() => props.photo.hotspots ?? []);
+const hotspots = computed(() =>
+  localHotspots.value?.photoId === props.photo.id
+    ? localHotspots.value.spots
+    : (props.photo.hotspots ?? [])
+);
 
 const targets = computed(() =>
   props.photos
-    .filter(item => item.id !== props.photo.id)
-    .map(item => {
+    .filter((item: RoomPanorama) => item.id !== props.photo.id)
+    .map((item: RoomPanorama) => {
       const i = props.photos.indexOf(item);
       const caption = item.caption?.trim();
       return {
@@ -338,7 +353,9 @@ function onStageClick(event: MouseEvent) {
       .closest("[data-hotspot-id]")
       ?.getAttribute("data-hotspot-id");
     if (id) {
-      const spot = hotspots.value.find(item => item.id === id);
+      const spot = hotspots.value.find(
+        (item: RoomPanoramaHotspot) => item.id === id
+      );
       if (spot) editSpot(spot);
     }
     return;
@@ -381,6 +398,19 @@ function cancelDraft() {
   void boot();
 }
 
+function applyLocal(spots: RoomPanoramaHotspot[]) {
+  localHotspots.value = { photoId: props.photo.id, spots };
+  const nextPhoto: RoomPanorama = { ...props.photo, hotspots: spots };
+  emit(
+    "saved",
+    props.photos.map((photo: RoomPanorama) =>
+      photo.id === nextPhoto.id ? nextPhoto : photo
+    )
+  );
+}
+
+let pendingHotspotSeq = 0;
+
 async function saveDraft() {
   const current = draft.value;
   if (!current || !current.targetPanoramaId || busy.value) return;
@@ -393,15 +423,31 @@ async function saveDraft() {
       pitch: current.pitch,
       label: current.label.trim() || null
     };
-    const list = current.id
-      ? await updateRoomPanoramaHotspot(
-          props.roomId,
-          props.photo.id,
-          current.id,
-          input
-        )
-      : await addRoomPanoramaHotspot(props.roomId, props.photo.id, input);
-    emit("saved", list);
+    if (props.deferSave) {
+      const spots = [...(props.photo.hotspots ?? [])];
+      if (current.id) {
+        const index = spots.findIndex(
+          (spot: RoomPanoramaHotspot) => spot.id === current.id
+        );
+        const updated = { id: current.id, ...input };
+        if (index >= 0) spots[index] = updated;
+        else spots.push(updated);
+      } else {
+        pendingHotspotSeq += 1;
+        spots.push({ id: `pending-hs-${pendingHotspotSeq}`, ...input });
+      }
+      applyLocal(spots);
+    } else {
+      const list = current.id
+        ? await updateRoomPanoramaHotspot(
+            props.roomId,
+            props.photo.id,
+            current.id,
+            input
+          )
+        : await addRoomPanoramaHotspot(props.roomId, props.photo.id, input);
+      emit("saved", list);
+    }
     draft.value = null;
     moving.value = false;
     await boot();
@@ -418,12 +464,20 @@ async function removeDraft() {
   busy.value = true;
   error.value = "";
   try {
-    const list = await deleteRoomPanoramaHotspot(
-      props.roomId,
-      props.photo.id,
-      current.id
-    );
-    emit("saved", list);
+    if (props.deferSave) {
+      applyLocal(
+        (props.photo.hotspots ?? []).filter(
+          (spot: RoomPanoramaHotspot) => spot.id !== current.id
+        )
+      );
+    } else {
+      const list = await deleteRoomPanoramaHotspot(
+        props.roomId,
+        props.photo.id,
+        current.id
+      );
+      emit("saved", list);
+    }
     draft.value = null;
     moving.value = false;
     await boot();
