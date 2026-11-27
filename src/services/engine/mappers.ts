@@ -97,6 +97,7 @@ export interface EngineLocation {
   heroImage?: string | null;
   gallery?: string[];
   highlights?: string[];
+  amenities?: string[];
   phone?: string | null;
   email?: string | null;
   status: string;
@@ -264,6 +265,7 @@ export function mapEngineLocation(row: EngineLocation): Location {
     heroImage: row.heroImage ?? "",
     gallery: row.gallery ?? [],
     highlights: row.highlights ?? [],
+    amenities: row.amenities ?? [],
     status: asStatus(row.status),
     ...(row.phone ? { phone: row.phone } : {}),
     ...(row.email ? { email: row.email } : {}),

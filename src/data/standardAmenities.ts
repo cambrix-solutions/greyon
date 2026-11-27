@@ -19,7 +19,20 @@ export const STANDARD_AMENITIES = [
   "Safe",
   "Living area",
   "Room service",
-  "Laundry"
+  "Laundry",
+  "Free WiFi",
+  "Gym",
+  "Gym / Fitness Center",
+  "Rooftop Outdoor Space",
+  "Parking Space",
+  "Free Parking Space",
+  "BBQ Kitchen",
+  "Kid's Playground",
+  "Billiard",
+  "Table Tennis",
+  "24/7 Security",
+  "Fire Protection System",
+  "Elevator"
 ] as const;
 
 export type StandardAmenity = (typeof STANDARD_AMENITIES)[number];

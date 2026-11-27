@@ -901,6 +901,7 @@ export const useCmsStore = defineStore("cms", () => {
     heroImage?: string;
     gallery?: string[];
     highlights?: string[];
+    amenities?: string[];
     phone?: string;
     email?: string;
     status?: ContentStatus;
@@ -914,6 +915,7 @@ export const useCmsStore = defineStore("cms", () => {
       heroImage: input.heroImage,
       gallery: input.gallery,
       highlights: input.highlights,
+      amenities: input.amenities,
       phone: input.phone,
       email: input.email,
       status: input.status,

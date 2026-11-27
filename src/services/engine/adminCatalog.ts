@@ -84,6 +84,7 @@ export type LocationInput = {
   heroImage?: string;
   gallery?: string[];
   highlights?: string[];
+  amenities?: string[];
   phone?: string;
   email?: string;
   status?: ContentStatus;

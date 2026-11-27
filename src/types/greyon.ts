@@ -91,6 +91,7 @@ export interface Location {
   heroImage: string;
   gallery: string[];
   highlights: string[];
+  amenities: string[];
   status: ContentStatus;
   /** Destination contact (optional; from API when present) */
   phone?: string;

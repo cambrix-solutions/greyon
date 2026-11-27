@@ -317,6 +317,12 @@
         />
       </AdminFormSection>
       <AdminFormSection
+        title="Amenities"
+        hint="Shown on the public home Amenities band for this destination."
+      >
+        <AmenitiesEditor v-model="locAmenities" label="Amenities" />
+      </AdminFormSection>
+      <AdminFormSection
         title="Contact"
         hint="Optional destination-level phone and email (shown on the public location page)."
         :columns="2"
@@ -744,6 +750,7 @@ watch(
 /* —— Destination edit —— */
 const locDialog = ref(false);
 const highlightsText = ref("");
+const locAmenities = ref<string[]>([]);
 const locForm = reactive({
   name: "",
   slug: "",
@@ -772,6 +779,7 @@ function openEditLocation() {
   locForm.email = loc.email ?? "";
   locForm.status = loc.status;
   highlightsText.value = loc.highlights.join(", ");
+  locAmenities.value = [...loc.amenities];
   locDialog.value = true;
 }
 
@@ -788,7 +796,8 @@ function saveLocation() {
         highlights: highlightsText.value
           .split(",")
           .map(s => s.trim())
-          .filter(Boolean)
+          .filter(Boolean),
+        amenities: locAmenities.value
       });
       locDialog.value = false;
       $q.notify({ type: "positive", message: "Destination saved." });
