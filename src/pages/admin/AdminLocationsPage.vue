@@ -305,6 +305,12 @@
         />
       </AdminFormSection>
       <AdminFormSection
+        title="Amenities"
+        hint="Shown on the public home Amenities band for this destination."
+      >
+        <AmenitiesEditor v-model="locAmenities" label="Amenities" />
+      </AdminFormSection>
+      <AdminFormSection
         title="Contact"
         hint="Optional destination-level phone and email (public location page)."
         :columns="2"
@@ -345,6 +351,7 @@ import AdminDialog from "@/components/admin/AdminDialog.vue";
 import AdminEntityActions from "@/components/admin/AdminEntityActions.vue";
 import AdminFormSection from "@/components/admin/AdminFormSection.vue";
 import AdminPageHeader from "@/components/admin/AdminPageHeader.vue";
+import AmenitiesEditor from "@/components/admin/AmenitiesEditor.vue";
 import ImageDropField from "@/components/admin/ImageDropField.vue";
 import { useAuthStore } from "@/stores/auth-store";
 import { useCmsStore } from "@/stores/cms-store";
@@ -367,6 +374,7 @@ onMounted(() => {
 const dialog = ref(false);
 const editing = ref<string | null>(null);
 const highlightsText = ref("");
+const locAmenities = ref<string[]>([]);
 const query = ref("");
 const statusFilter = ref("all");
 const statusOptions = [
@@ -428,6 +436,7 @@ function openCreate() {
   form.email = "";
   form.status = "draft";
   highlightsText.value = "";
+  locAmenities.value = [];
   dialog.value = true;
 }
 
@@ -441,6 +450,7 @@ function openEdit(loc: Location) {
   form.email = loc.email ?? "";
   form.status = loc.status;
   highlightsText.value = loc.highlights.join(", ");
+  locAmenities.value = [...loc.amenities];
   dialog.value = true;
 }
 
@@ -457,7 +467,8 @@ function save() {
         highlights: highlightsText.value
           .split(",")
           .map(s => s.trim())
-          .filter(Boolean)
+          .filter(Boolean),
+        amenities: locAmenities.value
       });
       dialog.value = false;
       $q.notify({ type: "positive", message: "Location saved." });

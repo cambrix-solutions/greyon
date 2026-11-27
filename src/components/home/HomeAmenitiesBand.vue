@@ -1,6 +1,6 @@
 <template>
   <section
-    v-if="image && (words.length || amenities.length)"
+    v-if="image && (words.length || destinations.length)"
     id="home-amenities"
     class="band home-motion"
     :aria-label="amenities.length ? $t('home.amenities') : $t('home.exploreBy')"
@@ -14,10 +14,33 @@
       <h2 id="home-amenities-title" class="band__title">
         {{ $t("home.amenities") }}
       </h2>
+      <div
+        v-if="destinations.length"
+        class="dest-switch"
+        role="tablist"
+        :aria-label="$t('home.amenities')"
+      >
+        <button
+          v-for="loc in destinations"
+          :key="loc.id"
+          type="button"
+          class="dest-switch__btn"
+          :class="{ 'is-active': loc.slug === selectedSlug }"
+          role="tab"
+          :aria-selected="loc.slug === selectedSlug"
+          @click="selectDestination(loc.slug)"
+        >
+          {{ loc.name }}
+        </button>
+      </div>
       <ul
         v-if="amenities.length"
         class="amenity-list"
-        :aria-label="$t('home.amenities')"
+        :aria-label="
+          selectedLocation
+            ? `${$t('home.amenities')} — ${selectedLocation.name}`
+            : $t('home.amenities')
+        "
       >
         <li v-for="item in amenities" :key="item" class="chip">
           <q-icon :name="iconFor(item)" size="22px" />
@@ -41,9 +64,12 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { useParallax } from "@/components/home/useParallax";
+import { useBookingStore } from "@/stores/booking-store";
 import { useCmsStore } from "@/stores/cms-store";
+import type { Location } from "@/types/greyon";
 
 const cms = useCmsStore();
+const booking = useBookingStore();
 const frame = ref<HTMLElement | null>(null);
 const offset = useParallax(frame, 180);
 
@@ -54,12 +80,49 @@ const imageStyle = computed(() => ({
 /** Client-supplied drone photo of the Greyon building (replaces the 3D render). */
 const image = "/images/greyon-building.webp";
 
+const destinations = computed(() => cms.publishedLocations);
+const overrideSlug = ref("");
+
+function defaultSlug(): string {
+  const fromBooking = booking.search.locationSlug.trim();
+  if (
+    fromBooking &&
+    destinations.value.some((loc: Location) => loc.slug === fromBooking)
+  ) {
+    return fromBooking;
+  }
+  return (
+    destinations.value.find((loc: Location) => loc.slug === "phnom-penh")
+      ?.slug ??
+    destinations.value[0]?.slug ??
+    ""
+  );
+}
+
+const selectedSlug = computed(() => {
+  if (
+    overrideSlug.value &&
+    destinations.value.some((loc: Location) => loc.slug === overrideSlug.value)
+  ) {
+    return overrideSlug.value;
+  }
+  return defaultSlug();
+});
+
+function selectDestination(slug: string) {
+  overrideSlug.value = slug;
+}
+
+const selectedLocation = computed(() =>
+  destinations.value.find((loc: Location) => loc.slug === selectedSlug.value)
+);
+
 const words = computed(() =>
-  cms.publishedLocations.flatMap(loc =>
+  cms.publishedLocations.flatMap((loc: Location) =>
     loc.highlights
-      .map(label => label.trim())
+      .map((label: string) => label.trim())
       .filter(Boolean)
-      .map(label => ({
+      .map((label: string) => ({
         key: `${loc.id}-${label}`,
         label,
         slug: loc.slug
@@ -67,24 +130,11 @@ const words = computed(() =>
   )
 );
 
-const amenities = computed(() => {
-  const seen = new Set<string>();
-  const out: string[] = [];
-  const hotels = [
-    ...cms.publishedHotels.filter(hotel => hotel.featured),
-    ...cms.publishedHotels.filter(hotel => !hotel.featured)
-  ];
-  for (const hotel of hotels) {
-    for (const raw of hotel.amenities) {
-      const label = raw.trim();
-      const key = label.toLowerCase();
-      if (!label || seen.has(key)) continue;
-      seen.add(key);
-      out.push(label);
-    }
-  }
-  return out;
-});
+const amenities = computed(() =>
+  (selectedLocation.value?.amenities ?? [])
+    .map((label: string) => label.trim())
+    .filter(Boolean)
+);
 
 function iconFor(label: string) {
   const key = label.toLowerCase();
@@ -107,7 +157,6 @@ function iconFor(label: string) {
   return "check";
 }
 </script>
-
 <style scoped>
 .band {
   position: relative;
@@ -273,5 +322,45 @@ function iconFor(label: string) {
   .band__img {
     object-position: 60% 38%;
   }
+}
+
+.dest-switch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.35rem;
+  margin: -0.4rem 0 1.35rem;
+  padding-inline: clamp(1.25rem, 6vw, 5rem);
+}
+
+.dest-switch__btn {
+  appearance: none;
+  margin: 0;
+  padding: 0.35rem 0.85rem;
+  border: 1px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: rgba(246, 241, 231, 0.62);
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.dest-switch__btn:hover,
+.dest-switch__btn:focus-visible {
+  color: #f6f1e7;
+}
+
+.dest-switch__btn:focus-visible {
+  outline: 2px solid var(--gy-gold);
+  outline-offset: 4px;
+}
+
+.dest-switch__btn.is-active {
+  color: var(--gy-gold);
+  border-color: rgba(196, 163, 90, 0.55);
+  background: rgba(16, 18, 16, 0.4);
 }
 </style>
